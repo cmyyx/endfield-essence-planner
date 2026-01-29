@@ -129,6 +129,72 @@
         }
       }
 
+      .mobile-tabs {
+        display: none;
+        gap: 10px;
+        margin-bottom: 16px;
+        position: sticky;
+        top: 12px;
+        z-index: 12;
+      }
+
+      .mobile-hint {
+        display: none;
+        margin: 6px 0 14px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(8, 12, 18, 0.65);
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+      }
+
+      .mobile-tab {
+        flex: 1;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        padding: 8px 12px;
+        background: rgba(10, 14, 22, 0.8);
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .mobile-tab.active {
+        border-color: rgba(77, 214, 201, 0.6);
+        color: var(--text);
+        background: rgba(18, 34, 40, 0.85);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+
+      .mobile-tab .count {
+        margin-left: 6px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 10px;
+        color: var(--text);
+        letter-spacing: 0.08em;
+      }
+
+      @media (max-width: 1024px) {
+        .mobile-tabs {
+          display: flex;
+        }
+
+        .mobile-hint {
+          display: block;
+        }
+
+        .panel-hidden {
+          display: none;
+        }
+      }
+
       .panel {
         background: var(--panel);
         border: 1px solid var(--stroke);
@@ -391,6 +457,194 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
         gap: 8px;
+      }
+
+      @media (max-width: 640px) {
+        .weapon-list {
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 8px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .app-shell {
+          padding: 18px 14px 28px;
+        }
+
+        .hero h1 {
+          font-size: 22px;
+          letter-spacing: 0.06em;
+        }
+
+        .hero p {
+          font-size: 12px;
+          line-height: 1.5;
+        }
+
+        .mobile-tabs {
+          margin-bottom: 10px;
+          top: 8px;
+        }
+
+        .mobile-tab {
+          padding: 6px 10px;
+          font-size: 11px;
+        }
+
+        .mobile-tab .count {
+          font-size: 9px;
+        }
+
+        .mobile-hint {
+          margin: 4px 0 10px;
+          padding: 6px 10px;
+          font-size: 11px;
+        }
+
+        .panel {
+          padding: 14px;
+          border-radius: 14px;
+        }
+
+        .panel-title {
+          margin-bottom: 12px;
+        }
+
+        .panel-title h2 {
+          font-size: 14px;
+        }
+
+        .ghost-button {
+          padding: 4px 10px;
+          font-size: 11px;
+        }
+
+        .search-box {
+          padding: 8px 10px;
+          margin-bottom: 12px;
+        }
+
+        .search-box input {
+          font-size: 12px;
+        }
+
+        .tag-row {
+          gap: 6px;
+          margin-bottom: 10px;
+        }
+
+        .tag {
+          padding: 4px 8px;
+          font-size: 11px;
+        }
+
+        .weapon-list {
+          grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+          gap: 6px;
+        }
+
+        .weapon-item {
+          min-height: 92px;
+          border-radius: 7px;
+        }
+
+        .weapon-band {
+          height: 32px;
+        }
+
+        .weapon-name {
+          bottom: 8px;
+          height: 22px;
+          font-size: 11px;
+        }
+
+        .recommendations {
+          gap: 12px;
+        }
+
+        .card {
+          padding: 14px;
+          border-radius: 14px;
+        }
+
+        .card-header {
+          margin-bottom: 12px;
+          gap: 8px 12px;
+        }
+
+        .card-title {
+          font-size: 15px;
+        }
+
+        .pill {
+          padding: 4px 8px;
+          font-size: 11px;
+        }
+
+        .s1-block {
+          padding: 10px;
+        }
+
+        .s1-header {
+          gap: 8px 12px;
+        }
+
+        .chip-row {
+          gap: 6px;
+        }
+
+        .chip {
+          padding: 3px 8px;
+          font-size: 11px;
+        }
+
+        .hint {
+          font-size: 11px;
+        }
+
+        .lock-summary {
+          padding: 10px;
+          gap: 8px;
+        }
+
+        .lock-items {
+          gap: 6px;
+        }
+
+        .lock-chip {
+          padding: 6px 10px;
+          font-size: 11px;
+        }
+
+        .scheme-weapon-list {
+          gap: 8px;
+        }
+
+        .scheme-weapon-item {
+          padding: 10px 12px;
+          gap: 4px;
+        }
+
+        .scheme-weapon-title {
+          font-size: 13px;
+        }
+
+        .scheme-weapon-title .badge {
+          font-size: 10px;
+        }
+
+        .scheme-weapon-title .rarity {
+          font-size: 10px;
+        }
+
+        .scheme-weapon-attrs {
+          font-size: 11px;
+          gap: 4px 8px;
+        }
+
+        .attr-value {
+          padding: 2px 6px;
+        }
       }
 
       .weapon-item {
@@ -848,7 +1102,24 @@
       </header>
 
       <main class="layout">
-        <section class="panel">
+        <div class="mobile-tabs">
+          <button
+            class="mobile-tab"
+            :class="{ active: mobilePanel === 'weapons' }"
+            @click="mobilePanel = 'weapons'"
+          >
+            武器选择 <span class="count">{{ selectedNames.length }}</span>
+          </button>
+          <button
+            class="mobile-tab"
+            :class="{ active: mobilePanel === 'plans' }"
+            @click="mobilePanel = 'plans'"
+          >
+            方案推荐 <span class="count">{{ recommendations.length }}</span>
+          </button>
+        </div>
+        <div class="mobile-hint">手机端可通过上方标签切换“武器选择 / 方案推荐”。</div>
+        <section class="panel" :class="{ 'panel-hidden': mobilePanel !== 'weapons' }">
           <div class="panel-title">
             <h2>武器选择器</h2>
             <button class="ghost-button" @click="clearSelection" :disabled="!selectedNames.length">
@@ -896,7 +1167,7 @@
           </div>
         </section>
 
-        <section class="panel">
+        <section class="panel" :class="{ 'panel-hidden': mobilePanel !== 'plans' }">
           <div class="panel-title">
             <h2>方案推荐列表</h2>
             <div class="pill">已选 {{ selectedWeapons.length }} 把</div>
@@ -1146,6 +1417,7 @@
             const searchQuery = ref("");
             const selectedNames = ref([]);
             const showAbout = ref(false);
+            const mobilePanel = ref("weapons");
             const currentHost = ref(window.location.hostname);
             const allowedHosts = new Set(["end.canmoe.com", "127.0.0.1", "localhost"]);
             const showDomainWarning = ref(!allowedHosts.has(currentHost.value));
@@ -1400,6 +1672,7 @@
               hasImage,
               weaponImageSrc,
               showAbout,
+              mobilePanel,
               showDomainWarning,
               currentHost,
               isEmbedded,
