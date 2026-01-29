@@ -1128,7 +1128,7 @@
     </style>
   </head>
   <body>
-    <div id="app" class="app-shell" v-cloak>
+    <div id="app" class="app-shell" v-cloak v-show="appReady">
       <header class="hero">
         <div>
           <h1>终末地基质规划器</h1>
@@ -1458,7 +1458,7 @@
         );
       };
 
-      const { createApp, ref, computed } = Vue || {};
+      const { createApp, ref, computed, onMounted } = Vue || {};
 
       if (!createApp) {
         document.body.innerHTML =
@@ -1472,6 +1472,7 @@
             const searchQuery = ref("");
             const selectedNames = ref([]);
             const showAbout = ref(false);
+            const appReady = ref(false);
             const mobilePanel = ref("weapons");
             const currentHost = ref(window.location.hostname);
             const allowedHosts = new Set(["end.canmoe.com", "127.0.0.1", "localhost"]);
@@ -1510,6 +1511,10 @@
             } else if (showDomainWarning.value) {
               startWarningCountdown();
             }
+
+            onMounted(() => {
+              appReady.value = true;
+            });
 
             const weaponMap = new Map(weapons.map((weapon) => [weapon.name, weapon]));
 
@@ -1727,6 +1732,7 @@
               hasImage,
               weaponImageSrc,
               showAbout,
+              appReady,
               mobilePanel,
               showDomainWarning,
               currentHost,
