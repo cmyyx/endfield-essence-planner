@@ -529,30 +529,37 @@
         <div v-if="showNotice" class="about-overlay notice-overlay" @click.self="closeNotice">
           <div class="about-card notice-card">
             <h3>{{ announcement.title }}</h3>
-            <p class="notice-meta">更新日期：{{ announcement.date }}</p>
-            <ul class="notice-list">
-              <li v-for="item in announcement.items" :key="item">{{ item }}</li>
-            </ul>
-            <div class="notice-qq" v-if="announcement.qqGroup">
-              <a
-                class="ghost-button notice-join"
-                href="https://qm.qq.com/q/FBNLBtEPy8"
-                target="_blank"
-                rel="noopener"
-              >
-                加入 QQ 群
-              </a>
-              <div class="notice-qq-info">
-                QQ 群：{{ announcement.qqGroup }}
-                <span v-if="announcement.qqNote">（{{ announcement.qqNote }}）</span>
+            <div class="notice-body">
+              <p class="notice-meta">更新日期：{{ announcement.date }}</p>
+              <ul class="notice-list">
+                <li v-for="item in announcement.items" :key="item">{{ item }}</li>
+              </ul>
+              <div v-if="announcement.items && announcement.items.length > 6" class="notice-scroll-hint">
+                内容较长，可上下滚动查看更多
               </div>
             </div>
-            <label class="notice-skip">
-              <input type="checkbox" v-model="skipNotice" />
-              本次公告不再显示
-            </label>
-            <div class="about-actions">
-              <button class="ghost-button" @click="closeNotice">关闭</button>
+            <div class="notice-footer">
+              <div class="notice-qq" v-if="announcement.qqGroup">
+                <a
+                  class="ghost-button notice-join"
+                  href="https://qm.qq.com/q/FBNLBtEPy8"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  加入 QQ 群
+                </a>
+                <div class="notice-qq-info">
+                  QQ 群：{{ announcement.qqGroup }}
+                  <span v-if="announcement.qqNote">（{{ announcement.qqNote }}）</span>
+                </div>
+              </div>
+              <label class="notice-skip">
+                <input type="checkbox" v-model="skipNotice" />
+                本次公告不再显示
+              </label>
+              <div class="about-actions">
+                <button class="ghost-button" @click="closeNotice">关闭</button>
+              </div>
             </div>
           </div>
         </div>

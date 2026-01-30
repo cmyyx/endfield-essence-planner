@@ -452,6 +452,40 @@
         font-size: 12px;
       }
 
+      .notice-card {
+        display: flex;
+        flex-direction: column;
+        max-height: min(80vh, 680px);
+      }
+
+      .notice-body {
+        overflow: auto;
+        padding-right: 4px;
+        position: relative;
+      }
+
+      .notice-footer {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.12);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .notice-scroll-hint {
+        position: sticky;
+        bottom: 0;
+        margin-top: 10px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+        background:
+          linear-gradient(180deg, rgba(14, 20, 30, 0), rgba(14, 20, 30, 0.9));
+      }
+
       .notice-card .notice-skip input {
         accent-color: var(--accent-2);
       }
