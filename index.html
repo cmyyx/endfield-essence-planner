@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
@@ -25,7 +25,6 @@
     <link rel="icon" href="./favicon-003.ico" sizes="64x64" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <!-- 本地依赖（请将文件放到 ./vendor/） -->
-    <link rel="stylesheet" href="./vendor/tailwind.min.css" />
     <script
       defer
       src="https://umami.canmoe.com/umcmx.js"
@@ -104,7 +103,7 @@
   <body>
     <div id="app-preload">
       <div class="preload-card">
-        <div class="preload-title">正在加载</div>
+        <div class="preload-title">少女祈祷中</div>
         <div class="preload-sub">首次打开或强制刷新可能稍慢</div>
       </div>
     </div>
@@ -140,6 +139,16 @@
               <div class="secondary-item secondary-desc">
                 自动模式会根据渲染性能临时切换低GPU模式。
               </div>
+              <div class="secondary-item">
+                <div class="secondary-label">新手教程</div>
+                <button class="ghost-button" @click="startTutorial(true)">再次体验</button>
+              </div>
+              <div class="secondary-item secondary-desc">
+                <label class="notice-skip">
+                  <input type="checkbox" v-model="tutorialSkipAll" />
+                  不再自动弹出当前版本新手教程
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -171,7 +180,15 @@
           </button>
           <button
             class="mobile-tab"
-            :class="{ active: mobilePanel === 'plans' }"
+            ref="tutorialPlansTab"
+            :class="{
+              active: mobilePanel === 'plans',
+              'tutorial-highlight':
+                tutorialActive &&
+                tutorialStepKey === 'base-pick' &&
+                isPortrait &&
+                mobilePanel !== 'plans'
+            }"
             @click="mobilePanel = 'plans'"
           >
             方案推荐 <span class="count">{{ recommendations.length }}</span>
@@ -194,8 +211,11 @@
           <div class="filter-toolbar">
             <button
               class="ghost-button"
-              :class="{ 'is-active': showWeaponAttrs }"
-              @click="showWeaponAttrs = !showWeaponAttrs"
+              :class="{
+                'is-active': showWeaponAttrs,
+                'tutorial-highlight': tutorialActive && tutorialStepKey === 'show-attrs'
+              }"
+              @click="toggleShowWeaponAttrs"
             >
               {{ showWeaponAttrs ? "隐藏属性/排除/备注管理" : "显示属性/排除/备注管理" }}
             </button>
@@ -298,6 +318,54 @@
           </div>
 
           <div v-else class="weapon-attr-list">
+          <div
+            v-if="tutorialActive && (tutorialStepKey === 'exclude' || tutorialStepKey === 'note')"
+            class="scheme-weapon-item weapon-attr-item tutorial-weapon-item"
+            ref="tutorialWeaponTarget"
+          >
+              <div class="scheme-weapon-title">
+                <div class="weapon-mini" :style="rarityBadgeStyle(tutorialWeapon.rarity, false)">
+                  <span class="weapon-fallback">{{ tutorialWeapon.rarity }}★</span>
+                </div>
+                <span>{{ tutorialWeapon.name }}</span>
+                <span class="rarity" :style="rarityTextStyle(tutorialWeapon.rarity)">
+                  {{ tutorialWeapon.rarity }}★
+                </span>
+                <span class="badge tutorial-badge">教学示例</span>
+                <span class="badge muted" v-if="tutorialExcluded">排除</span>
+              </div>
+              <div class="scheme-weapon-attrs">
+                <span class="attr-value attr-type">{{ tutorialWeapon.type }}</span>
+                <span class="attr-value">{{ formatS1(tutorialWeapon.s1) }}</span>
+                <span class="attr-value">{{ tutorialWeapon.s2 }}</span>
+                <span class="attr-value">{{ tutorialWeapon.s3 }}</span>
+              </div>
+              <div class="weapon-exclude-row" @click.stop>
+                <button
+                  class="exclude-toggle small"
+                  :class="{
+                    active: tutorialExcluded,
+                    'tutorial-highlight': tutorialStepKey === 'exclude'
+                  }"
+                  @click.stop="toggleTutorialExclude"
+                >
+                  {{ tutorialExcluded ? "取消排除" : "标记排除" }}
+                </button>
+                <input
+                  class="exclude-note-input"
+                  :class="{
+                    'is-excluded': tutorialExcluded,
+                    'tutorial-highlight': tutorialStepKey === 'note'
+                  }"
+                  type="text"
+                  maxlength="30"
+                  placeholder="备注（可选）"
+                  :value="tutorialNote"
+                  @focus="markTutorialNoteTouched"
+                  @input="updateTutorialNote($event.target.value)"
+                />
+              </div>
+            </div>
             <div
               v-for="weapon in filteredWeapons"
               :key="weapon.name"
@@ -476,7 +544,26 @@
                 </div>
               </div>
             </div>
-            <div v-for="card in visibleRecommendations" :key="card.schemeKey" class="card">
+            <div
+              v-for="card in displayRecommendations"
+              :key="card.schemeKey"
+              class="card"
+              :class="{
+                'tutorial-scheme-highlight':
+                  tutorialActive &&
+                  tutorialStepKey === 'base-pick' &&
+                  tutorialTargetSchemeKey &&
+                  card.schemeKey === tutorialTargetSchemeKey,
+              }"
+              :ref="
+                tutorialActive &&
+                tutorialStepKey === 'base-pick' &&
+                tutorialTargetSchemeKey &&
+                card.schemeKey === tutorialTargetSchemeKey
+                  ? 'tutorialSchemeTarget'
+                  : null
+              "
+            >
               <div class="card-header">
                 <div>
                   <div class="card-title">{{ card.dungeon.name }}</div>
@@ -552,6 +639,12 @@
                     'base-selectable': card.baseOverflow,
                     'is-dim': weapon.baseDim || weapon.isExcluded,
                     'is-excluded': weapon.isExcluded,
+                    'tutorial-highlight':
+                      tutorialActive &&
+                      tutorialStepKey === 'base-pick' &&
+                      tutorialTargetSchemeKey &&
+                      card.schemeKey === tutorialTargetSchemeKey &&
+                      isTutorialGuideWeapon(weapon.name),
                   }"
                   :title="card.baseOverflow ? '点击选择基础属性' : ''"
                   @click="toggleSchemeBasePick(card, weapon)"
@@ -711,6 +804,96 @@
         </div>
       </transition>
 
+      <transition name="fade-scale">
+          <div v-if="tutorialActive" class="tutorial-float">
+          <div class="tutorial-card">
+            <div class="tutorial-head-row">
+              <div class="tutorial-step">
+                新手教程 {{ tutorialStepIndex + 1 }} / {{ tutorialTotalSteps }}
+              </div>
+              <button
+                v-if="tutorialBodyCanCollapse"
+                class="ghost-button tutorial-collapse"
+                :class="{ 'tutorial-highlight': tutorialCollapseHighlight }"
+                @click="toggleTutorialBody"
+              >
+                {{ tutorialBodyCollapsed ? "展开说明" : "收起说明" }}
+              </button>
+            </div>
+            <h3>{{ tutorialStep.title }}</h3>
+            <p
+              v-for="(line, index) in tutorialVisibleLines"
+              :key="`tutorial-line-${index}`"
+              :class="{
+                'tutorial-line-cut':
+                  tutorialBodyCollapsed &&
+                  isPortrait &&
+                  index === tutorialVisibleLines.length - 1
+              }"
+            >
+              {{ line }}
+            </p>
+            <div class="tutorial-status">
+              <span v-if="tutorialStepReady">已完成，可继续。</span>
+              <span v-else>请按提示完成当前操作。</span>
+            </div>
+            <div class="tutorial-actions">
+              <button
+                class="ghost-button"
+                @click="prevTutorialStep"
+                :disabled="tutorialStepIndex === 0"
+              >
+                上一步
+              </button>
+              <button class="ghost-button" @click="openTutorialSkipConfirm">跳过全部</button>
+              <button
+                v-if="tutorialStepKey === 'base-pick' && !tutorialStepReady"
+                class="ghost-button"
+                @click="skipTutorialStep"
+              >
+                跳过本步
+              </button>
+              <button
+                class="about-button"
+                @click="nextTutorialStep"
+                :disabled="!tutorialStepReady"
+              >
+                {{ tutorialStepIndex + 1 >= tutorialTotalSteps ? "完成" : "下一步" }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
+        <div v-if="showTutorialSkipConfirm" class="about-overlay" @click.self="closeTutorialSkipConfirm">
+          <div class="about-card tutorial-modal">
+            <h3>跳过新手教程？</h3>
+            <p>确定跳过当前版本的新手教程吗？此操作仅对当前版本生效。</p>
+            <p class="tutorial-note">之后可在“更多设置”中再次体验。</p>
+            <div class="about-actions">
+              <button class="ghost-button" @click="closeTutorialSkipConfirm">取消</button>
+              <button class="about-button" @click="confirmTutorialSkipAll">跳过全部</button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
+        <div v-if="showTutorialComplete" class="tutorial-float">
+          <div class="tutorial-card tutorial-complete-card">
+            <div class="tutorial-step">新手教程完成</div>
+            <h3>恭喜完成新手教程</h3>
+            <p>你已完成当前版本的新手教程。</p>
+            <p>如果你认为新手教程需要改进欢迎提供建议。</p>
+            <p class="tutorial-note">可在“更多设置”中再次体验。</p>
+            <div class="tutorial-actions">
+              <button class="about-button" @click="closeTutorialComplete">知道了</button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <div v-if="showDomainWarning" class="domain-overlay">
         <div class="domain-card">
           <h3>非官方域名提示</h3>
@@ -779,3 +962,4 @@
     </script>
   </body>
 </html>
+

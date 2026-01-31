@@ -45,7 +45,7 @@
         content: "";
         position: fixed;
         inset: 0;
-        z-index: -1;
+        z-index: -2;
         background-image:
           radial-gradient(1200px 800px at 8% 10%, rgba(77, 214, 201, 0.18), transparent 55%),
           radial-gradient(1000px 700px at 92% 0%, rgba(242, 182, 50, 0.12), transparent 50%),
@@ -64,10 +64,11 @@
         opacity: 0;
       }
 
-      body::before {
+      body::after {
         content: "";
         position: fixed;
         inset: 0;
+        z-index: -1;
         pointer-events: none;
         background-image:
           linear-gradient(120deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0) 30%),
@@ -292,6 +293,13 @@
         transform: translateY(-1px);
       }
 
+      .about-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        filter: grayscale(0.6);
+        transform: none;
+      }
+
       .about-overlay {
         position: fixed;
         inset: 0;
@@ -301,6 +309,16 @@
         place-items: center;
         padding: 20px 16px;
         z-index: 40;
+      }
+
+      .tutorial-float {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 35;
+        pointer-events: none;
+        display: flex;
+        justify-content: flex-end;
       }
 
       html.modal-open,
@@ -405,6 +423,157 @@
         border: 1px solid rgba(255, 255, 255, 0.12);
         background: rgba(14, 20, 30, 0.92);
         box-shadow: var(--shadow);
+      }
+
+      .tutorial-card {
+        position: relative;
+        width: min(380px, 92vw);
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(14, 20, 30, 0.92);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+        pointer-events: auto;
+      }
+
+      .tutorial-step {
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .tutorial-head-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .tutorial-head-row .tutorial-step {
+        margin-bottom: 0;
+      }
+
+      .tutorial-card h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+        letter-spacing: 0.08em;
+      }
+
+      .tutorial-collapse {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+
+      .tutorial-line-cut {
+        max-height: 0.8em;
+        overflow: hidden;
+      }
+
+      .tutorial-card p {
+        margin: 0 0 8px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .tutorial-note {
+        color: #ffd9b6;
+      }
+
+      .tutorial-status {
+        margin: 8px 0 12px;
+        font-size: 12px;
+        color: var(--text);
+      }
+
+      .tutorial-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .tutorial-actions .about-button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        filter: grayscale(0.6);
+        box-shadow: none;
+      }
+
+      .tutorial-weapon-item {
+        border: 1px dashed rgba(255, 205, 120, 0.35);
+        background: rgba(255, 196, 120, 0.06);
+      }
+
+      .tutorial-badge {
+        background: rgba(255, 205, 120, 0.18);
+        color: #ffd9b6;
+        border: 1px solid rgba(255, 205, 120, 0.45);
+      }
+
+      .tutorial-scheme-highlight {
+        border-color: rgba(255, 205, 120, 0.65);
+        background: rgba(255, 205, 120, 0.05);
+        box-shadow:
+          0 0 0 2px rgba(255, 205, 120, 0.35),
+          0 0 24px rgba(255, 196, 120, 0.35),
+          0 18px 36px rgba(0, 0, 0, 0.32);
+      }
+
+      .tutorial-highlight {
+        position: relative;
+        z-index: 6;
+        border-radius: inherit;
+        outline: 2px solid rgba(255, 214, 140, 0.9);
+        outline-offset: 2px;
+        background: rgba(255, 210, 140, 0.08);
+        transform-origin: center;
+        box-shadow:
+          0 0 0 3px rgba(255, 205, 120, 0.7),
+          0 0 18px rgba(255, 196, 120, 0.4);
+        animation: tutorial-pulse 1.6s ease-in-out infinite;
+      }
+
+      @keyframes tutorial-pulse {
+        0% {
+          outline-color: rgba(255, 214, 140, 0.75);
+          background: rgba(255, 210, 140, 0.06);
+          transform: scale(1);
+          box-shadow:
+            0 0 0 3px rgba(255, 205, 120, 0.55),
+            0 0 12px rgba(255, 196, 120, 0.25);
+        }
+        50% {
+          outline-color: rgba(255, 214, 140, 1);
+          background: rgba(255, 210, 140, 0.12);
+          transform: scale(1.01);
+          box-shadow:
+            0 0 0 4px rgba(255, 205, 120, 0.9),
+            0 0 22px rgba(255, 196, 120, 0.45);
+        }
+        100% {
+          outline-color: rgba(255, 214, 140, 0.75);
+          background: rgba(255, 210, 140, 0.06);
+          transform: scale(1);
+          box-shadow:
+            0 0 0 3px rgba(255, 205, 120, 0.55),
+            0 0 12px rgba(255, 196, 120, 0.25);
+        }
+      }
+
+      .tutorial-modal {
+        width: min(420px, 92vw);
+      }
+
+      .tutorial-complete-card {
+        width: min(420px, 92vw);
+        border-color: rgba(255, 205, 120, 0.4);
+        background:
+          radial-gradient(120% 120% at 20% 0%, rgba(255, 205, 120, 0.18), transparent 45%),
+          rgba(14, 20, 30, 0.92);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
       }
 
       .about-card h3 {

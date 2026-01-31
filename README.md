@@ -16,7 +16,6 @@
 
 1. 将依赖文件放到 `vendor/` 目录：
    - `vendor/vue.global.prod.js`
-   - `vendor/tailwind.min.css`
 2. 确保武器图片放在 `image/` 目录（图片文件名需与武器名称一致）
 3. 直接打开 `index.html` 即可使用
 

@@ -67,6 +67,7 @@
               const showSecondaryMenu = ref(false);
               const marksStorageKey = "weapon-marks:v1";
               const legacyExcludedKey = "excluded-notes:v1";
+              const tutorialStorageKey = "planner-tutorial:v1";
               const uiStateStorageKey = "planner-ui-state:v1";
               const noticeSkipKey = "announcement:skip";
               const legacyNoticePrefix = "announcement:skip:";
@@ -116,9 +117,130 @@
               const showWeaponAttrs = ref(false);
               const showFilterPanel = ref(true);
               const showAllSchemes = ref(false);
+              const tutorialVersion = "1.0.0";
+              const tutorialActive = ref(false);
+              const tutorialStepIndex = ref(0);
+              const tutorialSkippedVersion = ref("");
+              const tutorialCompletedVersion = ref("");
+              const showTutorialSkipConfirm = ref(false);
+              const showTutorialComplete = ref(false);
+              const tutorialSkipAll = computed({
+                get: () => tutorialSkippedVersion.value === tutorialVersion,
+                set: (value) => {
+                  tutorialSkippedVersion.value = value ? tutorialVersion : "";
+                },
+              });
+              const tutorialCompleted = computed(
+                () => tutorialCompletedVersion.value === tutorialVersion
+              );
               const filterS1 = ref([]);
               const filterS2 = ref([]);
               const filterS3 = ref([]);
+              let tutorialAutoStartPending = true;
+              let tutorialAdvanceTimer = null;
+              let tutorialScrollTimer = null;
+              const tutorialWeaponTarget = ref(null);
+              const tutorialSchemeTarget = ref(null);
+              const tutorialPlansTab = ref(null);
+              const tutorialBodyCollapsed = ref(false);
+              const tutorialCollapseHighlight = ref(false);
+              const tutorialCollapseHighlightSeen = ref(false);
+              const tutorialManualAdvanceHoldIndex = ref(-1);
+              const isPortrait = ref(false);
+
+              const updateViewportOrientation = () => {
+                if (typeof window === "undefined") return;
+                if (window.matchMedia) {
+                  isPortrait.value = window.matchMedia("(orientation: portrait)").matches;
+                  return;
+                }
+                isPortrait.value = window.innerHeight >= window.innerWidth;
+              };
+
+              updateViewportOrientation();
+
+              const tutorialWeapon = {
+                name: "教学示例-武器",
+                rarity: 5,
+                type: "示例类型",
+                s1: "力量提升",
+                s2: "攻击提升",
+                s3: "暴击提升",
+              };
+              const tutorialExcluded = ref(false);
+              const tutorialNote = ref("");
+              const tutorialNoteTouched = ref(false);
+              const tutorialTargetWeaponName = "沧溟星梦";
+              const tutorialTargetDungeonId = "energy";
+              const tutorialTargetLockType = "s3";
+              const tutorialTargetLockValue = "附术";
+              const tutorialGuideWeaponNames = new Set(["白夜新星", "宏愿"]);
+              const tutorialRequiredBaseKeys = ["主能力提升", "敏捷提升"];
+              const tutorialManualBack = ref(false);
+              const isTutorialGuideWeapon = (name) => tutorialGuideWeaponNames.has(name);
+
+              const tutorialSteps = [
+                {
+                  key: "show-attrs",
+                  title: "查看属性 / 排除 / 备注",
+                  body: [
+                    "点击“显示属性/排除/备注管理”按钮，切换到属性视图。",
+                    "切换后会出现一把教学示例武器，接下来按提示操作即可。",
+                  ],
+                },
+                {
+                  key: "exclude",
+                  title: "排除武器",
+                  body: [
+                    "对教学示例武器点击“标记排除”。",
+                    "被排除的武器不会参与方案计算。",
+                  ],
+                },
+                {
+                  key: "note",
+                  title: "添加备注",
+                  body: [
+                    "可为任意武器添加备注（不强制）",
+                    "例如已毕业。",
+                    "此步不会自动跳转，请手动点击下一步。",
+                  ],
+                },
+                {
+                  key: "base-pick",
+                  title: "基础属性选择",
+                  body: [
+                    "已自动选中“沧溟星梦（智识提升）”，并定位到“四号谷地·供能高地”。",
+                    "部分情况下会出现“最高可刷数量”大于“可同时刷数量”。",
+                    "在该方案中最多可刷 7 把，但最多只能同时刷 6 把。",
+                    "由于基础属性有 4 种，但是只能锁定 3 种。",
+                    "因此需要手动选择两种属性(当前已选中“沧溟星梦（智识提升）”,所以会自动选择一个属性为智识提升且无法取消)。",
+                    "请点击“白夜新星（主能力提升）”与“宏愿（敏捷提升）” 选择两种属性。",
+                  ],
+                },
+              ];
+              const tutorialTotalSteps = tutorialSteps.length;
+              const tutorialStep = computed(
+                () => tutorialSteps[tutorialStepIndex.value] || tutorialSteps[0]
+              );
+              const tutorialStepKey = computed(() => tutorialStep.value.key);
+              const tutorialStepLines = computed(() => {
+                const step = tutorialStep.value || {};
+                const lines = Array.isArray(step.body) ? step.body.slice() : [];
+                if (step.key === "base-pick" && isPortrait.value) {
+                  lines.unshift("竖屏时请先点击上方“方案推荐”标签进入方案列表。");
+                }
+                return lines;
+              });
+              const tutorialBodyCanCollapse = computed(
+                () => tutorialStepKey.value === "base-pick" && tutorialStepLines.value.length > 2
+              );
+              const tutorialVisibleLines = computed(() => {
+                const lines = tutorialStepLines.value;
+                if (!tutorialBodyCanCollapse.value || !tutorialBodyCollapsed.value) {
+                  return lines;
+                }
+                return lines.slice(0, 2);
+              });
 
               const sanitizeArray = (value) => (Array.isArray(value) ? value : []);
               const weaponNameSet = new Set(weapons.map((weapon) => weapon.name));
@@ -206,6 +328,27 @@
                     if (restored.filterS1) filterS1.value = restored.filterS1;
                     if (restored.filterS2) filterS2.value = restored.filterS2;
                     if (restored.filterS3) filterS3.value = restored.filterS3;
+                  }
+                }
+              } catch (error) {
+                // ignore storage errors
+              }
+
+              try {
+                const storedTutorial = localStorage.getItem(tutorialStorageKey);
+                if (storedTutorial) {
+                  const parsed = JSON.parse(storedTutorial);
+                  if (parsed && typeof parsed === "object") {
+                    if (typeof parsed.skipVersion === "string") {
+                      tutorialSkippedVersion.value = parsed.skipVersion;
+                    } else if (parsed.skipAll) {
+                      tutorialSkippedVersion.value = tutorialVersion;
+                    }
+                    if (typeof parsed.completedVersion === "string") {
+                      tutorialCompletedVersion.value = parsed.completedVersion;
+                    } else if (parsed.completed) {
+                      tutorialCompletedVersion.value = tutorialVersion;
+                    }
                   }
                 }
               } catch (error) {
@@ -590,15 +733,19 @@
                 showNotice.value = true;
               }
               initPerfMode();
+              updateViewportOrientation();
+              window.addEventListener("resize", updateViewportOrientation);
               document.addEventListener("click", handleDocClick);
               if (typeof nextTick === "function") {
                 nextTick(() => requestAnimationFrame(() => finishPreload()));
               } else {
                 requestAnimationFrame(() => finishPreload());
               }
+              maybeAutoStartTutorial();
             });
 
             onBeforeUnmount(() => {
+              window.removeEventListener("resize", updateViewportOrientation);
               document.removeEventListener("click", handleDocClick);
             });
 
@@ -732,6 +879,10 @@
                 action,
                 source,
               });
+            };
+
+            const toggleShowWeaponAttrs = () => {
+              showWeaponAttrs.value = !showWeaponAttrs.value;
             };
 
             const toggleSchemeBasePick = (scheme, weapon) => {
@@ -1094,6 +1245,308 @@
               showAllSchemes.value ? recommendations.value : primaryRecommendations.value
             );
 
+            const displayRecommendations = computed(() => {
+              if (!tutorialActive.value || tutorialStepKey.value !== "base-pick") {
+                return visibleRecommendations.value;
+              }
+              const target = tutorialTargetScheme.value;
+              if (!target) return visibleRecommendations.value;
+              const rest = visibleRecommendations.value.filter(
+                (scheme) => scheme && scheme.schemeKey !== target.schemeKey
+              );
+              return [target, ...rest];
+            });
+
+            const tutorialTargetSchemeKey = computed(
+              () => (tutorialTargetScheme.value ? tutorialTargetScheme.value.schemeKey : "")
+            );
+
+            const tutorialTargetScheme = computed(() =>
+              visibleRecommendations.value.find(
+                (scheme) =>
+                  scheme &&
+                  scheme.dungeon &&
+                  scheme.dungeon.id === tutorialTargetDungeonId &&
+                  scheme.lockType === tutorialTargetLockType &&
+                  scheme.lockValue === tutorialTargetLockValue
+              )
+            );
+
+            const tutorialManualPickReady = computed(() => {
+              const scheme = tutorialTargetScheme.value;
+              if (!scheme) return false;
+              const stored = schemeBaseSelections.value[scheme.schemeKey] || [];
+              return tutorialRequiredBaseKeys.every((key) => stored.includes(key));
+            });
+
+            const tutorialStepReady = computed(() => {
+              if (!tutorialActive.value) return false;
+              switch (tutorialStepKey.value) {
+                case "show-attrs":
+                  return showWeaponAttrs.value;
+                case "exclude":
+                  return tutorialExcluded.value;
+                case "note":
+                  return true;
+                case "base-pick":
+                  return tutorialManualPickReady.value;
+                default:
+                  return false;
+              }
+            });
+
+            const tutorialAutoAdvanceDisabled = computed(
+              () =>
+                tutorialStepKey.value === "note" ||
+                tutorialManualBack.value ||
+                tutorialManualAdvanceHoldIndex.value === tutorialStepIndex.value
+            );
+
+            const resetTutorialState = () => {
+              tutorialExcluded.value = false;
+              tutorialNote.value = "";
+              tutorialNoteTouched.value = false;
+              tutorialManualBack.value = false;
+              tutorialManualAdvanceHoldIndex.value = -1;
+              tutorialBodyCollapsed.value = false;
+              tutorialCollapseHighlight.value = false;
+              tutorialCollapseHighlightSeen.value = false;
+            };
+
+            const syncTutorialPanelForStep = () => {
+              if (tutorialStepKey.value === "base-pick") {
+                if (!isPortrait.value) {
+                  mobilePanel.value = "plans";
+                }
+                return;
+              }
+              mobilePanel.value = "weapons";
+            };
+
+            const applyTutorialBasePickPreset = () => {
+              const target = weapons.find((weapon) => weapon.name === tutorialTargetWeaponName);
+              if (!target) return;
+              if (selectedNames.value.length !== 1 || selectedNames.value[0] !== target.name) {
+                selectedNames.value = [target.name];
+              }
+              schemeBaseSelections.value = {};
+              showAllSchemes.value = true;
+            };
+
+            const syncTutorialStepState = () => {
+              if (tutorialStepKey.value === "base-pick") {
+                applyTutorialBasePickPreset();
+                return;
+              }
+            };
+
+            const maybeHighlightCollapseToggle = () => {
+              if (!tutorialActive.value) return;
+              if (tutorialStepKey.value !== "base-pick") return;
+              if (!isPortrait.value) return;
+              if (!tutorialBodyCanCollapse.value || !tutorialBodyCollapsed.value) return;
+              if (tutorialCollapseHighlightSeen.value) return;
+              tutorialCollapseHighlight.value = true;
+            };
+
+            const syncTutorialBodyCollapse = () => {
+              if (!tutorialActive.value) {
+                tutorialBodyCollapsed.value = false;
+                tutorialCollapseHighlight.value = false;
+                tutorialCollapseHighlightSeen.value = false;
+                return;
+              }
+              if (tutorialStepKey.value === "base-pick" && isPortrait.value) {
+                tutorialBodyCollapsed.value = true;
+                maybeHighlightCollapseToggle();
+                return;
+              }
+              tutorialBodyCollapsed.value = false;
+              tutorialCollapseHighlight.value = false;
+            };
+
+            const toggleTutorialBody = () => {
+              tutorialBodyCollapsed.value = !tutorialBodyCollapsed.value;
+              if (tutorialCollapseHighlight.value) {
+                tutorialCollapseHighlight.value = false;
+                tutorialCollapseHighlightSeen.value = true;
+              }
+            };
+
+            const toggleTutorialExclude = () => {
+              tutorialExcluded.value = !tutorialExcluded.value;
+            };
+
+            const markTutorialNoteTouched = () => {
+              tutorialNoteTouched.value = true;
+            };
+
+            const updateTutorialNote = (value) => {
+              tutorialNote.value = value || "";
+              tutorialNoteTouched.value = true;
+            };
+
+            const clearTutorialScrollTimer = () => {
+              if (tutorialScrollTimer) {
+                clearTimeout(tutorialScrollTimer);
+                tutorialScrollTimer = null;
+              }
+            };
+
+            const clearTutorialAdvanceTimer = () => {
+              if (tutorialAdvanceTimer) {
+                clearTimeout(tutorialAdvanceTimer);
+                tutorialAdvanceTimer = null;
+              }
+            };
+
+            const resolveTutorialTarget = (value) =>
+              Array.isArray(value) ? value[0] : value;
+
+            const getTutorialScrollTarget = () => {
+              if (!tutorialActive.value) return null;
+              if (tutorialStepKey.value === "exclude" || tutorialStepKey.value === "note") {
+                return resolveTutorialTarget(tutorialWeaponTarget.value);
+              }
+              if (tutorialStepKey.value === "base-pick") {
+                if (isPortrait.value && mobilePanel.value !== "plans") {
+                  return resolveTutorialTarget(tutorialPlansTab.value);
+                }
+                return resolveTutorialTarget(tutorialSchemeTarget.value);
+              }
+              return null;
+            };
+
+            const scrollTutorialTarget = () => {
+              const target = getTutorialScrollTarget();
+              if (!target || typeof target.scrollIntoView !== "function") return;
+              target.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+            };
+
+            const scheduleTutorialScroll = () => {
+              clearTutorialScrollTimer();
+              tutorialScrollTimer = setTimeout(() => {
+                if (!tutorialActive.value) return;
+                if (typeof nextTick === "function") {
+                  nextTick(() => requestAnimationFrame(scrollTutorialTarget));
+                } else {
+                  requestAnimationFrame(scrollTutorialTarget);
+                }
+              }, 120);
+            };
+
+            const advanceTutorialStep = (options = {}) => {
+              const { manual = false } = options;
+              if (tutorialStepIndex.value >= tutorialSteps.length - 1) {
+                finishTutorial();
+                return;
+              }
+              tutorialStepIndex.value += 1;
+              tutorialManualBack.value = false;
+              tutorialManualAdvanceHoldIndex.value = -1;
+              syncTutorialPanelForStep();
+              syncTutorialStepState();
+              if (manual && tutorialStepReady.value) {
+                tutorialManualAdvanceHoldIndex.value = tutorialStepIndex.value;
+              }
+            };
+
+            const scheduleTutorialAdvance = () => {
+              clearTutorialAdvanceTimer();
+              tutorialAdvanceTimer = setTimeout(() => {
+                if (!tutorialActive.value) return;
+                if (!tutorialStepReady.value) return;
+                advanceTutorialStep();
+              }, 450);
+            };
+
+            const startTutorial = (force = false) => {
+              if (!force && (tutorialSkipAll.value || tutorialCompleted.value)) return;
+              showTutorialSkipConfirm.value = false;
+              showTutorialComplete.value = false;
+              tutorialActive.value = true;
+              tutorialStepIndex.value = 0;
+              tutorialAutoStartPending = false;
+              resetTutorialState();
+              syncTutorialPanelForStep();
+              syncTutorialStepState();
+            };
+
+            const finishTutorial = () => {
+              tutorialActive.value = false;
+              tutorialCompletedVersion.value = tutorialVersion;
+              showTutorialSkipConfirm.value = false;
+              showTutorialComplete.value = true;
+              clearTutorialAdvanceTimer();
+              clearTutorialScrollTimer();
+            };
+
+            const skipTutorialAll = () => {
+              tutorialActive.value = false;
+              tutorialSkippedVersion.value = tutorialVersion;
+              tutorialCompletedVersion.value = tutorialVersion;
+              tutorialAutoStartPending = false;
+              showTutorialSkipConfirm.value = false;
+              showTutorialComplete.value = false;
+              clearTutorialAdvanceTimer();
+              clearTutorialScrollTimer();
+            };
+
+            const openTutorialSkipConfirm = () => {
+              if (!tutorialActive.value) return;
+              showTutorialSkipConfirm.value = true;
+            };
+
+            const closeTutorialSkipConfirm = () => {
+              showTutorialSkipConfirm.value = false;
+            };
+
+            const confirmTutorialSkipAll = () => {
+              skipTutorialAll();
+            };
+
+            const closeTutorialComplete = () => {
+              showTutorialComplete.value = false;
+            };
+
+            const skipTutorialStep = () => {
+              if (!tutorialActive.value) return;
+              clearTutorialAdvanceTimer();
+              advanceTutorialStep();
+            };
+
+            const nextTutorialStep = () => {
+              if (!tutorialStepReady.value) return;
+              clearTutorialAdvanceTimer();
+              tutorialManualBack.value = false;
+              advanceTutorialStep({ manual: true });
+            };
+
+            const prevTutorialStep = () => {
+              if (!tutorialActive.value) return;
+              if (tutorialStepIndex.value <= 0) return;
+              tutorialStepIndex.value -= 1;
+              tutorialManualBack.value = true;
+              tutorialManualAdvanceHoldIndex.value = -1;
+              clearTutorialAdvanceTimer();
+              syncTutorialPanelForStep();
+              syncTutorialStepState();
+            };
+
+            const maybeAutoStartTutorial = () => {
+              if (!tutorialAutoStartPending) return;
+              if (tutorialActive.value) return;
+              if (tutorialSkipAll.value || tutorialCompleted.value) {
+                tutorialAutoStartPending = false;
+                return;
+              }
+              if (showNotice.value || showChangelog.value || showAbout.value || showDomainWarning.value) {
+                return;
+              }
+              tutorialAutoStartPending = false;
+              startTutorial(true);
+            };
+
             const updateAttrWrap = () => {
               const groups = document.querySelectorAll(".scheme-weapon-attrs");
               groups.forEach((group) => {
@@ -1223,22 +1676,110 @@
               { deep: true }
             );
 
+            watch(
+              [tutorialSkippedVersion, tutorialCompletedVersion],
+              () => {
+                try {
+                  localStorage.setItem(
+                    tutorialStorageKey,
+                    JSON.stringify({
+                      skipVersion: tutorialSkippedVersion.value,
+                      completedVersion: tutorialCompletedVersion.value,
+                    })
+                  );
+                } catch (error) {
+                  // ignore storage errors
+                }
+              },
+              { immediate: true }
+            );
+
             const setModalScrollLock = (locked) => {
               document.documentElement.classList.toggle("modal-open", locked);
               document.body.classList.toggle("modal-open", locked);
             };
 
             watch(
-              [showNotice, showChangelog],
-              ([noticeOpen, changelogOpen]) => {
-                setModalScrollLock(Boolean(noticeOpen || changelogOpen));
+              [showNotice, showChangelog, showAbout, showTutorialSkipConfirm],
+              ([noticeOpen, changelogOpen, aboutOpen, skipOpen]) => {
+                setModalScrollLock(Boolean(noticeOpen || changelogOpen || aboutOpen || skipOpen));
+              },
+              { immediate: true }
+            );
+
+            watch(
+              [showNotice, showChangelog, showAbout, showDomainWarning],
+              () => {
+                maybeAutoStartTutorial();
+              },
+              { immediate: true }
+            );
+
+            watch(
+              [tutorialStepIndex, tutorialActive],
+              ([, active]) => {
+                if (!active) {
+                  clearTutorialScrollTimer();
+                  syncTutorialBodyCollapse();
+                  return;
+                }
+                syncTutorialPanelForStep();
+                syncTutorialStepState();
+                syncTutorialBodyCollapse();
+                scheduleTutorialScroll();
+              },
+              { immediate: true }
+            );
+
+            watch(
+              isPortrait,
+              (current, previous) => {
+                if (current && !previous) {
+                  tutorialCollapseHighlightSeen.value = false;
+                  maybeHighlightCollapseToggle();
+                  return;
+                }
+                if (!current && previous) {
+                  tutorialCollapseHighlight.value = false;
+                }
+              },
+              { immediate: true }
+            );
+
+            watch(
+              [tutorialStepReady, tutorialAutoAdvanceDisabled],
+              ([ready, disabled]) => {
+                if (!tutorialActive.value) {
+                  clearTutorialAdvanceTimer();
+                  return;
+                }
+                if (disabled) {
+                  clearTutorialAdvanceTimer();
+                  return;
+                }
+                if (ready) {
+                  scheduleTutorialAdvance();
+                } else {
+                  clearTutorialAdvanceTimer();
+                }
+              },
+              { immediate: true }
+            );
+
+            watch(
+              [mobilePanel, tutorialStepKey, isPortrait],
+              () => {
+                if (!tutorialActive.value) return;
+                if (tutorialStepKey.value === "base-pick") {
+                  scheduleTutorialScroll();
+                }
               },
               { immediate: true }
             );
 
             watch([showWeaponAttrs, showAllSchemes, mobilePanel], scheduleAttrWrap);
             watch(filteredWeapons, scheduleAttrWrap);
-            watch(visibleRecommendations, scheduleAttrWrap);
+            watch(displayRecommendations, scheduleAttrWrap);
             watch(
               () => selectedWeapons.value.length,
               (count) => {
@@ -1280,9 +1821,46 @@
                 toggleExclude,
                 getWeaponNote,
                 updateWeaponNote,
+                toggleShowWeaponAttrs,
                 showWeaponAttrs,
                 showFilterPanel,
                 showAllSchemes,
+                tutorialActive,
+                tutorialStep,
+                tutorialVisibleLines,
+                tutorialStepIndex,
+                tutorialTotalSteps,
+                tutorialStepKey,
+                tutorialStepReady,
+                tutorialWeapon,
+                tutorialExcluded,
+                tutorialNote,
+                tutorialBodyCanCollapse,
+                tutorialBodyCollapsed,
+                tutorialCollapseHighlight,
+                tutorialSkipAll,
+                showTutorialSkipConfirm,
+                showTutorialComplete,
+                tutorialTargetSchemeKey,
+                isTutorialGuideWeapon,
+                isPortrait,
+                startTutorial,
+                nextTutorialStep,
+                prevTutorialStep,
+                skipTutorialStep,
+                skipTutorialAll,
+                openTutorialSkipConfirm,
+                closeTutorialSkipConfirm,
+                confirmTutorialSkipAll,
+                closeTutorialComplete,
+                finishTutorial,
+                toggleTutorialBody,
+                toggleTutorialExclude,
+                updateTutorialNote,
+                markTutorialNoteTouched,
+                tutorialWeaponTarget,
+                tutorialSchemeTarget,
+                tutorialPlansTab,
                 filterS1,
                 filterS2,
                 filterS3,
@@ -1298,6 +1876,7 @@
                 primaryRecommendations,
                 extraRecommendations,
                 visibleRecommendations,
+                displayRecommendations,
                 fallbackPlan,
                 toggleWeapon,
                 toggleSchemeBasePick,
