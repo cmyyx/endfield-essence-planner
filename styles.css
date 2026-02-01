@@ -1977,6 +1977,10 @@
       html.low-gpu *::after {
         animation: none !important;
         transition: none !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        filter: none !important;
+        backdrop-filter: none !important;
       }
 
       html.low-gpu body {
@@ -2014,5 +2018,16 @@
       html.low-gpu .about-button,
       html.low-gpu .filter-panel,
       html.low-gpu .repo-link {
+        box-shadow: none;
+      }
+
+      html.low-gpu .tutorial-scheme-highlight {
+        box-shadow: none;
+      }
+
+      html.low-gpu .tutorial-highlight {
+        outline: 1px solid rgba(255, 214, 140, 0.6);
+        outline-offset: 0;
+        background: rgba(255, 210, 140, 0.04);
         box-shadow: none;
       }
