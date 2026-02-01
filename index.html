@@ -263,15 +263,21 @@
               <div class="filter-title">技能属性</div>
               <div class="filter-chips">
                 <button
-                  v-for="value in s3Options"
-                  :key="value"
+                  v-for="option in s3OptionEntries"
+                  :key="option.value"
                   class="filter-chip"
-                  :class="{ 'is-active': filterS3.includes(value) }"
-                  @click="toggleFilterValue('s3', value)"
+                  :class="{
+                    'is-active': filterS3.includes(option.value),
+                    'is-disabled': option.isEmpty,
+                  }"
+                  :title="option.isEmpty ? '当前武器暂无该词条' : ''"
+                  @click="option.isEmpty ? null : toggleFilterValue('s3', option.value)"
                 >
-                  {{ value }}
+                  <span>{{ option.value }}</span>
+                  <span v-if="option.isEmpty" class="chip-meta">暂无</span>
                 </button>
               </div>
+              <div class="filter-hint">灰色词条代表当前暂无武器</div>
             </div>
           </div>
 
@@ -536,11 +542,9 @@
                   <div class="card-title">当前组合需要分批刷取</div>
                   <div class="hint">
                     该组合无法在同一批次完成，已生成 {{ recommendations.length }} 套方案覆盖全部已选武器，
-                    并按效率优先排序，请在下方查看。如需查看更多方案请点击展开其他方案按钮。
+                    并按效率优先排序。当前展示 {{ displayRecommendations.length }} 套方案已满足全部已选武器刷取要求，
+                    请在下方查看。如需查看更多方案请点击展开其他方案按钮。
                   </div>
-                </div>
-                <div class="strategy-row">
-                  <span class="pill warn">需分批次刷取</span>
                 </div>
               </div>
             </div>
@@ -578,7 +582,7 @@
                     class="missing-details"
                     :open="selectedWeapons.length > 1"
                   >
-                    <summary>未覆盖 {{ card.displaySelectedMissingNames.length }} 把</summary>
+                    <summary>未覆盖 {{ card.displaySelectedMissingNames.length }} 把（基础属性）</summary>
                     <div class="missing-tags">
                       <span
                         v-for="name in card.displaySelectedMissingNames"
@@ -599,6 +603,12 @@
                   </span>
                   <span class="pill warn" v-if="card.displaySelectedMissingNames.length">
                     未覆盖 {{ card.displaySelectedMissingNames.length }}
+                  </span>
+                  <span
+                    class="pill warn"
+                    v-if="card.conflictSelected && card.conflictSelected.length"
+                  >
+                    冲突 {{ card.conflictSelected.length }}
                   </span>
                 </div>
               </div>
@@ -627,6 +637,61 @@
                   </span>
                   <span v-else>基础属性已锁定，可同时刷范围已更新。</span>
                 </div>
+              </div>
+
+              <div v-if="card.conflictSelected && card.conflictSelected.length" class="conflict-section">
+                <button class="ghost-button" @click="toggleConflictOpen(card.schemeKey)">
+                  {{
+                    isConflictOpen(card.schemeKey)
+                      ? "点击收起冲突已选武器"
+                      : `点击展开冲突已选武器（${card.conflictSelected.length}）`
+                  }}
+                </button>
+                <transition name="collapse">
+                  <div
+                    v-if="isConflictOpen(card.schemeKey)"
+                    class="scheme-weapon-list conflict-list"
+                  >
+                    <div
+                      v-for="weapon in card.conflictSelected"
+                      :key="weapon.name"
+                      class="scheme-weapon-item is-selected is-disabled"
+                    >
+                      <div class="scheme-weapon-title">
+                        <div
+                          class="weapon-mini"
+                          :style="rarityBadgeStyle(weapon.rarity, hasImage(weapon))"
+                        >
+                          <img
+                            v-if="hasImage(weapon)"
+                            :src="weaponImageSrc(weapon)"
+                            :alt="weapon.name"
+                          />
+                          <span v-else class="weapon-fallback">{{ weapon.rarity }}★</span>
+                        </div>
+                        <span>{{ weapon.name }}</span>
+                        <span class="rarity" :style="rarityTextStyle(weapon.rarity)">
+                          {{ weapon.rarity }}★
+                        </span>
+                        <span class="badge warn">冲突</span>
+                      </div>
+                      <div class="scheme-weapon-attrs">
+                        <span class="attr-value attr-type">类型：{{ weapon.type }}</span>
+                        <span class="attr-value">基础属性：{{ formatS1(weapon.s1) }}</span>
+                        <span class="attr-value" :class="{ conflict: weapon.conflictS2 }">
+                          附加属性：{{ weapon.s2 }}
+                        </span>
+                        <span class="attr-value" :class="{ conflict: weapon.conflictS3 }">
+                          技能属性：{{ weapon.s3 }}
+                        </span>
+                      </div>
+                      <div class="conflict-reason">冲突原因：{{ weapon.conflictReason }}</div>
+                      <div v-if="weapon.note" class="exclude-note-text">
+                        备注：{{ weapon.note }}
+                      </div>
+                    </div>
+                  </div>
+                </transition>
               </div>
 
               <div class="scheme-weapon-list">

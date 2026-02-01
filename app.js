@@ -31,6 +31,63 @@
         return index === -1 ? 99 : index;
       };
 
+      const compareText = (a, b) => (a || "").localeCompare(b || "", "zh-Hans-CN");
+
+      const getBaseAttrSorter = (secondaryKey, tertiaryKey, selectedSet) => (a, b) => {
+        const baseDiff = getS1OrderIndex(a.s1) - getS1OrderIndex(b.s1);
+        if (baseDiff !== 0) return baseDiff;
+        if (selectedSet) {
+          const selectedDiff =
+            (selectedSet.has(b.name) ? 1 : 0) - (selectedSet.has(a.name) ? 1 : 0);
+          if (selectedDiff !== 0) return selectedDiff;
+        }
+        const secondaryDiff = compareText(a[secondaryKey], b[secondaryKey]);
+        if (secondaryDiff !== 0) return secondaryDiff;
+        if (tertiaryKey) {
+          const tertiaryDiff = compareText(a[tertiaryKey], b[tertiaryKey]);
+          if (tertiaryDiff !== 0) return tertiaryDiff;
+        }
+        if (b.rarity !== a.rarity) return b.rarity - a.rarity;
+        return compareText(a.name, b.name);
+      };
+
+      const getSchemeWeaponSorter = (lockType, selectedSet) => {
+        const secondaryKey = lockType === "s2" ? "s3" : "s2";
+        return getBaseAttrSorter(secondaryKey, null, selectedSet);
+      };
+
+      const getConflictInfo = (weapon, dungeon, lockOption) => {
+        const reasons = [];
+        let conflictS2 = false;
+        let conflictS3 = false;
+
+        if (lockOption.type === "s2") {
+          if (weapon.s2 !== lockOption.value) {
+            conflictS2 = true;
+            reasons.push(`附加属性需为 ${lockOption.value}`);
+          }
+          if (!dungeon.s3_pool.includes(weapon.s3)) {
+            conflictS3 = true;
+            reasons.push(`方案地区（${dungeon.name}）不产出该技能属性`);
+          }
+        } else {
+          if (weapon.s3 !== lockOption.value) {
+            conflictS3 = true;
+            reasons.push(`技能属性需为 ${lockOption.value}`);
+          }
+          if (!dungeon.s2_pool.includes(weapon.s2)) {
+            conflictS2 = true;
+            reasons.push(`方案地区（${dungeon.name}）不产出该附加属性`);
+          }
+        }
+
+        return {
+          conflictS2,
+          conflictS3,
+          conflictReason: reasons.length ? reasons.join("；") : "与当前方案属性不兼容",
+        };
+      };
+
       const isWeaponCompatible = (weapon, dungeon, lockOption) => {
         if (lockOption.type === "s2") {
           return (
@@ -117,6 +174,7 @@
               const showWeaponAttrs = ref(false);
               const showFilterPanel = ref(true);
               const showAllSchemes = ref(false);
+              const conflictOpenMap = ref({});
               const tutorialVersion = "1.0.0";
               const tutorialActive = ref(false);
               const tutorialStepIndex = ref(0);
@@ -784,11 +842,25 @@
                   return a.localeCompare(b, "zh-Hans-CN");
                 })
               );
-              const s3Options = computed(() =>
-                uniqueSorted(weapons.map((weapon) => weapon.s3), (a, b) => {
-                  return a.localeCompare(b, "zh-Hans-CN");
-                })
-              );
+              const s3OptionEntries = computed(() => {
+                const weaponValues = weapons.map((weapon) => weapon.s3).filter(Boolean);
+                const weaponCounts = countBy(weaponValues);
+                const dungeonValues = dungeons.reduce((acc, dungeon) => {
+                  if (Array.isArray(dungeon.s3_pool)) {
+                    acc.push(...dungeon.s3_pool);
+                  }
+                  return acc;
+                }, []);
+                const values = uniqueSorted(
+                  [...weaponValues, ...dungeonValues],
+                  (a, b) => a.localeCompare(b, "zh-Hans-CN")
+                );
+                return values.map((value) => ({
+                  value,
+                  count: weaponCounts[value] || 0,
+                  isEmpty: !weaponCounts[value],
+                }));
+              });
 
             const excludedNameSet = computed(() => {
               const names = Object.keys(weaponMarks.value || {});
@@ -903,6 +975,22 @@
               };
             };
 
+            const isConflictOpen = (schemeKey) => {
+              const map = conflictOpenMap.value || {};
+              if (Object.prototype.hasOwnProperty.call(map, schemeKey)) {
+                return Boolean(map[schemeKey]);
+              }
+              return false;
+            };
+
+            const toggleConflictOpen = (schemeKey) => {
+              const map = conflictOpenMap.value || {};
+              conflictOpenMap.value = {
+                ...map,
+                [schemeKey]: !isConflictOpen(schemeKey),
+              };
+            };
+
               const clearSelection = () => {
                 selectedNames.value = [];
                 schemeBaseSelections.value = {};
@@ -991,14 +1079,13 @@
                   if (!matchedSelected.length) return;
 
                   const schemeKey = `${dungeon.id}-${option.type}-${option.value}`;
+                  const selectedSortSet = new Set(targets.map((weapon) => weapon.name));
+                  const schemeWeaponSorter = getSchemeWeaponSorter(option.type, selectedSortSet);
 
                   const schemeWeapons = weapons
                     .filter((weapon) => isWeaponCompatible(weapon, dungeon, option))
                     .slice()
-                    .sort((a, b) => {
-                      if (b.rarity !== a.rarity) return b.rarity - a.rarity;
-                      return a.name.localeCompare(b.name, "zh-Hans-CN");
-                    });
+                    .sort(schemeWeaponSorter);
 
                   const schemeWeaponsActive = schemeWeapons.filter(
                     (weapon) => !excludedSet.has(weapon.name)
@@ -1066,6 +1153,15 @@
                   }));
 
                   const planWeapons = schemeWeapons.slice();
+                  const incompatibleSelected = targets
+                    .filter((weapon) => !isWeaponCompatible(weapon, dungeon, option))
+                    .slice()
+                    .sort(schemeWeaponSorter)
+                    .map((weapon) => ({
+                      ...weapon,
+                      ...getConflictInfo(weapon, dungeon, option),
+                      note: getWeaponNote(weapon.name),
+                    }));
                   const autoCoveredSelected = matchedSelected.filter((weapon) =>
                     baseAutoPickSet.has(weapon.s1)
                   );
@@ -1079,7 +1175,7 @@
                     activeBaseSet.has(weapon.s1)
                   );
                   const coveredSelectedSet = new Set(coveredSelected.map((weapon) => weapon.name));
-                  const missingSelected = targets.filter(
+                  const missingSelected = matchedSelected.filter(
                     (weapon) => !coveredSelectedSet.has(weapon.name)
                   );
                   const autoWeaponCount = schemeWeaponsActive.filter((weapon) =>
@@ -1124,6 +1220,8 @@
                     selectedMissingCount: autoMissingSelected.length,
                     selectedMatchNames: autoCoveredSelected.map((weapon) => weapon.name),
                     selectedMissingNames: autoMissingSelected.map((weapon) => weapon.name),
+                    conflictSelected: incompatibleSelected,
+                    conflictSelectedNames: incompatibleSelected.map((weapon) => weapon.name),
                     displayWeaponCount,
                     displaySelectedMatchCount: coveredSelected.length,
                     displaySelectedMissingCount: missingSelected.length,
@@ -1608,10 +1706,7 @@
 
               const weaponRows = targets
                 .slice()
-                .sort((a, b) => {
-                  if (b.rarity !== a.rarity) return b.rarity - a.rarity;
-                  return a.name.localeCompare(b.name, "zh-Hans-CN");
-                })
+                .sort(getBaseAttrSorter("s2", "s3"))
                 .map((weapon) => ({
                   ...weapon,
                   baseLocked: basePick.includes(weapon.s1),
@@ -1785,6 +1880,7 @@
             watch([showWeaponAttrs, showAllSchemes, mobilePanel], scheduleAttrWrap);
             watch(filteredWeapons, scheduleAttrWrap);
             watch(displayRecommendations, scheduleAttrWrap);
+            watch(conflictOpenMap, scheduleAttrWrap, { deep: true });
             watch(
               () => selectedWeapons.value.length,
               (count) => {
@@ -1871,7 +1967,7 @@
                 filterS3,
                 s1Options,
                 s2Options,
-                s3Options,
+                s3OptionEntries,
                 toggleFilterValue,
                 clearAttributeFilters,
                 hasAttributeFilters,
@@ -1885,6 +1981,8 @@
                 fallbackPlan,
                 toggleWeapon,
                 toggleSchemeBasePick,
+                isConflictOpen,
+                toggleConflictOpen,
                 clearSelection,
                 formatS1,
               rarityBadgeStyle,
