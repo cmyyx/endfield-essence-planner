@@ -1,4 +1,4 @@
-      .weapon-list {
+.weapon-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
         gap: 8px;
@@ -617,6 +617,10 @@
         background-image: var(--rarity-5-frame);
       }
 
+      .weapon-item.rarity-4 .weapon-name {
+        background-image: var(--rarity-4-frame);
+      }
+
       .weapon-art {
         position: absolute;
         inset: 0;
@@ -658,6 +662,10 @@
 
       .weapon-item.rarity-5 .weapon-band {
         background-image: var(--rarity-5-frame);
+      }
+
+      .weapon-item.rarity-4 .weapon-band {
+        background-image: var(--rarity-4-frame);
       }
 
       .weapon-name {

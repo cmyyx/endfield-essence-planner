@@ -1,0 +1,685 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>终末地基质规划器 (Endfield Essence Planner)</title>
+  <meta name="description" content="终末地基质规划器：根据附加/技能属性池与锁定规则，自动计算多武器共刷方案，提供基础属性冲突提示与可刷数量参考，适配移动端。" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://end.canmoe.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="终末地基质规划器 (Endfield Essence Planner)" />
+  <meta property="og:description" content="终末地基质规划器：根据附加/技能属性池与锁定规则，自动计算多武器共刷方案，提供基础属性冲突提示与可刷数量参考，适配移动端。" />
+  <meta property="og:url" content="https://end.canmoe.com/" />
+  <meta property="og:site_name" content="终末地基质规划器" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="./favicon.ico" sizes="any" />
+  <link rel="icon" href="./favicon-002.ico" sizes="32x32" />
+  <link rel="icon" href="./favicon-003.ico" sizes="48x48" />
+  <link rel="icon" href="./favicon-003.ico" sizes="64x64" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <!-- 本地依赖（请将文件放到 ./vendor/） -->
+  <script defer src="https://umami.canmoe.com/umcmx.js" data-website-id="98084554-f35b-4100-8bd4-262f490c9ae2"></script>
+  <script>
+    var _hmt = _hmt || [];
+    (function () {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?675464d4b6500379e28adbfeb2ce0b40";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FQ81EJB28L"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-FQ81EJB28L");
+  </script>
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "vb1z842wno");
+  </script>
+  <style>
+    html.preload body {
+      background: #0b0f14;
+      color: #e6e9ef;
+    }
+
+    html.preload #app {
+      display: none;
+    }
+
+    [v-cloak] {
+      display: none;
+    }
+
+    #app-preload {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(6, 8, 12, 0.55);
+      color: #e6e9ef;
+      font-family: "Microsoft YaHei UI", "PingFang SC", sans-serif;
+      z-index: 9999;
+      opacity: 1;
+      transition: opacity 0.2s ease;
+    }
+
+    #app-preload.preload-hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #app-preload .preload-card {
+      padding: 16px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(14, 20, 30, 0.85);
+      text-align: center;
+    }
+
+    #app-preload .preload-title {
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    #app-preload .preload-sub {
+      font-size: 12px;
+      color: #9aa5b1;
+    }
+  </style>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      root.classList.add("preload");
+      const version = (document.lastModified || String(Date.now())).replace(/\D/g, "");
+      root.dataset.assetVersion = version;
+      const finish = () => {
+        if (!root.classList.contains("preload")) return;
+        root.classList.remove("preload");
+        const overlay = document.getElementById("app-preload");
+        if (overlay) {
+          overlay.classList.add("preload-hide");
+          setTimeout(() => overlay.remove(), 240);
+        }
+      };
+      window.__finishPreload = finish;
+      const cssFiles = [
+        "./css/styles.theme.css",
+        "./css/styles.layout.css",
+        "./css/styles.overlays.css",
+        "./css/styles.filters.css",
+        "./css/styles.weapons.css",
+        "./css/styles.recommendations.css",
+      ];
+      cssFiles.forEach((href) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href + "?v=" + version;
+        document.head.appendChild(link);
+      });
+      setTimeout(finish, 8000);
+    })();
+  </script>
+
+</head>
+
+<body>
+  <div id="app-preload">
+    <div class="preload-card">
+      <div class="preload-title">少女祈祷中</div>
+      <div class="preload-sub">首次打开或强制刷新可能稍慢</div>
+    </div>
+  </div>
+  <div id="app" class="app-shell" v-cloak v-show="appReady">
+    <header class="hero">
+      <div>
+        <h1>{{ t("终末地基质规划器") }}</h1>
+      </div>
+      <div class="hero-actions">
+        <div class="lang-switch" ref="langSwitchRef" @click.stop>
+          <button class="lang-button" type="button" aria-label="Language" aria-haspopup="listbox"
+            :aria-expanded="showLangMenu ? 'true' : 'false'" @click="toggleLangMenu">
+            <span class="lang-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18"></path>
+                <path d="M12 3a13 13 0 0 1 0 18"></path>
+                <path d="M12 3a13 13 0 0 0 0 18"></path>
+              </svg>
+            </span>
+            <span class="lang-label">Language</span>
+          </button>
+          <div v-if="showLangMenu" class="lang-menu" :class="'align-' + langMenuPlacement" role="listbox">
+            <button v-for="option in languageOptions" :key="option.value" class="lang-option"
+              :class="{ active: option.value === locale }" role="option" :aria-selected="option.value === locale"
+              @click="setLocale(option.value)">
+              {{ option.label }}
+            </button>
+          </div>
+        </div>
+        <button class="about-button notice-button" @click="openNotice">{{ t("公告") }}</button>
+        <button class="about-button" @click="showChangelog = true">{{ t("更新日志") }}</button>
+        <button class="about-button" @click="showAbout = true">{{ t("关于") }}</button>
+        <div class="secondary-menu">
+          <button class="ghost-button menu-toggle" @click="showSecondaryMenu = !showSecondaryMenu">
+            {{ t("更多设置") }}
+          </button>
+          <div v-if="showSecondaryMenu" class="secondary-panel">
+            <div class="secondary-item">
+              <div class="secondary-label">{{ t("性能模式") }}</div>
+              <select class="secondary-select" :value="perfPreference" @change="setPerfMode($event.target.value)">
+                <option value="auto">{{ t("自动") }}</option>
+                <option value="standard">{{ t("标准") }}</option>
+                <option value="low">{{ t("低GPU") }}</option>
+              </select>
+              <div v-if="perfPreference === 'auto'" class="secondary-hint">
+                {{ t("当前自动：") }}{{ lowGpuEnabled ? t("低GPU") : t("标准") }}
+              </div>
+            </div>
+            <div class="secondary-item secondary-desc">
+              {{ t("自动模式会根据渲染性能临时切换低GPU模式。") }}
+            </div>
+            <div class="secondary-item">
+              <div class="secondary-label">{{ t("背景图片") }}</div>
+              <div class="secondary-actions">
+                <label class="ghost-button secondary-upload">
+                  {{ t("导入图片") }}
+                  <input type="file" accept="image/*" @change="handleBackgroundFile" />
+                </label>
+                <button class="ghost-button" @click="clearCustomBackground"
+                  :disabled="!customBackground && !customBackgroundApi">
+                  {{ t("恢复默认") }}
+                </button>
+              </div>
+              <div v-if="customBackgroundName" class="secondary-hint secondary-file">
+                {{ t("当前：") }}{{ customBackgroundName }}
+              </div>
+              <div v-else class="secondary-hint">{{ t("未导入时使用随机背景") }}</div>
+              <input class="secondary-input" type="text" v-model.trim.lazy="customBackgroundApi"
+                :placeholder="t('自定义图片API（返回图片）')" />
+              <div v-if="customBackgroundApi" class="secondary-hint secondary-file">
+                {{ t("API：") }}{{ customBackgroundApi }}
+              </div>
+              <div v-else class="secondary-hint">{{ t("未设置API时使用随机背景") }}</div>
+              <div v-if="customBackground" class="secondary-hint">
+                {{ t("已导入本地图片，将优先使用本地背景。") }}
+              </div>
+              <div v-if="customBackgroundError" class="secondary-hint secondary-warning">
+                {{ customBackgroundError }}
+              </div>
+            </div>
+            <div class="secondary-item">
+              <div class="secondary-label">{{ t("新手教程") }}</div>
+              <button class="ghost-button" @click="startTutorial(true)">{{ t("再次体验") }}</button>
+            </div>
+            <div class="secondary-item secondary-desc">
+              <label class="notice-skip">
+                <input type="checkbox" v-model="tutorialSkipAll" />
+                {{ t("不再自动弹出当前版本新手教程") }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div v-if="showAiNotice" class="ai-notice">
+      <span class="ai-chip">AI</span>
+      <span>{{ t("当前语言内容由 AI 翻译，可能存在不准确。如发现错误，请前往 GitHub 反馈。") }}</span>
+    </div>
+    <div v-if="lowGpuEnabled" class="perf-status">
+      <div class="perf-status-text">
+        {{ t("低GPU模式已开启") }}{{ perfPreference === "auto" ? t("（自动）") : t("（手动）") }}
+      </div>
+      <button class="ghost-button" @click.stop="showSecondaryMenu = true">
+        {{ t("更多设置") }}
+      </button>
+    </div>
+    <div v-if="showPerfNotice" class="perf-notice">
+      <div class="perf-notice-text">
+        {{ t("检测到当前渲染性能较低，已自动切换到低GPU模式以提升滚动流畅度（可在“更多设置”调整）。") }}
+      </div>
+      <div class="perf-notice-actions">
+        <button class="ghost-button" @click="setPerfMode('standard')">{{ t("恢复效果") }}</button>
+        <button class="about-button perf-keep" @click="setPerfMode('low')">{{ t("保持低GPU") }}</button>
+      </div>
+    </div>
+
+
+    <main style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+      <div class="panel">
+        <div class="panel-title">
+          <h2>{{ t("低星武器词条匹配") }}</h2>
+        </div>
+        <div class="panel-body">
+          <p>{{ t("选择一个六星武器，查找具有完全一致词条组合的四/五星武器（用于获取“终极武器奖章”镀层）。") }}</p>
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <button class="ghost-button" @click="matcherViewMode = (matcherViewMode === 'search' ? 'all' : 'search')">
+              {{ matcherViewMode === 'search' ? t("显示所有已知匹配组合") : t("返回搜索") }}
+            </button>
+          </div>
+
+          <div v-if="matcherViewMode === 'search'">
+            <div class="search-box">
+              <span>🔍</span>
+              <input v-model="matcherSearchQuery" :placeholder="t('搜索六星武器...')" />
+            </div>
+
+            <div class="weapon-list"
+              style="margin-bottom: 32px; max-height: 480px; overflow-y: auto; padding-right: 8px;">
+              <div v-for="w in matcherFilteredSixStarWeapons" :key="w.name" class="weapon-item" :class="{ 
+                                'is-selected': matcherSelected6StarName === w.name,
+                                'rarity-6': w.rarity === 6,
+                                'rarity-5': w.rarity === 5
+                            }" :title="w.name + '\n' + w.s1 + ' / ' + w.s2 + ' / ' + w.s3"
+                @click="matcherSelected6StarName = w.name">
+                <div class="weapon-art">
+                  <img v-if="hasImage(w)" class="weapon-figure" :src="weaponImageSrc(w)" :alt="w.name" loading="lazy" />
+                  <span v-else class="weapon-fallback-large">{{ w.rarity }}★</span>
+                </div>
+                <div v-if="weaponCharacters(w).length" class="weapon-avatars">
+                  <img v-for="(character, index) in weaponCharacters(w)" :key="index" class="weapon-avatar"
+                    :src="characterImageSrc(character)" :alt="character" loading="lazy" />
+                </div>
+                <div class="weapon-band"></div>
+                <div class="weapon-name">
+                  <div class="weapon-title">{{ w.name }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="matcherSelected6Star" class="result-section"
+              style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
+              <h3 style="margin-bottom: 16px; font-size: 1.25em;">
+                {{ t("匹配结果") }}
+                <span style="font-size: 0.8em; opacity: 0.6; font-weight: normal; display: block; margin-top: 4px;">
+                  {{ matcherSelected6Star.name }} : {{matcherSelected6Star.s1}} / {{matcherSelected6Star.s2}} /
+                  {{matcherSelected6Star.s3}}
+                </span>
+              </h3>
+
+              <div v-if="matcherMatches.length === 0" class="empty-state">
+                {{ t("没有找到完全匹配的武器。") }}
+              </div>
+              <div class="weapon-list">
+                <div v-for="w in matcherMatches" :key="w.name" class="weapon-item" :class="{ 
+                                    'rarity-6': w.rarity === 6,
+                                    'rarity-5': w.rarity === 5
+                                 }" :title="w.name + '\n' + w.s1 + ' / ' + w.s2 + ' / ' + w.s3">
+                  <div class="weapon-art">
+                    <img v-if="hasImage(w)" class="weapon-figure" :src="weaponImageSrc(w)" :alt="w.name"
+                      loading="lazy" />
+                    <span v-else class="weapon-fallback-large">{{ w.rarity }}★</span>
+                  </div>
+                  <div v-if="weaponCharacters(w).length" class="weapon-avatars">
+                    <img v-for="(character, index) in weaponCharacters(w)" :key="index" class="weapon-avatar"
+                      :src="characterImageSrc(character)" :alt="character" loading="lazy" />
+                  </div>
+                  <div class="weapon-band"></div>
+                  <div class="weapon-name">
+                    <div class="weapon-title">{{ w.name }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="matcherViewMode === 'all'" style="margin-top: 16px;">
+            <div v-if="matcherAllMatches.length === 0" class="empty-state">
+              {{ t("当前数据中没有发现任何完全匹配的组合。") }}
+            </div>
+            <div v-for="group in matcherAllMatches" :key="group.source.name"
+              style="margin-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 24px;">
+              <h3 style="margin-bottom: 12px; font-size: 1.1em; display:flex; align-items:center; gap: 8px;">
+                <img v-if="hasImage(group.source)" :src="weaponImageSrc(group.source)"
+                  style="width: 32px; height: 32px; object-fit:contain; border-radius:4px; background: rgba(0,0,0,0.3);" />
+                <span>{{ group.source.name }}</span>
+                <span style="font-size: 0.8em; opacity: 0.6; font-weight: normal;">
+                  {{group.source.s1}}/{{group.source.s2}}/{{group.source.s3}}
+                </span>
+              </h3>
+              <div class="weapon-list">
+                <div v-for="w in group.matches" :key="w.name" class="weapon-item" :class="{ 
+                                    'rarity-6': w.rarity === 6,
+                                    'rarity-5': w.rarity === 5
+                                 }" :title="w.name + '\n' + w.s1 + ' / ' + w.s2 + ' / ' + w.s3">
+                  <div class="weapon-art">
+                    <img v-if="hasImage(w)" class="weapon-figure" :src="weaponImageSrc(w)" :alt="w.name"
+                      loading="lazy" />
+                    <span v-else class="weapon-fallback-large">{{ w.rarity }}★</span>
+                  </div>
+                  <div v-if="weaponCharacters(w).length" class="weapon-avatars">
+                    <img v-for="(character, index) in weaponCharacters(w)" :key="index" class="weapon-avatar"
+                      :src="characterImageSrc(character)" :alt="character" loading="lazy" />
+                  </div>
+                  <div class="weapon-band"></div>
+                  <div class="weapon-name">
+                    <div class="weapon-title">{{ w.name }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 48px; text-align: center;">
+            <a href="index.html" class="ghost-button" style="text-decoration: none; display: inline-block;">{{
+              t("返回基质规划器") }}</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <button class="back-to-top" :class="{ 'is-visible': showBackToTop }" :title="t('回到顶部')" :aria-label="t('回到顶部')"
+      @click="scrollToTop">
+      ↑
+    </button>
+
+    <transition name="fade-scale">
+      <div v-if="showNotice" class="about-overlay notice-overlay" @click.self="closeNotice">
+        <div class="about-card notice-card">
+          <h3>{{ announcement.title }}</h3>
+          <div class="notice-body">
+            <p class="notice-meta">
+              {{ t("更新日期：{date}", { date: announcement.date }) }}
+            </p>
+            <ul class="notice-list">
+              <li v-for="item in announcement.items" :key="item">{{ item }}</li>
+            </ul>
+          </div>
+          <div class="notice-footer">
+            <div class="notice-qq" v-if="announcement.qqGroup">
+              <a class="ghost-button notice-join" href="https://qm.qq.com/q/FBNLBtEPy8" target="_blank" rel="noopener">
+                {{ t("加入 QQ 群") }}
+              </a>
+              <div class="notice-qq-info">
+                {{ t("QQ 群：{group}", { group: announcement.qqGroup }) }}
+                <span v-if="announcement.qqNote">（{{ announcement.qqNote }}）</span>
+              </div>
+            </div>
+            <label class="notice-skip">
+              <input type="checkbox" v-model="skipNotice" />
+              {{ t("本次公告不再显示") }}
+            </label>
+            <div class="about-actions">
+              <button class="ghost-button" @click="closeNotice">{{ t("关闭") }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-scale">
+      <div v-if="showChangelog" class="about-overlay changelog-overlay" @click.self="showChangelog = false">
+        <div class="about-card changelog-card">
+          <h3>{{ changelog.title }}</h3>
+          <div class="changelog-body">
+            <div v-if="!changelog.entries || !changelog.entries.length" class="empty">
+              {{ t("暂无更新日志。") }}
+            </div>
+            <div v-else v-for="(entry, index) in changelog.entries" :key="entry.date || `changelog-${index}`"
+              class="changelog-section">
+              <div class="changelog-date">{{ entry.date }}</div>
+              <ul class="changelog-list">
+                <li v-for="item in entry.items" :key="item">{{ item }}</li>
+              </ul>
+            </div>
+          </div>
+          <div class="about-actions">
+            <button class="ghost-button" @click="showChangelog = false">{{ t("关闭") }}</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-scale">
+      <div v-if="showAbout" class="about-overlay about-overlay-main" @click.self="showAbout = false">
+        <div class="about-card about-main">
+          <h3>{{ aboutContent.title }}</h3>
+          <div class="about-body">
+            <p v-for="(line, index) in aboutContent.paragraphs" :key="`about-line-${index}`">
+              {{ line }}
+            </p>
+            <p v-if="aboutContent.author">
+              {{ t("作者：{name}", { name: aboutContent.author }) }}
+            </p>
+            <div class="about-links" v-if="aboutContent.links && aboutContent.links.length">
+              <a v-for="link in aboutContent.links" :key="link.href || link.text" class="repo-link" :href="link.href"
+                target="_blank" rel="noreferrer">
+                <span class="repo-chip">{{ link.chip }}</span>
+                <span>{{ link.text }}</span>
+                <span class="repo-arrow">↗</span>
+              </a>
+            </div>
+            <div class="about-thanks" v-if="aboutContent.thanks && aboutContent.thanks.length">
+              <h4>{{ t("感谢") }}</h4>
+              <ul class="about-thanks-list">
+                <li v-for="(entry, index) in aboutContent.thanks" :key="entry.name || `about-thanks-${index}`"
+                  class="about-thanks-item">
+                  <div class="about-thanks-name">
+                    <a v-if="entry.href" :href="entry.href" target="_blank" rel="noreferrer">
+                      {{ entry.name }}
+                      <span class="about-thanks-arrow">↗</span>
+                    </a>
+                    <span v-else>{{ entry.name }}</span>
+                  </div>
+                  <div v-if="entry.note" class="about-thanks-note">{{ entry.note }}</div>
+                </li>
+              </ul>
+            </div>
+            <div class="about-sponsor"
+              v-if="aboutContent.sponsor && aboutContent.sponsor.items && aboutContent.sponsor.items.length">
+              <h4>{{ t(aboutContent.sponsor.title || "赞助支持") }}</h4>
+              <p v-if="aboutContent.sponsor.text" class="about-sponsor-text">
+                {{ t(aboutContent.sponsor.text) }}
+              </p>
+              <div class="about-sponsor-grid">
+                <div v-for="(item, index) in aboutContent.sponsor.items"
+                  :key="item.label || item.src || `about-sponsor-${index}`" class="about-sponsor-item">
+                  <img :src="item.src" :alt="item.label ? t(item.label) : ''" loading="lazy" decoding="async" />
+                  <div v-if="item.label" class="about-sponsor-label">
+                    {{ t(item.label) }}
+                  </div>
+                </div>
+              </div>
+              <div v-if="aboutContent.sponsor.list && aboutContent.sponsor.list.length" class="about-sponsor-list">
+                <h5>{{ t("赞助列表") }}</h5>
+                <ul class="about-sponsor-list-items">
+                  <li v-for="(entry, index) in aboutContent.sponsor.list"
+                    :key="entry.name || `about-sponsor-entry-${index}`" class="about-sponsor-entry">
+                    <div class="about-sponsor-entry-name">{{ entry.name }}</div>
+                    <div v-if="entry.amount || entry.date" class="about-sponsor-entry-meta">
+                      <span v-if="entry.amount" class="about-sponsor-entry-amount">
+                        {{ entry.amount }}
+                      </span>
+                      <span v-if="entry.date" class="about-sponsor-entry-date">
+                        {{ entry.date }}
+                      </span>
+                    </div>
+                    <div v-if="entry.note" class="about-sponsor-entry-note">
+                      {{ entry.note }}
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-actions">
+            <button class="ghost-button" @click="showAbout = false">{{ t("关闭") }}</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-scale">
+      <div v-if="tutorialActive" class="tutorial-float">
+        <div class="tutorial-card">
+          <div class="tutorial-head-row">
+            <div class="tutorial-step">
+              {{ t("新手教程 {current} / {total}", {
+              current: tutorialStepIndex + 1,
+              total: tutorialTotalSteps,
+              }) }}
+            </div>
+            <button v-if="tutorialBodyCanCollapse" class="ghost-button tutorial-collapse"
+              :class="{ 'tutorial-highlight': tutorialCollapseHighlight }" @click="toggleTutorialBody">
+              {{ tutorialBodyCollapsed ? t("展开说明") : t("收起说明") }}
+            </button>
+          </div>
+          <h3>{{ tutorialStep.title }}</h3>
+          <p v-for="(line, index) in tutorialVisibleLines" :key="`tutorial-line-${index}`" :class="{
+                'tutorial-line-cut':
+                  tutorialBodyCollapsed &&
+                  isPortrait &&
+                  index === tutorialVisibleLines.length - 1
+              }">
+            {{ line }}
+          </p>
+          <div class="tutorial-status">
+            <span v-if="tutorialStepReady">{{ t("已完成，可继续。") }}</span>
+            <span v-else>{{ t("请按提示完成当前操作。") }}</span>
+          </div>
+          <div class="tutorial-actions">
+            <button class="ghost-button" @click="prevTutorialStep" :disabled="tutorialStepIndex === 0">
+              {{ t("上一步") }}
+            </button>
+            <button class="ghost-button" @click="openTutorialSkipConfirm">
+              {{ t("跳过全部") }}
+            </button>
+            <button v-if="tutorialStepKey === 'base-pick' && !tutorialStepReady" class="ghost-button"
+              @click="skipTutorialStep">
+              {{ t("跳过本步") }}
+            </button>
+            <button class="about-button" @click="nextTutorialStep" :disabled="!tutorialStepReady">
+              {{
+              tutorialStepIndex + 1 >= tutorialTotalSteps
+              ? t("完成")
+              : t("下一步")
+              }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-scale">
+      <div v-if="showTutorialSkipConfirm" class="about-overlay" @click.self="closeTutorialSkipConfirm">
+        <div class="about-card tutorial-modal">
+          <h3>{{ t("跳过新手教程？") }}</h3>
+          <p>{{ t("确定跳过当前版本的新手教程吗？此操作仅对当前版本生效。") }}</p>
+          <p class="tutorial-note">{{ t("之后可在“更多设置”中再次体验。") }}</p>
+          <div class="about-actions">
+            <button class="ghost-button" @click="closeTutorialSkipConfirm">{{ t("取消") }}</button>
+            <button class="about-button" @click="confirmTutorialSkipAll">
+              {{ t("跳过全部") }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade-scale">
+      <div v-if="showTutorialComplete" class="tutorial-float">
+        <div class="tutorial-card tutorial-complete-card">
+          <div class="tutorial-step">{{ t("新手教程完成") }}</div>
+          <h3>{{ t("恭喜完成新手教程") }}</h3>
+          <p>{{ t("你已完成当前版本的新手教程。") }}</p>
+          <p>{{ t("如果你认为新手教程需要改进欢迎提供建议。") }}</p>
+          <p class="tutorial-note">{{ t("可在“更多设置”中再次体验。") }}</p>
+          <div class="tutorial-actions">
+            <button class="about-button" @click="closeTutorialComplete">{{ t("知道了") }}</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <div v-if="showDomainWarning" class="domain-overlay">
+      <div class="domain-card">
+        <h3>{{ t("非官方域名提示") }}</h3>
+        <p>
+          {{ t("当前访问域名并非") }}
+          <a class="domain-link" href="https://end.canmoe.com" target="_blank" rel="noreferrer">
+            end.canmoe.com
+          </a>
+          {{ t("请确认是否为可信来源，谨防恶意映射或页面被内嵌篡改。") }}
+        </p>
+        <p class="domain-chip">{{ t("当前页面域名：{host}", { host: currentHost }) }}</p>
+        <p v-if="isEmbedded" class="domain-chip">
+          {{ t("上层页面域名：{host}", { host: embedHostLabel }) }}
+        </p>
+        <p v-if="isEmbedded && !isEmbedTrusted">{{ t("该域名未在内嵌白名单内。") }}</p>
+        <p v-if="isEmbedded">{{ t("检测到页面被内嵌（iframe）打开，此提示无法关闭。") }}</p>
+        <div class="about-actions domain-actions">
+          <a class="repo-link domain-primary" href="https://end.canmoe.com" target="_blank" rel="noreferrer">
+            <span class="repo-chip">OFFICIAL</span>
+            <span>{{ t("访问官方域名") }}</span>
+            <span class="repo-arrow">↗</span>
+          </a>
+          <button v-if="!isEmbedded" class="ghost-button" :disabled="warningCountdown > 0"
+            @click="dismissDomainWarning">
+            {{
+            warningCountdown > 0
+            ? t("我已知晓（{count}s）", { count: warningCountdown })
+            : t("我已知晓")
+            }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const version =
+        document.documentElement.dataset.assetVersion ||
+        (document.lastModified || String(Date.now())).replace(/\D/g, "");
+      const loadScript = (src) =>
+        new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?v=" + version;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Failed to load: " + src));
+          document.body.appendChild(script);
+        });
+      const vuePromise = loadScript("./vendor/vue.global.prod.js");
+      const dataPromise = Promise.all([
+        loadScript("./data/dungeons.js"),
+        loadScript("./data/weapons.js"),
+        loadScript("./data/weapon-images.js"),
+        loadScript("./data/i18n.zh-CN.js"),
+        loadScript("./data/i18n.zh-TW.js"),
+        loadScript("./data/i18n.en.js"),
+        loadScript("./data/i18n.ja.js"),
+        loadScript("./data/sponsors.js"),
+        loadScript("./data/content.js"),
+      ]);
+      Promise.all([vuePromise, dataPromise])
+        .then(() => loadScript("./js/matcher_loader.js"))
+        .catch(() => {
+          document.body.innerHTML =
+            "<div style='padding:24px;color:#f36c6c;font-family:Microsoft YaHei UI;'>资源加载失败，请刷新或检查网络缓存。</div>";
+        });
+    })();
+  </script>
+</body>
+
+</html>
