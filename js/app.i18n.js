@@ -118,6 +118,25 @@
           : key;
       return interpolate(raw, params);
     };
+
+    const tPlanPriorityMode = (value) => {
+      const config = state.regionPriorityModeOptions || [];
+      const matched = config.find((item) => item && item.value === value);
+      if (!matched) return value;
+      return {
+        ...matched,
+        label: t(matched.label),
+        description: t(matched.description),
+      };
+    };
+
+    const tPlanPriorityModeOptions = computed(() =>
+      (state.regionPriorityModeOptions || []).map((item) => ({
+        ...item,
+        label: t(item.label),
+        description: t(item.description),
+      }))
+    );
     const tTerm = (category, value) => {
       if (!value) return value;
       const terms = getTerms(locale.value);
@@ -190,5 +209,7 @@
     state.showAiNotice = showAiNotice;
     state.updateLangMenuPlacement = updateLangMenuPlacement;
     state.fallbackLocale = fallbackLocale;
+    state.tPlanPriorityMode = tPlanPriorityMode;
+    state.tPlanPriorityModeOptions = tPlanPriorityModeOptions;
   };
 })();

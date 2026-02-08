@@ -745,6 +745,12 @@
         transition: 0.2s ease;
       }
 
+      .about-links .repo-link,
+      .domain-actions .repo-link,
+      .domain-primary {
+        box-shadow: none;
+      }
+
       .repo-link::before {
         content: "";
         position: absolute;
@@ -763,6 +769,12 @@
           inset 0 0 0 1px rgba(77, 214, 201, 0.35),
           0 0 18px rgba(77, 214, 201, 0.25),
           0 12px 30px rgba(0, 0, 0, 0.35);
+      }
+
+      .about-links .repo-link:hover,
+      .domain-actions .repo-link:hover,
+      .domain-primary:hover {
+        box-shadow: none;
       }
 
       .repo-chip {

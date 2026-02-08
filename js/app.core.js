@@ -46,6 +46,20 @@
 
       const compareText = (a, b) => (a || "").localeCompare(b || "", "zh-Hans-CN");
 
+      const getDungeonRegion = (name) => {
+        const text = (name || "").toString();
+        if (!text) return "";
+        const delimiter = text.indexOf("·");
+        if (delimiter > 0) {
+          return text.slice(0, delimiter).trim();
+        }
+        const spaceMatch = text.match(/^([^\s-]+?)\s*[-—]/);
+        if (spaceMatch && spaceMatch[1]) {
+          return spaceMatch[1].trim();
+        }
+        return text.trim();
+      };
+
       const getBaseCount = (counts, key) => {
         if (!counts) return 0;
         if (typeof counts.get === "function") return counts.get(key) || 0;

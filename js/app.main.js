@@ -1,17 +1,41 @@
 (function () {
   const { createApp, ref, computed, onMounted, onBeforeUnmount, watch, nextTick } = Vue || {};
 
+  const showBootError = (payload) => {
+    if (typeof window !== "undefined" && typeof window.__renderBootError === "function") {
+      window.__renderBootError(payload);
+      return;
+    }
+    document.body.innerHTML =
+      "<div style='padding:24px;color:#f36c6c;font-family:Microsoft YaHei UI;'>页面启动失败，请刷新后重试。</div>";
+  };
+
   if (!createApp) {
     finishPreload();
-    document.body.innerHTML =
-      "<div style='padding:24px;color:#f36c6c;font-family:Microsoft YaHei UI;'>未找到 Vue 3 本地文件：请将 vue.global.prod.js 放入 ./vendor/</div>";
+    showBootError({
+      title: "运行依赖缺失",
+      summary: "未检测到 Vue 3 运行时，页面无法初始化。",
+      details: [
+        "缺失文件：./vendor/vue.global.prod.js",
+        "请确认构建产物或静态资源已完整部署",
+      ],
+      suggestions: ["检查 vendor 目录是否完整", "清理缓存后刷新页面并重试"],
+    });
     return;
   }
 
   if (!dungeons.length || !weapons.length) {
     finishPreload();
-    document.body.innerHTML =
-      "<div style='padding:24px;color:#f36c6c;font-family:Microsoft YaHei UI;'>缺少数据文件：请确认 ./data/dungeons.js 与 ./data/weapons.js</div>";
+    showBootError({
+      title: "数据文件缺失",
+      summary: "核心数据未加载完成，当前无法生成武器规划。",
+      details: [
+        `地牢数据：${dungeons.length ? "已加载" : "缺失"}`,
+        `武器数据：${weapons.length ? "已加载" : "缺失"}`,
+        "请确认 ./data/dungeons.js 与 ./data/weapons.js 可访问",
+      ],
+      suggestions: ["检查 data 目录与发布路径", "强制刷新页面后重试"],
+    });
     return;
   }
 
@@ -227,6 +251,8 @@
         setLocale: state.setLocale,
         t: state.t,
         tTerm: state.tTerm,
+        tPlanPriorityMode: state.tPlanPriorityMode,
+        tPlanPriorityModeOptions: state.tPlanPriorityModeOptions,
         showAiNotice: state.showAiNotice,
         searchQuery: state.searchQuery,
         selectedNames: state.selectedNames,
@@ -243,7 +269,12 @@
         dismissAttrHint: state.dismissAttrHint,
         showFilterPanel: state.showFilterPanel,
         showAllSchemes: state.showAllSchemes,
-        hideExcludedInPlans: state.hideExcludedInPlans,
+        showPlanConfig: state.showPlanConfig,
+        showPlanConfigHintDot: state.showPlanConfigHintDot,
+        togglePlanConfig: state.togglePlanConfig,
+        recommendationConfig: state.recommendationConfig,
+        regionOptions: state.regionOptions,
+        regionPriorityModeOptions: state.regionPriorityModeOptions,
         showBackToTop: state.showBackToTop,
         scrollToTop: state.scrollToTop,
         tutorialActive: state.tutorialActive,
@@ -336,9 +367,12 @@
         dismissDomainWarning: state.dismissDomainWarning,
         lowGpuEnabled: state.lowGpuEnabled,
         perfPreference: state.perfPreference,
+        themePreference: state.themePreference,
+        resolvedTheme: state.resolvedTheme,
         showSecondaryMenu: state.showSecondaryMenu,
         showPerfNotice: state.showPerfNotice,
         setPerfMode: state.setPerfMode,
+        setThemeMode: state.setThemeMode,
         customBackground: state.customBackground,
         customBackgroundName: state.customBackgroundName,
         customBackgroundError: state.customBackgroundError,

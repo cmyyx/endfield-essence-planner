@@ -495,6 +495,11 @@
         font-size: 12px;
       }
 
+      .secondary-range {
+        width: 100%;
+        accent-color: var(--accent-2);
+      }
+
       .secondary-hint {
         font-size: 11px;
         color: var(--muted);
@@ -516,6 +521,97 @@
         padding-top: 8px;
         font-size: 11px;
         color: var(--muted);
+      }
+
+      .plan-config {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .plan-config .toggle-button {
+        position: relative;
+      }
+
+      .plan-config-hint-dot {
+        position: absolute;
+        right: -3px;
+        top: -3px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ff6b6b;
+        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.38), 0 0 10px rgba(255, 107, 107, 0.5);
+        animation: plan-config-hint-dot-pulse 1.6s ease-in-out infinite;
+      }
+
+      @keyframes plan-config-hint-dot-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.38), 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        50% {
+          transform: scale(1.25);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.48), 0 0 14px rgba(255, 107, 107, 0.65);
+        }
+      }
+
+      .plan-config-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        width: min(420px, 92vw);
+        max-height: min(70vh, 520px);
+        overflow: auto;
+        padding: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(12, 18, 28, 0.98);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        z-index: 28;
+        display: grid;
+        gap: 10px;
+      }
+
+      .plan-config-item {
+        display: grid;
+        gap: 6px;
+        padding: 8px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .priority-mode-guide {
+        display: grid;
+        gap: 6px;
+      }
+
+      .priority-mode-desc {
+        opacity: 0.72;
+        transition: opacity 0.15s ease, color 0.15s ease;
+      }
+
+      .priority-mode-desc.is-active {
+        opacity: 1;
+      }
+
+      .priority-mode-name {
+        font-weight: 700;
+      }
+
+      @media (max-width: 720px) {
+        .plan-config-panel {
+          position: fixed;
+          top: 68px;
+          left: 12px;
+          right: 12px;
+          width: auto;
+          max-height: calc(100vh - 96px);
+          z-index: 70;
+        }
       }
 
       .perf-notice {
@@ -892,7 +988,16 @@
 
       .fade-scale-enter-active,
       .fade-scale-leave-active {
-        transition: opacity 0.22s ease;
+        transition: opacity 0.28s ease;
+      }
+
+      .fade-scale-enter-active.about-overlay.notice-overlay,
+      .fade-scale-leave-active.about-overlay.notice-overlay,
+      .fade-scale-enter-active.about-overlay.changelog-overlay,
+      .fade-scale-leave-active.about-overlay.changelog-overlay,
+      .fade-scale-enter-active.about-overlay.about-overlay-main,
+      .fade-scale-leave-active.about-overlay.about-overlay-main {
+        transition: opacity 0.28s ease, padding-bottom 0.22s ease;
       }
 
       .fade-scale-enter-from,
@@ -900,16 +1005,21 @@
         opacity: 0;
       }
 
+      .fade-scale-leave-active {
+        pointer-events: none;
+      }
+
       .fade-scale-enter-active .about-card,
       .fade-scale-leave-active .about-card {
-        transition: transform 0.22s ease, opacity 0.22s ease;
+        transition: transform 0.28s ease, opacity 0.28s ease;
       }
 
       .fade-scale-enter-from .about-card,
       .fade-scale-leave-to .about-card {
-        transform: translateY(8px) scale(0.98);
+        transform: translateY(10px) scale(0.975);
         opacity: 0;
       }
+
 
       .collapse-enter-active,
       .collapse-leave-active {

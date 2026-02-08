@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initStrategy = function (ctx, state) {
@@ -133,6 +133,55 @@
       });
     };
 
+    const stripAvatarName = (value) => {
+      if (!value) return "";
+      return String(value)
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(/[（(][^()（）]*[)）]/g, "")
+        .replace(/[\/|｜、，。·•・_\-]/g, "");
+    };
+
+    const normalizeNameForAvatar = (value) => {
+      const stripped = stripAvatarName(value);
+      if (!stripped) return "";
+      return stripped.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, "");
+    };
+
+    const findCharacterAvatarByName = (name) => {
+      const target = normalizeNameForAvatar(name);
+      if (!target) return "";
+
+      let bestMatch = null;
+      (state.characters || []).forEach((character) => {
+        if (!character || !character.name || !character.avatar) return;
+        const current = normalizeNameForAvatar(character.name);
+        if (!current) return;
+
+        let score = 0;
+        if (current === target) {
+          score = 3;
+        } else if (current.includes(target) || target.includes(current)) {
+          score = 2;
+        }
+        if (!score) return;
+
+        if (
+          !bestMatch ||
+          score > bestMatch.score ||
+          (score === bestMatch.score && current.length < bestMatch.length)
+        ) {
+          bestMatch = {
+            score,
+            length: current.length,
+            avatar: character.avatar,
+          };
+        }
+      });
+
+      return bestMatch ? bestMatch.avatar : "";
+    };
+
     const normalizeTeamSlots = (slots) => {
       if (!Array.isArray(slots)) return [];
       return slots
@@ -145,6 +194,7 @@
           if (!options.length) return null;
           const normalizedOptions = options.map((option) => ({
             ...option,
+            avatar: resolveTeamAvatar(option, slot),
             weapons: Array.isArray(option.weapons)
               ? option.weapons.filter(Boolean).map(normalizeGuideWeapon).filter(Boolean)
               : [],
@@ -156,6 +206,38 @@
           };
         })
         .filter(Boolean);
+    };
+
+    const resolveTeamAvatar = (option, slot) => {
+      if (option && option.avatar) return option.avatar;
+      if (slot && slot.avatar) return slot.avatar;
+
+      const names = [option && option.name, slot && slot.name].filter(Boolean);
+      for (let index = 0; index < names.length; index += 1) {
+        const found = findCharacterAvatarByName(names[index]);
+        if (found) return found;
+      }
+
+      const fallbackCandidates = names.flatMap((name) => buildAvatarPathCandidates(name));
+      return fallbackCandidates[0] || "";
+    };
+
+    const buildAvatarPathCandidates = (name) => {
+      const raw = stripAvatarName(name);
+      if (!raw) return [];
+      const candidates = [];
+      candidates.push(`image/characters/${raw}.png`);
+
+      const base = raw.replace(/[\u7537\u5973]$/u, "").trim();
+      if (base && base !== raw) {
+        const gender = /\u7537$/u.test(raw) ? "\u7537" : "\u5973";
+        candidates.push(`image/characters/${base}(${gender}).png`);
+      } else {
+        candidates.push(`image/characters/${raw}(\u5973).png`);
+        candidates.push(`image/characters/${raw}(\u7537).png`);
+      }
+
+      return Array.from(new Set(candidates));
     };
 
     state.currentGuide = computed(() => {
@@ -306,3 +388,5 @@
     };
   };
 })();
+
+

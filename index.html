@@ -25,10 +25,9 @@
     <meta property="og:site_name" content="终末地基质规划器" />
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="./favicon.ico" sizes="any" />
-    <link rel="icon" href="./favicon-002.ico" sizes="32x32" />
-    <link rel="icon" href="./favicon-003.ico" sizes="48x48" />
-    <link rel="icon" href="./favicon-003.ico" sizes="64x64" />
-    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="./favicon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <meta name="theme-color" content="#0f1521" />
     <!-- 本地依赖（请将文件放到 ./vendor/） -->
     <script
       defer
@@ -72,6 +71,12 @@
       html.preload body {
         background: #0b0f14;
         color: #e6e9ef;
+      }
+      @media (prefers-color-scheme: light) {
+        html.preload body {
+          background: #eef3fb;
+          color: #1c2b3f;
+        }
       }
       html.preload #app {
         display: none;
@@ -136,6 +141,7 @@
           "./css/styles.filters.css",
           "./css/styles.weapons.css",
           "./css/styles.recommendations.css",
+          "./css/styles.theme.modes.css",
         ];
         cssFiles.forEach((href) => {
           const link = document.createElement("link");
@@ -193,6 +199,19 @@
                 {{ option.label }}
               </button>
             </div>
+          </div>
+          <div class="theme-switch" @click.stop>
+            <label class="theme-label" for="theme-mode-select">{{ t("界面主题") }}</label>
+            <select
+              id="theme-mode-select"
+              class="theme-select"
+              :value="themePreference"
+              @change="setThemeMode($event.target.value)"
+            >
+              <option value="auto">{{ t("自动") }}</option>
+              <option value="light">{{ t("日间") }}</option>
+              <option value="dark">{{ t("夜间") }}</option>
+            </select>
           </div>
           <button class="about-button notice-button" @click="openNotice">{{ t("公告") }}</button>
           <button class="about-button" @click="showChangelog = true">{{ t("更新日志") }}</button>
@@ -669,18 +688,127 @@
           <div class="panel-title">
             <h2>{{ t("方案推荐列表") }}</h2>
             <div class="panel-actions">
-              <button
-                class="ghost-button toggle-button"
-                :class="{ 'is-active': hideExcludedInPlans }"
-                :title="t('开启后，排除的武器将不会出现在方案推荐列表中。')"
-                :aria-pressed="hideExcludedInPlans ? 'true' : 'false'"
-                @click="hideExcludedInPlans = !hideExcludedInPlans"
-              >
-                <span>{{ t("隐藏已排除武器") }}</span>
-                <span class="toggle-state" :class="{ on: hideExcludedInPlans }">
-                  {{ hideExcludedInPlans ? t("开") : t("关") }}
-                </span>
-              </button>
+              <div class="plan-config" @click.stop>
+                <button
+                  class="ghost-button toggle-button"
+                  :class="{ 'is-active': showPlanConfig }"
+                  :aria-pressed="showPlanConfig ? 'true' : 'false'"
+                  @click="togglePlanConfig"
+                >
+                  <span
+                    v-if="showPlanConfigHintDot"
+                    class="plan-config-hint-dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span>{{ t("方案推荐设置") }}</span>
+                </button>
+                <div v-if="showPlanConfig" class="plan-config-panel">
+                  <div class="plan-config-item">
+                    <div class="secondary-label">{{ t("方案显示") }}</div>
+                    <button
+                      class="ghost-button toggle-button"
+                      :class="{ 'is-active': recommendationConfig.hideExcluded }"
+                      :title="t('开启后，排除的武器将不会出现在方案推荐列表中。')"
+                      :aria-pressed="recommendationConfig.hideExcluded ? 'true' : 'false'"
+                      @click="recommendationConfig.hideExcluded = !recommendationConfig.hideExcluded"
+                    >
+                      <span>{{ t("隐藏已排除武器") }}</span>
+                      <span
+                        class="toggle-state"
+                        :class="{ on: recommendationConfig.hideExcluded }"
+                        >{{ recommendationConfig.hideExcluded ? t("开") : t("关") }}</span
+                      >
+                    </button>
+                    <div class="secondary-hint">
+                      {{ recommendationConfig.hideExcluded ? t("当前：已启用") : t("当前：未启用") }}
+                    </div>
+                  </div>
+                  <div class="plan-config-item">
+                    <div class="secondary-label">{{ t("地区优先级") }}</div>
+                    <select class="secondary-select" v-model="recommendationConfig.preferredRegion1">
+                      <option value="">{{ t("不设置") }}</option>
+                      <option v-for="region in regionOptions" :key="'region-1-' + region" :value="region">
+                        {{ region }}
+                      </option>
+                    </select>
+                    <div class="secondary-hint">{{ t("优先地区1（最高）") }}</div>
+                    <select class="secondary-select" v-model="recommendationConfig.preferredRegion2">
+                      <option value="">{{ t("不设置") }}</option>
+                      <option
+                        v-for="region in regionOptions"
+                        :key="'region-2-' + region"
+                        :value="region"
+                        :disabled="region === recommendationConfig.preferredRegion1"
+                      >
+                        {{ region }}
+                      </option>
+                    </select>
+                    <div class="secondary-hint">{{ t("优先地区2（次高）") }}</div>
+                  </div>
+                  <div class="plan-config-item">
+                    <div class="secondary-label">{{ t("优先级影响策略") }}</div>
+                    <select class="secondary-select" v-model="recommendationConfig.priorityMode">
+                      <option
+                        v-for="mode in tPlanPriorityModeOptions"
+                        :key="mode.value"
+                        :value="mode.value"
+                      >
+                        {{ mode.label }}
+                      </option>
+                    </select>
+                    <div class="priority-mode-guide">
+                      <div
+                        class="secondary-hint priority-mode-desc"
+                        :class="{ 'is-active': recommendationConfig.priorityMode === mode.value }"
+                        v-for="mode in tPlanPriorityModeOptions"
+                        :key="'mode-desc-' + mode.value"
+                      >
+                        <span class="priority-mode-name">{{ mode.label }}：</span>{{ mode.description }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="plan-config-item" v-if="recommendationConfig.priorityMode === 'weighted'">
+                    <div class="secondary-label">{{ t("影响强度") }}</div>
+                    <input
+                      class="secondary-range"
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      v-model.number="recommendationConfig.priorityStrength"
+                    />
+                    <div class="secondary-hint">{{ t("当前强度：") }}{{ recommendationConfig.priorityStrength }}</div>
+                    <div class="secondary-hint">
+                      {{ t("0~30：以效率为主；40~70：效率与地区平衡；80~100：显著优先地区（仅“加权融合”生效）") }}
+                    </div>
+                    <div class="secondary-hint">
+                      {{ t("影响强度用于控制“地区加分”对总排序的作用比例，数值越大，优先地区越容易排在前面。") }}
+                    </div>
+                    <div class="secondary-hint">
+                      {{
+                        t("说明：影响强度越高，地区优先级越容易压过效率差异；0表示几乎只按效率排序，100表示更强调优先地区。")
+                      }}
+                    </div>
+                    <div class="secondary-label">{{ t("地区2权重") }}</div>
+                    <input
+                      class="secondary-range"
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      v-model.number="recommendationConfig.prioritySecondaryWeight"
+                    />
+                    <div class="secondary-hint">
+                      {{ t("当前地区2权重：") }}{{ recommendationConfig.prioritySecondaryWeight }}%
+                    </div>
+                    <div class="secondary-hint">
+                      {{
+                        t("说明：加权融合中，地区1权重固定为100%，地区2按该比例参与；0%等于只看地区1，100%等于地区1和地区2同权。")
+                      }}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="pill">{{ t("已选") }} {{ selectedWeapons.length }} {{ t("把") }}</div>
               <button
                 v-if="extraRecommendations.length"
@@ -1584,6 +1712,7 @@
                             }"
                           >
                             <div class="team-name-row">
+                              <img v-if="entry.avatar" :src="entry.avatar" class="team-member-avatar" alt="" loading="lazy" />
                               <div class="team-name">{{ entry.name }}</div>
                               <span
                                 v-if="currentCharacter && entry.name === currentCharacter.name"
@@ -1697,6 +1826,16 @@
               contact@canmoe.com
             </a>
           </span>
+          <span class="footer-item footer-item-disclaimer">
+            <span class="footer-label">{{ t("素材声明") }}</span>
+            <span class="footer-value footer-disclaimer-text">
+              {{
+                t(
+                  "当前图片素材均来源于上海鹰角网络科技有限公司及其游戏《明日方舟：终末地》，相关版权归原权利方所有。本工具仅供玩家交流与辅助规划使用。"
+                )
+              }}
+            </span>
+          </span>
         </div>
       </footer>
 
@@ -1785,17 +1924,27 @@
       </transition>
 
       <transition name="fade-scale">
-        <div v-if="showAbout" class="about-overlay about-overlay-main" @click.self="showAbout = false">
-          <div class="about-card about-main">
-            <h3>{{ aboutContent.title }}</h3>
-            <div class="about-body">
+                <div v-if="showAbout" class="about-overlay about-overlay-main" @click.self="showAbout = false">
+                  <div class="about-card about-main">
+                    <h3>{{ aboutContent.title }}</h3>
+                    <div class="about-body">
               <p v-for="(line, index) in aboutContent.paragraphs" :key="`about-line-${index}`">
                 {{ line }}
               </p>
-              <p v-if="aboutContent.author">
-                {{ t("作者：{name}", { name: aboutContent.author }) }}
-              </p>
-              <div class="about-links" v-if="aboutContent.links && aboutContent.links.length">
+                      <p v-if="aboutContent.author">
+                        {{ t("作者：{name}", { name: aboutContent.author }) }}
+                      </p>
+                      <div
+                        class="about-material-note"
+                        v-if="aboutContent.materialNotice || aboutContent.materialDisclaimer"
+                      >
+                        <h4>{{ t("素材说明与免责声明") }}</h4>
+                        <p v-if="aboutContent.materialNotice">{{ t(aboutContent.materialNotice) }}</p>
+                        <p v-if="aboutContent.materialDisclaimer" class="about-material-disclaimer">
+                          {{ t(aboutContent.materialDisclaimer) }}
+                        </p>
+                      </div>
+                      <div class="about-links" v-if="aboutContent.links && aboutContent.links.length">
                 <a
                   v-for="link in aboutContent.links"
                   :key="link.href || link.text"

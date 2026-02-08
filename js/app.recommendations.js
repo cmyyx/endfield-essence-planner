@@ -12,6 +12,105 @@
       return values;
     };
 
+    const getRecommendationConfig = () =>
+      state.recommendationConfig && state.recommendationConfig.value
+        ? state.recommendationConfig.value
+        : {
+            hideExcluded: false,
+            preferredRegion1: "",
+            preferredRegion2: "",
+            priorityMode: "sameCoverage",
+            priorityStrength: 50,
+            prioritySecondaryWeight: 60,
+          };
+
+    const getRegionRank = (region, preferred1, preferred2) => {
+      if (!region) return 99;
+      if (preferred1 && region === preferred1) return 0;
+      if (preferred2 && region === preferred2) return 1;
+      return 2;
+    };
+
+    const compareBaseEfficiency = (a, b) => {
+      if (b.selectedMatchCount !== a.selectedMatchCount) {
+        return b.selectedMatchCount - a.selectedMatchCount;
+      }
+      if (b.weaponCount !== a.weaponCount) return b.weaponCount - a.weaponCount;
+      if (b.maxWeaponCount !== a.maxWeaponCount) {
+        return b.maxWeaponCount - a.maxWeaponCount;
+      }
+      return 0;
+    };
+
+    const compareRegion = (a, b, preferred1, preferred2) => {
+      if (!preferred1 && !preferred2) return 0;
+      const rankDiff =
+        getRegionRank(a.dungeonRegion, preferred1, preferred2) -
+        getRegionRank(b.dungeonRegion, preferred1, preferred2);
+      if (rankDiff !== 0) return rankDiff;
+      return 0;
+    };
+
+    const compareWithPriorityMode = (a, b, config) => {
+      const preferred1 = config.preferredRegion1 || "";
+      const preferred2 = config.preferredRegion2 || "";
+      const mode = config.priorityMode || "sameCoverage";
+      const baseDiff = compareBaseEfficiency(a, b);
+
+      if (mode === "strict") {
+        const aCovered = a.selectedMatchCount > 0;
+        const bCovered = b.selectedMatchCount > 0;
+        if (aCovered !== bCovered) return bCovered ? 1 : -1;
+        const regionDiff = compareRegion(a, b, preferred1, preferred2);
+        if (regionDiff !== 0) return regionDiff;
+        if (baseDiff !== 0) return baseDiff;
+      } else if (mode === "sameCoverage") {
+        if (b.selectedMatchCount !== a.selectedMatchCount) {
+          return b.selectedMatchCount - a.selectedMatchCount;
+        }
+        const regionDiff = compareRegion(a, b, preferred1, preferred2);
+        if (regionDiff !== 0) return regionDiff;
+        if (b.weaponCount !== a.weaponCount) return b.weaponCount - a.weaponCount;
+        if (b.maxWeaponCount !== a.maxWeaponCount) {
+          return b.maxWeaponCount - a.maxWeaponCount;
+        }
+      } else if (mode === "weighted") {
+        const strength = Math.max(0, Math.min(100, Number(config.priorityStrength) || 0));
+        const secondaryWeight =
+          Math.max(0, Math.min(100, Number(config.prioritySecondaryWeight) || 0)) / 100;
+        const regionWeightTable = {
+          0: 1,
+          1: secondaryWeight,
+          2: 0,
+        };
+        const efficiencyA =
+          a.selectedMatchCount * 1000 +
+          a.weaponCount * 100 +
+          a.maxWeaponCount * 10;
+        const efficiencyB =
+          b.selectedMatchCount * 1000 +
+          b.weaponCount * 100 +
+          b.maxWeaponCount * 10;
+        const priorityA =
+          (regionWeightTable[getRegionRank(a.dungeonRegion, preferred1, preferred2)] || 0) * strength;
+        const priorityB =
+          (regionWeightTable[getRegionRank(b.dungeonRegion, preferred1, preferred2)] || 0) * strength;
+        const totalA = efficiencyA + priorityA;
+        const totalB = efficiencyB + priorityB;
+        if (totalB !== totalA) return totalB - totalA;
+      } else {
+        if (baseDiff !== 0) return baseDiff;
+        const regionDiff = compareRegion(a, b, preferred1, preferred2);
+        if (regionDiff !== 0) return regionDiff;
+      }
+
+      if (baseDiff !== 0) return baseDiff;
+      if (a.dungeon.name !== b.dungeon.name) {
+        return a.dungeon.name.localeCompare(b.dungeon.name, "zh-Hans-CN");
+      }
+      return a.lockLabel.localeCompare(b.lockLabel, "zh-Hans-CN");
+    };
+
     const toggleSchemeBasePick = (scheme, weapon) => {
       if (!scheme || !weapon || !scheme.baseOverflow) return;
       const baseKey = weapon.s1;
@@ -46,6 +145,11 @@
       };
     };
 
+    state.regionOptions.value = uniqueSorted(
+      dungeons.map((dungeon) => getDungeonRegion(dungeon && dungeon.name)),
+      (a, b) => a.localeCompare(b, "zh-Hans-CN")
+    );
+
     const recommendations = computed(() => {
       const targets = state.selectedWeapons.value;
       if (!targets.length) return [];
@@ -71,7 +175,8 @@
 
       const selectedSet = new Set(state.selectedNames.value);
       const excludedSet = state.excludedNameSet.value;
-      const hideExcludedInPlans = state.hideExcludedInPlans.value;
+      const recommendationConfig = getRecommendationConfig();
+      const hideExcludedInPlans = Boolean(recommendationConfig.hideExcluded);
       const schemes = [];
 
       dungeons.forEach((dungeon) => {
@@ -95,11 +200,7 @@
 
           const baseCounts = countBy(schemeWeaponsActive.map((weapon) => weapon.s1));
           const selectedSortSet = new Set(targets.map((weapon) => weapon.name));
-          const schemeWeaponSorter = getSchemeWeaponSorter(
-            option.type,
-            selectedSortSet,
-            baseCounts
-          );
+          const schemeWeaponSorter = getSchemeWeaponSorter(option.type, selectedSortSet, baseCounts);
           const schemeWeaponsSorted = schemeWeapons.slice().sort(schemeWeaponSorter);
           const baseKeys = Object.keys(baseCounts);
           const baseSorted = baseKeys.sort((a, b) => {
@@ -140,9 +241,7 @@
             [...requiredBaseKeys, ...manualPickKeys],
             (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
           );
-          const manualPickNeeded = baseOverflow
-            ? Math.max(0, baseLimit - displayBaseKeys.length)
-            : 0;
+          const manualPickNeeded = baseOverflow ? Math.max(0, baseLimit - displayBaseKeys.length) : 0;
           const manualPickOverflow = baseOverflow && displayBaseKeys.length > baseLimit;
           const manualPickReady =
             baseOverflow && displayBaseKeys.length >= baseLimit && !manualPickOverflow;
@@ -173,18 +272,12 @@
               ...getConflictInfo(weapon, dungeon, option),
               note: state.getWeaponNote(weapon.name),
             }));
-          const autoCoveredSelected = matchedSelected.filter((weapon) =>
-            baseAutoPickSet.has(weapon.s1)
-          );
-          const autoCoveredSelectedSet = new Set(
-            autoCoveredSelected.map((weapon) => weapon.name)
-          );
+          const autoCoveredSelected = matchedSelected.filter((weapon) => baseAutoPickSet.has(weapon.s1));
+          const autoCoveredSelectedSet = new Set(autoCoveredSelected.map((weapon) => weapon.name));
           const autoMissingSelected = targets.filter(
             (weapon) => !autoCoveredSelectedSet.has(weapon.name)
           );
-          const coveredSelected = matchedSelected.filter((weapon) =>
-            activeBaseSet.has(weapon.s1)
-          );
+          const coveredSelected = matchedSelected.filter((weapon) => activeBaseSet.has(weapon.s1));
           const coveredSelectedSet = new Set(coveredSelected.map((weapon) => weapon.name));
           const missingSelected = matchedSelected.filter(
             (weapon) => !coveredSelectedSet.has(weapon.name)
@@ -217,6 +310,7 @@
 
           schemes.push({
             dungeon,
+            dungeonRegion: getDungeonRegion(dungeon.name),
             lockType: option.type,
             lockLabel: option.label,
             lockValue: option.value,
@@ -247,19 +341,7 @@
         });
       });
 
-      return schemes.sort((a, b) => {
-        if (b.selectedMatchCount !== a.selectedMatchCount) {
-          return b.selectedMatchCount - a.selectedMatchCount;
-        }
-        if (b.weaponCount !== a.weaponCount) return b.weaponCount - a.weaponCount;
-        if (b.maxWeaponCount !== a.maxWeaponCount) {
-          return b.maxWeaponCount - a.maxWeaponCount;
-        }
-        if (a.dungeon.name !== b.dungeon.name) {
-          return a.dungeon.name.localeCompare(b.dungeon.name, "zh-Hans-CN");
-        }
-        return a.lockLabel.localeCompare(b.lockLabel, "zh-Hans-CN");
-      });
+      return schemes.sort((a, b) => compareWithPriorityMode(a, b, recommendationConfig));
     });
 
     const coverageSummary = computed(() => {
@@ -342,9 +424,7 @@
     });
 
     const extraRecommendations = computed(() => {
-      const primaryKeys = new Set(
-        primaryRecommendations.value.map((scheme) => scheme.schemeKey)
-      );
+      const primaryKeys = new Set(primaryRecommendations.value.map((scheme) => scheme.schemeKey));
       return recommendations.value.filter((scheme) => !primaryKeys.has(scheme.schemeKey));
     });
 

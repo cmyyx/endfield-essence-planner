@@ -10,6 +10,55 @@
     const s2Set = new Set(weapons.map((weapon) => weapon.s2).filter(Boolean));
     const s3Set = new Set(weapons.map((weapon) => weapon.s3).filter(Boolean));
     const mobilePanels = new Set(["weapons", "plans"]);
+    const priorityModes = new Set(["strict", "sameCoverage", "sameEfficiency", "weighted"]);
+    const themeModes = new Set(["auto", "light", "dark"]);
+    const regionSet = new Set(
+      dungeons
+        .map((dungeon) => getDungeonRegion(dungeon && dungeon.name))
+        .filter((name) => typeof name === "string" && name)
+    );
+
+    const sanitizeRecommendationConfig = (raw, legacyHideExcluded) => {
+      const defaults = state.recommendationConfig.value || {};
+      const source = raw && typeof raw === "object" ? raw : {};
+      const normalized = {
+        hideExcluded:
+          typeof source.hideExcluded === "boolean"
+            ? source.hideExcluded
+            : typeof legacyHideExcluded === "boolean"
+            ? legacyHideExcluded
+            : Boolean(defaults.hideExcluded),
+        preferredRegion1: "",
+        preferredRegion2: "",
+        priorityMode: priorityModes.has(source.priorityMode)
+          ? source.priorityMode
+          : defaults.priorityMode || "sameCoverage",
+        priorityStrength: Number.isFinite(source.priorityStrength)
+          ? Math.max(0, Math.min(100, Math.round(source.priorityStrength)))
+          : Number.isFinite(defaults.priorityStrength)
+          ? Math.max(0, Math.min(100, Math.round(defaults.priorityStrength)))
+          : 50,
+        prioritySecondaryWeight: Number.isFinite(source.prioritySecondaryWeight)
+          ? Math.max(0, Math.min(100, Math.round(source.prioritySecondaryWeight)))
+          : Number.isFinite(defaults.prioritySecondaryWeight)
+          ? Math.max(0, Math.min(100, Math.round(defaults.prioritySecondaryWeight)))
+          : 60,
+      };
+      if (typeof source.preferredRegion1 === "string" && regionSet.has(source.preferredRegion1)) {
+        normalized.preferredRegion1 = source.preferredRegion1;
+      }
+      if (typeof source.preferredRegion2 === "string" && regionSet.has(source.preferredRegion2)) {
+        normalized.preferredRegion2 = source.preferredRegion2;
+      }
+      if (
+        normalized.preferredRegion1 &&
+        normalized.preferredRegion2 &&
+        normalized.preferredRegion1 === normalized.preferredRegion2
+      ) {
+        normalized.preferredRegion2 = "";
+      }
+      return normalized;
+    };
 
     const sanitizeState = (raw) => {
       if (!raw || typeof raw !== "object") return null;
@@ -42,9 +91,10 @@
       if (typeof raw.showAllSchemes === "boolean") {
         next.showAllSchemes = raw.showAllSchemes;
       }
-      if (typeof raw.hideExcludedInPlans === "boolean") {
-        next.hideExcludedInPlans = raw.hideExcludedInPlans;
-      }
+      next.recommendationConfig = sanitizeRecommendationConfig(
+        raw.recommendationConfig,
+        raw.hideExcludedInPlans
+      );
       if (mobilePanels.has(raw.mobilePanel)) {
         next.mobilePanel = raw.mobilePanel;
       }
@@ -94,8 +144,8 @@
           if (typeof restored.showAllSchemes === "boolean") {
             state.showAllSchemes.value = restored.showAllSchemes;
           }
-          if (typeof restored.hideExcludedInPlans === "boolean") {
-            state.hideExcludedInPlans.value = restored.hideExcludedInPlans;
+          if (restored.recommendationConfig) {
+            state.recommendationConfig.value = restored.recommendationConfig;
           }
           if (restored.mobilePanel) {
             state.mobilePanel.value = restored.mobilePanel;
@@ -108,6 +158,24 @@
     } catch (error) {
       // ignore storage errors
     }
+
+    try {
+      const storedTheme = localStorage.getItem(state.themeModeStorageKey);
+      if (themeModes.has(storedTheme)) {
+        state.themePreference.value = storedTheme;
+      }
+    } catch (error) {
+      // ignore storage errors
+    }
+
+    try {
+      const storedPlanConfigHintVersion = localStorage.getItem(state.planConfigHintStorageKey);
+      state.showPlanConfigHintDot.value =
+        storedPlanConfigHintVersion !== state.planConfigHintVersion;
+    } catch (error) {
+      state.showPlanConfigHintDot.value = true;
+    }
+
     if (!restoredShowFilterPanel && shouldCollapseFilterPanelByDefault()) {
       state.showFilterPanel.value = false;
     }
@@ -209,7 +277,7 @@
       showWeaponAttrs: state.showWeaponAttrs.value,
       showFilterPanel: state.showFilterPanel.value,
       showAllSchemes: state.showAllSchemes.value,
-      hideExcludedInPlans: state.hideExcludedInPlans.value,
+      recommendationConfig: state.recommendationConfig.value,
       filterS1: state.filterS1.value,
       filterS2: state.filterS2.value,
       filterS3: state.filterS3.value,
@@ -227,5 +295,17 @@
       },
       { deep: true }
     );
+
+    watch(state.themePreference, (value) => {
+      try {
+        if (!value || value === "auto") {
+          localStorage.removeItem(state.themeModeStorageKey);
+          return;
+        }
+        localStorage.setItem(state.themeModeStorageKey, value);
+      } catch (error) {
+        // ignore storage errors
+      }
+    });
   };
 })();

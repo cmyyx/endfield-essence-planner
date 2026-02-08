@@ -2,7 +2,9 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initModals = function initModals(ctx, state) {
-    const { watch, onMounted } = ctx;
+    const { watch, onMounted, onBeforeUnmount } = ctx;
+    const modalTransitionMs = 280;
+    let modalUnlockTimer = null;
 
     const readNoticeSkipVersion = () => {
       try {
@@ -112,7 +114,19 @@
     watch(
       [state.showNotice, state.showChangelog, state.showAbout, state.showTutorialSkipConfirm],
       ([noticeOpen, changelogOpen, aboutOpen, skipOpen]) => {
-        setModalScrollLock(Boolean(noticeOpen || changelogOpen || aboutOpen || skipOpen));
+        const hasOpenModal = Boolean(noticeOpen || changelogOpen || aboutOpen || skipOpen);
+        if (modalUnlockTimer) {
+          clearTimeout(modalUnlockTimer);
+          modalUnlockTimer = null;
+        }
+        if (hasOpenModal) {
+          setModalScrollLock(true);
+          return;
+        }
+        modalUnlockTimer = setTimeout(() => {
+          setModalScrollLock(false);
+          modalUnlockTimer = null;
+        }, modalTransitionMs);
       },
       { immediate: true }
     );
@@ -126,6 +140,14 @@
       },
       { immediate: true }
     );
+
+    onBeforeUnmount(() => {
+      if (modalUnlockTimer) {
+        clearTimeout(modalUnlockTimer);
+        modalUnlockTimer = null;
+      }
+      setModalScrollLock(false);
+    });
 
     state.openNotice = openNotice;
     state.closeNotice = closeNotice;

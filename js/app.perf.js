@@ -2,14 +2,35 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initPerf = function initPerf(ctx, state) {
-    const { onMounted } = ctx;
+    const { onMounted, onBeforeUnmount } = ctx;
 
-    const perfAutoCooldownMs = 2500;
+    const perfAutoCooldownMs = 5000;
+    const perfProbeThresholdMs = 46;
+    const perfProbeMinSamples = 2;
+    const lagThresholdMs = 180;
+    const lagHitsForSwitch = 2;
+    const longTaskThresholdMs = 260;
+    const longTaskHitsForSwitch = 2;
     let perfAutoBlockedUntil = 0;
     let perfProbeRunning = false;
     let perfLagTimer = null;
     let perfLagTimeout = null;
     let longTaskObserver = null;
+    let longTaskHits = 0;
+    let lagHits = 0;
+    let probeSlowHits = 0;
+    let activityListenersBound = false;
+
+    const removeActivityListeners = () => {
+      if (!activityListenersBound) return;
+      window.removeEventListener("scroll", onUserActivity);
+      window.removeEventListener("wheel", onUserActivity);
+      window.removeEventListener("pointerdown", onUserActivity);
+      window.removeEventListener("keydown", onUserActivity);
+      window.removeEventListener("touchstart", onUserActivity);
+      document.removeEventListener("visibilitychange", onUserActivity);
+      activityListenersBound = false;
+    };
 
     const applyLowGpuMode = (enabled) => {
       state.lowGpuEnabled.value = enabled;
@@ -56,6 +77,7 @@
       if (!canAutoSwitch()) return;
       applyLowGpuMode(true);
       state.showPerfNotice.value = true;
+      stopAutoMonitors();
     };
 
     const stopAutoMonitors = () => {
@@ -71,6 +93,9 @@
         longTaskObserver.disconnect();
         longTaskObserver = null;
       }
+      longTaskHits = 0;
+      lagHits = 0;
+      probeSlowHits = 0;
     };
 
     const startPerfProbe = (durationMs = 1200) => {
@@ -90,8 +115,14 @@
         }
         perfProbeRunning = false;
         const avg = total / Math.max(frames, 1);
-        if (avg > 40 && state.perfPreference.value === "auto") {
-          autoSwitchToLowGpu();
+        if (avg > perfProbeThresholdMs && state.perfPreference.value === "auto") {
+          probeSlowHits += 1;
+          if (probeSlowHits >= perfProbeMinSamples) {
+            autoSwitchToLowGpu();
+            probeSlowHits = 0;
+          }
+        } else {
+          probeSlowHits = 0;
         }
       };
       requestAnimationFrame(step);
@@ -104,8 +135,14 @@
         const now = performance.now();
         const lag = Math.max(0, now - last - intervalMs);
         last = now;
-        if (lag > 120) {
-          autoSwitchToLowGpu();
+        if (lag > lagThresholdMs) {
+          lagHits += 1;
+          if (lagHits >= lagHitsForSwitch) {
+            autoSwitchToLowGpu();
+            lagHits = 0;
+          }
+        } else {
+          lagHits = 0;
         }
       }, intervalMs);
       perfLagTimeout = setTimeout(() => {
@@ -123,9 +160,14 @@
       try {
         longTaskObserver = new PerformanceObserver((list) => {
           const entries = list.getEntries();
-          if (entries.some((entry) => entry.duration >= 200)) {
-            autoSwitchToLowGpu();
-            stopAutoMonitors();
+          if (entries.some((entry) => entry.duration >= longTaskThresholdMs)) {
+            longTaskHits += 1;
+            if (longTaskHits >= longTaskHitsForSwitch) {
+              autoSwitchToLowGpu();
+              longTaskHits = 0;
+            }
+          } else {
+            longTaskHits = 0;
           }
         });
         longTaskObserver.observe({ entryTypes: ["longtask"] });
@@ -136,9 +178,31 @@
 
     const startAutoMonitors = () => {
       if (state.perfPreference.value !== "auto") return;
+      if (!canAutoSwitch()) return;
       startPerfProbe();
       startLagMonitor();
       startLongTaskObserver();
+    };
+
+    const onUserActivity = () => {
+      if (readPerfMode()) {
+        removeActivityListeners();
+        return;
+      }
+      if (state.perfPreference.value !== "auto") return;
+      if (!canAutoSwitch()) return;
+      startAutoMonitors();
+    };
+
+    const ensureActivityListeners = () => {
+      if (activityListenersBound) return;
+      window.addEventListener("scroll", onUserActivity, { passive: true });
+      window.addEventListener("wheel", onUserActivity, { passive: true });
+      window.addEventListener("pointerdown", onUserActivity);
+      window.addEventListener("keydown", onUserActivity);
+      window.addEventListener("touchstart", onUserActivity, { passive: true });
+      document.addEventListener("visibilitychange", onUserActivity);
+      activityListenersBound = true;
     };
 
     const initPerfMode = () => {
@@ -155,29 +219,8 @@
       }
       state.perfPreference.value = "auto";
       blockAutoSwitch(perfAutoCooldownMs);
+      ensureActivityListeners();
       startAutoMonitors();
-      const onUserActivity = (event) => {
-        if (readPerfMode()) {
-          window.removeEventListener("scroll", onUserActivity);
-          window.removeEventListener("wheel", onUserActivity);
-          window.removeEventListener("pointerdown", onUserActivity);
-          window.removeEventListener("keydown", onUserActivity);
-          window.removeEventListener("touchstart", onUserActivity);
-          return;
-        }
-        if (event && typeof event.timeStamp === "number") {
-          const delay = performance.now() - event.timeStamp;
-          if (delay > 150 && delay < 60000) {
-            autoSwitchToLowGpu();
-          }
-        }
-        startAutoMonitors();
-      };
-      window.addEventListener("scroll", onUserActivity, { passive: true });
-      window.addEventListener("wheel", onUserActivity, { passive: true });
-      window.addEventListener("pointerdown", onUserActivity);
-      window.addEventListener("keydown", onUserActivity);
-      window.addEventListener("touchstart", onUserActivity, { passive: true });
     };
 
     const setPerfMode = (mode) => {
@@ -187,23 +230,31 @@
         applyLowGpuMode(true);
         writePerfMode("low");
         stopAutoMonitors();
+        removeActivityListeners();
         return;
       }
       if (mode === "standard") {
         applyLowGpuMode(false);
         writePerfMode("standard");
         stopAutoMonitors();
+        removeActivityListeners();
         return;
       }
       writePerfMode("");
       applyLowGpuMode(false);
       stopAutoMonitors();
       blockAutoSwitch(perfAutoCooldownMs);
+      ensureActivityListeners();
       startAutoMonitors();
     };
 
     onMounted(() => {
       initPerfMode();
+    });
+
+    onBeforeUnmount(() => {
+      stopAutoMonitors();
+      removeActivityListeners();
     });
 
     state.setPerfMode = setPerfMode;

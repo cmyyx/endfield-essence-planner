@@ -433,6 +433,14 @@
         mix-blend-mode: normal !important;
       }
 
+      html.low-gpu .fade-scale-enter-active,
+      html.low-gpu .fade-scale-leave-active,
+      html.low-gpu .fade-scale-enter-active .about-card,
+      html.low-gpu .fade-scale-leave-active .about-card {
+        transition: opacity 0.22s ease, transform 0.22s ease !important;
+      }
+
+
       html.low-gpu body {
         background: var(--bg-0);
         background-image: none;

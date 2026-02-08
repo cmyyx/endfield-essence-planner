@@ -144,6 +144,20 @@
         gap: 6px;
       }
 
+      .footer-item-disclaimer {
+        flex-basis: 100%;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .footer-disclaimer-text {
+        max-width: min(920px, 100%);
+        line-height: 1.55;
+        letter-spacing: 0.02em;
+        color: rgba(214, 225, 238, 0.9);
+      }
+
       .footer-label {
         font-size: 10px;
         letter-spacing: 0.12em;
@@ -180,6 +194,11 @@
 
         .footer-sep {
           display: none;
+        }
+
+        .footer-item-disclaimer {
+          justify-content: flex-start;
+          text-align: left;
         }
       }
 
@@ -363,6 +382,31 @@
         position: relative;
         display: inline-flex;
         align-items: center;
+      }
+
+      .theme-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(10, 14, 22, 0.6);
+      }
+
+      .theme-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+
+      .theme-select {
+        border: 1px solid var(--stroke);
+        background: rgba(8, 12, 18, 0.7);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 11px;
       }
 
       .lang-button {
@@ -1273,6 +1317,16 @@
         align-items: center;
         gap: 6px;
         flex-wrap: wrap;
+      }
+
+      .team-member-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
+        flex: 0 0 auto;
       }
 
       .team-name {

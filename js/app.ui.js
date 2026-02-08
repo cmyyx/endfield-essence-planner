@@ -7,8 +7,52 @@
     const showBackToTop = state.showBackToTop;
     const showLangMenu = state.showLangMenu;
     const showSecondaryMenu = state.showSecondaryMenu;
+    const showPlanConfig = state.showPlanConfig;
+    const showPlanConfigHintDot = state.showPlanConfigHintDot;
     const isPortrait = state.isPortrait;
     const updateLangMenuPlacement = state.updateLangMenuPlacement;
+
+    const root = typeof document !== "undefined" ? document.documentElement : null;
+
+    const resolveTheme = (mode) => {
+      if (mode === "light" || mode === "dark") return mode;
+      if (typeof window === "undefined" || !window.matchMedia) return "dark";
+      return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    };
+
+    const applyTheme = (mode) => {
+      const resolved = resolveTheme(mode);
+      state.resolvedTheme.value = resolved;
+      if (!root) return;
+      root.setAttribute("data-theme", resolved);
+      root.style.colorScheme = resolved;
+    };
+
+    const setThemeMode = (mode) => {
+      const normalized = mode === "light" || mode === "dark" ? mode : "auto";
+      state.themePreference.value = normalized;
+      applyTheme(normalized);
+    };
+
+    let mediaTheme = null;
+    let removeMediaThemeListener = null;
+
+    const bindSystemThemeListener = () => {
+      if (typeof window === "undefined" || !window.matchMedia) return;
+      mediaTheme = window.matchMedia("(prefers-color-scheme: light)");
+      const onChange = () => {
+        if (state.themePreference.value === "auto") {
+          applyTheme("auto");
+        }
+      };
+      if (typeof mediaTheme.addEventListener === "function") {
+        mediaTheme.addEventListener("change", onChange);
+        removeMediaThemeListener = () => mediaTheme.removeEventListener("change", onChange);
+      } else if (typeof mediaTheme.addListener === "function") {
+        mediaTheme.addListener(onChange);
+        removeMediaThemeListener = () => mediaTheme.removeListener(onChange);
+      }
+    };
 
     const backToTopRevealOffset = 240;
     const backToTopScrollDelta = 6;
@@ -104,14 +148,36 @@
       window.scrollTo(0, 0);
     };
 
+    const markPlanConfigHintSeen = () => {
+      if (!showPlanConfigHintDot.value) return;
+      showPlanConfigHintDot.value = false;
+      try {
+        localStorage.setItem(state.planConfigHintStorageKey, state.planConfigHintVersion);
+      } catch (error) {
+        // ignore storage errors
+      }
+    };
+
+    const togglePlanConfig = () => {
+      const nextOpen = !showPlanConfig.value;
+      showPlanConfig.value = nextOpen;
+      if (nextOpen) {
+        markPlanConfigHintSeen();
+      }
+    };
+
     const handleDocClick = (event) => {
       if (!event || !event.target || !event.target.closest) {
         showSecondaryMenu.value = false;
+        showPlanConfig.value = false;
         showLangMenu.value = false;
         return;
       }
       if (showSecondaryMenu.value && !event.target.closest(".secondary-menu")) {
         showSecondaryMenu.value = false;
+      }
+      if (showPlanConfig.value && !event.target.closest(".plan-config")) {
+        showPlanConfig.value = false;
       }
       if (showLangMenu.value && !event.target.closest(".lang-switch")) {
         showLangMenu.value = false;
@@ -122,12 +188,15 @@
       if (!event) return;
       if (event.key === "Escape") {
         showSecondaryMenu.value = false;
+        showPlanConfig.value = false;
         showLangMenu.value = false;
       }
     };
 
     onMounted(() => {
       state.appReady.value = true;
+      bindSystemThemeListener();
+      applyTheme(state.themePreference.value || "auto");
       updateViewportOrientation();
       window.addEventListener("resize", updateViewportOrientation);
       updateViewportSafeBottom();
@@ -151,6 +220,11 @@
     });
 
     onBeforeUnmount(() => {
+      if (removeMediaThemeListener) {
+        removeMediaThemeListener();
+        removeMediaThemeListener = null;
+      }
+      mediaTheme = null;
       window.removeEventListener("resize", updateViewportOrientation);
       window.removeEventListener("resize", scheduleViewportSafeBottom);
       if (window.visualViewport) {
@@ -170,5 +244,7 @@
     });
 
     state.scrollToTop = scrollToTop;
+    state.setThemeMode = setThemeMode;
+    state.togglePlanConfig = togglePlanConfig;
   };
 })();
