@@ -157,6 +157,21 @@
   box-shadow: 0 0 0 1px rgba(31, 200, 183, 0.3), 0 8px 18px rgba(44, 77, 118, 0.16);
 }
 
+[data-theme="light"] .scheme-weapon-item.base-choice {
+  background: rgba(255, 240, 214, 0.98);
+  border-color: rgba(230, 124, 0, 0.85);
+  box-shadow: 0 0 0 2px rgba(230, 124, 0, 0.35), 0 10px 22px rgba(230, 124, 0, 0.22);
+}
+
+[data-theme="light"] .scheme-weapon-item.is-selected.base-choice {
+  border-color: rgba(230, 124, 0, 0.95);
+  background: rgba(255, 235, 208, 0.98);
+  box-shadow:
+    0 0 0 2px rgba(230, 124, 0, 0.45),
+    inset 0 0 0 1px rgba(31, 200, 183, 0.35),
+    0 10px 22px rgba(230, 124, 0, 0.22);
+}
+
 [data-theme="light"] .scheme-weapon-item.base-selectable {
   background: rgba(248, 252, 255, 0.96);
   border-color: rgba(22, 44, 72, 0.16);

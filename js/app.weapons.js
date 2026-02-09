@@ -209,6 +209,22 @@
       });
     });
 
+    const allFilteredSelected = computed(() => {
+      const rows = filteredWeapons.value;
+      if (!rows.length) return false;
+      const selected = selectedNameSet.value;
+      return rows.every((weapon) => selected.has(weapon.name));
+    });
+
+    const selectAllWeapons = () => {
+      const rows = filteredWeapons.value;
+      if (!rows.length) return;
+      const next = new Set(state.selectedNames.value);
+      rows.forEach((weapon) => next.add(weapon.name));
+      state.selectedNames.value = Array.from(next);
+      trackEvent("weapon_select_all", { count: rows.length });
+    };
+
     state.s1Options = s1Options;
     state.s2Options = s2Options;
     state.s3OptionEntries = s3OptionEntries;
@@ -227,6 +243,8 @@
     state.clearAttributeFilters = clearAttributeFilters;
     state.hasAttributeFilters = hasAttributeFilters;
     state.filteredWeapons = filteredWeapons;
+    state.allFilteredSelected = allFilteredSelected;
+    state.selectAllWeapons = selectAllWeapons;
     state.trackEvent = trackEvent;
     state.dismissAttrHint = dismissAttrHint;
   };

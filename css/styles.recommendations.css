@@ -111,6 +111,20 @@
         margin-top: 8px;
         font-size: 12px;
         color: var(--muted);
+        display: grid;
+        gap: 6px;
+      }
+
+      .lock-summary .hint {
+        line-height: 1.5;
+      }
+
+      .hint-line {
+        display: block;
+      }
+
+      .hint-line.hint-accent {
+        margin-left: 0;
       }
 
       .hint-accent {
@@ -230,6 +244,14 @@
       .scheme-weapon-item.is-selected {
         border-color: rgba(77, 214, 201, 0.5);
         background: rgba(18, 34, 40, 0.88);
+      }
+
+      .scheme-weapon-item.base-choice {
+        border-color: rgba(255, 196, 83, 0.6);
+        background: rgba(30, 26, 18, 0.88);
+        box-shadow:
+          0 0 0 1px rgba(255, 196, 83, 0.3),
+          0 10px 20px rgba(255, 196, 83, 0.16);
       }
 
       .scheme-weapon-item.is-disabled {

@@ -115,16 +115,19 @@
       if (!scheme || !weapon || !scheme.baseOverflow) return;
       const baseKey = weapon.s1;
       if (!baseKey || baseKey === "任意") return;
-      const required = new Set(scheme.requiredBaseKeys || []);
-      if (required.has(baseKey)) return;
-      const current = new Set(state.schemeBaseSelections.value[scheme.schemeKey] || []);
+      const stored = state.schemeBaseSelections.value || {};
+      const hasStored = Object.prototype.hasOwnProperty.call(stored, scheme.schemeKey);
+      const seed = hasStored
+        ? stored[scheme.schemeKey] || []
+        : scheme.baseAutoPickKeys || scheme.requiredBaseKeys || [];
+      const current = new Set(seed.filter(Boolean));
       if (current.has(baseKey)) {
         current.delete(baseKey);
       } else {
         current.add(baseKey);
       }
       state.schemeBaseSelections.value = {
-        ...state.schemeBaseSelections.value,
+        ...stored,
         [scheme.schemeKey]: Array.from(current),
       };
     };
@@ -207,15 +210,18 @@
             if (baseCounts[b] !== baseCounts[a]) return baseCounts[b] - baseCounts[a];
             return getS1OrderIndex(a) - getS1OrderIndex(b);
           });
+          const baseLimit = Math.min(3, baseKeys.length);
           const baseAutoPick = [];
           const selectedBaseSet = new Set(matchedSelected.map((weapon) => weapon.s1));
           baseSorted.forEach((key) => {
+            if (baseAutoPick.length >= baseLimit) return;
             if (selectedBaseSet.has(key) && !baseAutoPick.includes(key)) {
               baseAutoPick.push(key);
             }
           });
           baseSorted.forEach((key) => {
-            if (baseAutoPick.length < 3 && !baseAutoPick.includes(key)) {
+            if (baseAutoPick.length >= baseLimit) return;
+            if (!baseAutoPick.includes(key)) {
               baseAutoPick.push(key);
             }
           });
@@ -225,24 +231,24 @@
             baseAutoPick.push(...fillers.slice(0, 3 - baseAutoPick.length));
           }
           const baseAllLabels = baseSorted.slice();
-
-          const baseLimit = Math.min(3, baseKeys.length);
-          const storedManual = state.schemeBaseSelections.value[schemeKey] || [];
+          const storedMap = state.schemeBaseSelections.value || {};
+          const hasStoredManual = Object.prototype.hasOwnProperty.call(storedMap, schemeKey);
+          const storedManual = hasStoredManual ? storedMap[schemeKey] || [] : [];
           const requiredBaseKeys = uniqueSorted(
             matchedSelected.map((weapon) => weapon.s1),
             (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
           );
-          const requiredBaseSet = new Set(requiredBaseKeys);
+          const manualSeed = hasStoredManual ? storedManual : baseAutoPick;
           const manualPickKeys = uniqueSorted(
-            storedManual.filter((key) => baseKeys.includes(key) && !requiredBaseSet.has(key)),
+            manualSeed.filter((key) => baseKeys.includes(key)),
             (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
           );
-          const displayBaseKeys = uniqueSorted(
-            [...requiredBaseKeys, ...manualPickKeys],
-            (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
-          );
+          const displayBaseKeys = uniqueSorted(manualPickKeys, (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b));
           const manualPickNeeded = baseOverflow ? Math.max(0, baseLimit - displayBaseKeys.length) : 0;
           const manualPickOverflow = baseOverflow && displayBaseKeys.length > baseLimit;
+          const manualPickOverflowCount = manualPickOverflow
+            ? Math.max(0, displayBaseKeys.length - baseLimit)
+            : 0;
           const manualPickReady =
             baseOverflow && displayBaseKeys.length >= baseLimit && !manualPickOverflow;
           const activeBaseKeys = baseOverflow
@@ -331,9 +337,11 @@
             displaySelectedMissingNames: missingSelected.map((weapon) => weapon.name),
             basePickLabels,
             baseAllLabels,
+            baseAutoPickKeys: baseAutoPick.slice(),
             baseOverflow,
             manualPickNeeded,
             manualPickOverflow,
+            manualPickOverflowCount,
             baseCount: baseKeys.length,
             baseChips,
             requiredBaseKeys,

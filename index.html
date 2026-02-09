@@ -473,9 +473,18 @@
                 <button @click.stop="toggleWeapon(weapon, 'tag')">✕</button>
               </span>
             </div>
-            <button class="ghost-button tag-clear" @click="clearSelection" :disabled="!selectedNames.length">
-              {{ t("清空已选武器") }}
-            </button>
+            <div class="tag-actions">
+              <button
+                class="ghost-button tag-select"
+                @click="selectAllWeapons"
+                :disabled="!filteredWeapons.length || allFilteredSelected"
+              >
+                {{ t("全选武器") }}
+              </button>
+              <button class="ghost-button tag-clear" @click="clearSelection" :disabled="!selectedNames.length">
+                {{ t("清空已选武器") }}
+              </button>
+            </div>
           </div>
 
           <div v-if="!showWeaponAttrs" class="weapon-list">
@@ -993,7 +1002,7 @@
                     }}
                   </div>
                   <details
-                    v-if="card.displaySelectedMissingNames.length"
+                    v-if="card.displaySelectedMissingNames.length && !card.baseOverflow"
                     class="missing-details"
                     :open="selectedWeapons.length > 1"
                   >
@@ -1025,7 +1034,7 @@
                   <span class="pill" v-if="card.maxWeaponCount !== card.displayWeaponCount">
                     {{ t("最多可刷：{count} 把", { count: card.maxWeaponCount }) }}
                   </span>
-                  <span class="pill warn" v-if="card.displaySelectedMissingNames.length">
+                  <span class="pill warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
                     {{
                       t("未覆盖 {count}", { count: card.displaySelectedMissingNames.length })
                     }}
@@ -1065,17 +1074,30 @@
                   v-if="card.baseOverflow"
                   :class="{ 'status-warn': card.manualPickOverflow }"
                 >
-                  <span v-if="card.manualPickOverflow">
-                    {{ t("已选择超过三种基础属性，请放弃一种属性。") }}
-                  </span>
-                  <span v-else-if="card.manualPickNeeded">
-                    {{
-                      t("基础属性超过三选，请在下方点击武器选择你想要刷取的基础属性（还需选择 {count} 个）", {
-                        count: card.manualPickNeeded,
-                      })
-                    }}
-                  </span>
-                  <span v-else>{{ t("基础属性已锁定，可同时刷范围已更新。") }}</span>
+                  <template v-if="card.manualPickOverflow">
+                    <span class="hint-line">{{ t("已选择超过三种基础属性，请放弃一种属性。") }}</span>
+                    <span class="hint-line hint-accent">
+                      {{
+                        t("请在下方黄色高亮的武器中点击武器选择你想要放弃的基础属性（还需放弃 {count} 个）", {
+                          count: card.manualPickOverflowCount,
+                        })
+                      }}
+                    </span>
+                  </template>
+                  <template v-else-if="card.manualPickNeeded">
+                    <span class="hint-line">{{ t("基础属性超过三选。") }}</span>
+                    <span class="hint-line hint-accent">
+                      {{
+                        t("请在下方黄色高亮的武器中点击武器选择你想要刷取的基础属性（还需选择 {count} 个）", {
+                          count: card.manualPickNeeded,
+                        })
+                      }}
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span class="hint-line">{{ t("基础属性已锁定，可同时刷范围已更新。") }}</span>
+                    <span class="hint-line hint-accent">{{ t("可点击武器来选中/取消基础属性。") }}</span>
+                  </template>
                 </div>
               </div>
 
@@ -1204,6 +1226,11 @@
                   :class="{
                     'is-selected': weapon.isSelected,
                     'base-selectable': card.baseOverflow,
+                    'base-choice':
+                      card.baseOverflow &&
+                      !weapon.isExcluded &&
+                      ((card.manualPickOverflow && weapon.baseLocked) ||
+                        (!card.manualPickOverflow && card.manualPickNeeded && !weapon.baseLocked)),
                     'is-dim': weapon.baseDim || weapon.isExcluded,
                     'is-excluded': weapon.isExcluded,
                     'tutorial-highlight':

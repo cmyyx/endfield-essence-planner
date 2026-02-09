@@ -164,6 +164,10 @@
           gap: 6px;
         }
 
+        .tag-actions {
+          gap: 6px;
+        }
+
         .tag {
           padding: 4px 8px;
           font-size: 11px;
