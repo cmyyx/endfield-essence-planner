@@ -139,21 +139,21 @@
             { name: "大雷斑", icon: "image/大雷斑.png" }
           ],
           equipment: [
-            { name: "拓荒护甲", icon: "image/gear/5/拓荒护甲.png", rarity: 5 },
-            { name: "拓荒耐蚀手套", icon: "image/gear/5/拓荒耐蚀手套.png", rarity: 5 },
-            { name: "拓荒通信器", icon: "image/gear/5/拓荒通信器.png", rarity: 5 },
-            { name: "拓荒增量供氧栓", icon: "image/gear/5/拓荒增量供氧栓.png", rarity: 5 }
+            { name: "生物辅助重甲", icon: "image/gear/5/生物辅助重甲.png", rarity: 5 },
+            { name: "生物辅助手甲", icon: "image/gear/5/生物辅助手甲.png", rarity: 5 },
+            { name: "生物辅助接驳器·壹型", icon: "image/gear/5/生物辅助接驳器·壹型.png", rarity: 5 },
+            { name: "生物辅助接驳器", icon: "image/gear/5/生物辅助接驳器.png", rarity: 5 }
           ]
         },
         {
           weapons: [
-            { name: "热熔切割器", icon: "image/热熔切割器.png" }
+            { name: "破碎君王", icon: "image/破碎君王.png" }
           ],
           equipment: [
-            { name: "矿场防护服·壹型", icon: "image/gear/4/矿场防护服·壹型.png", rarity: 4 },
-            { name: "矿场护手·壹型", icon: "image/gear/4/矿场护手·壹型.png", rarity: 4 },
-            { name: "矿场联络仪·壹型", icon: "image/gear/4/矿场联络仪·壹型.png", rarity: 4 },
-            { name: "矿场传动轮·壹型", icon: "image/gear/4/矿场传动轮·壹型.png", rarity: 4 }
+            { name: "点剑重装甲", icon: "image/gear/5/点剑重装甲.png", rarity: 5 },
+            { name: "点剑战术手套", icon: "image/gear/5/点剑战术手套.png", rarity: 5 },
+            { name: "点剑火石", icon: "image/gear/5/点剑火石.png", rarity: 5 },
+            { name: "50式应龙雷达", icon: "image/gear/5/50式应龙雷达.png", rarity: 5 }
           ]
         }
       ],
@@ -170,52 +170,52 @@
                 { name: "大雷斑", icon: "image/大雷斑.png" }
               ],
               equipment: [
-                { name: "拓荒护甲", icon: "image/gear/5/拓荒护甲.png", rarity: 5 },
-                { name: "拓荒耐蚀手套", icon: "image/gear/5/拓荒耐蚀手套.png", rarity: 5 },
-                { name: "拓荒通信器", icon: "image/gear/5/拓荒通信器.png", rarity: 5 },
-                { name: "拓荒增量供氧栓", icon: "image/gear/5/拓荒增量供氧栓.png", rarity: 5 }
+                { name: "生物辅助重甲", icon: "image/gear/5/生物辅助重甲.png", rarity: 5 },
+                { name: "生物辅助手甲", icon: "image/gear/5/生物辅助手甲.png", rarity: 5 },
+                { name: "生物辅助接驳器·壹型", icon: "image/gear/5/生物辅助接驳器·壹型.png", rarity: 5 },
+                { name: "生物辅助接驳器", icon: "image/gear/5/生物辅助接驳器.png", rarity: 5 }
               ]
             },
             {
               name: "余烬(下位)",
               tag: "下位",
               weapons: [
-                { name: "热熔切割器", icon: "image/热熔切割器.png" }
+                { name: "破碎君王", icon: "image/破碎君王.png" }
               ],
               equipment: [
-                { name: "矿场防护服·壹型", icon: "image/gear/4/矿场防护服·壹型.png", rarity: 4 },
-                { name: "矿场护手·壹型", icon: "image/gear/4/矿场护手·壹型.png", rarity: 4 },
-                { name: "矿场联络仪·壹型", icon: "image/gear/4/矿场联络仪·壹型.png", rarity: 4 },
-                { name: "矿场传动轮·壹型", icon: "image/gear/4/矿场传动轮·壹型.png", rarity: 4 }
-              ]
+                { name: "点剑重装甲", icon: "image/gear/5/点剑重装甲.png", rarity: 5 },
+                { name: "点剑战术手套", icon: "image/gear/5/点剑战术手套.png", rarity: 5 },
+                { name: "点剑火石", icon: "image/gear/5/点剑火石.png", rarity: 5 },
+                { name: "50式应龙雷达", icon: "image/gear/5/50式应龙雷达.png", rarity: 5 }
+                ]
             }
           ]
         },
         {
           options: [
             {
-              name: "佩丽卡",
+              name: "大潘",
               weapons: [
                 { name: "典范", icon: "image/典范.png" }
               ],
               equipment: [
                 { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
+                { name: "生物辅助臂甲", icon: "image/gear/5/生物辅助臂甲.png", rarity: 5 },
+                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 },
                 { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
               ]
             },
             {
-              name: "佩丽卡(下位)",
+              name: "管理员(下位)",
               tag: "下位",
               weapons: [
-                { name: "爆破单元", icon: "image/爆破单元.png" }
+                { name: "宏愿", icon: "image/宏愿.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
+                { name: "碾骨重护甲·壹型", icon: "image/gear/5/碾骨重护甲·壹型.png", rarity: 5 },
+                { name: "点剑战术手甲", icon: "image/gear/5/点剑战术手甲.png", rarity: 5 },
+                { name: "碾骨面具", icon: "image/gear/5/碾骨面具.png", rarity: 5 },
+                { name: "碾骨面具", icon: "image/gear/5/碾骨面具.png", rarity: 5 }
               ]
             }
           ]
@@ -225,26 +225,26 @@
             {
               name: "陈千语",
               weapons: [
-                { name: "作品：蚀迹", icon: "image/作品：蚀迹.png" }
+                { name: "扶摇", icon: "image/扶摇.png" }
               ],
               equipment: [
-                { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
+                { name: "点剑重装甲", icon: "image/gear/5/点剑重装甲.png", rarity: 5 },
                 { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+                { name: "点剑火石", icon: "image/gear/5/点剑火石.png", rarity: 5 },
+                { name: "点剑火石", icon: "image/gear/5/点剑火石.png", rarity: 5 }
               ]
             },
             {
               name: "陈千语(下位)",
               tag: "下位",
               weapons: [
-                { name: "白夜新星", icon: "image/白夜新星.png" }
+                { name: "仰止", icon: "image/仰止.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
+                { name: "点剑重装甲", icon: "image/gear/5/点剑重装甲.png", rarity: 5 },
+                { name: "点剑战术手甲", icon: "image/gear/5/点剑战术手甲.png", rarity: 5 },
+                { name: "点剑火石", icon: "image/gear/5/点剑火石.png", rarity: 5 },
+                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
               ]
             }
           ]
@@ -252,28 +252,28 @@
         {
           options: [
             {
-              name: "管理员",
+              name: "骏卫",
               weapons: [
-                { name: "宏愿", icon: "image/宏愿.png" }
+                { name: "不知归", icon: "image/不知归.png" }
               ],
               equipment: [
-                { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+                { name: "碾骨披巾·壹型", icon: "image/gear/5/碾骨披巾·壹型.png", rarity: 5 },
+                { name: "50式应龙护手·壹型", icon: "image/gear/5/50式应龙护手·壹型.png", rarity: 5 },
+                { name: "50式应龙短刃", icon: "image/gear/5/50式应龙短刃.png", rarity: 5 },
+                { name: "50式应龙短刃", icon: "image/gear/5/50式应龙短刃.png", rarity: 5 }
               ]
             },
             {
-              name: "管理员(下位)",
+              name: "骏卫(下位)",
               tag: "下位",
               weapons: [
-                { name: "古渠", icon: "image/古渠.png" }
+                { name: "坚城铸造者", icon: "image/坚城铸造者.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
+                { name: "长息装甲", icon: "image/gear/5/长息装甲.png", rarity: 5 },
+                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
+                { name: "长息辅助臂", icon: "image/gear/5/长息辅助臂.png", rarity: 5 },
+                { name: "长息辅助臂", icon: "image/gear/5/长息辅助臂.png", rarity: 5 }
               ]
             }
           ]
