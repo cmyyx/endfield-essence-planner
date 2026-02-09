@@ -13,4 +13,7 @@ window.SPONSORS = [
   { name: "匿名", amount: "CNY 6.00", note: "很好用的工具網站👍讚欸", date: "2026-02-08" },
   { name: "szwy", amount: "CNY 5.00", note: "感谢付出。", date: "2026-02-08" },
   { name: "Destiny", amount: "CNY 10.00", note: "感谢作者方便大家,期待装备精锻", date: "2026-02-08" },
+  { name: "cetacea", amount: "CNY 6.00", note: "好用,支持", date: "2026-02-08" },
+  { name: "Lincp", amount: "CNY 20.00", note: "黑瞳", date: "2026-02-08" },
+  { name: "XH", amount: "CNY 8.88", note: "感谢开发贡献,帮大忙了", date: "2026-02-08" },
 ];
