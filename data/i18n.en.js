@@ -264,7 +264,7 @@ window.I18N["en"] = {
     },
     "dungeon": {
       "四号谷地·枢纽区": "Valley IV - The Hub",
-      "四号谷地·源石研究院": "Valley IV - Originium Science Park",
+      "四号谷地·源石研究园": "Valley IV - Originium Science Park",
       "四号谷地·供能高地": "Valley IV - Power Plateau",
       "四号谷地·矿脉源区": "Valley IV - Origin Lodespring",
       "武陵城": "Wuling City"

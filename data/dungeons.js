@@ -16,7 +16,7 @@ window.DUNGEONS = [
   },
   {
     id: "research",
-    name: "四号谷地·源石研究院",
+    name: "四号谷地·源石研究园",
     s2_pool: [
       "攻击提升",
       "物理伤害提升",
