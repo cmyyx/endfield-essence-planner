@@ -2,11 +2,11 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initStrategy = function (ctx, state) {
-    const { ref, computed, nextTick } = ctx;
+    const { ref, computed, nextTick, watch, onMounted, onBeforeUnmount } = ctx;
     const weaponCatalog = Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
     const weaponMap = new Map(weaponCatalog.map((weapon) => [weapon.name, weapon]));
 
-    state.characters = window.characters || [];
+    state.characters = ref(Array.isArray(window.characters) ? window.characters : []);
     state.selectedCharacterId = ref(null);
     state.strategyCategory = ref("info");
     state.strategyTab = ref("base");
@@ -116,7 +116,7 @@
 
     state.currentCharacter = computed(() => {
       if (!state.selectedCharacterId.value) return null;
-      return state.characters.find(c => c.id === state.selectedCharacterId.value);
+      return state.characters.value.find((c) => c.id === state.selectedCharacterId.value);
     });
 
     const normalizeGearRows = (rows) => {
@@ -153,7 +153,7 @@
       if (!target) return "";
 
       let bestMatch = null;
-      (state.characters || []).forEach((character) => {
+      state.characters.value.forEach((character) => {
         if (!character || !character.name || !character.avatar) return;
         const current = normalizeNameForAvatar(character.name);
         if (!current) return;
@@ -262,19 +262,165 @@
       return trimmed;
     });
 
+    const characterScripts = [
+      "./data/characters.js",
+      "./data/characters/ember.js",
+      "./data/characters/perlica.js",
+    ];
+
+    const syncCharactersFromWindow = () => {
+      state.characters.value = Array.isArray(window.characters) ? window.characters : [];
+      state.charactersLoaded.value = state.characters.value.length > 0;
+    };
+
+    let pendingCharacterLoad = null;
+    const ensureCharacterDataLoaded = async () => {
+      if (state.charactersLoaded.value) {
+        syncCharactersFromWindow();
+        return true;
+      }
+      if (pendingCharacterLoad) return pendingCharacterLoad;
+      if (typeof state.loadScriptOnce !== "function") return false;
+      state.charactersLoading.value = true;
+      pendingCharacterLoad = (async () => {
+        try {
+          for (let index = 0; index < characterScripts.length; index += 1) {
+            await state.loadScriptOnce(characterScripts[index]);
+          }
+          syncCharactersFromWindow();
+          return state.charactersLoaded.value;
+        } catch (error) {
+          return false;
+        } finally {
+          state.charactersLoading.value = false;
+          pendingCharacterLoad = null;
+        }
+      })();
+      return pendingCharacterLoad;
+    };
+
+    const characterVirtual = ref({
+      startIndex: 0,
+      endIndex: Number.POSITIVE_INFINITY,
+      columns: 1,
+      rowHeight: 220,
+      gap: 16,
+      overscanRows: 2,
+    });
+
+    const updateCharacterVirtualWindow = () => {
+      const list = state.characters.value || [];
+      if (!list.length) {
+        characterVirtual.value = {
+          ...characterVirtual.value,
+          startIndex: 0,
+          endIndex: 0,
+        };
+        state.characterGridTopSpacer.value = 0;
+        state.characterGridBottomSpacer.value = 0;
+        return;
+      }
+
+      if (
+        state.currentView.value !== "strategy" ||
+        state.selectedCharacterId.value ||
+        typeof window === "undefined"
+      ) {
+        characterVirtual.value = {
+          ...characterVirtual.value,
+          startIndex: 0,
+          endIndex: list.length,
+        };
+        state.characterGridTopSpacer.value = 0;
+        state.characterGridBottomSpacer.value = 0;
+        return;
+      }
+
+      const grid = document.querySelector(".character-grid");
+      if (!grid) {
+        characterVirtual.value = {
+          ...characterVirtual.value,
+          startIndex: 0,
+          endIndex: list.length,
+        };
+        state.characterGridTopSpacer.value = 0;
+        state.characterGridBottomSpacer.value = 0;
+        return;
+      }
+
+      const styles = window.getComputedStyle(grid);
+      const gap = parseFloat(styles.rowGap || styles.gap || "16") || 16;
+      const sampleCard = grid.querySelector(".character-card");
+      const sampleHeight = sampleCard ? sampleCard.getBoundingClientRect().height : 200;
+      const rowHeight = Math.max(1, sampleHeight + gap);
+
+      const minCardWidth = 140;
+      const columns = Math.max(1, Math.floor((grid.clientWidth + gap) / (minCardWidth + gap)));
+      const totalRows = Math.ceil(list.length / columns);
+
+      const viewportHeight =
+        window.innerHeight ||
+        (document.documentElement && document.documentElement.clientHeight) ||
+        0;
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
+      const gridTop = grid.getBoundingClientRect().top + scrollTop;
+      const viewTop = Math.max(0, scrollTop - gridTop);
+
+      const overscanRows = characterVirtual.value.overscanRows;
+      const startRow = Math.max(0, Math.floor(viewTop / rowHeight) - overscanRows);
+      const visibleRows = Math.max(1, Math.ceil(viewportHeight / rowHeight) + overscanRows * 2 + 1);
+      const endRow = Math.min(totalRows, startRow + visibleRows);
+
+      const startIndex = Math.min(list.length, startRow * columns);
+      const endIndex = Math.min(list.length, endRow * columns);
+      const topSpacer = startRow * rowHeight;
+      const bottomSpacer = Math.max(0, (totalRows - endRow) * rowHeight);
+
+      characterVirtual.value = {
+        ...characterVirtual.value,
+        startIndex,
+        endIndex,
+        columns,
+        rowHeight,
+        gap,
+      };
+      state.characterGridTopSpacer.value = topSpacer;
+      state.characterGridBottomSpacer.value = bottomSpacer;
+    };
+
+    const scheduleCharacterVirtualWindow = () => {
+      if (typeof window === "undefined") return;
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(updateCharacterVirtualWindow);
+      } else {
+        updateCharacterVirtualWindow();
+      }
+    };
+
+    state.visibleCharacters = computed(() => {
+      const list = state.characters.value || [];
+      const start = Math.max(0, characterVirtual.value.startIndex || 0);
+      const end = Math.max(start, characterVirtual.value.endIndex || list.length);
+      return list.slice(start, end);
+    });
+
     const resetStrategyDefaults = () => {
       state.strategyCategory.value = "info";
       state.strategyTab.value = "base";
     };
 
-    state.selectCharacter = (id) => {
+    state.selectCharacter = async (id) => {
+      if (!state.charactersLoaded.value) {
+        await ensureCharacterDataLoaded();
+      }
       state.selectedCharacterId.value = id;
       resetStrategyDefaults();
     };
-    
+
     state.backToCharacterList = () => {
       state.selectedCharacterId.value = null;
       resetStrategyDefaults();
+      scheduleCharacterVirtualWindow();
     };
 
     state.setStrategyTab = (tab) => {
@@ -292,6 +438,44 @@
         state.strategyTab.value = "analysis";
       }
     };
+
+    watch(
+      () => state.currentView.value,
+      async (view) => {
+        if (view === "strategy") {
+          await ensureCharacterDataLoaded();
+          scheduleCharacterVirtualWindow();
+        }
+      },
+      { immediate: true }
+    );
+
+    watch(
+      [() => state.characters.value.length, state.selectedCharacterId, state.charactersLoaded],
+      () => {
+        if (
+          state.charactersLoaded.value &&
+          state.selectedCharacterId.value &&
+          !state.characters.value.some((item) => item && item.id === state.selectedCharacterId.value)
+        ) {
+          state.selectedCharacterId.value = null;
+        }
+        scheduleCharacterVirtualWindow();
+      }
+    );
+
+    onMounted(() => {
+      if (typeof window === "undefined") return;
+      window.addEventListener("scroll", scheduleCharacterVirtualWindow, { passive: true });
+      window.addEventListener("resize", scheduleCharacterVirtualWindow);
+      scheduleCharacterVirtualWindow();
+    });
+
+    onBeforeUnmount(() => {
+      if (typeof window === "undefined") return;
+      window.removeEventListener("scroll", scheduleCharacterVirtualWindow);
+      window.removeEventListener("resize", scheduleCharacterVirtualWindow);
+    });
 
     const getGuideContainer = (el) => {
       if (!el || !el.closest) return null;
@@ -386,6 +570,8 @@
         schedule();
       }
     };
+
+    state.ensureCharacterDataLoaded = ensureCharacterDataLoaded;
   };
 })();
 

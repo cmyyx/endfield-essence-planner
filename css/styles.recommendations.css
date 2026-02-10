@@ -36,12 +36,15 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
+        padding: 5px 11px;
         border-radius: 999px;
         background: rgba(77, 214, 201, 0.12);
         border: 1px solid rgba(77, 214, 201, 0.4);
         color: #d7fff8;
-        font-size: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.02em;
       }
 
       .pill.wide {
@@ -93,9 +96,12 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 4px 10px;
+        padding: 4px 9px;
         border-radius: 999px;
-        font-size: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.01em;
         border: 1px solid rgba(87, 210, 140, 0.4);
         background: rgba(87, 210, 140, 0.12);
         color: #d9ffe7;
@@ -124,18 +130,28 @@
       }
 
       .hint-line.hint-accent {
+        display: inline-block;
+        justify-self: start;
+        width: fit-content;
+        max-width: 100%;
         margin-left: 0;
       }
 
       .hint-accent {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        max-width: 100%;
         margin-left: 4px;
-        padding: 2px 6px;
+        padding: 2px 7px;
         border-radius: 999px;
         border: 1px solid rgba(77, 214, 201, 0.35);
         background: rgba(77, 214, 201, 0.12);
         color: var(--accent-2);
+        font-size: 11px;
         font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.01em;
       }
 
       .scheme-weapon-list {
@@ -192,13 +208,14 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 999px;
         border: 1px solid rgba(87, 210, 140, 0.35);
         background: rgba(87, 210, 140, 0.12);
         color: #d9ffe7;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
+        line-height: 1.2;
         letter-spacing: 0.02em;
       }
 
@@ -221,6 +238,8 @@
         background: rgba(10, 14, 22, 0.72);
         display: grid;
         gap: 6px;
+        content-visibility: auto;
+        contain-intrinsic-size: 72px 72px;
       }
 
       .scheme-weapon-item.base-selectable {
@@ -301,7 +320,10 @@
       .scheme-weapon-title .badge {
         padding: 2px 6px;
         border-radius: 999px;
-        font-size: 11px;
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.02em;
         background: rgba(77, 214, 201, 0.15);
         color: #c9fff7;
         border: 1px solid rgba(77, 214, 201, 0.4);

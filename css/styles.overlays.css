@@ -132,13 +132,15 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 12px;
+        padding: 5px 11px;
         border-radius: 999px;
         border: 1px solid rgba(243, 108, 108, 0.5);
         background: rgba(243, 108, 108, 0.12);
         color: #ffd1d1;
-        font-size: 12px;
-        letter-spacing: 0.08em;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.04em;
       }
 
       .domain-actions {
@@ -648,6 +650,8 @@
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(8, 12, 18, 0.6);
+        content-visibility: auto;
+        contain-intrinsic-size: 180px 140px;
       }
 
       .about-sponsor-item img {
@@ -781,7 +785,9 @@
         padding: 2px 8px;
         border-radius: 999px;
         font-size: 10px;
-        letter-spacing: 0.12em;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.08em;
         background: rgba(77, 214, 201, 0.2);
         border: 1px solid rgba(77, 214, 201, 0.5);
         color: #bff5ef;

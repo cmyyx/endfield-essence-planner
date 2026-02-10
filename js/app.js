@@ -1,7 +1,4 @@
 (function () {
-  const version =
-    (document.documentElement && document.documentElement.dataset.assetVersion) ||
-    (document.lastModified || String(Date.now())).replace(/\D/g, "");
 
   const escapeHtml = (value) =>
     String(value || "")
@@ -57,7 +54,7 @@
   const loadScript = (src) =>
     new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = src + "?v=" + version;
+      script.src = src;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error("Failed to load: " + src));
       document.body.appendChild(script);

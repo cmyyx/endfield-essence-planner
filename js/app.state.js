@@ -13,6 +13,18 @@
     state.showAbout = ref(false);
     state.showSecondaryMenu = ref(false);
 
+    state.contentLoading = ref(false);
+    state.contentLoaded = ref(Boolean(window.CONTENT));
+    state.charactersLoading = ref(false);
+    state.charactersLoaded = ref(Array.isArray(window.characters) && window.characters.length > 0);
+
+    state.weaponGridTopSpacer = ref(0);
+    state.weaponGridBottomSpacer = ref(0);
+    state.recommendationTopSpacer = ref(0);
+    state.recommendationBottomSpacer = ref(0);
+    state.characterGridTopSpacer = ref(0);
+    state.characterGridBottomSpacer = ref(0);
+
     state.marksStorageKey = "weapon-marks:v1";
     state.legacyExcludedKey = "excluded-notes:v1";
     state.tutorialStorageKey = "planner-tutorial:v1";

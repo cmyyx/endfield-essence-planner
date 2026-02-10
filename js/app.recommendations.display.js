@@ -2,7 +2,7 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initRecommendationDisplay = function initRecommendationDisplay(ctx, state) {
-    const { computed, onMounted, onBeforeUnmount, watch, nextTick } = ctx;
+    const { computed, ref, onMounted, onBeforeUnmount, watch, nextTick } = ctx;
 
     const reorderForTutorial = (list) => {
       if (!state.tutorialActive.value || state.tutorialStepKey.value !== "base-pick") {
@@ -37,6 +37,106 @@
       if (!displayExtraRecommendations.value.length) return -1;
       return displayPrimaryRecommendations.value.length;
     });
+
+    const recommendationVirtual = ref({
+      startIndex: 0,
+      endIndex: Number.POSITIVE_INFINITY,
+      itemHeight: 420,
+      overscan: 1,
+    });
+
+    const updateRecommendationVirtualWindow = () => {
+      const list = displayRecommendations.value;
+      if (!list.length) {
+        recommendationVirtual.value = {
+          ...recommendationVirtual.value,
+          startIndex: 0,
+          endIndex: 0,
+        };
+        state.recommendationTopSpacer.value = 0;
+        state.recommendationBottomSpacer.value = 0;
+        return;
+      }
+
+      if (state.currentView.value !== "planner" || typeof window === "undefined") {
+        recommendationVirtual.value = {
+          ...recommendationVirtual.value,
+          startIndex: 0,
+          endIndex: list.length,
+        };
+        state.recommendationTopSpacer.value = 0;
+        state.recommendationBottomSpacer.value = 0;
+        return;
+      }
+
+      const anchor = document.querySelector(".scheme-list-anchor");
+      if (!anchor) {
+        recommendationVirtual.value = {
+          ...recommendationVirtual.value,
+          startIndex: 0,
+          endIndex: list.length,
+        };
+        state.recommendationTopSpacer.value = 0;
+        state.recommendationBottomSpacer.value = 0;
+        return;
+      }
+
+      const sampleCard = document.querySelector(".scheme-card");
+      const measuredHeight = sampleCard ? sampleCard.getBoundingClientRect().height + 12 : 420;
+      const itemHeight = Math.max(220, Math.ceil(measuredHeight));
+      const viewportHeight =
+        window.innerHeight ||
+        (document.documentElement && document.documentElement.clientHeight) ||
+        0;
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
+      const listTop = anchor.getBoundingClientRect().top + scrollTop;
+      const viewTop = Math.max(0, scrollTop - listTop);
+
+      const overscan = recommendationVirtual.value.overscan;
+      const startIndex = Math.max(0, Math.floor(viewTop / itemHeight) - overscan);
+      const visibleCount = Math.max(1, Math.ceil(viewportHeight / itemHeight) + overscan * 2 + 1);
+      const endIndex = Math.min(list.length, startIndex + visibleCount);
+
+      recommendationVirtual.value = {
+        ...recommendationVirtual.value,
+        startIndex,
+        endIndex,
+        itemHeight,
+      };
+      state.recommendationTopSpacer.value = startIndex * itemHeight;
+      state.recommendationBottomSpacer.value = Math.max(0, (list.length - endIndex) * itemHeight);
+    };
+
+    const scheduleRecommendationVirtualWindow = () => {
+      if (typeof window === "undefined") return;
+      const run = () => updateRecommendationVirtualWindow();
+      if (typeof nextTick === "function") {
+        nextTick(() => {
+          if (typeof window.requestAnimationFrame === "function") {
+            window.requestAnimationFrame(run);
+          } else {
+            run();
+          }
+        });
+        return;
+      }
+      if (typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(run);
+      } else {
+        run();
+      }
+    };
+
+    const visibleDisplayRecommendations = computed(() => {
+      const list = displayRecommendations.value;
+      const start = Math.max(0, recommendationVirtual.value.startIndex || 0);
+      const end = Math.max(start, recommendationVirtual.value.endIndex || list.length);
+      return list.slice(start, end);
+    });
+
+    const recommendationVirtualStartIndex = computed(
+      () => recommendationVirtual.value.startIndex || 0
+    );
 
     const updateAttrWrap = () => {
       const groups = document.querySelectorAll(".scheme-weapon-attrs");
@@ -136,11 +236,16 @@
 
     onMounted(() => {
       scheduleAttrWrap();
+      scheduleRecommendationVirtualWindow();
       window.addEventListener("resize", scheduleAttrWrap);
+      window.addEventListener("resize", scheduleRecommendationVirtualWindow);
+      window.addEventListener("scroll", scheduleRecommendationVirtualWindow, { passive: true });
     });
 
     onBeforeUnmount(() => {
       window.removeEventListener("resize", scheduleAttrWrap);
+      window.removeEventListener("resize", scheduleRecommendationVirtualWindow);
+      window.removeEventListener("scroll", scheduleRecommendationVirtualWindow);
     });
 
     watch(
@@ -150,11 +255,24 @@
         state.mobilePanel,
         () => (state.recommendationConfig.value || {}).hideExcluded,
       ],
-      scheduleAttrWrap
+      () => {
+        scheduleAttrWrap();
+        scheduleRecommendationVirtualWindow();
+      }
     );
     watch(state.filteredWeapons, scheduleAttrWrap);
-    watch(displayRecommendations, scheduleAttrWrap);
+    watch(displayRecommendations, () => {
+      scheduleAttrWrap();
+      scheduleRecommendationVirtualWindow();
+    });
     watch(state.conflictOpenMap, scheduleAttrWrap, { deep: true });
+    watch(
+      () => state.currentView.value,
+      () => {
+        scheduleRecommendationVirtualWindow();
+      },
+      { immediate: true }
+    );
     watch(
       () => state.selectedWeapons.value.length,
       (count) => {
@@ -170,6 +288,8 @@
 
     state.displayRecommendations = displayRecommendations;
     state.displayDividerIndex = displayDividerIndex;
+    state.visibleDisplayRecommendations = visibleDisplayRecommendations;
+    state.recommendationVirtualStartIndex = recommendationVirtualStartIndex;
     state.fallbackPlan = fallbackPlan;
   };
 })();

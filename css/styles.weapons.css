@@ -361,6 +361,8 @@
         cursor: pointer;
         transition: 0.2s ease;
         overflow: hidden;
+        content-visibility: auto;
+        contain-intrinsic-size: 124px 124px;
       }
 
       .weapon-item:hover {
@@ -876,6 +878,11 @@
       .scheme-weapon-title .weapon-avatar {
         width: 28px;
         height: 28px;
+      }
+
+      .virtual-spacer {
+        width: 100%;
+        pointer-events: none;
       }
 
       .weapon-attr-list {

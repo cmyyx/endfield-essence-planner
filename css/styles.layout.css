@@ -924,6 +924,8 @@
         overflow: hidden;
         cursor: pointer;
         transition: all 0.2s ease;
+        content-visibility: auto;
+        contain-intrinsic-size: 220px 140px;
       }
 
       .character-card:hover {
@@ -962,6 +964,16 @@
         justify-content: space-between;
         font-size: 12px;
         color: var(--muted);
+      }
+
+      .strategy-loading,
+      .strategy-empty {
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 14, 22, 0.62);
+        color: var(--muted);
+        text-align: center;
       }
 
       .guide-switch-enter-active,
@@ -1553,6 +1565,8 @@
       .team-badge {
         font-size: 10px;
         font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: 0.03em;
         padding: 2px 6px;
         border-radius: 999px;
         border: 1px solid rgba(242, 182, 50, 0.35);

@@ -146,6 +146,12 @@
   color: #5a708c;
 }
 
+[data-theme="light"] .hint-accent {
+  color: #0f625f;
+  border-color: rgba(31, 200, 183, 0.38);
+  background: rgba(31, 200, 183, 0.1);
+}
+
 [data-theme="light"] .conflict-reason {
   color: #8f3434;
 }

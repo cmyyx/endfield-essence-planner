@@ -4,10 +4,68 @@
   modules.initContent = function initContent(ctx, state) {
     const { computed } = ctx;
 
-    const content = window.CONTENT || {};
-    const sponsorEntries = Array.isArray(window.SPONSORS) ? window.SPONSORS : [];
     const fallbackLocale = state.fallbackLocale || "zh-CN";
     const t = state.t || ((value) => value);
+
+    const getContentRoot = () => (typeof window !== "undefined" && window.CONTENT ? window.CONTENT : {});
+    const getSponsorEntries = () =>
+      typeof window !== "undefined" && Array.isArray(window.SPONSORS) ? window.SPONSORS : [];
+
+    let pendingContentLoad = null;
+    let pendingSponsorLoad = null;
+    let sponsorsLoaded =
+      typeof window !== "undefined" && Array.isArray(window.SPONSORS) && window.SPONSORS.length > 0;
+
+    const ensureBaseContentLoaded = async () => {
+      if (state.contentLoaded.value) return true;
+      if (pendingContentLoad) return pendingContentLoad;
+      if (typeof state.loadScriptOnce !== "function") return false;
+      pendingContentLoad = (async () => {
+        try {
+          await state.loadScriptOnce("./data/content.js");
+          state.contentLoaded.value = Boolean(window.CONTENT);
+          return state.contentLoaded.value;
+        } catch (error) {
+          return false;
+        } finally {
+          pendingContentLoad = null;
+        }
+      })();
+      return pendingContentLoad;
+    };
+
+    const ensureSponsorsLoaded = async () => {
+      if (sponsorsLoaded) return true;
+      if (pendingSponsorLoad) return pendingSponsorLoad;
+      if (typeof state.loadScriptOnce !== "function") return false;
+      pendingSponsorLoad = (async () => {
+        try {
+          await state.loadScriptOnce("./data/sponsors.js");
+          sponsorsLoaded = Boolean(Array.isArray(window.SPONSORS));
+          return sponsorsLoaded;
+        } catch (error) {
+          return false;
+        } finally {
+          pendingSponsorLoad = null;
+        }
+      })();
+      return pendingSponsorLoad;
+    };
+
+    const ensureContentLoaded = async (options = {}) => {
+      const withSponsors = Boolean(options && options.withSponsors);
+      state.contentLoading.value = true;
+      try {
+        const baseLoaded = await ensureBaseContentLoaded();
+        if (!baseLoaded) return false;
+        if (withSponsors) {
+          await ensureSponsorsLoaded();
+        }
+        return true;
+      } finally {
+        state.contentLoading.value = false;
+      }
+    };
 
     const normalizeSponsorList = (list) => {
       if (!Array.isArray(list)) return [];
@@ -83,6 +141,7 @@
     };
 
     const getContentForLocale = (targetLocale) => {
+      const content = getContentRoot();
       const base = {
         announcement: content.announcement || {},
         changelog: content.changelog || {},
@@ -130,7 +189,7 @@
         ...defaultAbout.value,
         ...(localizedContent.value.about || {}),
       };
-      const list = normalizeSponsorList((base.sponsor && base.sponsor.list) || sponsorEntries);
+      const list = normalizeSponsorList((base.sponsor && base.sponsor.list) || getSponsorEntries());
       const items =
         (base.sponsor && Array.isArray(base.sponsor.items) && base.sponsor.items) || [];
       if (items.length) base.sponsor = { ...(base.sponsor || {}), items };
@@ -140,7 +199,8 @@
       return base;
     });
 
-    state.content = content;
+    state.content = computed(() => getContentRoot());
+    state.ensureContentLoaded = ensureContentLoaded;
     state.announcement = announcement;
     state.formatNoticeItem = formatNoticeItem;
     state.changelog = changelog;

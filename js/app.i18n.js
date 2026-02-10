@@ -6,16 +6,19 @@
 
     const i18n = window.I18N || {};
     const fallbackLocale = "zh-CN";
-    const supportedLocales = ["zh-CN", "zh-TW", "en", "ja"].filter(
-      (locale) => i18n && i18n[locale]
-    );
-    if (!supportedLocales.length) supportedLocales.push(fallbackLocale);
-    const normalizeLocale = (value) =>
-      supportedLocales.includes(value) ? value : fallbackLocale;
+    const allLocales = ["zh-CN", "zh-TW", "en", "ja"];
+    const localeScriptMap = {
+      "zh-CN": "./data/i18n.zh-CN.js",
+      "zh-TW": "./data/i18n.zh-TW.js",
+      en: "./data/i18n.en.js",
+      ja: "./data/i18n.ja.js",
+    };
+    const isLocaleLoaded = (localeKey) => Boolean(i18n && i18n[localeKey]);
+    const normalizeLocale = (value) => (allLocales.includes(value) ? value : fallbackLocale);
     const detectLocale = () => {
       if (typeof window === "undefined") return fallbackLocale;
       const stored = localStorage.getItem(state.langStorageKey);
-      if (stored && supportedLocales.includes(stored)) return stored;
+      if (stored && allLocales.includes(stored)) return normalizeLocale(stored);
       const raw = (navigator.language || "").toLowerCase();
       if (raw.startsWith("zh")) {
         if (raw.includes("tw") || raw.includes("hk") || raw.includes("mo") || raw.includes("hant")) {
@@ -34,10 +37,13 @@
       en: "English",
       ja: "日本語",
     };
-    const languageOptions = supportedLocales.map((value) => ({
-      value,
-      label: localeLabels[value] || value,
-    }));
+    const localeLoading = ref(false);
+    const languageOptions = computed(() =>
+      allLocales.map((value) => ({
+        value,
+        label: localeLabels[value] || value,
+      }))
+    );
 
     const langSwitchRef = ref(null);
     const showLangMenu = ref(false);
@@ -80,6 +86,22 @@
       langMenuPlacement.value = "right";
     };
 
+    const ensureLocaleLoaded = async (targetLocale) => {
+      const normalized = normalizeLocale(targetLocale);
+      if (isLocaleLoaded(normalized)) return true;
+      const src = localeScriptMap[normalized];
+      if (!src || typeof state.loadScriptOnce !== "function") return false;
+      localeLoading.value = true;
+      try {
+        await state.loadScriptOnce(src);
+        return isLocaleLoaded(normalized);
+      } catch (error) {
+        return false;
+      } finally {
+        localeLoading.value = false;
+      }
+    };
+
     const toggleLangMenu = () => {
       state.showSecondaryMenu.value = false;
       showLangMenu.value = !showLangMenu.value;
@@ -92,8 +114,12 @@
       }
     };
 
-    const setLocale = (value) => {
-      locale.value = value;
+    const setLocale = async (value) => {
+      const normalized = normalizeLocale(value);
+      if (!isLocaleLoaded(normalized)) {
+        await ensureLocaleLoaded(normalized);
+      }
+      locale.value = normalized;
       showLangMenu.value = false;
     };
 
@@ -181,13 +207,21 @@
 
     watch(
       locale,
-      (value) => {
-        i18nState.locale = value;
+      async (value) => {
+        const normalized = normalizeLocale(value);
+        if (!isLocaleLoaded(normalized)) {
+          const loaded = await ensureLocaleLoaded(normalized);
+          if (!loaded && normalized !== fallbackLocale) {
+            locale.value = fallbackLocale;
+            return;
+          }
+        }
+        i18nState.locale = normalized;
         if (typeof document !== "undefined") {
-          document.documentElement.lang = value;
+          document.documentElement.lang = normalized;
         }
         try {
-          localStorage.setItem(state.langStorageKey, value);
+          localStorage.setItem(state.langStorageKey, normalized);
         } catch (error) {
           // ignore storage errors
         }
@@ -199,6 +233,8 @@
 
     state.locale = locale;
     state.languageOptions = languageOptions;
+    state.localeLoading = localeLoading;
+    state.ensureLocaleLoaded = ensureLocaleLoaded;
     state.langSwitchRef = langSwitchRef;
     state.showLangMenu = showLangMenu;
     state.langMenuPlacement = langMenuPlacement;

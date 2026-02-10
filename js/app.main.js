@@ -39,12 +39,126 @@
     return;
   }
 
+  const lazyImageObserver = (() => {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      return null;
+    }
+    return new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting && entry.intersectionRatio <= 0) return;
+          const img = entry.target;
+          const src = img.dataset.src;
+          if (src) {
+            img.src = src;
+            img.removeAttribute("data-src");
+          }
+          observer.unobserve(img);
+        });
+      },
+      { rootMargin: "200px 0px" }
+    );
+  })();
+
+  const applyLazyImage = (el, src) => {
+    if (!src) return;
+    if (!lazyImageObserver) {
+      if (el.src !== src) {
+        el.src = src;
+      }
+      return;
+    }
+    if (el.dataset.src !== src) {
+      el.dataset.src = src;
+    }
+    lazyImageObserver.observe(el);
+  };
+
+  const lazyImageDirective = {
+    mounted(el, binding) {
+      applyLazyImage(el, binding.value);
+    },
+    updated(el, binding) {
+      if (binding.value !== binding.oldValue) {
+        applyLazyImage(el, binding.value);
+      }
+    },
+    unmounted(el) {
+      if (lazyImageObserver) {
+        lazyImageObserver.unobserve(el);
+      }
+    },
+  };
+
+  const scriptLoadRegistry =
+    typeof window !== "undefined"
+      ? (window.__scriptLoadRegistry = window.__scriptLoadRegistry || new Map())
+      : new Map();
+
+  const normalizeScriptSrc = (src) => {
+    if (!src) return "";
+    if (typeof window === "undefined") return src;
+    try {
+      return new URL(src, window.location.href).href;
+    } catch (error) {
+      return src;
+    }
+  };
+
+  if (typeof document !== "undefined") {
+    Array.from(document.scripts || []).forEach((script) => {
+      const key = normalizeScriptSrc(script.getAttribute("src") || script.src || "");
+      if (!key || scriptLoadRegistry.has(key)) return;
+      scriptLoadRegistry.set(key, Promise.resolve());
+      script.dataset.loaded = "true";
+    });
+  }
+
+  const loadScriptOnce = (src) => {
+    const key = normalizeScriptSrc(src);
+    if (!key) {
+      return Promise.reject(new Error("Script src is required"));
+    }
+    if (scriptLoadRegistry.has(key)) {
+      return scriptLoadRegistry.get(key);
+    }
+    const pending = new Promise((resolve, reject) => {
+      if (typeof document === "undefined") {
+        resolve();
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      const cleanup = () => {
+        script.removeEventListener("load", onLoad);
+        script.removeEventListener("error", onError);
+      };
+      const onLoad = () => {
+        script.dataset.loaded = "true";
+        cleanup();
+        resolve();
+      };
+      const onError = () => {
+        cleanup();
+        scriptLoadRegistry.delete(key);
+        reject(new Error(`Failed to load: ${src}`));
+      };
+      script.addEventListener("load", onLoad);
+      script.addEventListener("error", onError);
+      document.body.appendChild(script);
+    });
+    scriptLoadRegistry.set(key, pending);
+    return pending;
+  };
+
   const modules = window.AppModules || {};
 
-  createApp({
+  const app = createApp({
     setup() {
       const ctx = { ref, computed, onMounted, onBeforeUnmount, watch, nextTick };
       const state = {};
+      state.loadScriptOnce = loadScriptOnce;
       const init = (name) => {
         const fn = modules[name];
         if (typeof fn === "function") {
@@ -114,11 +228,6 @@
         return { view: "planner", weaponNames, hasWeaponParam };
       };
 
-      const hasCharacter = (id) =>
-        id &&
-        Array.isArray(state.characters) &&
-        state.characters.some((char) => char && char.id === id);
-
       let applyingRoute = false;
 
       const applyRoute = (route) => {
@@ -126,12 +235,7 @@
         applyingRoute = true;
         state.currentView.value = route.view || "planner";
         if (route.view === "strategy") {
-          const resolvedId = hasCharacter(route.characterId) ? route.characterId : null;
-          if (resolvedId && typeof state.selectCharacter === "function") {
-            state.selectCharacter(resolvedId);
-          } else {
-            state.selectedCharacterId.value = resolvedId;
-          }
+          state.selectedCharacterId.value = route.characterId || null;
         }
         if (route.view === "planner" && route.hasWeaponParam) {
           state.selectedNames.value = Array.isArray(route.weaponNames) ? route.weaponNames : [];
@@ -330,6 +434,9 @@
         clearAttributeFilters: state.clearAttributeFilters,
         hasAttributeFilters: state.hasAttributeFilters,
         filteredWeapons: state.filteredWeapons,
+        visibleFilteredWeapons: state.visibleFilteredWeapons,
+        weaponGridTopSpacer: state.weaponGridTopSpacer,
+        weaponGridBottomSpacer: state.weaponGridBottomSpacer,
         allFilteredSelected: state.allFilteredSelected,
         recommendations: state.recommendations,
         coverageSummary: state.coverageSummary,
@@ -338,6 +445,10 @@
         visibleRecommendations: state.visibleRecommendations,
         displayRecommendations: state.displayRecommendations,
         displayDividerIndex: state.displayDividerIndex,
+        visibleDisplayRecommendations: state.visibleDisplayRecommendations,
+        recommendationVirtualStartIndex: state.recommendationVirtualStartIndex,
+        recommendationTopSpacer: state.recommendationTopSpacer,
+        recommendationBottomSpacer: state.recommendationBottomSpacer,
         fallbackPlan: state.fallbackPlan,
         toggleWeapon: state.toggleWeapon,
         toggleSchemeBasePick: state.toggleSchemeBasePick,
@@ -365,11 +476,14 @@
         formatNoticeItem: state.formatNoticeItem,
         changelog: state.changelog,
         aboutContent: state.aboutContent,
+        contentLoading: state.contentLoading,
         showAbout: state.showAbout,
         showNotice: state.showNotice,
         showChangelog: state.showChangelog,
         skipNotice: state.skipNotice,
         openNotice: state.openNotice,
+        openChangelog: state.openChangelog,
+        openAbout: state.openAbout,
         closeNotice: state.closeNotice,
         appReady: state.appReady,
         mobilePanel: state.mobilePanel,
@@ -399,6 +513,11 @@
         clearCustomBackground: state.clearCustomBackground,
         // Strategy Module
         characters: state.characters,
+        visibleCharacters: state.visibleCharacters,
+        characterGridTopSpacer: state.characterGridTopSpacer,
+        characterGridBottomSpacer: state.characterGridBottomSpacer,
+        charactersLoading: state.charactersLoading,
+        charactersLoaded: state.charactersLoaded,
         selectedCharacterId: state.selectedCharacterId,
         currentCharacter: state.currentCharacter,
         currentGuide: state.currentGuide,
@@ -416,5 +535,8 @@
         guideEnter: state.guideEnter,
       };
     },
-  }).mount("#app");
+  });
+
+  app.directive("lazy-src", lazyImageDirective);
+  app.mount("#app");
 })();

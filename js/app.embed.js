@@ -4,7 +4,10 @@
   modules.initEmbed = function initEmbed(ctx, state) {
     const { ref } = ctx;
 
-    const content = state.content || window.CONTENT || {};
+    const content =
+      state.content && typeof state.content === "object" && "value" in state.content
+        ? state.content.value || {}
+        : state.content || window.CONTENT || {};
     const currentHost = ref(window.location.hostname);
     const isFileProtocol = window.location.protocol === "file:";
     const allowedHosts = new Set(["end.canmoe.com", "127.0.0.1", "localhost"]);

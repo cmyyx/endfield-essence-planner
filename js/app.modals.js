@@ -41,10 +41,27 @@
       }
     };
 
-    const openNotice = () => {
+    const ensureModalContent = async (withSponsors = false) => {
+      if (typeof state.ensureContentLoaded === "function") {
+        await state.ensureContentLoaded({ withSponsors });
+      }
+    };
+
+    const openNotice = async () => {
+      state.showNotice.value = true;
+      await ensureModalContent(false);
       state.skipNotice.value =
         readNoticeSkipVersion() === (state.announcement.value || {}).version;
-      state.showNotice.value = true;
+    };
+
+    const openChangelog = async () => {
+      state.showChangelog.value = true;
+      await ensureModalContent(false);
+    };
+
+    const openAbout = async () => {
+      state.showAbout.value = true;
+      await ensureModalContent(true);
     };
 
     const closeNotice = () => {
@@ -61,6 +78,14 @@
 
     let scrollLockActive = false;
     let scrollLockY = 0;
+    const supportsStableGutter = (() => {
+      try {
+        return typeof CSS !== "undefined" && CSS.supports("scrollbar-gutter: stable");
+      } catch (error) {
+        return false;
+      }
+    })();
+
     const setModalScrollLock = (locked) => {
       if (typeof window === "undefined") return;
       const root = document.documentElement;
@@ -70,7 +95,7 @@
         scrollLockActive = true;
         scrollLockY = window.scrollY || window.pageYOffset || 0;
         const scrollbarGap = window.innerWidth - root.clientWidth;
-        if (scrollbarGap > 0) {
+        if (scrollbarGap > 0 && !supportsStableGutter) {
           body.style.paddingRight = `${scrollbarGap}px`;
         }
         body.style.position = "fixed";
@@ -101,11 +126,18 @@
 
     onMounted(() => {
       cleanupLegacyNoticeKeys();
-      const skippedVersion = readNoticeSkipVersion();
-      if (skippedVersion !== (state.announcement.value || {}).version) {
-        state.skipNotice.value = false;
-        state.showNotice.value = true;
-      }
+
+      const autoOpenNotice = async () => {
+        await ensureModalContent(false);
+        if (!state.contentLoaded.value) return;
+        const skippedVersion = readNoticeSkipVersion();
+        if (skippedVersion !== (state.announcement.value || {}).version) {
+          state.skipNotice.value = false;
+          state.showNotice.value = true;
+        }
+      };
+      autoOpenNotice();
+
       if (typeof state.maybeAutoStartTutorial === "function") {
         state.maybeAutoStartTutorial();
       }
@@ -150,6 +182,8 @@
     });
 
     state.openNotice = openNotice;
+    state.openChangelog = openChangelog;
+    state.openAbout = openAbout;
     state.closeNotice = closeNotice;
   };
 })();

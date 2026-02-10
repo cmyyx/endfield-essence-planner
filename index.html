@@ -122,8 +122,6 @@
       (function () {
         const root = document.documentElement;
         root.classList.add("preload");
-        const version = (document.lastModified || String(Date.now())).replace(/\D/g, "");
-        root.dataset.assetVersion = version;
         const finish = () => {
           if (!root.classList.contains("preload")) return;
           root.classList.remove("preload");
@@ -146,7 +144,7 @@
         cssFiles.forEach((href) => {
           const link = document.createElement("link");
           link.rel = "stylesheet";
-          link.href = href + "?v=" + version;
+          link.href = href;
           document.head.appendChild(link);
         });
         setTimeout(finish, 8000);
@@ -214,8 +212,8 @@
             </select>
           </div>
           <button class="about-button notice-button" @click="openNotice">{{ t("公告") }}</button>
-          <button class="about-button" @click="showChangelog = true">{{ t("更新日志") }}</button>
-          <button class="about-button" @click="showAbout = true">{{ t("关于") }}</button>
+          <button class="about-button" @click="openChangelog">{{ t("更新日志") }}</button>
+          <button class="about-button" @click="openAbout">{{ t("关于") }}</button>
           <div class="secondary-menu">
             <button class="ghost-button menu-toggle" @click="showSecondaryMenu = !showSecondaryMenu">
               {{ t("更多设置") }}
@@ -496,7 +494,12 @@
 
           <div v-if="!showWeaponAttrs" class="weapon-list">
             <div
-              v-for="weapon in filteredWeapons"
+              v-if="weaponGridTopSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${weaponGridTopSpacer}px`, gridColumn: '1 / -1' }"
+            ></div>
+            <div
+              v-for="weapon in visibleFilteredWeapons"
               :key="weapon.name"
               class="weapon-item"
               v-memo="[locale, selectedNameSet.has(weapon.name), isExcluded(weapon.name)]"
@@ -513,7 +516,7 @@
                 <img
                   v-if="hasImage(weapon)"
                   class="weapon-figure"
-                  :src="weaponImageSrc(weapon)"
+                  v-lazy-src="weaponImageSrc(weapon)"
                   :alt="weapon.name"
                   loading="lazy"
                   decoding="async"
@@ -525,7 +528,7 @@
                   v-for="(character, index) in weaponCharacters(weapon)"
                   :key="`${weapon.name}-character-${index}`"
                   class="weapon-avatar"
-                  :src="characterImageSrc(character)"
+                  v-lazy-src="characterImageSrc(character)"
                   :alt="tTerm('character', character)"
                   loading="lazy"
                   decoding="async"
@@ -537,6 +540,11 @@
                 <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
               </div>
             </div>
+            <div
+              v-if="weaponGridBottomSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${weaponGridBottomSpacer}px`, gridColumn: '1 / -1' }"
+            ></div>
           </div>
 
           <div v-else class="weapon-attr-list">
@@ -554,7 +562,7 @@
                     v-for="(character, index) in weaponCharacters(tutorialWeapon)"
                     :key="`${tutorialWeapon.name}-character-${index}`"
                     class="weapon-avatar"
-                    :src="characterImageSrc(character)"
+                    v-lazy-src="characterImageSrc(character)"
                     :alt="tTerm('character', character)"
                     loading="lazy"
                     decoding="async"
@@ -603,8 +611,14 @@
                 />
               </div>
             </div>
+            <div class="weapon-attr-anchor"></div>
             <div
-              v-for="weapon in filteredWeapons"
+              v-if="weaponGridTopSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${weaponGridTopSpacer}px` }"
+            ></div>
+            <div
+              v-for="weapon in visibleFilteredWeapons"
               :key="weapon.name"
               class="scheme-weapon-item weapon-attr-item"
               v-memo="[
@@ -629,7 +643,7 @@
                 >
                   <img
                     v-if="hasImage(weapon)"
-                    :src="weaponImageSrc(weapon)"
+                    v-lazy-src="weaponImageSrc(weapon)"
                     :alt="weapon.name"
                     loading="lazy"
                     decoding="async"
@@ -641,7 +655,7 @@
                     v-for="(character, index) in weaponCharacters(weapon)"
                     :key="`${weapon.name}-character-${index}`"
                     class="weapon-avatar"
-                    :src="characterImageSrc(character)"
+                    v-lazy-src="characterImageSrc(character)"
                     :alt="tTerm('character', character)"
                     loading="lazy"
                     decoding="async"
@@ -698,6 +712,11 @@
                 />
               </div>
             </div>
+            <div
+              v-if="weaponGridBottomSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${weaponGridBottomSpacer}px` }"
+            ></div>
           </div>
         </section>
 
@@ -908,7 +927,7 @@
                         v-for="(character, index) in weaponCharacters(weapon)"
                         :key="`${weapon.name}-fallback-character-${index}`"
                         class="weapon-avatar"
-                        :src="characterImageSrc(character)"
+                        v-lazy-src="characterImageSrc(character)"
                         :alt="tTerm('character', character)"
                         loading="lazy"
                         decoding="async"
@@ -986,12 +1005,18 @@
                 </div>
               </div>
             </div>
-            <template v-for="(card, index) in displayRecommendations" :key="card.schemeKey">
-              <div v-if="index === displayDividerIndex" class="scheme-divider">
+            <div class="scheme-list-anchor"></div>
+            <div
+              v-if="recommendationTopSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${recommendationTopSpacer}px` }"
+            ></div>
+            <template v-for="(card, index) in visibleDisplayRecommendations" :key="card.schemeKey">
+              <div v-if="index + recommendationVirtualStartIndex === displayDividerIndex" class="scheme-divider">
                 <span>{{ t("其他方案") }}</span>
               </div>
               <div
-                class="card"
+                class="card scheme-card"
                 :class="{
                   'tutorial-scheme-highlight':
                     tutorialActive &&
@@ -1155,7 +1180,7 @@
                         >
                           <img
                             v-if="hasImage(weapon)"
-                            :src="weaponImageSrc(weapon)"
+                            v-lazy-src="weaponImageSrc(weapon)"
                             :alt="weapon.name"
                             loading="lazy"
                             decoding="async"
@@ -1167,7 +1192,7 @@
                             v-for="(character, index) in weaponCharacters(weapon)"
                             :key="`${weapon.name}-conflict-character-${index}`"
                             class="weapon-avatar"
-                            :src="characterImageSrc(character)"
+                            v-lazy-src="characterImageSrc(character)"
                             :alt="tTerm('character', character)"
                             loading="lazy"
                             decoding="async"
@@ -1268,7 +1293,7 @@
                     <div class="weapon-mini" :style="rarityBadgeStyle(weapon.rarity, hasImage(weapon))">
                       <img
                         v-if="hasImage(weapon)"
-                        :src="weaponImageSrc(weapon)"
+                        v-lazy-src="weaponImageSrc(weapon)"
                         :alt="weapon.name"
                         loading="lazy"
                         decoding="async"
@@ -1280,7 +1305,7 @@
                         v-for="(character, index) in weaponCharacters(weapon)"
                         :key="`${weapon.name}-scheme-character-${index}`"
                         class="weapon-avatar"
-                        :src="characterImageSrc(character)"
+                        v-lazy-src="characterImageSrc(character)"
                         :alt="tTerm('character', character)"
                         loading="lazy"
                         decoding="async"
@@ -1337,6 +1362,11 @@
 
               </div>
             </template>
+            <div
+              v-if="recommendationBottomSpacer > 0"
+              class="virtual-spacer"
+              :style="{ height: `${recommendationBottomSpacer}px` }"
+            ></div>
             <div class="expand-row" v-if="extraRecommendations.length">
               <button class="ghost-button" @click="showAllSchemes = !showAllSchemes">
                 {{
@@ -1359,15 +1389,26 @@
              <div class="panel-title">
                <h2>{{ t("角色列表") }}</h2>
              </div>
-             <div class="character-grid">
-               <div 
-                 v-for="char in characters" 
-                 :key="char.id" 
+             <div v-if="charactersLoading" class="strategy-loading">
+               {{ t("角色数据加载中...") }}
+             </div>
+             <div v-else-if="!characters.length" class="strategy-empty">
+               {{ t("暂无角色数据") }}
+             </div>
+             <div v-else class="character-grid">
+               <div
+                 v-if="characterGridTopSpacer > 0"
+                 class="virtual-spacer"
+                 :style="{ height: `${characterGridTopSpacer}px`, gridColumn: '1 / -1' }"
+               ></div>
+               <div
+                 v-for="char in visibleCharacters"
+                 :key="char.id"
                  class="character-card"
                  @click="selectCharacter(char.id)"
                >
                  <div class="character-avatar">
-                   <img :src="char.avatar" :alt="char.name" loading="lazy" />
+                   <img v-lazy-src="char.avatar" :alt="char.name" loading="lazy" />
                  </div>
                  <div class="character-info">
                    <div class="character-name">{{ char.name }}</div>
@@ -1377,6 +1418,11 @@
                    </div>
                  </div>
                </div>
+               <div
+                 v-if="characterGridBottomSpacer > 0"
+                 class="virtual-spacer"
+                 :style="{ height: `${characterGridBottomSpacer}px`, gridColumn: '1 / -1' }"
+               ></div>
              </div>
           </div>
           <div v-else key="guide-detail" class="character-detail">
@@ -1387,7 +1433,7 @@
                     ← {{ t("返回列表") }}
                   </button>
                   <div class="hero-identity">
-                    <img :src="currentCharacter.avatar" :alt="currentCharacter.name" class="detail-avatar hero-avatar" />
+                    <img v-lazy-src="currentCharacter.avatar" :alt="currentCharacter.name" class="detail-avatar hero-avatar" />
                     <div class="hero-title">
                       <div class="hero-name-row">
                         <h1>{{ currentCharacter.name }}</h1>
@@ -1424,7 +1470,7 @@
                 <div class="hero-right">
                   <div class="character-card-frame">
                     <img
-                      :src="characterCardSrc(currentCharacter)"
+                      v-lazy-src="characterCardSrc(currentCharacter)"
                       :alt="currentCharacter.name"
                       class="character-card-image"
                       loading="lazy"
@@ -1577,7 +1623,7 @@
                     <div class="skills-list">
                       <div v-for="skill in currentCharacter.skills" :key="skill.name" class="skill-item">
                         <div class="skill-header">
-                          <img v-if="skill.icon" :src="skill.icon" class="skill-icon" alt="" />
+                          <img v-if="skill.icon" v-lazy-src="skill.icon" class="skill-icon" alt="" />
                           <span class="skill-name">{{ skill.name }}</span>
                         </div>
                         <p>{{ skill.description }}</p>
@@ -1643,7 +1689,7 @@
                     <div class="talents-list">
                       <div v-for="talent in currentCharacter.talents" :key="talent.name" class="talent-item">
                         <div class="talent-header">
-                          <img v-if="talent.icon" :src="talent.icon" class="talent-icon" alt="" />
+                          <img v-if="talent.icon" v-lazy-src="talent.icon" class="talent-icon" alt="" />
                           <div class="talent-name">{{ talent.name }}</div>
                         </div>
                         <p>{{ talent.description }}</p>
@@ -1704,7 +1750,7 @@
                                   class="gear-icon-frame"
                                   :class="weapon.rarity === 6 ? 'weapon-rarity-6' : weapon.rarity === 5 ? 'weapon-rarity-5' : weapon.rarity === 4 ? 'weapon-rarity-4' : ''"
                                 >
-                                  <img v-if="weapon.icon" :src="weapon.icon" class="gear-icon" alt="" />
+                                  <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="gear-icon" alt="" />
                                 </div>
                                 <div class="gear-text">
                                   <div class="gear-name">{{ weapon.name }}</div>
@@ -1719,7 +1765,7 @@
                                 class="gear-icon-frame"
                                 :class="equip.rarity === 5 ? 'gear-rarity-5' : equip.rarity === 4 ? 'gear-rarity-4' : ''"
                               >
-                                <img v-if="equip.icon" :src="equip.icon" class="gear-icon" alt="" />
+                                <img v-if="equip.icon" v-lazy-src="equip.icon" class="gear-icon" alt="" />
                               </div>
                               <div class="gear-text">
                                 <div class="gear-name">{{ equip.name }}</div>
@@ -1756,7 +1802,7 @@
                             }"
                           >
                             <div class="team-name-row">
-                              <img v-if="entry.avatar" :src="entry.avatar" class="team-member-avatar" alt="" loading="lazy" />
+                              <img v-if="entry.avatar" v-lazy-src="entry.avatar" class="team-member-avatar" alt="" loading="lazy" />
                               <div class="team-name">{{ entry.name }}</div>
                               <span
                                 v-if="currentCharacter && entry.name === currentCharacter.name"
@@ -1774,7 +1820,7 @@
                                     class="team-icon-frame"
                                     :class="weapon.rarity === 6 ? 'weapon-rarity-6' : weapon.rarity === 5 ? 'weapon-rarity-5' : weapon.rarity === 4 ? 'weapon-rarity-4' : ''"
                                   >
-                                    <img v-if="weapon.icon" :src="weapon.icon" class="team-icon" alt="" />
+                                    <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="team-icon" alt="" />
                                   </div>
                                   <div class="team-text">
                                     <div class="team-item-name">{{ weapon.name }}</div>
@@ -1791,7 +1837,7 @@
                                     class="team-icon-frame"
                                     :class="equip.rarity === 5 ? 'gear-rarity-5' : equip.rarity === 4 ? 'gear-rarity-4' : ''"
                                   >
-                                    <img v-if="equip.icon" :src="equip.icon" class="team-icon" alt="" />
+                                    <img v-if="equip.icon" v-lazy-src="equip.icon" class="team-icon" alt="" />
                                   </div>
                                   <div class="team-text">
                                     <div class="team-item-name">{{ equip.name }}</div>
@@ -1871,7 +1917,7 @@
                       <img
                         v-if="hasImage(weapon)"
                         class="weapon-figure"
-                        :src="weaponImageSrc(weapon)"
+                        v-lazy-src="weaponImageSrc(weapon)"
                         :alt="weapon.name"
                         loading="lazy"
                         decoding="async"
@@ -1883,7 +1929,7 @@
                         v-for="(character, index) in weaponCharacters(weapon)"
                         :key="`${weapon.name}-match-character-${index}`"
                         class="weapon-avatar"
-                        :src="characterImageSrc(character)"
+                        v-lazy-src="characterImageSrc(character)"
                         :alt="tTerm('character', character)"
                         loading="lazy"
                         decoding="async"
@@ -1930,7 +1976,7 @@
                           <img
                             v-if="hasImage(matchSourceWeapon)"
                             class="weapon-figure"
-                            :src="weaponImageSrc(matchSourceWeapon)"
+                            v-lazy-src="weaponImageSrc(matchSourceWeapon)"
                             :alt="matchSourceWeapon.name"
                             loading="lazy"
                             decoding="async"
@@ -1947,7 +1993,7 @@
                             v-for="(character, index) in weaponCharacters(matchSourceWeapon)"
                             :key="`${matchSourceWeapon.name}-match-selected-${index}`"
                             class="weapon-avatar"
-                            :src="characterImageSrc(character)"
+                            v-lazy-src="characterImageSrc(character)"
                             :alt="tTerm('character', character)"
                             loading="lazy"
                             decoding="async"
@@ -1991,7 +2037,7 @@
                         <img
                           v-if="hasImage(weapon)"
                           class="weapon-figure"
-                          :src="weaponImageSrc(weapon)"
+                          v-lazy-src="weaponImageSrc(weapon)"
                           :alt="weapon.name"
                           loading="lazy"
                           decoding="async"
@@ -2003,7 +2049,7 @@
                           v-for="(character, index) in weaponCharacters(weapon)"
                           :key="`${weapon.name}-match-result-${index}`"
                           class="weapon-avatar"
-                          :src="characterImageSrc(character)"
+                          v-lazy-src="characterImageSrc(character)"
                           :alt="tTerm('character', character)"
                           loading="lazy"
                           decoding="async"
@@ -2091,7 +2137,8 @@
 
       <transition name="fade-scale">
         <div v-if="showNotice" class="about-overlay notice-overlay" @click.self="closeNotice">
-          <div class="about-card notice-card">
+          <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+          <div v-else class="about-card notice-card">
             <h3>{{ announcement.title }}</h3>
             <div class="notice-body">
               <p class="notice-meta">
@@ -2138,7 +2185,8 @@
           class="about-overlay changelog-overlay"
           @click.self="showChangelog = false"
         >
-          <div class="about-card changelog-card">
+          <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+          <div v-else class="about-card changelog-card">
             <h3>{{ changelog.title }}</h3>
             <div class="changelog-body">
               <div v-if="!changelog.entries || !changelog.entries.length" class="empty">
@@ -2165,7 +2213,8 @@
 
       <transition name="fade-scale">
                 <div v-if="showAbout" class="about-overlay about-overlay-main" @click.self="showAbout = false">
-                  <div class="about-card about-main">
+                  <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+                  <div v-else class="about-card about-main">
                     <h3>{{ aboutContent.title }}</h3>
                     <div class="about-body">
               <p v-for="(line, index) in aboutContent.paragraphs" :key="`about-line-${index}`">
@@ -2232,7 +2281,7 @@
                   class="about-sponsor-item"
                 >
                   <img
-                    :src="item.src"
+                    v-lazy-src="item.src"
                     :alt="item.label ? t(item.label) : ''"
                     loading="lazy"
                     decoding="async"
@@ -2434,13 +2483,10 @@
 
     <script>
       (function () {
-        const version =
-          document.documentElement.dataset.assetVersion ||
-          (document.lastModified || String(Date.now())).replace(/\D/g, "");
         const loadScript = (src) =>
           new Promise((resolve, reject) => {
             const script = document.createElement("script");
-            script.src = src + "?v=" + version;
+            script.src = src;
             script.onload = () => resolve();
             script.onerror = () => reject(new Error("Failed to load: " + src));
             document.body.appendChild(script);
@@ -2451,14 +2497,6 @@
           loadScript("./data/weapons.js"),
           loadScript("./data/weapon-images.js"),
           loadScript("./data/i18n.zh-CN.js"),
-          loadScript("./data/i18n.zh-TW.js"),
-          loadScript("./data/i18n.en.js"),
-          loadScript("./data/i18n.ja.js"),
-          loadScript("./data/sponsors.js"),
-          loadScript("./data/content.js"),
-          loadScript("./data/characters.js"),
-          loadScript("./data/characters/ember.js"),
-          loadScript("./data/characters/perlica.js"),
         ]);
         Promise.all([vuePromise, dataPromise])
           .then(() => loadScript("./js/app.js"))
