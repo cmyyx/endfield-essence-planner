@@ -912,8 +912,9 @@
 
       /* Strategy View Styles */
       .character-grid {
+        --character-card-min-width: 140px;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(var(--character-card-min-width), 1fr));
         gap: 16px;
       }
 
@@ -2054,7 +2055,8 @@
 
       @media (max-width: 640px) {
         .character-grid {
-          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          --character-card-min-width: 120px;
+          grid-template-columns: repeat(auto-fill, minmax(var(--character-card-min-width), 1fr));
           gap: 12px;
         }
 

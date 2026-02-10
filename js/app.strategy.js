@@ -273,7 +273,9 @@
       state.charactersLoaded.value = state.characters.value.length > 0;
     };
 
+    const CHARACTER_LOAD_RETRY_COOLDOWN_MS = 3000;
     let pendingCharacterLoad = null;
+    let lastCharacterLoadFailureAt = 0;
     const ensureCharacterDataLoaded = async () => {
       if (state.charactersLoaded.value) {
         syncCharactersFromWindow();
@@ -281,6 +283,12 @@
       }
       if (pendingCharacterLoad) return pendingCharacterLoad;
       if (typeof state.loadScriptOnce !== "function") return false;
+      if (
+        lastCharacterLoadFailureAt &&
+        Date.now() - lastCharacterLoadFailureAt < CHARACTER_LOAD_RETRY_COOLDOWN_MS
+      ) {
+        return false;
+      }
       state.charactersLoading.value = true;
       pendingCharacterLoad = (async () => {
         try {
@@ -288,8 +296,10 @@
             await state.loadScriptOnce(characterScripts[index]);
           }
           syncCharactersFromWindow();
+          lastCharacterLoadFailureAt = 0;
           return state.charactersLoaded.value;
         } catch (error) {
+          lastCharacterLoadFailureAt = Date.now();
           return false;
         } finally {
           state.charactersLoading.value = false;
@@ -301,7 +311,7 @@
 
     const characterVirtual = ref({
       startIndex: 0,
-      endIndex: Number.POSITIVE_INFINITY,
+      endIndex: 0,
       columns: 1,
       rowHeight: 220,
       gap: 16,
@@ -354,7 +364,9 @@
       const sampleHeight = sampleCard ? sampleCard.getBoundingClientRect().height : 200;
       const rowHeight = Math.max(1, sampleHeight + gap);
 
-      const minCardWidth = 140;
+      const cssMinCardWidth =
+        parseFloat(styles.getPropertyValue("--character-card-min-width")) || 140;
+      const minCardWidth = Math.max(80, cssMinCardWidth);
       const columns = Math.max(1, Math.floor((grid.clientWidth + gap) / (minCardWidth + gap)));
       const totalRows = Math.ceil(list.length / columns);
 
@@ -388,14 +400,28 @@
       state.characterGridBottomSpacer.value = bottomSpacer;
     };
 
-    const scheduleCharacterVirtualWindow = () => {
-      if (typeof window === "undefined") return;
-      if (typeof window.requestAnimationFrame === "function") {
-        window.requestAnimationFrame(updateCharacterVirtualWindow);
-      } else {
-        updateCharacterVirtualWindow();
-      }
-    };
+    const scheduleCharacterVirtualWindow =
+      typeof state.createUiScheduler === "function"
+        ? state.createUiScheduler(updateCharacterVirtualWindow)
+        : () => {
+            if (typeof window === "undefined") return;
+            const run = () => updateCharacterVirtualWindow();
+            if (typeof nextTick === "function") {
+              nextTick(() => {
+                if (typeof window.requestAnimationFrame === "function") {
+                  window.requestAnimationFrame(run);
+                } else {
+                  run();
+                }
+              });
+              return;
+            }
+            if (typeof window.requestAnimationFrame === "function") {
+              window.requestAnimationFrame(run);
+            } else {
+              run();
+            }
+          };
 
     state.visibleCharacters = computed(() => {
       const list = state.characters.value || [];
@@ -439,16 +465,12 @@
       }
     };
 
-    watch(
-      () => state.currentView.value,
-      async (view) => {
-        if (view === "strategy") {
-          await ensureCharacterDataLoaded();
-          scheduleCharacterVirtualWindow();
-        }
-      },
-      { immediate: true }
-    );
+    watch(() => state.currentView.value, async (view) => {
+      if (view === "strategy") {
+        await ensureCharacterDataLoaded();
+        scheduleCharacterVirtualWindow();
+      }
+    });
 
     watch(
       [() => state.characters.value.length, state.selectedCharacterId, state.charactersLoaded],
@@ -468,7 +490,9 @@
       if (typeof window === "undefined") return;
       window.addEventListener("scroll", scheduleCharacterVirtualWindow, { passive: true });
       window.addEventListener("resize", scheduleCharacterVirtualWindow);
-      scheduleCharacterVirtualWindow();
+      if (state.currentView.value === "strategy") {
+        ensureCharacterDataLoaded().finally(scheduleCharacterVirtualWindow);
+      }
     });
 
     onBeforeUnmount(() => {

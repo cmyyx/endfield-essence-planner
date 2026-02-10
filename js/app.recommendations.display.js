@@ -107,25 +107,28 @@
       state.recommendationBottomSpacer.value = Math.max(0, (list.length - endIndex) * itemHeight);
     };
 
-    const scheduleRecommendationVirtualWindow = () => {
-      if (typeof window === "undefined") return;
-      const run = () => updateRecommendationVirtualWindow();
-      if (typeof nextTick === "function") {
-        nextTick(() => {
-          if (typeof window.requestAnimationFrame === "function") {
-            window.requestAnimationFrame(run);
-          } else {
-            run();
-          }
-        });
-        return;
-      }
-      if (typeof window.requestAnimationFrame === "function") {
-        window.requestAnimationFrame(run);
-      } else {
-        run();
-      }
-    };
+    const scheduleRecommendationVirtualWindow =
+      typeof state.createUiScheduler === "function"
+        ? state.createUiScheduler(updateRecommendationVirtualWindow)
+        : () => {
+            if (typeof window === "undefined") return;
+            const run = () => updateRecommendationVirtualWindow();
+            if (typeof nextTick === "function") {
+              nextTick(() => {
+                if (typeof window.requestAnimationFrame === "function") {
+                  window.requestAnimationFrame(run);
+                } else {
+                  run();
+                }
+              });
+              return;
+            }
+            if (typeof window.requestAnimationFrame === "function") {
+              window.requestAnimationFrame(run);
+            } else {
+              run();
+            }
+          };
 
     const visibleDisplayRecommendations = computed(() => {
       const list = displayRecommendations.value;

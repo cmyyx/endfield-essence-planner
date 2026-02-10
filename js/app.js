@@ -51,14 +51,20 @@
     window.__renderBootError = renderBootError;
   }
 
-  const loadScript = (src) =>
-    new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Failed to load: " + src));
-      document.body.appendChild(script);
-    });
+  const loadScript =
+    (typeof window !== "undefined" && window.__loadScript) ||
+    ((src) =>
+      new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error("Failed to load: " + src));
+        document.body.appendChild(script);
+      }));
+
+  if (typeof window !== "undefined" && !window.__loadScript) {
+    window.__loadScript = loadScript;
+  }
 
   const scripts = [
     "./js/app.core.js",

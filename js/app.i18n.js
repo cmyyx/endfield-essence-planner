@@ -205,17 +205,21 @@
       if (sub) sub.textContent = t("首次打开或强制刷新可能稍慢");
     };
 
+    let localeWatchSeq = 0;
     watch(
       locale,
       async (value) => {
+        const requestId = ++localeWatchSeq;
         const normalized = normalizeLocale(value);
         if (!isLocaleLoaded(normalized)) {
           const loaded = await ensureLocaleLoaded(normalized);
+          if (requestId !== localeWatchSeq) return;
           if (!loaded && normalized !== fallbackLocale) {
             locale.value = fallbackLocale;
             return;
           }
         }
+        if (requestId !== localeWatchSeq) return;
         i18nState.locale = normalized;
         if (typeof document !== "undefined") {
           document.documentElement.lang = normalized;

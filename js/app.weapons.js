@@ -304,25 +304,28 @@
       state.weaponGridBottomSpacer.value = bottomSpacer;
     };
 
-    const scheduleWeaponGridWindow = () => {
-      if (typeof window === "undefined") return;
-      const run = () => updateWeaponGridWindow();
-      if (typeof nextTick === "function") {
-        nextTick(() => {
-          if (typeof window.requestAnimationFrame === "function") {
-            window.requestAnimationFrame(run);
-          } else {
-            run();
-          }
-        });
-        return;
-      }
-      if (typeof window.requestAnimationFrame === "function") {
-        window.requestAnimationFrame(run);
-      } else {
-        run();
-      }
-    };
+    const scheduleWeaponGridWindow =
+      typeof state.createUiScheduler === "function"
+        ? state.createUiScheduler(updateWeaponGridWindow)
+        : () => {
+            if (typeof window === "undefined") return;
+            const run = () => updateWeaponGridWindow();
+            if (typeof nextTick === "function") {
+              nextTick(() => {
+                if (typeof window.requestAnimationFrame === "function") {
+                  window.requestAnimationFrame(run);
+                } else {
+                  run();
+                }
+              });
+              return;
+            }
+            if (typeof window.requestAnimationFrame === "function") {
+              window.requestAnimationFrame(run);
+            } else {
+              run();
+            }
+          };
 
     const visibleFilteredWeapons = computed(() => {
       const rows = filteredWeapons.value;

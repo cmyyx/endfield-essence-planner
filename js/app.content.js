@@ -41,7 +41,7 @@
       pendingSponsorLoad = (async () => {
         try {
           await state.loadScriptOnce("./data/sponsors.js");
-          sponsorsLoaded = Boolean(Array.isArray(window.SPONSORS));
+          sponsorsLoaded = Array.isArray(window.SPONSORS);
           return sponsorsLoaded;
         } catch (error) {
           return false;

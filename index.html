@@ -2483,14 +2483,19 @@
 
     <script>
       (function () {
-        const loadScript = (src) =>
-          new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = src;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error("Failed to load: " + src));
-            document.body.appendChild(script);
-          });
+        const loadScript =
+          (typeof window !== "undefined" && window.__loadScript) ||
+          ((src) =>
+            new Promise((resolve, reject) => {
+              const script = document.createElement("script");
+              script.src = src;
+              script.onload = () => resolve();
+              script.onerror = () => reject(new Error("Failed to load: " + src));
+              document.body.appendChild(script);
+            }));
+        if (typeof window !== "undefined" && !window.__loadScript) {
+          window.__loadScript = loadScript;
+        }
         const vuePromise = loadScript("./vendor/vue.global.prod.js");
         const dataPromise = Promise.all([
           loadScript("./data/dungeons.js"),

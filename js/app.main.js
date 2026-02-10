@@ -90,10 +90,7 @@
     },
   };
 
-  const scriptLoadRegistry =
-    typeof window !== "undefined"
-      ? (window.__scriptLoadRegistry = window.__scriptLoadRegistry || new Map())
-      : new Map();
+  const scriptLoadRegistry = new Map();
 
   const normalizeScriptSrc = (src) => {
     if (!src) return "";
@@ -152,6 +149,26 @@
     return pending;
   };
 
+  const createUiScheduler = (updateFn) => () => {
+    if (typeof window === "undefined") return;
+    const run = () => updateFn();
+    if (typeof nextTick === "function") {
+      nextTick(() => {
+        if (typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(run);
+        } else {
+          run();
+        }
+      });
+      return;
+    }
+    if (typeof window.requestAnimationFrame === "function") {
+      window.requestAnimationFrame(run);
+    } else {
+      run();
+    }
+  };
+
   const modules = window.AppModules || {};
 
   const app = createApp({
@@ -159,6 +176,7 @@
       const ctx = { ref, computed, onMounted, onBeforeUnmount, watch, nextTick };
       const state = {};
       state.loadScriptOnce = loadScriptOnce;
+      state.createUiScheduler = createUiScheduler;
       const init = (name) => {
         const fn = modules[name];
         if (typeof fn === "function") {
