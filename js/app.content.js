@@ -59,7 +59,8 @@
         const baseLoaded = await ensureBaseContentLoaded();
         if (!baseLoaded) return false;
         if (withSponsors) {
-          await ensureSponsorsLoaded();
+          const sponsorsLoaded = await ensureSponsorsLoaded();
+          if (!sponsorsLoaded) return false;
         }
         return true;
       } finally {

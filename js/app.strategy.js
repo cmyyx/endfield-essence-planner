@@ -318,45 +318,34 @@
       overscanRows: 2,
     });
 
-    const updateCharacterVirtualWindow = () => {
-      const list = state.characters.value || [];
-      if (!list.length) {
-        characterVirtual.value = {
-          ...characterVirtual.value,
-          startIndex: 0,
-          endIndex: 0,
-        };
-        state.characterGridTopSpacer.value = 0;
-        state.characterGridBottomSpacer.value = 0;
-        return;
-      }
+    const characterVirtualMetrics = {
+      valid: false,
+      listLength: 0,
+      columns: 1,
+      rowHeight: 220,
+      gap: 16,
+      totalRows: 0,
+      gridTop: 0,
+    };
 
-      if (
-        state.currentView.value !== "strategy" ||
-        state.selectedCharacterId.value ||
-        typeof window === "undefined"
-      ) {
-        characterVirtual.value = {
-          ...characterVirtual.value,
-          startIndex: 0,
-          endIndex: list.length,
-        };
-        state.characterGridTopSpacer.value = 0;
-        state.characterGridBottomSpacer.value = 0;
-        return;
-      }
+    const invalidateCharacterVirtualMetrics = () => {
+      characterVirtualMetrics.valid = false;
+    };
 
+    const resetCharacterVirtualWindow = (listLength) => {
+      characterVirtual.value = {
+        ...characterVirtual.value,
+        startIndex: 0,
+        endIndex: listLength,
+      };
+      state.characterGridTopSpacer.value = 0;
+      state.characterGridBottomSpacer.value = 0;
+    };
+
+    const measureCharacterVirtualMetrics = (list) => {
+      if (typeof window === "undefined") return false;
       const grid = document.querySelector(".character-grid");
-      if (!grid) {
-        characterVirtual.value = {
-          ...characterVirtual.value,
-          startIndex: 0,
-          endIndex: list.length,
-        };
-        state.characterGridTopSpacer.value = 0;
-        state.characterGridBottomSpacer.value = 0;
-        return;
-      }
+      if (!grid) return false;
 
       const styles = window.getComputedStyle(grid);
       const gap = parseFloat(styles.rowGap || styles.gap || "16") || 16;
@@ -369,32 +358,74 @@
       const minCardWidth = Math.max(80, cssMinCardWidth);
       const columns = Math.max(1, Math.floor((grid.clientWidth + gap) / (minCardWidth + gap)));
       const totalRows = Math.ceil(list.length / columns);
+      const scrollTop = window.scrollY || window.pageYOffset || 0;
+      const gridTop = grid.getBoundingClientRect().top + scrollTop;
+
+      characterVirtualMetrics.valid = true;
+      characterVirtualMetrics.listLength = list.length;
+      characterVirtualMetrics.columns = columns;
+      characterVirtualMetrics.rowHeight = rowHeight;
+      characterVirtualMetrics.gap = gap;
+      characterVirtualMetrics.totalRows = totalRows;
+      characterVirtualMetrics.gridTop = gridTop;
+      return true;
+    };
+
+    const updateCharacterVirtualWindow = () => {
+      const list = state.characters.value || [];
+      if (!list.length) {
+        invalidateCharacterVirtualMetrics();
+        resetCharacterVirtualWindow(0);
+        return;
+      }
+
+      if (
+        state.currentView.value !== "strategy" ||
+        state.selectedCharacterId.value ||
+        typeof window === "undefined"
+      ) {
+        invalidateCharacterVirtualMetrics();
+        resetCharacterVirtualWindow(list.length);
+        return;
+      }
+
+      if (!characterVirtualMetrics.valid || characterVirtualMetrics.listLength !== list.length) {
+        const measured = measureCharacterVirtualMetrics(list);
+        if (!measured) {
+          resetCharacterVirtualWindow(list.length);
+          return;
+        }
+      }
 
       const viewportHeight =
         window.innerHeight ||
         (document.documentElement && document.documentElement.clientHeight) ||
         0;
       const scrollTop = window.scrollY || window.pageYOffset || 0;
-      const gridTop = grid.getBoundingClientRect().top + scrollTop;
-      const viewTop = Math.max(0, scrollTop - gridTop);
+      const viewTop = Math.max(0, scrollTop - characterVirtualMetrics.gridTop);
 
       const overscanRows = characterVirtual.value.overscanRows;
-      const startRow = Math.max(0, Math.floor(viewTop / rowHeight) - overscanRows);
-      const visibleRows = Math.max(1, Math.ceil(viewportHeight / rowHeight) + overscanRows * 2 + 1);
-      const endRow = Math.min(totalRows, startRow + visibleRows);
+      const startRow = Math.max(
+        0,
+        Math.floor(viewTop / characterVirtualMetrics.rowHeight) - overscanRows
+      );
+      const visibleRows =
+        Math.max(1, Math.ceil(viewportHeight / characterVirtualMetrics.rowHeight) + overscanRows * 2 + 1);
+      const endRow = Math.min(characterVirtualMetrics.totalRows, startRow + visibleRows);
 
-      const startIndex = Math.min(list.length, startRow * columns);
-      const endIndex = Math.min(list.length, endRow * columns);
-      const topSpacer = startRow * rowHeight;
-      const bottomSpacer = Math.max(0, (totalRows - endRow) * rowHeight);
+      const startIndex = Math.min(list.length, startRow * characterVirtualMetrics.columns);
+      const endIndex = Math.min(list.length, endRow * characterVirtualMetrics.columns);
+      const topSpacer = startRow * characterVirtualMetrics.rowHeight;
+      const bottomSpacer =
+        Math.max(0, (characterVirtualMetrics.totalRows - endRow) * characterVirtualMetrics.rowHeight);
 
       characterVirtual.value = {
         ...characterVirtual.value,
         startIndex,
         endIndex,
-        columns,
-        rowHeight,
-        gap,
+        columns: characterVirtualMetrics.columns,
+        rowHeight: characterVirtualMetrics.rowHeight,
+        gap: characterVirtualMetrics.gap,
       };
       state.characterGridTopSpacer.value = topSpacer;
       state.characterGridBottomSpacer.value = bottomSpacer;
@@ -423,6 +454,15 @@
             }
           };
 
+    const handleCharacterVirtualScroll = () => {
+      scheduleCharacterVirtualWindow();
+    };
+
+    const handleCharacterVirtualResize = () => {
+      invalidateCharacterVirtualMetrics();
+      scheduleCharacterVirtualWindow();
+    };
+
     state.visibleCharacters = computed(() => {
       const list = state.characters.value || [];
       const start = Math.max(0, characterVirtual.value.startIndex || 0);
@@ -437,7 +477,16 @@
 
     state.selectCharacter = async (id) => {
       if (!state.charactersLoaded.value) {
-        await ensureCharacterDataLoaded();
+        try {
+          const loaded = await ensureCharacterDataLoaded();
+          if (!loaded) {
+            console.warn("Failed to load character data before opening character details.");
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to load character data before opening character details.", error);
+          return;
+        }
       }
       state.selectedCharacterId.value = id;
       resetStrategyDefaults();
@@ -467,7 +516,9 @@
 
     watch(() => state.currentView.value, async (view) => {
       if (view === "strategy") {
-        await ensureCharacterDataLoaded();
+        invalidateCharacterVirtualMetrics();
+        const loaded = await ensureCharacterDataLoaded();
+        if (!loaded) return;
         scheduleCharacterVirtualWindow();
       }
     });
@@ -482,23 +533,25 @@
         ) {
           state.selectedCharacterId.value = null;
         }
+        invalidateCharacterVirtualMetrics();
         scheduleCharacterVirtualWindow();
       }
     );
 
     onMounted(() => {
       if (typeof window === "undefined") return;
-      window.addEventListener("scroll", scheduleCharacterVirtualWindow, { passive: true });
-      window.addEventListener("resize", scheduleCharacterVirtualWindow);
+      window.addEventListener("scroll", handleCharacterVirtualScroll, { passive: true });
+      window.addEventListener("resize", handleCharacterVirtualResize);
       if (state.currentView.value === "strategy") {
+        invalidateCharacterVirtualMetrics();
         ensureCharacterDataLoaded().finally(scheduleCharacterVirtualWindow);
       }
     });
 
     onBeforeUnmount(() => {
       if (typeof window === "undefined") return;
-      window.removeEventListener("scroll", scheduleCharacterVirtualWindow);
-      window.removeEventListener("resize", scheduleCharacterVirtualWindow);
+      window.removeEventListener("scroll", handleCharacterVirtualScroll);
+      window.removeEventListener("resize", handleCharacterVirtualResize);
     });
 
     const getGuideContainer = (el) => {
