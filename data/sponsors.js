@@ -21,4 +21,6 @@ window.SPONSORS = [
   { name: "VSWFTX", amount: "CNY 10.00", note: "感谢开发与维护,很好用的工具^_^", date: "2026-02-09" },
   { name: "匿名", amount: "CNY 10.00", note: "", date: "2026-02-15" },
   { name: "李帅辰", amount: "CNY 7.99", note: "好用爱用,希望能一直更新下去,加油喵", date: "2026-02-25" },
+  { name: "匿名", amount: "CNY 100.00", note: "感谢up的网站", date: "2026-02-25" },
+  { name: "victim", amount: "CNY 5.00", note: "很好用", date: "2026-02-25" },
 ];

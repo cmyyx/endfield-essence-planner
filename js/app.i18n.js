@@ -272,5 +272,6 @@
     state.tRegionPriorityModeOptions = tRegionPriorityModeOptions;
     state.tOwnershipPriorityModeOptions = tOwnershipPriorityModeOptions;
     state.tStrictPriorityOrderOptions = tStrictPriorityOrderOptions;
+    state.localeRenderVersion = localeRenderVersion;
   };
 })();

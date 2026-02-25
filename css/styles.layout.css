@@ -23,16 +23,27 @@
         position: fixed;
         inset: 0;
         z-index: -2;
-        background-image:
-          radial-gradient(1400px 900px at 50% 20%, rgba(77, 214, 201, 0.12), transparent 60%),
-          var(--bg-image),
-          linear-gradient(120deg, rgba(11, 15, 20, 0.92), rgba(16, 23, 34, 0.92) 45%, rgba(20, 28, 43, 0.92));
-        background-size: auto, cover, auto;
-        background-position: center, center, center;
-        background-repeat: no-repeat, no-repeat, no-repeat;
+        background-image: var(--bg-image);
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         opacity: 1;
         transition: opacity 0.75s ease;
         pointer-events: none;
+      }
+
+      html.bg-display-disabled body::before {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        background-image: none !important;
+      }
+
+      html[data-bg-display="off"] body::before {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        background-image: none !important;
       }
 
       html.bg-image-fading-in body::before {
@@ -49,9 +60,16 @@
         inset: 0;
         z-index: -1;
         pointer-events: none;
-        background-image:
-          linear-gradient(120deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0) 30%);
-        opacity: 0.3;
+        background: var(--bg-overlay-solid);
+        opacity: 0.4;
+      }
+
+      html.bg-display-disabled body::after {
+        opacity: 1;
+      }
+
+      html[data-bg-display="off"] body::after {
+        opacity: 1;
       }
 
       [v-cloak] {
@@ -1608,6 +1626,9 @@
       .gear-note {
         font-size: 12px;
         color: rgba(195, 205, 219, 0.55);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .gear-empty {
@@ -1777,6 +1798,9 @@
       .team-note {
         font-size: 12px;
         color: rgba(195, 205, 219, 0.55);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .team-empty {

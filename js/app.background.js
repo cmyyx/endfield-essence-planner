@@ -6,6 +6,7 @@
     const storageKey = state.backgroundStorageKey || "planner-bg-image:v1";
     const apiStorageKey = state.backgroundApiStorageKey || "planner-bg-api:v1";
     const root = typeof document !== "undefined" ? document.documentElement : null;
+    const backgroundDisabledClass = "bg-display-disabled";
     const defaultBackgroundUrl = "https://img.canmoe.com/image?img=ua";
     let mounted = false;
     let fallbackFadeTimer = null;
@@ -58,9 +59,32 @@
       }
     };
 
+    const setBackgroundVisualEnabled = (enabled) => {
+      if (!root) return;
+      const visualEnabled = Boolean(enabled);
+      root.classList.toggle(backgroundDisabledClass, !visualEnabled);
+      root.setAttribute("data-bg-display", visualEnabled ? "on" : "off");
+      if (!visualEnabled) {
+        clearFadeTimer();
+        root.style.setProperty("--bg-image", "none");
+      } else if (String(root.style.getPropertyValue("--bg-image") || "").trim() === "none") {
+        root.style.removeProperty("--bg-image");
+      }
+    };
+
+    const isLowGpuMode = () => Boolean(state.lowGpuEnabled && state.lowGpuEnabled.value);
+
+    const isStandardBackgroundEnabled = () => {
+      if (isLowGpuMode()) return false;
+      if (state.backgroundDisplayEnabled && "value" in state.backgroundDisplayEnabled) {
+        return state.backgroundDisplayEnabled.value !== false;
+      }
+      return true;
+    };
+
     const shouldUseDefaultBackground = () => {
       if (!root) return false;
-      if (state.lowGpuEnabled && state.lowGpuEnabled.value) return false;
+      if (!isStandardBackgroundEnabled()) return false;
       const customFile = state.customBackground ? state.customBackground.value : "";
       if (customFile) return false;
       const customApi = state.customBackgroundApi ? state.customBackgroundApi.value : "";
@@ -86,10 +110,14 @@
 
     const applyBackground = () => {
       if (!root) return;
-      if (state.lowGpuEnabled && state.lowGpuEnabled.value) {
-        applyRootBackground("", { fade: false });
+      if (!isStandardBackgroundEnabled()) {
+        setBackgroundVisualEnabled(false);
+        // Hard-disable the image layer so the UI switch always has visible effect.
+        clearFadeTimer();
+        root.style.setProperty("--bg-image", "none");
         return;
       }
+      setBackgroundVisualEnabled(true);
       const customFile = state.customBackground ? state.customBackground.value : "";
       if (customFile) {
         applyRootBackground(customFile, { fade: mounted });
@@ -198,6 +226,23 @@
       applyBackground();
     };
 
+    const setBackgroundDisplayEnabled = (enabled) => {
+      const next = Boolean(enabled);
+      if (state.backgroundDisplayEnabled && state.backgroundDisplayEnabled.value === next) {
+        applyBackground();
+        return;
+      }
+      if (state.backgroundDisplayEnabled) {
+        state.backgroundDisplayEnabled.value = next;
+      }
+      applyBackground();
+    };
+
+    const toggleBackgroundDisplayEnabled = () => {
+      const current = Boolean(state.backgroundDisplayEnabled && state.backgroundDisplayEnabled.value);
+      setBackgroundDisplayEnabled(!current);
+    };
+
     const handleBackgroundFile = (event) => {
       const input = event && event.target;
       const file = input && input.files && input.files[0];
@@ -235,7 +280,11 @@
     applyBackground();
 
     watch(
-      () => [state.customBackground.value, state.lowGpuEnabled.value],
+      () => [
+        state.customBackground.value,
+        state.lowGpuEnabled.value,
+        state.backgroundDisplayEnabled ? state.backgroundDisplayEnabled.value : true,
+      ],
       () => applyBackground(),
       { immediate: true }
     );
@@ -256,11 +305,17 @@
     if (typeof onBeforeUnmount === "function") {
       onBeforeUnmount(() => {
         clearFadeTimer();
+        if (root) {
+          root.classList.remove(backgroundDisabledClass);
+          root.removeAttribute("data-bg-display");
+        }
       });
     }
 
     state.handleBackgroundFile = handleBackgroundFile;
     state.clearCustomBackground = clearCustomBackground;
+    state.setBackgroundDisplayEnabled = setBackgroundDisplayEnabled;
+    state.toggleBackgroundDisplayEnabled = toggleBackgroundDisplayEnabled;
     state.reapplyBackground = applyBackground;
   };
 })();

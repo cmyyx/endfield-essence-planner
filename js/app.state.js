@@ -39,6 +39,7 @@
     state.langStorageKey = "planner-lang";
     state.backgroundStorageKey = "planner-bg-image:v1";
     state.backgroundApiStorageKey = "planner-bg-api:v1";
+    state.backgroundDisplayStorageKey = "planner-bg-display:v1";
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
     // 更新方案推荐设置时递增该版本号，可让红点对所有用户重新显示一次。
     state.planConfigHintVersion = "4";
@@ -53,6 +54,7 @@
     state.customBackgroundName = ref("");
     state.customBackgroundError = ref("");
     state.customBackgroundApi = ref("");
+    state.backgroundDisplayEnabled = ref(true);
 
     state.showNotice = ref(false);
     state.showChangelog = ref(false);
@@ -153,6 +155,8 @@
     state.migrationConflictStrategy = ref("fillMissing");
     state.showMigrationConfirmModal = ref(false);
     state.migrationConfirmAction = ref("");
+    state.migrationPreviewExpanded = ref(false);
+    state.migrationModalScrollable = ref(false);
 
     state.tutorialVersion = "1.0.0";
     state.tutorialActive = ref(false);

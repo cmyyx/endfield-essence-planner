@@ -2,7 +2,7 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initMigration = function initMigration(ctx, state) {
-    const { computed, watch, onMounted } = ctx;
+    const { computed, watch, onMounted, onBeforeUnmount, nextTick } = ctx;
 
     const defaultMark = { weaponOwned: false, essenceOwned: false, note: "" };
 
@@ -71,73 +71,142 @@
       return Object.keys(normalized).length ? normalized : null;
     };
 
+    const getMigrationTargetNames = (legacy, mappingMode) => {
+      const legacyNames = Object.keys(legacy || {});
+      if (mappingMode !== "weaponUnowned") return legacyNames;
+      const result = [];
+      const seen = new Set();
+      const catalog = Array.isArray(weapons) ? weapons : [];
+      catalog.forEach((weapon) => {
+        const name = weapon && typeof weapon.name === "string" ? weapon.name : "";
+        if (!name || seen.has(name)) return;
+        seen.add(name);
+        result.push(name);
+      });
+      legacyNames.forEach((name) => {
+        if (!name || seen.has(name)) return;
+        seen.add(name);
+        result.push(name);
+      });
+      return result;
+    };
+
     const buildPatchByMapping = (legacyEntry, mappingMode) => {
       const patch = {};
+      if (mappingMode === "weaponUnowned") {
+        patch.weaponOwned = !(legacyEntry && legacyEntry.excluded);
+        return patch;
+      }
       if (legacyEntry && legacyEntry.excluded) {
-        if (mappingMode === "weaponUnowned") {
-          patch.weaponOwned = false;
-        } else {
-          patch.essenceOwned = true;
-        }
+        patch.essenceOwned = true;
       }
       return patch;
     };
 
-    const detectConflict = (current, patch, note, hasCurrentStored, currentRaw) => {
-      if (!hasCurrentStored) return false;
+    const detectConflictFields = (patch, note, hasCurrentStored, currentRaw) => {
+      if (!hasCurrentStored) return [];
       const raw = currentRaw && typeof currentRaw === "object" ? currentRaw : {};
-      const hasStatusConflict = Object.keys(patch).some((key) => {
-        if (!Object.prototype.hasOwnProperty.call(raw, key)) return false;
-        return current[key] !== patch[key];
+      const fields = [];
+      Object.keys(patch).forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(raw, key)) {
+          fields.push(key);
+        }
       });
-      const hasNoteConflict = Boolean(
-        note &&
-          Object.prototype.hasOwnProperty.call(raw, "note") &&
-          current.note &&
-          current.note !== note
-      );
-      return hasStatusConflict || hasNoteConflict;
+      if (note && Object.prototype.hasOwnProperty.call(raw, "note")) {
+        fields.push("note");
+      }
+      return fields;
+    };
+
+    const detectConflict = (current, patch, note, hasCurrentStored, currentRaw) => {
+      return detectConflictFields(patch, note, hasCurrentStored, currentRaw).length > 0;
     };
 
     const migrationPreview = computed(() => {
       const legacy = state.legacyMigrationMarks.value || {};
-      const names = Object.keys(legacy);
+      const legacyNames = Object.keys(legacy);
       const mappingMode = state.migrationMappingMode.value || "essenceOwned";
+      const names = getMigrationTargetNames(legacy, mappingMode);
       const currentMap = state.weaponMarks.value || {};
 
       let effectCount = 0;
       let conflictCount = 0;
       let statusChangeCount = 0;
       let noteChangeCount = 0;
+      const effectItems = [];
+      const conflictItems = [];
 
       names.forEach((name) => {
-        const entry = legacy[name];
-        if (!entry || typeof entry !== "object") return;
+        const rawLegacyEntry = legacy[name];
+        const entry =
+          rawLegacyEntry && typeof rawLegacyEntry === "object" ? rawLegacyEntry : null;
         const hasCurrentStored = Object.prototype.hasOwnProperty.call(currentMap, name);
         const currentRaw = hasCurrentStored ? currentMap[name] : null;
         const current = normalizeCurrentMark(name, currentMap);
         const patch = buildPatchByMapping(entry, mappingMode);
-        const note = typeof entry.note === "string" ? entry.note : "";
+        const note = entry && typeof entry.note === "string" ? entry.note : "";
+        const conflictFields = detectConflictFields(patch, note, hasCurrentStored, currentRaw);
+        const conflict = conflictFields.length > 0;
 
-        const hasStatusChange = Object.keys(patch).some((key) => current[key] !== patch[key]);
-        const hasNoteChange = Boolean(note && current.note !== note);
-        if (!hasStatusChange && !hasNoteChange) return;
+        const statusChanges = Object.keys(patch)
+          .filter((key) => current[key] !== patch[key])
+          .map((key) => ({
+            field: key,
+            from: current[key],
+            to: patch[key],
+          }));
+        const noteChange =
+          note && current.note !== note
+            ? {
+                field: "note",
+                from: current.note,
+                to: note,
+              }
+            : null;
+        const changes = noteChange ? statusChanges.concat([noteChange]) : statusChanges;
+        const hasStatusChange = statusChanges.length > 0;
+        const hasNoteChange = Boolean(noteChange);
+
+        if (!hasStatusChange && !hasNoteChange) {
+          if (conflict) {
+            conflictCount += 1;
+            conflictItems.push({
+              name,
+              conflictFields,
+              changes: [],
+            });
+          }
+          return;
+        }
 
         effectCount += 1;
         if (hasStatusChange) statusChangeCount += 1;
         if (hasNoteChange) noteChangeCount += 1;
+        effectItems.push({
+          name,
+          changes,
+          conflict,
+          conflictFields,
+        });
 
-        if (detectConflict(current, patch, note, hasCurrentStored, currentRaw)) {
+        if (conflict) {
           conflictCount += 1;
+          conflictItems.push({
+            name,
+            conflictFields,
+            changes,
+          });
         }
       });
 
       return {
-        totalLegacyCount: names.length,
+        totalLegacyCount: legacyNames.length,
         effectCount,
         conflictCount,
         statusChangeCount,
         noteChangeCount,
+        effectItems,
+        conflictItems,
       };
     });
 
@@ -167,32 +236,53 @@
       },
     ];
 
+    const updateMigrationModalScrollable = () => {
+      nextTick(() => {
+        const card = document.querySelector(
+          ".migration-overlay .migration-card:not(.migration-confirm-card)"
+        );
+        if (!card) {
+          state.migrationModalScrollable.value = false;
+          return;
+        }
+        state.migrationModalScrollable.value = card.scrollHeight - card.clientHeight > 1;
+      });
+    };
+
+    const toggleMigrationPreviewDetails = () => {
+      state.migrationPreviewExpanded.value = !state.migrationPreviewExpanded.value;
+      updateMigrationModalScrollable();
+    };
+
     const closeMigrationModals = () => {
       state.showMigrationConfirmModal.value = false;
       state.migrationConfirmAction.value = "";
       state.showMigrationModal.value = false;
+      state.migrationPreviewExpanded.value = false;
+      state.migrationModalScrollable.value = false;
     };
 
     const applyMigration = () => {
       const legacy = state.legacyMigrationMarks.value || {};
-      const names = Object.keys(legacy);
+      const mappingMode = state.migrationMappingMode.value || "essenceOwned";
+      const names = getMigrationTargetNames(legacy, mappingMode);
       if (!names.length) {
         closeMigrationModals();
         return;
       }
 
-      const mappingMode = state.migrationMappingMode.value || "essenceOwned";
       const strategy = state.migrationConflictStrategy.value || "fillMissing";
       const currentMap = { ...(state.weaponMarks.value || {}) };
 
       names.forEach((name) => {
-        const entry = legacy[name];
-        if (!entry || typeof entry !== "object") return;
+        const rawLegacyEntry = legacy[name];
+        const entry =
+          rawLegacyEntry && typeof rawLegacyEntry === "object" ? rawLegacyEntry : null;
         const hasCurrentStored = Object.prototype.hasOwnProperty.call(currentMap, name);
         const currentRaw = hasCurrentStored ? currentMap[name] : null;
         const current = normalizeCurrentMark(name, currentMap);
         const patch = buildPatchByMapping(entry, mappingMode);
-        const note = typeof entry.note === "string" ? entry.note : "";
+        const note = entry && typeof entry.note === "string" ? entry.note : "";
 
         const hasStatusChange = Object.keys(patch).some((key) => current[key] !== patch[key]);
         const hasNoteChange = Boolean(note && current.note !== note);
@@ -295,15 +385,21 @@
       if (!hasLegacyData.value) {
         state.showMigrationModal.value = false;
         state.showMigrationConfirmModal.value = false;
+        state.migrationPreviewExpanded.value = false;
+        state.migrationModalScrollable.value = false;
         return;
       }
       const decision = getStoredDecision();
       if (decision.status === "done" || decision.status === "discarded") {
         state.showMigrationModal.value = false;
         state.showMigrationConfirmModal.value = false;
+        state.migrationPreviewExpanded.value = false;
+        state.migrationModalScrollable.value = false;
         return;
       }
+      state.migrationPreviewExpanded.value = false;
       state.showMigrationModal.value = true;
+      updateMigrationModalScrollable();
     };
 
     watch(hasLegacyData, () => {
@@ -314,6 +410,36 @@
       () => state.migrationMappingMode.value,
       () => {
         ensureValidConflictStrategy();
+        if (state.showMigrationModal.value) {
+          updateMigrationModalScrollable();
+        }
+      }
+    );
+
+    watch(
+      () => state.showMigrationModal.value,
+      (visible) => {
+        if (!visible) {
+          state.migrationModalScrollable.value = false;
+          return;
+        }
+        updateMigrationModalScrollable();
+      }
+    );
+
+    watch(
+      () => state.migrationPreviewExpanded.value,
+      () => {
+        if (!state.showMigrationModal.value) return;
+        updateMigrationModalScrollable();
+      }
+    );
+
+    watch(
+      migrationPreview,
+      () => {
+        if (!state.showMigrationModal.value) return;
+        updateMigrationModalScrollable();
       }
     );
 
@@ -322,19 +448,37 @@
       (hasConflict) => {
         if (!hasConflict) {
           state.migrationConflictStrategy.value = "fillMissing";
-          return;
+        } else {
+          ensureValidConflictStrategy();
         }
-        ensureValidConflictStrategy();
+        if (state.showMigrationModal.value) {
+          updateMigrationModalScrollable();
+        }
       },
       { immediate: true }
     );
 
+    const handleWindowResize = () => {
+      if (!state.showMigrationModal.value) return;
+      updateMigrationModalScrollable();
+    };
+
     onMounted(() => {
       maybeAutoOpenMigrationModal();
+      if (typeof window !== "undefined") {
+        window.addEventListener("resize", handleWindowResize);
+      }
+    });
+
+    onBeforeUnmount(() => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", handleWindowResize);
+      }
     });
 
     state.hasLegacyMigrationData = hasLegacyData;
     state.migrationPreview = migrationPreview;
+    state.toggleMigrationPreviewDetails = toggleMigrationPreviewDetails;
     state.shouldShowConflictStrategy = shouldShowConflictStrategy;
     state.migrationConflictOptions = migrationConflictOptions;
     state.openMigrationConfirm = openMigrationConfirm;

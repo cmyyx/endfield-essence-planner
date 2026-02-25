@@ -21,7 +21,8 @@
         position: relative;
       }
 
-      .slot-inline-card .slot-provider-net {
+      .slot-inline-card .slot-provider-net,
+      .slot-inline-card .adwork-net {
         display: block;
         width: 100%;
       }
@@ -46,7 +47,8 @@
         position: relative;
       }
 
-      .slot-hero-shell .slot-provider-net {
+      .slot-hero-shell .slot-provider-net,
+      .slot-hero-shell .adwork-net {
         display: block;
         width: 100%;
       }
@@ -87,6 +89,15 @@
         z-index: 5;
       }
 
+      .slot-hero-shell.is-slot-compact .slot-close-button,
+      .slot-inline-top.is-slot-compact .slot-close-button {
+        width: 20px;
+        height: 20px;
+        top: 3px;
+        right: 3px;
+        font-size: 12px;
+      }
+
       .slot-preview-banner {
         width: min(100%, 640px);
         min-height: 88px;
@@ -104,9 +115,7 @@
       }
 
       .slot-hero-shell.is-slot-hidden,
-      .slot-inline-top.is-slot-hidden,
-      .slot-hero-shell.is-slot-compact,
-      .slot-inline-top.is-slot-compact {
+      .slot-inline-top.is-slot-hidden {
         display: flex;
         align-items: center;
         flex-direction: column;
@@ -120,13 +129,44 @@
         justify-content: center;
       }
 
+      .slot-hero-shell.is-slot-compact,
+      .slot-inline-top.is-slot-compact {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        gap: 2px;
+        min-height: 44px !important;
+        padding: 3px 8px;
+        border-style: dashed;
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.02);
+        box-shadow: none;
+        justify-content: center;
+      }
+
+      .slot-inline-card.slot-inline-top.is-slot-compact {
+        min-height: 44px !important;
+        height: auto !important;
+      }
+
       .slot-hero-shell.is-slot-hidden .slot-provider-net,
       .slot-inline-top.is-slot-hidden .slot-provider-net,
+      .slot-hero-shell.is-slot-hidden .adwork-net,
+      .slot-inline-top.is-slot-hidden .adwork-net {
+        min-height: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden;
+      }
+
       .slot-hero-shell.is-slot-compact .slot-provider-net,
-      .slot-inline-top.is-slot-compact .slot-provider-net {
-        min-height: 0;
-        height: 0;
-        max-height: 0;
+      .slot-inline-top.is-slot-compact .slot-provider-net,
+      .slot-hero-shell.is-slot-compact .adwork-net,
+      .slot-inline-top.is-slot-compact .adwork-net {
+        width: 100%;
+        min-height: 0 !important;
+        height: 0 !important;
+        max-height: 0 !important;
         overflow: hidden;
       }
 
@@ -184,6 +224,7 @@
         color: rgba(214, 225, 238, 0.78);
         text-align: center;
         display: block;
+        margin-top: 2px;
         pointer-events: none;
       }
 
@@ -219,12 +260,25 @@
         text-shadow: none;
       }
 
+      .slot-hero-shell.is-slot-compact::before,
+      .slot-inline-top.is-slot-compact::before {
+        font-size: 10px;
+        line-height: 1.1;
+      }
+
       .slot-hero-shell.is-slot-hidden::after,
       .slot-inline-top.is-slot-hidden::after,
       .slot-hero-shell.is-slot-compact::after,
       .slot-inline-top.is-slot-compact::after {
         font-size: 10px;
         color: rgba(200, 213, 228, 0.62);
+      }
+
+      .slot-hero-shell.is-slot-compact::after,
+      .slot-inline-top.is-slot-compact::after {
+        font-size: 9px;
+        line-height: 1.15;
+        margin-top: 0;
       }
 
       [data-theme="light"] .slot-hero-shell.is-slot-hidden::before,
@@ -263,6 +317,22 @@
 
         .slot-preview-banner {
           min-height: 76px;
+          font-size: 11px;
+        }
+
+        .slot-hero-shell.is-slot-compact,
+        .slot-inline-top.is-slot-compact,
+        .slot-inline-card.slot-inline-top.is-slot-compact {
+          min-height: 40px !important;
+          padding: 2px 6px;
+        }
+
+        .slot-hero-shell.is-slot-compact .slot-close-button,
+        .slot-inline-top.is-slot-compact .slot-close-button {
+          width: 18px;
+          height: 18px;
+          top: 2px;
+          right: 2px;
           font-size: 11px;
         }
 
@@ -726,12 +796,33 @@
       html.low-gpu *::before,
       html.low-gpu *::after {
         animation: none !important;
-        transition: none !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
         filter: none !important;
         backdrop-filter: none !important;
         mix-blend-mode: normal !important;
+      }
+
+      html.low-gpu .panel,
+      html.low-gpu .card,
+      html.low-gpu .about-card,
+      html.low-gpu .notice-card,
+      html.low-gpu .domain-card,
+      html.low-gpu .secondary-panel,
+      html.low-gpu .filter-panel,
+      html.low-gpu .perf-notice,
+      html.low-gpu .perf-status,
+      html.low-gpu .lock-summary,
+      html.low-gpu .weapon-item::after,
+      html.low-gpu .weapon-item::before,
+      html.low-gpu .repo-link::before {
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+
+      html.low-gpu .tutorial-highlight,
+      html.low-gpu .back-to-top,
+      html.low-gpu .about-button,
+      html.low-gpu .ghost-button {
+        transition: none !important;
       }
 
       html.low-gpu .fade-scale-enter-active,

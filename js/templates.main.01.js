@@ -75,6 +75,29 @@
                 {{ t("自动模式会根据渲染性能临时切换低GPU模式。") }}
               </div>
               <div class="secondary-item">
+                <div class="secondary-label">{{ t("背景显示") }}</div>
+                <button
+                  class="ghost-button toggle-button switch-toggle"
+                  :class="{ 'is-active': backgroundDisplayEnabled }"
+                  role="switch"
+                  :aria-checked="backgroundDisplayEnabled ? 'true' : 'false'"
+                  :disabled="lowGpuEnabled"
+                  @click="toggleBackgroundDisplayEnabled"
+                >
+                  <span class="switch-label">{{ backgroundDisplayEnabled ? t("已开启") : t("已关闭") }}</span>
+                  <span class="switch-track" :class="{ on: backgroundDisplayEnabled }">
+                    <span class="switch-thumb"></span>
+                  </span>
+                </button>
+                <div class="secondary-hint">
+                  {{
+                    lowGpuEnabled
+                      ? t("低GPU模式下背景固定关闭，此开关仅在标准模式生效。")
+                      : t("关闭后仅显示纯色背景。")
+                  }}
+                </div>
+              </div>
+              <div class="secondary-item">
                 <div class="secondary-label">{{ t("背景图片") }}</div>
                 <div class="secondary-actions">
                   <label class="ghost-button secondary-upload">
@@ -124,7 +147,7 @@
           </div>
         </div>
         <div class="hero-nav-stack">
-          <div v-if="canShowAds && isAdPortrait" class="slot-hero-shell is-slot-compact" aria-label="slot-banner-mobile">
+          <div v-if="canShowAds && isAdPortrait" class="slot-hero-shell" :aria-label="t('广告位（移动端）')">
             <button
               class="slot-close-button"
               type="button"
@@ -137,9 +160,14 @@
             <div v-if="adPreviewMode" class="slot-preview-banner">
               {{ t("广告预览模式（本地）") }}
             </div>
-            <div v-else class="slot-provider-net slot-provider-auto" data-id="1050" data-placeholder="none"></div>
+            <div
+              v-else
+              class="adwork-net adwork-auto slot-provider-net slot-provider-auto"
+              data-id="1050"
+              data-placeholder="none"
+            ></div>
           </div>
-          <nav class="main-nav hero-nav">
+          <nav class="main-nav hero-nav" :aria-label="t('主导航')">
           <button 
             class="nav-item" 
             :class="{ active: currentView === 'planner' }" 
@@ -172,7 +200,7 @@
         </div>
       </header>
       <div v-if="showAiNotice" class="ai-notice">
-        <span class="ai-chip">AI</span>
+        <span class="ai-chip">{{ t("AI") }}</span>
         <span>{{ t("当前语言内容由 AI 翻译，可能存在不准确。如发现错误，请前往 GitHub 反馈。") }}</span>
       </div>
       <div v-if="lowGpuEnabled" class="perf-status">
@@ -385,10 +413,16 @@
               </div>
               <div class="filter-hint">{{ t("灰色属性代表当前筛选下暂无武器") }}</div>
               <div v-if="hiddenInSelectorSummary && hiddenInSelectorSummary.total" class="filter-hint">
-                当前有 {{ hiddenInSelectorSummary.total }} 把武器因隐藏开关未显示
-                <span v-if="hiddenInSelectorSummary.unowned > 0">（未拥有 {{ hiddenInSelectorSummary.unowned }}）</span>
-                <span v-if="hiddenInSelectorSummary.essenceOwned > 0">（基质已有 {{ hiddenInSelectorSummary.essenceOwned }}）</span>
-                <span v-if="hiddenInSelectorSummary.fourStar > 0">（四星 {{ hiddenInSelectorSummary.fourStar }}）</span>
+                {{ t("当前有 {count} 把武器因隐藏开关未显示", { count: hiddenInSelectorSummary.total }) }}
+                <span v-if="hiddenInSelectorSummary.unowned > 0"
+                  >（{{ t("未拥有 {count}", { count: hiddenInSelectorSummary.unowned }) }}）</span
+                >
+                <span v-if="hiddenInSelectorSummary.essenceOwned > 0"
+                  >（{{ t("基质已有 {count}", { count: hiddenInSelectorSummary.essenceOwned }) }}）</span
+                >
+                <span v-if="hiddenInSelectorSummary.fourStar > 0"
+                  >（{{ t("四星 {count}", { count: hiddenInSelectorSummary.fourStar }) }}）</span
+                >
               </div>
             </div>
           </div>
@@ -433,7 +467,7 @@
               v-for="weapon in visibleFilteredWeapons"
               :key="weapon.name"
               class="weapon-item"
-              v-memo="[locale, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name)]"
+              v-memo="[locale, localeRenderVersion, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name)]"
               :class="{
                 'is-selected': selectedNameSet.has(weapon.name),
                 'is-unowned': isUnowned(weapon.name),
@@ -532,19 +566,19 @@
                 >
                   {{ tutorialEssenceOwned ? t("标记基质未有") : t("标记基质已有") }}
                 </button>
-                <input
+                <textarea
                   class="exclude-note-input"
                   :class="{
                     'is-essence-owned': tutorialEssenceOwned,
                     'tutorial-highlight': tutorialStepKey === 'note'
                   }"
-                  type="text"
+                  rows="1"
                   maxlength="30"
                   :placeholder="t('备注（可选）')"
                   :value="tutorialNote"
-                  @focus="markTutorialNoteTouched"
-                  @input="updateTutorialNote($event.target.value)"
-                />
+                  @focus="markTutorialNoteTouched(); resizeNoteTextarea($event)"
+                  @input="resizeNoteTextarea($event); updateTutorialNote($event.target.value)"
+                ></textarea>
               </div>
             </div>
             <div class="weapon-attr-anchor"></div>
@@ -559,6 +593,7 @@
               class="scheme-weapon-item weapon-attr-item"
               v-memo="[
                 locale,
+                localeRenderVersion,
                 selectedNameSet.has(weapon.name),
                 isWeaponOwned(weapon.name),
                 isEssenceOwned(weapon.name),
@@ -650,15 +685,16 @@
                 >
                   {{ isEssenceOwned(weapon.name) ? t("标记基质未有") : t("标记基质已有") }}
                 </button>
-                <input
+                <textarea
                   class="exclude-note-input"
                   :class="{ 'is-essence-owned': isEssenceOwned(weapon.name), 'is-unowned': isUnowned(weapon.name) }"
-                  type="text"
+                  rows="1"
                   maxlength="30"
                   :placeholder="t('备注（可选）')"
                   :value="getWeaponNote(weapon.name)"
-                  @input="updateWeaponNote(weapon, $event.target.value)"
-                />
+                  @focus="resizeNoteTextarea($event)"
+                  @input="resizeNoteTextarea($event); updateWeaponNote(weapon, $event.target.value)"
+                ></textarea>
               </div>
             </div>
             <div
@@ -675,6 +711,7 @@
             <div class="panel-actions">
               <plan-config-control
                 :t="t"
+                :t-term="tTerm"
                 :recommendation-config="recommendationConfig"
                 :show-plan-config="showPlanConfig"
                 :show-plan-config-hint-dot="showPlanConfigHintDot"
@@ -699,7 +736,7 @@
             </div>
           </div>
 
-          <div v-if="canShowAds && !isAdPortrait" class="card slot-inline-card slot-inline-top is-slot-compact" aria-label="slot-banner-desktop">
+          <div v-if="canShowAds && !isAdPortrait" class="card slot-inline-card slot-inline-top" :aria-label="t('广告位（桌面端）')">
             <button
               class="slot-close-button"
               type="button"
@@ -712,7 +749,12 @@
             <div v-if="adPreviewMode" class="slot-preview-banner">
               {{ t("广告预览模式（本地）") }}
             </div>
-            <div v-else class="slot-provider-net slot-provider-auto" data-id="1050" data-placeholder="none"></div>
+            <div
+              v-else
+              class="adwork-net adwork-auto slot-provider-net slot-provider-auto"
+              data-id="1050"
+              data-placeholder="none"
+            ></div>
           </div>
 
           <div v-if="!selectedCount" class="empty">
@@ -759,6 +801,7 @@
                   class="scheme-weapon-item is-selected"
                   v-memo="[
                     locale,
+                    localeRenderVersion,
                     weapon.baseLocked,
                     weapon.baseConflict,
                     fallbackPlan.s2Conflict,
@@ -824,15 +867,16 @@
                     >
                       {{ isEssenceOwned(weapon.name) ? t("标记基质未有") : t("标记基质已有") }}
                     </button>
-                    <input
+                    <textarea
                       class="exclude-note-input"
                       :class="{ 'is-essence-owned': isEssenceOwned(weapon.name), 'is-unowned': isUnowned(weapon.name) }"
-                      type="text"
+                      rows="1"
                       maxlength="30"
                       :placeholder="t('备注（可选）')"
                       :value="getWeaponNote(weapon.name)"
-                      @input="updateWeaponNote(weapon, $event.target.value)"
-                    />
+                      @focus="resizeNoteTextarea($event)"
+                      @input="resizeNoteTextarea($event); updateWeaponNote(weapon, $event.target.value)"
+                    ></textarea>
                   </div>
 `);
 })();

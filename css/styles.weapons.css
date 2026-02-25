@@ -1003,21 +1003,30 @@
       .weapon-exclude-row {
         display: flex;
         align-items: center;
+        flex-wrap: nowrap;
         gap: 8px;
         margin-top: 6px;
       }
 
       .exclude-note-input {
-        flex: 1;
+        flex: 1 1 auto;
         min-width: 0;
-        padding: 4px 8px;
+        min-height: 32px;
+        height: 32px;
+        padding: 6px 8px;
         border-radius: 6px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background: rgba(10, 14, 20, 0.45);
         color: var(--text);
         font-size: 12px;
+        line-height: 1.35;
         outline: none;
         transition: border-color 0.2s ease;
+        resize: none;
+        overflow-y: hidden;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .exclude-note-input::placeholder {
@@ -1035,6 +1044,20 @@
 
       .exclude-note-input.is-excluded::placeholder {
         color: rgba(255, 209, 209, 0.7);
+      }
+
+      @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
+        .weapon-exclude-row {
+          align-items: center;
+          gap: 6px;
+        }
+
+        .weapon-exclude-row .exclude-note-input {
+          flex: 1 1 auto;
+          min-width: 0;
+          min-height: 32px;
+          height: 32px;
+        }
       }
 
       .missing-details {

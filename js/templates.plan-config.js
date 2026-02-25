@@ -133,7 +133,7 @@
             <select class="secondary-select" v-model="recommendationConfig.preferredRegion1">
               <option value="">{{ t("不设置") }}</option>
               <option v-for="region in regionOptions" :key="'region-1-' + region" :value="region">
-                {{ region }}
+                {{ tTerm("dungeon", region) }}
               </option>
             </select>
             <div class="secondary-hint">{{ t("优先地区2（次高）") }}</div>
@@ -145,7 +145,7 @@
                 :value="region"
                 :disabled="region === recommendationConfig.preferredRegion1"
               >
-                {{ region }}
+                {{ tTerm("dungeon", region) }}
               </option>
             </select>
           </div>

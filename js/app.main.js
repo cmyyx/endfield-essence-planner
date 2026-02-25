@@ -197,6 +197,7 @@
       tRegionPriorityModeOptions: { type: Array, required: true },
       tOwnershipPriorityModeOptions: { type: Array, required: true },
       tStrictPriorityOrderOptions: { type: Array, required: true },
+      tTerm: { type: Function, required: true },
     },
     emits: ["toggle"],
     template: planConfigTemplate,
@@ -356,6 +357,23 @@
         });
       };
 
+      const resizeNoteTextarea = (event) => {
+        const target = event && event.target ? event.target : null;
+        if (!target || typeof target.tagName !== "string" || target.tagName.toLowerCase() !== "textarea") {
+          return;
+        }
+        target.style.height = "32px";
+        if (!target.value) {
+          target.style.overflowY = "hidden";
+          return;
+        }
+        target.style.height = "auto";
+        const maxHeight = 96;
+        const nextHeight = Math.min(Math.max(target.scrollHeight, 32), maxHeight);
+        target.style.height = `${nextHeight}px`;
+        target.style.overflowY = target.scrollHeight > maxHeight ? "auto" : "hidden";
+      };
+
       const syncQuery = (replace = false) => {
         if (typeof window === "undefined") return;
         if (applyingRoute) return;
@@ -413,6 +431,7 @@
         setLocale: state.setLocale,
         t: state.t,
         tTerm: state.tTerm,
+        localeRenderVersion: state.localeRenderVersion,
         tPlanPriorityMode: state.tPlanPriorityMode,
         tPlanPriorityModeOptions: state.tPlanPriorityModeOptions,
         tRegionPriorityModeOptions: state.tRegionPriorityModeOptions,
@@ -486,6 +505,7 @@
         toggleTutorialBody: state.toggleTutorialBody,
         toggleTutorialEssenceOwned: state.toggleTutorialEssenceOwned,
         updateTutorialNote: state.updateTutorialNote,
+        resizeNoteTextarea,
         markTutorialNoteTouched: state.markTutorialNoteTouched,
         tutorialWeaponTarget: state.tutorialWeaponTarget,
         tutorialSchemeTarget: state.tutorialSchemeTarget,
@@ -554,7 +574,10 @@
         migrationConflictStrategy: state.migrationConflictStrategy,
         showMigrationConfirmModal: state.showMigrationConfirmModal,
         migrationConfirmAction: state.migrationConfirmAction,
+        migrationPreviewExpanded: state.migrationPreviewExpanded,
+        migrationModalScrollable: state.migrationModalScrollable,
         migrationPreview: state.migrationPreview,
+        toggleMigrationPreviewDetails: state.toggleMigrationPreviewDetails,
         shouldShowConflictStrategy: state.shouldShowConflictStrategy,
         migrationConflictOptions: state.migrationConflictOptions,
         openMigrationConfirm: state.openMigrationConfirm,
@@ -589,6 +612,8 @@
         customBackgroundName: state.customBackgroundName,
         customBackgroundError: state.customBackgroundError,
         customBackgroundApi: state.customBackgroundApi,
+        backgroundDisplayEnabled: state.backgroundDisplayEnabled,
+        toggleBackgroundDisplayEnabled: state.toggleBackgroundDisplayEnabled,
         handleBackgroundFile: state.handleBackgroundFile,
         clearCustomBackground: state.clearCustomBackground,
         // Strategy Module

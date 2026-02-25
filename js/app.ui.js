@@ -22,7 +22,11 @@
     const preloadBackgroundFadeMs = 720;
     let preloadBackgroundFadeTimer = null;
 
-    const allowedAdHosts = new Set(["end.canmoe.com", "127.0.0.1", "localhost"]);
+    const allowedAdHosts = new Set([
+      "end.canmoe.com",
+      "127.0.0.1",
+      "localhost",
+    ]);
     const providerScriptSrc = "https://cdn.adwork.net/js/makemoney.js";
     const mobileLayoutBreakpoint = 1024;
     const adMobileBreakpoint = mobileLayoutBreakpoint;
@@ -30,6 +34,9 @@
     const adPreviewMode = state.adPreviewMode || ref(false);
     const adDismissedSession = state.adDismissedSession || ref(false);
     let adScriptLoadingPromise = null;
+    let adScriptRetryTimer = null;
+    let adScriptRetryCount = 0;
+    const adScriptRetryDelaysMs = [1800, 5000];
 
     state.adPreviewMode = adPreviewMode;
     state.adDismissedSession = adDismissedSession;
@@ -37,6 +44,10 @@
     const isLocalPreviewHost = (host) => host === "127.0.0.1" || host === "localhost" || host === "::1";
     const resolveCurrentHost = () =>
       (window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
+    const isAllowedAdHost = (host) => {
+      if (!host) return false;
+      return allowedAdHosts.has(host);
+    };
     const isAdPreviewEnabledByQuery = () => {
       if (typeof window === "undefined") return false;
       try {
@@ -98,6 +109,7 @@
       if (!root || typeof Image !== "function") return false;
       if (!root.classList.contains("preload")) return false;
       if (state.lowGpuEnabled && state.lowGpuEnabled.value) return false;
+      if (state.backgroundDisplayEnabled && state.backgroundDisplayEnabled.value === false) return false;
       const customFile = state.customBackground ? String(state.customBackground.value || "").trim() : "";
       if (customFile) return false;
       const customApi = state.customBackgroundApi ? String(state.customBackgroundApi.value || "").trim() : "";
@@ -173,17 +185,42 @@
         canShowAds.value = true;
         return;
       }
-      if (window.__slotProviderScriptError) {
-        canShowAds.value = false;
-        return;
-      }
       const host = resolveCurrentHost();
-      canShowAds.value = allowedAdHosts.has(host);
+      canShowAds.value = isAllowedAdHost(host);
     };
 
     const handleAdFailed = () => {
       canShowAds.value = false;
       scheduleAdSlotVisibility();
+    };
+
+    const hasRenderedAdSlotContainer = () => {
+      if (typeof document === "undefined") return false;
+      return Boolean(document.querySelector(".slot-provider-net, .adwork-net"));
+    };
+
+    const clearAdScriptRetry = () => {
+      if (!adScriptRetryTimer) return;
+      clearTimeout(adScriptRetryTimer);
+      adScriptRetryTimer = null;
+    };
+
+    const scheduleAdScriptRetry = () => {
+      if (adPreviewMode.value) return;
+      if (adScriptRetryTimer) return;
+      if (adScriptRetryCount >= adScriptRetryDelaysMs.length) return;
+      const host = resolveCurrentHost();
+      if (!isAllowedAdHost(host)) return;
+      const delay = adScriptRetryDelaysMs[adScriptRetryCount];
+      adScriptRetryCount += 1;
+      adScriptRetryTimer = setTimeout(() => {
+        adScriptRetryTimer = null;
+        window.__slotProviderScriptError = false;
+        evaluateAdVisibility();
+        if (canShowAds.value) {
+          ensureAdScriptLoaded();
+        }
+      }, delay);
     };
 
     const ensureAdScriptLoaded = () => {
@@ -193,7 +230,10 @@
       if (adPreviewMode.value) {
         return Promise.resolve(false);
       }
-      if (!canShowAds.value || window.__slotProviderScriptError) {
+      if (!canShowAds.value) {
+        return Promise.resolve(false);
+      }
+      if (!hasRenderedAdSlotContainer()) {
         return Promise.resolve(false);
       }
       if (window.__slotProviderScriptReady) {
@@ -216,12 +256,16 @@
       adScriptLoadingPromise = loadTask
         .then(() => {
           window.__slotProviderScriptReady = true;
+          window.__slotProviderScriptError = false;
+          adScriptRetryCount = 0;
+          clearAdScriptRetry();
           scheduleAdSlotVisibility();
           primeAdSlotVisibility();
           return true;
         })
         .catch(() => {
           window.__slotProviderScriptError = true;
+          scheduleAdScriptRetry();
           window.dispatchEvent(new Event("slotfeed:failed"));
           return false;
         })
@@ -232,6 +276,7 @@
     };
 
     const adSlotSelector = ".slot-hero-shell, .slot-inline-top";
+    const adSlotContainerSelector = ".slot-provider-net, .adwork-net";
     let adSlotVisibilityRaf = null;
     let adSlotVisibilityTimers = [];
 
@@ -300,7 +345,7 @@
           slot.classList.remove("is-slot-compact");
           return;
         }
-        const container = slot.querySelector(".slot-provider-net");
+        const container = slot.querySelector(adSlotContainerSelector);
         const hasContainer = container instanceof HTMLElement;
         const richNodes =
           hasContainer
@@ -308,7 +353,14 @@
                 container.querySelectorAll("iframe, img, ins, object, embed, video, canvas, svg")
               )
             : [];
-        const hasRichRenderable = richNodes.some(hasRenderableAdContent);
+        const hasRichRenderable = richNodes.some((node) => {
+          if (!(node instanceof HTMLElement)) return false;
+          if (node.tagName === "IFRAME") {
+            const src = String(node.getAttribute("src") || "").trim().toLowerCase();
+            if (!src || src === "about:blank") return false;
+          }
+          return hasRenderableAdContent(node);
+        });
         const hasMeaningfulChildren =
           hasContainer && hasMeaningfulAdChildren(container);
         const hasContainerRenderable =
@@ -323,8 +375,8 @@
           !hasRichRenderable &&
           (isLikelyPlaceholderNode(container) || placeholderChildren);
         const hasRenderable = hasRichRenderable || (hasMeaningfulChildren && hasContainerRenderable);
-        const shouldHardHide = !canShowAds.value || !hasContainer || placeholderLike;
-        const shouldSoftHide = !shouldHardHide && !hasRenderable;
+        const shouldHardHide = !canShowAds.value || !hasContainer;
+        const shouldSoftHide = !shouldHardHide && (!hasRenderable || placeholderLike);
         slot.classList.toggle("is-slot-hidden", shouldHardHide);
         slot.classList.toggle("is-slot-compact", shouldSoftHide);
       });
@@ -582,6 +634,9 @@
         window.visualViewport.addEventListener("scroll", scheduleViewportSafeBottom);
       }
       if (typeof window !== "undefined") {
+        if (!window.__slotProviderScriptReady) {
+          window.__slotProviderScriptError = false;
+        }
         backToTopLastScroll = window.scrollY || window.pageYOffset || 0;
         updateBackToTopVisibility();
         window.addEventListener("scroll", handleBackToTopScroll, { passive: true });
@@ -591,10 +646,14 @@
         if (canShowAds.value) {
           if (typeof nextTick === "function") {
             nextTick(() => {
-              ensureAdScriptLoaded();
+              requestAnimationFrame(() => {
+                ensureAdScriptLoaded();
+              });
             });
           } else {
-            ensureAdScriptLoaded();
+            requestAnimationFrame(() => {
+              ensureAdScriptLoaded();
+            });
           }
         }
       }
@@ -623,10 +682,41 @@
 
     watch([canShowAds, isAdPortrait], () => {
       if (canShowAds.value) {
-        ensureAdScriptLoaded();
+        if (typeof nextTick === "function") {
+          nextTick(() => {
+            requestAnimationFrame(() => {
+              ensureAdScriptLoaded();
+            });
+          });
+        } else {
+          requestAnimationFrame(() => {
+            ensureAdScriptLoaded();
+          });
+        }
       }
       primeAdSlotVisibility();
     });
+
+    watch(
+      () => (state.currentView ? state.currentView.value : ""),
+      (view) => {
+        if (view !== "planner") return;
+        const refreshAdSlotAfterViewSwitch = () => {
+          if (canShowAds.value) {
+            ensureAdScriptLoaded();
+          }
+          primeAdSlotVisibility();
+          scheduleAdSlotVisibility();
+        };
+        if (typeof nextTick === "function") {
+          nextTick(() => {
+            requestAnimationFrame(refreshAdSlotAfterViewSwitch);
+          });
+        } else {
+          requestAnimationFrame(refreshAdSlotAfterViewSwitch);
+        }
+      }
+    );
 
     onBeforeUnmount(() => {
       if (removeMediaThemeListener) {
@@ -654,6 +744,7 @@
         adSlotVisibilityRaf = null;
       }
       clearAdSlotTimers();
+      clearAdScriptRetry();
       document.removeEventListener("click", handleAdPotentialMutation, true);
       clearBackToTopTimer();
       document.removeEventListener("click", handleDocClick);
@@ -674,4 +765,3 @@
     state.dismissAdsForSession = dismissAdsForSession;
   };
 })();
-

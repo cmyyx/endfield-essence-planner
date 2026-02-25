@@ -227,6 +227,9 @@
       if (typeof raw.showAllSchemes === "boolean") {
         next.showAllSchemes = raw.showAllSchemes;
       }
+      if (typeof raw.backgroundDisplayEnabled === "boolean") {
+        next.backgroundDisplayEnabled = raw.backgroundDisplayEnabled;
+      }
 
       next.recommendationConfig = normalizeRecommendationConfig(
         raw.recommendationConfig,
@@ -284,6 +287,9 @@
           if (typeof restored.showAllSchemes === "boolean") {
             state.showAllSchemes.value = restored.showAllSchemes;
           }
+          if (typeof restored.backgroundDisplayEnabled === "boolean") {
+            state.backgroundDisplayEnabled.value = restored.backgroundDisplayEnabled;
+          }
           if (restored.recommendationConfig) {
             state.recommendationConfig.value = restored.recommendationConfig;
           }
@@ -303,6 +309,17 @@
       const storedTheme = localStorage.getItem(state.themeModeStorageKey);
       if (themeModes.has(storedTheme)) {
         state.themePreference.value = storedTheme;
+      }
+    } catch (error) {
+      // ignore storage errors
+    }
+
+    try {
+      const storedBackgroundDisplay = localStorage.getItem(state.backgroundDisplayStorageKey);
+      if (storedBackgroundDisplay === "0") {
+        state.backgroundDisplayEnabled.value = false;
+      } else if (storedBackgroundDisplay === "1") {
+        state.backgroundDisplayEnabled.value = true;
       }
     } catch (error) {
       // ignore storage errors
@@ -391,6 +408,7 @@
       showWeaponAttrs: state.showWeaponAttrs.value,
       showFilterPanel: state.showFilterPanel.value,
       showAllSchemes: state.showAllSchemes.value,
+      backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,
       recommendationConfig: state.recommendationConfig.value,
       filterS1: state.filterS1.value,
       filterS2: state.filterS2.value,
@@ -417,6 +435,14 @@
           return;
         }
         localStorage.setItem(state.themeModeStorageKey, value);
+      } catch (error) {
+        // ignore storage errors
+      }
+    });
+
+    watch(state.backgroundDisplayEnabled, (value) => {
+      try {
+        localStorage.setItem(state.backgroundDisplayStorageKey, value ? "1" : "0");
       } catch (error) {
         // ignore storage errors
       }
