@@ -120,8 +120,8 @@
       }
       setPreloadPhaseText({
         status: t("资源已就绪，正在准备背景…"),
-        current: t("当前：背景（可选）"),
-        help: t("背景准备不会阻塞太久，超时会先进入页面。"),
+        current: t("当前：背景"),
+        help: "",
       });
       return new Promise((resolve) => {
         let settled = false;

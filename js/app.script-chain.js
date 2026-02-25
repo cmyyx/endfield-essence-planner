@@ -9,6 +9,7 @@
     "./js/app.search.js",
     "./js/app.ui.js",
     "./js/app.storage.js",
+    "./js/app.migration.js",
     "./js/app.analytics.js",
     "./js/app.embed.js",
     "./js/app.perf.js",

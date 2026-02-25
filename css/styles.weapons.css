@@ -208,6 +208,15 @@
           font-size: 11px;
         }
 
+        .weapon-hidden-chip {
+          left: 4px;
+          right: 4px;
+          bottom: 34px;
+          max-width: none;
+          font-size: 9px;
+          padding: 1px 5px;
+        }
+
         .weapon-short {
           font-size: 9px;
         }
@@ -391,6 +400,11 @@
         text-decoration-thickness: 1px;
       }
 
+      .weapon-item.is-essence-owned .weapon-name {
+        text-decoration: line-through;
+        text-decoration-thickness: 1px;
+      }
+
       .exclude-toggle {
         position: absolute;
         top: 8px;
@@ -398,9 +412,9 @@
         z-index: 5;
         padding: 4px 8px;
         border-radius: 999px;
-        border: 1px solid rgba(243, 108, 108, 0.4);
-        background: rgba(243, 108, 108, 0.12);
-        color: #ffd1d1;
+        border: 1px solid rgba(128, 154, 183, 0.46);
+        background: rgba(128, 154, 183, 0.14);
+        color: #d8e6f4;
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
@@ -569,7 +583,7 @@
         top: calc(100% + 8px);
         right: 0;
         width: min(420px, 92vw);
-        max-height: min(70vh, 520px);
+        max-height: min(calc(100vh - 120px), 860px);
         overflow: auto;
         padding: 12px;
         border-radius: 12px;
@@ -671,13 +685,26 @@
       }
 
       .exclude-toggle:hover {
-        border-color: rgba(243, 108, 108, 0.8);
-        background: rgba(243, 108, 108, 0.22);
+        border-color: rgba(77, 214, 201, 0.68);
+        background: rgba(77, 214, 201, 0.18);
       }
 
       .exclude-toggle.active {
-        border-color: rgba(243, 108, 108, 0.85);
+        border-color: rgba(95, 132, 176, 0.62);
+        background: rgba(95, 132, 176, 0.24);
+        color: #e8f3ff;
+      }
+
+      .exclude-toggle.intent-alert {
+        border-color: rgba(243, 108, 108, 0.8);
+        background: rgba(243, 108, 108, 0.22);
+        color: #ffe6e6;
+      }
+
+      .exclude-toggle.intent-alert:hover {
+        border-color: rgba(243, 108, 108, 0.9);
         background: rgba(243, 108, 108, 0.3);
+        color: #fff1f1;
       }
 
       .exclude-toggle.small {
@@ -787,6 +814,24 @@
         z-index: 2;
       }
 
+      .weapon-hidden-chip {
+        position: absolute;
+        left: 6px;
+        bottom: 40px;
+        z-index: 4;
+        max-width: calc(100% - 12px);
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 196, 83, 0.65);
+        background: rgba(45, 35, 18, 0.88);
+        color: #ffe8b4;
+        font-size: 10px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .weapon-item.rarity-6 .weapon-band {
         background-image: var(--rarity-6-frame);
       }
@@ -821,6 +866,10 @@
         text-overflow: ellipsis;
         text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
         z-index: 3;
+      }
+
+      .weapon-hidden-note {
+        max-width: 100%;
       }
 
       .weapon-title {
@@ -942,6 +991,11 @@
       }
 
       .weapon-attr-item.is-excluded .scheme-weapon-title {
+        color: inherit;
+      }
+
+      .weapon-attr-item.is-excluded .weapon-main-name,
+      .weapon-attr-item.is-essence-owned .weapon-main-name {
         text-decoration: line-through;
         text-decoration-thickness: 1px;
       }

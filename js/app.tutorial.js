@@ -13,7 +13,7 @@
       s3: "压制",
     };
 
-    const tutorialExcluded = ref(false);
+    const tutorialEssenceOwned = ref(false);
     const tutorialNote = ref("");
     const tutorialNoteTouched = ref(false);
     const tutorialManualBack = ref(false);
@@ -50,20 +50,20 @@
       return [
         {
           key: "show-attrs",
-          title: state.t("查看属性 / 排除 / 备注"),
+          title: state.t("查看属性 / 拥有状态 / 备注"),
           body: [
             state.t("点击“{label}”按钮，切换到属性视图。", {
-              label: state.t("显示属性/排除/备注"),
+              label: state.t("显示属性/拥有/备注"),
             }),
             state.t("切换后会出现一把教学示例武器，接下来按提示操作即可。"),
           ],
         },
         {
-          key: "exclude",
-          title: state.t("排除武器"),
+          key: "essence-owned",
+          title: state.t("标记基质已有"),
           body: [
-            state.t("对教学示例武器点击“{label}”。", { label: state.t("标记排除") }),
-            state.t("被排除的武器不会参与方案计算。"),
+            state.t("对教学示例武器点击“{label}”。", { label: state.t("标记基质已有") }),
+            state.t("标记后该武器会按“基质已有”处理，不再计入待刷数量。"),
           ],
         },
         {
@@ -165,8 +165,8 @@
       switch (tutorialStepKey.value) {
         case "show-attrs":
           return state.showWeaponAttrs.value;
-        case "exclude":
-          return tutorialExcluded.value;
+        case "essence-owned":
+          return tutorialEssenceOwned.value;
         case "note":
           return true;
         case "base-pick":
@@ -184,7 +184,7 @@
     );
 
     const resetTutorialState = () => {
-      tutorialExcluded.value = false;
+      tutorialEssenceOwned.value = false;
       tutorialNote.value = "";
       tutorialNoteTouched.value = false;
       tutorialManualBack.value = false;
@@ -254,12 +254,12 @@
       }
     };
 
-    const toggleTutorialExclude = () => {
-      tutorialExcluded.value = !tutorialExcluded.value;
-      if (tutorialExcluded.value) {
-        state.trackEvent("weapon_exclude", { weapon: tutorialWeapon.name, tutorial: true });
+    const toggleTutorialEssenceOwned = () => {
+      tutorialEssenceOwned.value = !tutorialEssenceOwned.value;
+      if (tutorialEssenceOwned.value) {
+        state.trackEvent("weapon_mark_essence_owned", { weapon: tutorialWeapon.name, tutorial: true });
       } else {
-        state.trackEvent("weapon_unexclude", { weapon: tutorialWeapon.name, tutorial: true });
+        state.trackEvent("weapon_mark_essence_pending", { weapon: tutorialWeapon.name, tutorial: true });
       }
     };
 
@@ -290,7 +290,7 @@
 
     const getTutorialScrollTarget = () => {
       if (!state.tutorialActive.value) return null;
-      if (tutorialStepKey.value === "exclude" || tutorialStepKey.value === "note") {
+      if (tutorialStepKey.value === "essence-owned" || tutorialStepKey.value === "note") {
         return resolveTutorialTarget(state.tutorialWeaponTarget.value);
       }
       if (tutorialStepKey.value === "base-pick") {
@@ -433,7 +433,9 @@
         state.showNotice.value ||
         state.showChangelog.value ||
         state.showAbout.value ||
-        state.showDomainWarning.value
+        state.showDomainWarning.value ||
+        state.showMigrationModal.value ||
+        state.showMigrationConfirmModal.value
       ) {
         return;
       }
@@ -522,7 +524,7 @@
     );
 
     state.tutorialWeapon = tutorialWeapon;
-    state.tutorialExcluded = tutorialExcluded;
+    state.tutorialEssenceOwned = tutorialEssenceOwned;
     state.tutorialNote = tutorialNote;
     state.tutorialSkipAll = tutorialSkipAll;
     state.tutorialStep = tutorialStep;
@@ -545,7 +547,7 @@
     state.closeTutorialComplete = closeTutorialComplete;
     state.finishTutorial = finishTutorial;
     state.toggleTutorialBody = toggleTutorialBody;
-    state.toggleTutorialExclude = toggleTutorialExclude;
+    state.toggleTutorialEssenceOwned = toggleTutorialEssenceOwned;
     state.updateTutorialNote = updateTutorialNote;
     state.markTutorialNoteTouched = markTutorialNoteTouched;
     state.maybeAutoStartTutorial = maybeAutoStartTutorial;

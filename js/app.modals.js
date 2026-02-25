@@ -131,7 +131,9 @@
         state.showNotice.value ||
           state.showChangelog.value ||
           state.showAbout.value ||
-          state.showTutorialSkipConfirm.value
+          state.showTutorialSkipConfirm.value ||
+          state.showMigrationModal.value ||
+          state.showMigrationConfirmModal.value
       );
 
     const clearStaleLockCheck = () => {
@@ -203,9 +205,23 @@
     });
 
     watch(
-      [state.showNotice, state.showChangelog, state.showAbout, state.showTutorialSkipConfirm],
-      ([noticeOpen, changelogOpen, aboutOpen, skipOpen]) => {
-        const hasOpenModal = Boolean(noticeOpen || changelogOpen || aboutOpen || skipOpen);
+      [
+        state.showNotice,
+        state.showChangelog,
+        state.showAbout,
+        state.showTutorialSkipConfirm,
+        state.showMigrationModal,
+        state.showMigrationConfirmModal,
+      ],
+      ([noticeOpen, changelogOpen, aboutOpen, skipOpen, migrationOpen, migrationConfirmOpen]) => {
+        const hasOpenModal = Boolean(
+          noticeOpen ||
+            changelogOpen ||
+            aboutOpen ||
+            skipOpen ||
+            migrationOpen ||
+            migrationConfirmOpen
+        );
         if (modalUnlockTimer) {
           clearTimeout(modalUnlockTimer);
           modalUnlockTimer = null;
@@ -224,7 +240,14 @@
     );
 
     watch(
-      [state.showNotice, state.showChangelog, state.showAbout, state.showDomainWarning],
+      [
+        state.showNotice,
+        state.showChangelog,
+        state.showAbout,
+        state.showDomainWarning,
+        state.showMigrationModal,
+        state.showMigrationConfirmModal,
+      ],
       () => {
         if (typeof state.maybeAutoStartTutorial === "function") {
           state.maybeAutoStartTutorial();

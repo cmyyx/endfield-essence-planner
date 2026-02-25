@@ -17,12 +17,15 @@
       return [target, ...rest];
     };
 
+    const hasVisibleRows = (scheme) =>
+      Boolean(scheme && Array.isArray(scheme.weaponRows) && scheme.weaponRows.length);
+
     const displayPrimaryRecommendations = computed(() =>
-      reorderForTutorial(state.primaryRecommendations.value)
+      reorderForTutorial(state.primaryRecommendations.value).filter(hasVisibleRows)
     );
 
     const displayExtraRecommendations = computed(() =>
-      reorderForTutorial(state.extraRecommendations.value)
+      reorderForTutorial(state.extraRecommendations.value).filter(hasVisibleRows)
     );
 
     const displayRecommendations = computed(() => {
@@ -205,13 +208,14 @@
       });
     };
 
+    const recommendationFilterHidesAll = computed(() => {
+      const all = Array.isArray(state.recommendations.value) ? state.recommendations.value : [];
+      if (!all.length) return false;
+      return !all.some(hasVisibleRows);
+    });
+
     const fallbackPlan = computed(() => {
-      const config = state.recommendationConfig.value || {};
-      const hideExcludedInPlans = Boolean(config.hideExcluded);
-      const excludedSet = hideExcludedInPlans ? state.excludedNameSet.value : null;
-      const targets = hideExcludedInPlans
-        ? state.selectedWeapons.value.filter((weapon) => !excludedSet.has(weapon.name))
-        : state.selectedWeapons.value;
+      const targets = state.selectedWeapons.value;
       if (!targets.length) return null;
       if (state.recommendations.value.length) return null;
 
@@ -276,7 +280,9 @@
         state.showWeaponAttrs,
         state.showAllSchemes,
         state.mobilePanel,
-        () => (state.recommendationConfig.value || {}).hideExcluded,
+        () => (state.recommendationConfig.value || {}).hideEssenceOwnedWeapons,
+        () => (state.recommendationConfig.value || {}).hideEssenceOwnedOwnedOnly,
+        () => (state.recommendationConfig.value || {}).hideUnownedWeapons,
       ],
       () => {
         scheduleAttrWrap();
@@ -313,6 +319,7 @@
     state.displayDividerIndex = displayDividerIndex;
     state.visibleDisplayRecommendations = visibleDisplayRecommendations;
     state.recommendationVirtualStartIndex = recommendationVirtualStartIndex;
+    state.recommendationFilterHidesAll = recommendationFilterHidesAll;
     state.fallbackPlan = fallbackPlan;
   };
 })();

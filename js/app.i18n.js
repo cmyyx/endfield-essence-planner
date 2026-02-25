@@ -151,6 +151,13 @@
       return interpolate(raw, params);
     };
 
+    const translateOptionItems = (items) =>
+      (items || []).map((item) => ({
+        ...item,
+        label: t(item.label),
+        description: t(item.description),
+      }));
+
     const tPlanPriorityMode = (value) => {
       const config = state.regionPriorityModeOptions || [];
       const matched = config.find((item) => item && item.value === value);
@@ -162,13 +169,16 @@
       };
     };
 
-    const tPlanPriorityModeOptions = computed(() =>
-      (state.regionPriorityModeOptions || []).map((item) => ({
-        ...item,
-        label: t(item.label),
-        description: t(item.description),
-      }))
+    const tRegionPriorityModeOptions = computed(() =>
+      translateOptionItems(state.regionPriorityModeOptions)
     );
+    const tOwnershipPriorityModeOptions = computed(() =>
+      translateOptionItems(state.ownershipPriorityModeOptions)
+    );
+    const tStrictPriorityOrderOptions = computed(() =>
+      translateOptionItems(state.strictPriorityOrderOptions)
+    );
+    const tPlanPriorityModeOptions = tRegionPriorityModeOptions;
     const tTerm = (category, value) => {
       void localeRenderVersion.value;
       if (!value) return value;
@@ -259,5 +269,8 @@
     state.fallbackLocale = fallbackLocale;
     state.tPlanPriorityMode = tPlanPriorityMode;
     state.tPlanPriorityModeOptions = tPlanPriorityModeOptions;
+    state.tRegionPriorityModeOptions = tRegionPriorityModeOptions;
+    state.tOwnershipPriorityModeOptions = tOwnershipPriorityModeOptions;
+    state.tStrictPriorityOrderOptions = tStrictPriorityOrderOptions;
   };
 })();

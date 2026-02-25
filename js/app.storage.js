@@ -10,7 +10,8 @@
     const s2Set = new Set(weapons.map((weapon) => weapon.s2).filter(Boolean));
     const s3Set = new Set(weapons.map((weapon) => weapon.s3).filter(Boolean));
     const mobilePanels = new Set(["weapons", "plans"]);
-    const priorityModes = new Set(["strict", "sameCoverage", "sameEfficiency"]);
+    const priorityModes = new Set(["ignore", "strict", "sameCoverage", "sameEfficiency"]);
+    const strictPriorityOrders = new Set(["ownershipFirst", "regionFirst"]);
     const themeModes = new Set(["auto", "light", "dark"]);
     const regionSet = new Set(
       dungeons
@@ -18,36 +19,84 @@
         .filter((name) => typeof name === "string" && name)
     );
 
-    const sanitizeRecommendationConfig = (raw, legacyHideExcluded) => {
+    const normalizeRecommendationConfig = (raw, legacyHideExcluded) => {
       const defaults = state.recommendationConfig.value || {};
       const source = raw && typeof raw === "object" ? raw : {};
+
+      const hideEssenceOwnedWeapons =
+        typeof source.hideEssenceOwnedWeapons === "boolean"
+          ? source.hideEssenceOwnedWeapons
+          : typeof source.hideExcluded === "boolean"
+          ? source.hideExcluded
+          : typeof legacyHideExcluded === "boolean"
+          ? legacyHideExcluded
+          : Boolean(defaults.hideEssenceOwnedWeapons);
+
+      const hideEssenceOwnedOwnedOnly =
+        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedOwnedOnly === "boolean"
+          ? source.hideEssenceOwnedOwnedOnly
+          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedOwnedOnly);
+
+      const hideEssenceOwnedWeaponsInSelector =
+        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedWeaponsInSelector === "boolean"
+          ? source.hideEssenceOwnedWeaponsInSelector
+          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedWeaponsInSelector);
+
+      const hideUnownedWeapons =
+        typeof source.hideUnownedWeapons === "boolean"
+          ? source.hideUnownedWeapons
+          : Boolean(defaults.hideUnownedWeapons);
+
+      const hideUnownedWeaponsInSelector =
+        hideUnownedWeapons && typeof source.hideUnownedWeaponsInSelector === "boolean"
+          ? source.hideUnownedWeaponsInSelector
+          : hideUnownedWeapons && Boolean(defaults.hideUnownedWeaponsInSelector);
+
+      const hideFourStarWeapons =
+        typeof source.hideFourStarWeapons === "boolean"
+          ? source.hideFourStarWeapons
+          : Boolean(defaults.hideFourStarWeapons);
+
+      const hideFourStarWeaponsInSelector =
+        hideFourStarWeapons && typeof source.hideFourStarWeaponsInSelector === "boolean"
+          ? source.hideFourStarWeaponsInSelector
+          : hideFourStarWeapons && Boolean(defaults.hideFourStarWeaponsInSelector);
+
+      const attributeFilterAffectsHiddenWeapons =
+        typeof source.attributeFilterAffectsHiddenWeapons === "boolean"
+          ? source.attributeFilterAffectsHiddenWeapons
+          : Boolean(defaults.attributeFilterAffectsHiddenWeapons);
+
+      const regionPriorityMode = priorityModes.has(source.regionPriorityMode)
+        ? source.regionPriorityMode
+        : priorityModes.has(source.priorityMode)
+        ? source.priorityMode
+        : defaults.regionPriorityMode || "ignore";
+
+      const ownershipPriorityMode = priorityModes.has(source.ownershipPriorityMode)
+        ? source.ownershipPriorityMode
+        : defaults.ownershipPriorityMode || "ignore";
+
+      const strictPriorityOrder = strictPriorityOrders.has(source.strictPriorityOrder)
+        ? source.strictPriorityOrder
+        : defaults.strictPriorityOrder || "ownershipFirst";
+
       const normalized = {
-        hideExcluded:
-          typeof source.hideExcluded === "boolean"
-            ? source.hideExcluded
-            : typeof legacyHideExcluded === "boolean"
-            ? legacyHideExcluded
-            : Boolean(defaults.hideExcluded),
-        hideFourStarWeapons:
-          typeof source.hideFourStarWeapons === "boolean"
-            ? source.hideFourStarWeapons
-            : Boolean(defaults.hideFourStarWeapons),
+        hideEssenceOwnedWeapons,
+        hideEssenceOwnedOwnedOnly,
+        hideEssenceOwnedWeaponsInSelector,
+        hideUnownedWeapons,
+        hideUnownedWeaponsInSelector,
+        hideFourStarWeapons,
+        hideFourStarWeaponsInSelector,
+        attributeFilterAffectsHiddenWeapons,
         preferredRegion1: "",
         preferredRegion2: "",
-        priorityMode: priorityModes.has(source.priorityMode)
-          ? source.priorityMode
-          : defaults.priorityMode || "sameCoverage",
-        priorityStrength: Number.isFinite(source.priorityStrength)
-          ? Math.max(0, Math.min(100, Math.round(source.priorityStrength)))
-          : Number.isFinite(defaults.priorityStrength)
-          ? Math.max(0, Math.min(100, Math.round(defaults.priorityStrength)))
-          : 50,
-        prioritySecondaryWeight: Number.isFinite(source.prioritySecondaryWeight)
-          ? Math.max(0, Math.min(100, Math.round(source.prioritySecondaryWeight)))
-          : Number.isFinite(defaults.prioritySecondaryWeight)
-          ? Math.max(0, Math.min(100, Math.round(defaults.prioritySecondaryWeight)))
-          : 60,
+        regionPriorityMode,
+        ownershipPriorityMode,
+        strictPriorityOrder,
       };
+
       if (typeof source.preferredRegion1 === "string" && regionSet.has(source.preferredRegion1)) {
         normalized.preferredRegion1 = source.preferredRegion1;
       }
@@ -61,19 +110,101 @@
       ) {
         normalized.preferredRegion2 = "";
       }
+
+      if (!normalized.hideEssenceOwnedWeapons) {
+        normalized.hideEssenceOwnedOwnedOnly = false;
+        normalized.hideEssenceOwnedWeaponsInSelector = false;
+      }
+      if (!normalized.hideUnownedWeapons) {
+        normalized.hideUnownedWeaponsInSelector = false;
+      }
+      if (!normalized.hideFourStarWeapons) {
+        normalized.hideFourStarWeaponsInSelector = false;
+      }
+
       return normalized;
     };
+
+    const normalizeWeaponMarks = (raw) => {
+      if (!raw || typeof raw !== "object") return {};
+      const normalized = {};
+
+      Object.keys(raw).forEach((name) => {
+        if (!name || !weaponNameSet.has(name)) return;
+        const mark = raw[name];
+
+        let weaponOwned = false;
+        let essenceOwned = false;
+        let note = "";
+
+        if (mark && typeof mark === "object") {
+          if (typeof mark.weaponOwned === "boolean") {
+            weaponOwned = mark.weaponOwned;
+          }
+          if (typeof mark.essenceOwned === "boolean") {
+            essenceOwned = mark.essenceOwned;
+          } else if (typeof mark.excluded === "boolean") {
+            essenceOwned = mark.excluded;
+          }
+          note = typeof mark.note === "string" ? mark.note : "";
+        } else if (typeof mark === "string") {
+          note = mark;
+        }
+
+        const compact = {};
+        if (weaponOwned) compact.weaponOwned = true;
+        if (essenceOwned) compact.essenceOwned = true;
+        if (note) compact.note = note;
+        if (Object.keys(compact).length) {
+          normalized[name] = compact;
+        }
+      });
+
+      return normalized;
+    };
+
+    const normalizeLegacyMarks = (raw) => {
+      if (!raw || typeof raw !== "object") return {};
+      const normalized = {};
+
+      Object.keys(raw).forEach((name) => {
+        if (!name || !weaponNameSet.has(name)) return;
+        const value = raw[name];
+        let excluded = false;
+        let note = "";
+
+        if (value && typeof value === "object") {
+          excluded = Boolean(value.excluded);
+          note = typeof value.note === "string" ? value.note : "";
+        } else if (typeof value === "string") {
+          note = value;
+        }
+
+        if (excluded || note) {
+          normalized[name] = { excluded, note };
+        }
+      });
+
+      return normalized;
+    };
+
+    state.normalizeWeaponMarks = normalizeWeaponMarks;
+    state.normalizeLegacyMarks = normalizeLegacyMarks;
+    state.normalizeRecommendationConfig = normalizeRecommendationConfig;
 
     const sanitizeState = (raw) => {
       if (!raw || typeof raw !== "object") return null;
       const next = {};
+
       if (typeof raw.searchQuery === "string") {
         next.searchQuery = raw.searchQuery;
       }
+
       if (Array.isArray(raw.selectedNames)) {
         const unique = Array.from(new Set(raw.selectedNames));
         next.selectedNames = unique.filter((name) => weaponNameSet.has(name));
       }
+
       if (raw.schemeBaseSelections && typeof raw.schemeBaseSelections === "object") {
         const cleaned = {};
         Object.keys(raw.schemeBaseSelections).forEach((key) => {
@@ -86,6 +217,7 @@
         });
         next.schemeBaseSelections = cleaned;
       }
+
       if (typeof raw.showWeaponAttrs === "boolean") {
         next.showWeaponAttrs = raw.showWeaponAttrs;
       }
@@ -95,13 +227,16 @@
       if (typeof raw.showAllSchemes === "boolean") {
         next.showAllSchemes = raw.showAllSchemes;
       }
-      next.recommendationConfig = sanitizeRecommendationConfig(
+
+      next.recommendationConfig = normalizeRecommendationConfig(
         raw.recommendationConfig,
         raw.hideExcludedInPlans
       );
+
       if (mobilePanels.has(raw.mobilePanel)) {
         next.mobilePanel = raw.mobilePanel;
       }
+
       const s1Filter = Array.from(
         new Set(sanitizeArray(raw.filterS1).filter((value) => s1Set.has(value)))
       );
@@ -114,6 +249,7 @@
       if (s1Filter.length) next.filterS1 = s1Filter;
       if (s2Filter.length) next.filterS2 = s2Filter;
       if (s3Filter.length) next.filterS3 = s3Filter;
+
       return next;
     };
 
@@ -205,68 +341,42 @@
       // ignore storage errors
     }
 
-    const sanitizeMarks = (raw) => {
-      if (!raw || typeof raw !== "object") return {};
-      const normalized = {};
-      Object.keys(raw).forEach((name) => {
-        const mark = raw[name];
-        if (!name) return;
-        if (mark && typeof mark === "object") {
-          const excluded = Boolean(mark.excluded);
-          const note = typeof mark.note === "string" ? mark.note : "";
-          if (excluded || note) {
-            normalized[name] = { excluded, note };
-          }
-        } else if (typeof mark === "string") {
-          if (mark) {
-            normalized[name] = { excluded: false, note: mark };
-          }
-        }
-      });
-      return normalized;
-    };
-
     try {
       const stored = localStorage.getItem(state.marksStorageKey);
       if (stored) {
         const parsed = JSON.parse(stored);
-        state.weaponMarks.value = sanitizeMarks(parsed);
+        state.weaponMarks.value = normalizeWeaponMarks(parsed);
       }
     } catch (error) {
       // ignore storage errors
     }
 
-    if (!Object.keys(state.weaponMarks.value).length) {
-      try {
-        const legacy = localStorage.getItem(state.legacyExcludedKey);
-        if (legacy) {
-          const parsed = JSON.parse(legacy);
-          if (parsed && typeof parsed === "object") {
-            const migrated = {};
-            Object.keys(parsed).forEach((name) => {
-              const note = typeof parsed[name] === "string" ? parsed[name] : "";
-              migrated[name] = { excluded: true, note };
-            });
-            state.weaponMarks.value = sanitizeMarks(migrated);
-            localStorage.removeItem(state.legacyExcludedKey);
-            localStorage.setItem(state.marksStorageKey, JSON.stringify(state.weaponMarks.value));
-          }
-        }
-      } catch (error) {
-        // ignore storage errors
-      }
+    try {
+      const legacyFromV1Raw = localStorage.getItem(state.legacyMarksStorageKey);
+      const legacyFromExcludedRaw = localStorage.getItem(state.legacyExcludedKey);
+      const legacyFromV1 = legacyFromV1Raw ? normalizeLegacyMarks(JSON.parse(legacyFromV1Raw)) : {};
+      const legacyFromExcluded = legacyFromExcludedRaw
+        ? normalizeLegacyMarks(JSON.parse(legacyFromExcludedRaw))
+        : {};
+      state.legacyMigrationMarks.value = {
+        ...legacyFromExcluded,
+        ...legacyFromV1,
+      };
+    } catch (error) {
+      state.legacyMigrationMarks.value = {};
     }
 
     watch(
       state.weaponMarks,
       (value) => {
         try {
-          const keys = Object.keys(value || {});
+          const normalized = normalizeWeaponMarks(value);
+          const keys = Object.keys(normalized || {});
           if (!keys.length) {
             localStorage.removeItem(state.marksStorageKey);
             return;
           }
-          localStorage.setItem(state.marksStorageKey, JSON.stringify(value));
+          localStorage.setItem(state.marksStorageKey, JSON.stringify(normalized));
         } catch (error) {
           // ignore storage errors
         }

@@ -420,6 +420,12 @@
         background: #dffff8;
       }
 
+      .switch-sub-toggle {
+        margin-left: 14px;
+        width: calc(100% - 14px);
+        opacity: 0.92;
+      }
+
       .about-button {
         display: inline-flex;
         align-items: center;
@@ -823,6 +829,90 @@
         letter-spacing: 0.18em;
         text-transform: uppercase;
         color: var(--muted);
+      }
+
+      .match-weapon-item .weapon-name {
+        bottom: 6px;
+        height: auto;
+        min-height: 34px;
+        padding: 0 5px;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .match-status-line {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 3px;
+      }
+
+      .match-status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1px 4px;
+        border-radius: 999px;
+        border: 1px solid rgba(134, 166, 204, 0.95);
+        background: rgba(42, 60, 82, 0.96);
+        background-color: rgba(42, 60, 82, 0.96);
+        color: #f2f7ff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.2;
+        text-shadow: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+      }
+
+      .match-status-chip.is-unowned {
+        border-color: rgba(134, 166, 204, 0.95);
+        background: rgba(42, 60, 82, 0.96);
+        background-color: rgba(42, 60, 82, 0.96);
+        color: #f2f7ff;
+      }
+
+      .match-status-chip.is-owned {
+        border-color: rgba(255, 169, 169, 0.98);
+        background: rgba(179, 55, 55, 0.96);
+        background-color: rgba(179, 55, 55, 0.96);
+        color: #ffffff;
+      }
+
+      .match-status-chip.is-essence-owned {
+        border-color: rgba(255, 169, 169, 0.98);
+        background: rgba(179, 55, 55, 0.96);
+        background-color: rgba(179, 55, 55, 0.96);
+        color: #ffffff;
+      }
+
+      [data-theme="light"] .match-status-chip {
+        background: rgba(58, 86, 121, 0.94);
+        background-color: rgba(58, 86, 121, 0.94);
+        border-color: rgba(40, 62, 89, 0.96);
+        color: #f6f9ff;
+        box-shadow: 0 1px 2px rgba(19, 33, 52, 0.2);
+      }
+
+      [data-theme="light"] .match-status-chip.is-unowned {
+        background: rgba(58, 86, 121, 0.94);
+        background-color: rgba(58, 86, 121, 0.94);
+        border-color: rgba(40, 62, 89, 0.96);
+        color: #f6f9ff;
+      }
+
+      [data-theme="light"] .match-status-chip.is-owned {
+        border-color: rgba(118, 34, 34, 0.98);
+        background: rgba(187, 61, 61, 0.95);
+        background-color: rgba(187, 61, 61, 0.95);
+        color: #ffffff;
+      }
+
+      [data-theme="light"] .match-status-chip.is-essence-owned {
+        border-color: rgba(118, 34, 34, 0.98);
+        background: rgba(187, 61, 61, 0.95);
+        background-color: rgba(187, 61, 61, 0.95);
+        color: #ffffff;
       }
 
       .match-result-header {

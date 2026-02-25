@@ -512,7 +512,7 @@
         opacity: 0.45;
       }
 
-      .scheme-weapon-item.is-dim .scheme-weapon-title {
+      .scheme-weapon-item.is-dim .weapon-main-name {
         text-decoration: line-through;
         text-decoration-thickness: 1px;
       }

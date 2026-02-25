@@ -16,12 +16,14 @@
       state.recommendationConfig && state.recommendationConfig.value
         ? state.recommendationConfig.value
         : {
-            hideExcluded: false,
+            hideEssenceOwnedWeapons: false,
+            hideEssenceOwnedOwnedOnly: false,
+            hideUnownedWeapons: false,
             preferredRegion1: "",
             preferredRegion2: "",
-            priorityMode: "sameCoverage",
-            priorityStrength: 50,
-            prioritySecondaryWeight: 60,
+            regionPriorityMode: "ignore",
+            ownershipPriorityMode: "ignore",
+            strictPriorityOrder: "ownershipFirst",
           };
 
     const getRegionRank = (region, preferred1, preferred2) => {
@@ -51,36 +53,49 @@
       return 0;
     };
 
+    const compareOwnership = (a, b) => {
+      if (b.ownedPendingMatchCount !== a.ownedPendingMatchCount) {
+        return b.ownedPendingMatchCount - a.ownedPendingMatchCount;
+      }
+      if (a.unownedPendingMatchCount !== b.unownedPendingMatchCount) {
+        return a.unownedPendingMatchCount - b.unownedPendingMatchCount;
+      }
+      return 0;
+    };
+
     const compareWithPriorityMode = (a, b, config) => {
       const preferred1 = config.preferredRegion1 || "";
       const preferred2 = config.preferredRegion2 || "";
-      const mode = config.priorityMode || "sameCoverage";
+      const regionMode = config.regionPriorityMode || "ignore";
+      const ownershipMode = config.ownershipPriorityMode || "ignore";
+      const strictPriorityOrder = config.strictPriorityOrder || "ownershipFirst";
       const baseDiff = compareBaseEfficiency(a, b);
+      const coverageDiff = b.selectedMatchCount - a.selectedMatchCount;
+      const regionDiff = compareRegion(a, b, preferred1, preferred2);
+      const ownershipDiff = compareOwnership(a, b);
 
-      if (mode === "strict") {
-        const aCovered = a.selectedMatchCount > 0;
-        const bCovered = b.selectedMatchCount > 0;
-        if (aCovered !== bCovered) return bCovered ? 1 : -1;
-        const regionDiff = compareRegion(a, b, preferred1, preferred2);
-        if (regionDiff !== 0) return regionDiff;
-        if (baseDiff !== 0) return baseDiff;
-      } else if (mode === "sameCoverage") {
-        if (b.selectedMatchCount !== a.selectedMatchCount) {
-          return b.selectedMatchCount - a.selectedMatchCount;
-        }
-        const regionDiff = compareRegion(a, b, preferred1, preferred2);
-        if (regionDiff !== 0) return regionDiff;
-        if (b.weaponCount !== a.weaponCount) return b.weaponCount - a.weaponCount;
-        if (b.maxWeaponCount !== a.maxWeaponCount) {
-          return b.maxWeaponCount - a.maxWeaponCount;
+      if (coverageDiff !== 0) return coverageDiff;
+
+      if (regionMode === "strict" && ownershipMode === "strict") {
+        if (strictPriorityOrder === "ownershipFirst") {
+          if (ownershipDiff !== 0) return ownershipDiff;
+          if (regionDiff !== 0) return regionDiff;
+        } else {
+          if (regionDiff !== 0) return regionDiff;
+          if (ownershipDiff !== 0) return ownershipDiff;
         }
       } else {
-        if (baseDiff !== 0) return baseDiff;
-        const regionDiff = compareRegion(a, b, preferred1, preferred2);
-        if (regionDiff !== 0) return regionDiff;
+        if (ownershipMode === "strict" && ownershipDiff !== 0) return ownershipDiff;
+        if (regionMode === "strict" && regionDiff !== 0) return regionDiff;
       }
 
       if (baseDiff !== 0) return baseDiff;
+
+      if (ownershipMode === "sameCoverage" && ownershipDiff !== 0) return ownershipDiff;
+      if (regionMode === "sameCoverage" && regionDiff !== 0) return regionDiff;
+      if (ownershipMode === "sameEfficiency" && ownershipDiff !== 0) return ownershipDiff;
+      if (regionMode === "sameEfficiency" && regionDiff !== 0) return regionDiff;
+
       if (a.dungeon.name !== b.dungeon.name) {
         return a.dungeon.name.localeCompare(b.dungeon.name, "zh-Hans-CN");
       }
@@ -144,7 +159,30 @@
     );
 
     const recommendations = computed(() => {
-      const targets = state.selectedWeapons.value;
+      const selectedSet = new Set(state.selectedNames.value);
+      const isEssenceOwnedForPlanning =
+        typeof state.isEssenceOwnedForPlanning === "function"
+          ? state.isEssenceOwnedForPlanning
+          : state.isEssenceOwned;
+      const recommendationConfig = getRecommendationConfig();
+      const hideEssenceOwnedInPlans = Boolean(recommendationConfig.hideEssenceOwnedWeapons);
+      const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
+      const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
+      const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
+      const shouldHideWeaponInPlan = (weapon) => {
+        if (!weapon) return true;
+        if (hideEssenceOwnedInPlans && isEssenceOwnedForPlanning(weapon.name)) {
+          if (!hideEssenceOwnedOwnedOnly || state.isWeaponOwned(weapon.name)) {
+            return true;
+          }
+        }
+        if (hideUnownedInPlans && !state.isWeaponOwned(weapon.name)) return true;
+        return false;
+      };
+      const selectedWeapons = Array.isArray(state.selectedWeapons && state.selectedWeapons.value)
+        ? state.selectedWeapons.value
+        : [];
+      const targets = selectedWeapons.filter((weapon) => !shouldHideWeaponInPlan(weapon));
       if (!targets.length) return [];
 
       const lockOptions = [
@@ -166,11 +204,6 @@
 
       if (!lockOptions.length) return [];
 
-      const selectedSet = new Set(state.selectedNames.value);
-      const excludedSet = state.excludedNameSet.value;
-      const recommendationConfig = getRecommendationConfig();
-      const hideExcludedInPlans = Boolean(recommendationConfig.hideExcluded);
-      const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
       const schemes = [];
 
       dungeons.forEach((dungeon) => {
@@ -189,14 +222,20 @@
             return isWeaponCompatible(weapon, dungeon, option);
           });
 
-          const schemeWeaponsActive = schemeWeapons.filter(
-            (weapon) => !excludedSet.has(weapon.name)
+          const schemeWeaponsVisible = schemeWeapons.filter(
+            (weapon) => !shouldHideWeaponInPlan(weapon)
           );
+          const schemeWeaponsActive = schemeWeaponsVisible;
 
           const baseCounts = countBy(schemeWeaponsActive.map((weapon) => weapon.s1));
-          const selectedSortSet = new Set(targets.map((weapon) => weapon.name));
-          const schemeWeaponSorter = getSchemeWeaponSorter(option.type, selectedSortSet, baseCounts);
-          const schemeWeaponsSorted = schemeWeapons.slice().sort(schemeWeaponSorter);
+          const sortBaseCounts = countBy(schemeWeaponsVisible.map((weapon) => weapon.s1));
+          const selectedSortSet = selectedSet;
+          const schemeWeaponSorter = getSchemeWeaponSorter(
+            option.type,
+            selectedSortSet,
+            sortBaseCounts
+          );
+          const schemeWeaponsSorted = schemeWeaponsVisible.slice().sort(schemeWeaponSorter);
           const baseKeys = Object.keys(baseCounts);
           const baseSorted = baseKeys.sort((a, b) => {
             if (baseCounts[b] !== baseCounts[a]) return baseCounts[b] - baseCounts[a];
@@ -258,9 +297,7 @@
             overflow: baseOverflow && !baseAutoPick.includes(key),
           }));
 
-          const planWeapons = hideExcludedInPlans
-            ? schemeWeaponsSorted.filter((weapon) => !excludedSet.has(weapon.name))
-            : schemeWeaponsSorted.slice();
+          const planWeapons = schemeWeaponsSorted;
           const incompatibleSelected = targets
             .filter((weapon) => !isWeaponCompatible(weapon, dungeon, option))
             .slice()
@@ -280,6 +317,12 @@
           const missingSelected = matchedSelected.filter(
             (weapon) => !coveredSelectedSet.has(weapon.name)
           );
+          const autoCoveredOwnedSelected = autoCoveredSelected.filter((weapon) =>
+            state.isWeaponOwned(weapon.name)
+          );
+          const coveredOwnedSelected = coveredSelected.filter((weapon) =>
+            state.isWeaponOwned(weapon.name)
+          );
           const autoWeaponCount = schemeWeaponsActive.filter((weapon) =>
             baseAutoPickSet.has(weapon.s1)
           ).length;
@@ -297,13 +340,17 @@
           const weaponRows = planWeapons.map((weapon) => ({
             ...weapon,
             isSelected: selectedSet.has(weapon.name),
-            isExcluded: excludedSet.has(weapon.name),
+            isWeaponOwned: state.isWeaponOwned(weapon.name),
+            isUnowned: !state.isWeaponOwned(weapon.name),
+            isEssenceOwned: isEssenceOwnedForPlanning(weapon.name),
+            isEssenceOwnedReal: state.isEssenceOwned(weapon.name),
+            isExcluded: isEssenceOwnedForPlanning(weapon.name),
             note: state.getWeaponNote(weapon.name),
             baseLocked: baseLockedSet.has(weapon.s1),
             baseConflict: baseOverflow && manualPickReady && !activeBaseSet.has(weapon.s1),
             baseDim:
               (baseOverflow && manualPickReady && !activeBaseSet.has(weapon.s1)) ||
-              excludedSet.has(weapon.name),
+              isEssenceOwnedForPlanning(weapon.name),
           }));
 
           schemes.push({
@@ -315,15 +362,23 @@
             schemeKey,
             weaponRows,
             weaponCount: autoWeaponCount,
-            maxWeaponCount: schemeWeaponsActive.length,
+            maxWeaponCount: schemeWeaponsVisible.length,
             selectedMatchCount: autoCoveredSelected.length,
+            ownedPendingMatchCount: autoCoveredOwnedSelected.length,
+            unownedPendingMatchCount: Math.max(
+              0,
+              autoCoveredSelected.length - autoCoveredOwnedSelected.length
+            ),
             selectedMissingCount: autoMissingSelected.length,
             selectedMatchNames: autoCoveredSelected.map((weapon) => weapon.name),
             selectedMissingNames: autoMissingSelected.map((weapon) => weapon.name),
+            targetCount: targets.length,
+            targetNames: targets.map((weapon) => weapon.name),
             conflictSelected: incompatibleSelected,
             conflictSelectedNames: incompatibleSelected.map((weapon) => weapon.name),
             displayWeaponCount,
             displaySelectedMatchCount: coveredSelected.length,
+            displayOwnedPendingMatchCount: coveredOwnedSelected.length,
             displaySelectedMissingCount: missingSelected.length,
             displaySelectedMatchNames: coveredSelected.map((weapon) => weapon.name),
             displaySelectedMissingNames: missingSelected.map((weapon) => weapon.name),
@@ -345,25 +400,27 @@
     });
 
     const coverageSummary = computed(() => {
-      const targets = state.selectedWeapons.value;
-      if (!targets.length) return null;
       const schemes = recommendations.value;
       if (!schemes.length) return null;
       const best = schemes[0];
+      const totalSelected =
+        Number.isFinite(best.targetCount) && best.targetCount > 0 ? best.targetCount : 0;
+      if (!totalSelected) return null;
       return {
-        totalSelected: targets.length,
+        totalSelected,
         bestMatchCount: best.selectedMatchCount,
         missingNames: best.selectedMissingNames || [],
-        hasGap: best.selectedMatchCount < targets.length,
+        hasGap: best.selectedMatchCount < totalSelected,
       };
     });
 
     const primaryRecommendations = computed(() => {
-      const targets = state.selectedWeapons.value;
       const schemes = recommendations.value;
-      if (!targets.length || !schemes.length) return [];
+      if (!schemes.length) return [];
 
       const top = schemes[0];
+      const targetNames = Array.isArray(top.targetNames) ? top.targetNames : [];
+      if (!targetNames.length) return [];
       const bestMatch = top.selectedMatchCount;
       const bestWeaponCount = top.weaponCount;
       const bestSchemes = schemes.filter(
@@ -371,7 +428,7 @@
           scheme.selectedMatchCount === bestMatch && scheme.weaponCount === bestWeaponCount
       );
 
-      const remaining = new Set(targets.map((weapon) => weapon.name));
+      const remaining = new Set(targetNames);
       const picked = [];
       const pickedKeys = new Set();
       const pickScheme = (scheme) => {

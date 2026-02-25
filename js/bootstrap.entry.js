@@ -59,6 +59,10 @@
       error_detail_confirm_chain: "请确认 ./js/app.script-chain.js 已成功部署且可访问",
       error_summary_core_script: "核心脚本未能完整加载，应用暂时无法启动。",
       error_summary_core_resource: "核心资源未能完整加载，应用暂时无法启动。",
+      error_summary_http_404: "检测到资源路径错误（404），请检查部署目录与访问路径。",
+      error_summary_http_403: "检测到资源访问被拒绝（403），请检查访问策略或防护规则。",
+      error_summary_http_429: "检测到请求过于频繁（429），请稍后重试。",
+      error_summary_http_5xx: "检测到服务端异常（5xx），请稍后重试。",
       error_title_style: "页面样式加载失败",
       error_summary_style: "关键样式文件未能完整加载，页面无法正常展示。",
       error_detail_failed_style: "失败样式：{name}",
@@ -119,6 +123,10 @@
       error_detail_confirm_chain: "請確認 ./js/app.script-chain.js 已成功部署且可訪問",
       error_summary_core_script: "核心腳本未完整載入，應用暫時無法啟動。",
       error_summary_core_resource: "核心資源未完整載入，應用暫時無法啟動。",
+      error_summary_http_404: "偵測到資源路徑錯誤（404），請檢查部署目錄與訪問路徑。",
+      error_summary_http_403: "偵測到資源存取被拒（403），請檢查存取策略或防護規則。",
+      error_summary_http_429: "偵測到請求過於頻繁（429），請稍後再試。",
+      error_summary_http_5xx: "偵測到伺服器異常（5xx），請稍後再試。",
       error_title_style: "頁面樣式載入失敗",
       error_summary_style: "關鍵樣式檔未完整載入，頁面無法正常展示。",
       error_detail_failed_style: "失敗樣式：{name}",
@@ -179,6 +187,10 @@
       error_detail_confirm_chain: "Please verify ./js/app.script-chain.js is deployed and accessible",
       error_summary_core_script: "Core scripts failed to load completely.",
       error_summary_core_resource: "Core resources failed to load completely.",
+      error_summary_http_404: "Detected a 404 resource path error. Please verify deployment directory and URL path.",
+      error_summary_http_403: "Detected a 403 access denial. Please check access policy or protection rules.",
+      error_summary_http_429: "Detected too many requests (429). Please retry in a moment.",
+      error_summary_http_5xx: "Detected a server-side error (5xx). Please retry later.",
       error_title_style: "Stylesheet Load Failed",
       error_summary_style: "Critical styles failed to load. The page cannot render correctly.",
       error_detail_failed_style: "Failed stylesheet: {name}",
@@ -242,6 +254,12 @@
         "./js/app.script-chain.js が正しく配置されアクセス可能か確認してください",
       error_summary_core_script: "コアスクリプトの読み込みが完了しませんでした。",
       error_summary_core_resource: "コアリソースの読み込みが完了しませんでした。",
+      error_summary_http_404:
+        "リソースのパスエラー（404）を検出しました。配置ディレクトリとURLパスを確認してください。",
+      error_summary_http_403:
+        "リソースへのアクセス拒否（403）を検出しました。アクセス方針や保護設定を確認してください。",
+      error_summary_http_429: "リクエスト過多（429）を検出しました。しばらくして再試行してください。",
+      error_summary_http_5xx: "サーバー側の異常（5xx）を検出しました。しばらくして再試行してください。",
       error_title_style: "スタイルシートの読み込みに失敗しました",
       error_summary_style: "重要なスタイルの読み込みに失敗し、正しく表示できません。",
       error_detail_failed_style: "失敗したスタイル：{name}",
@@ -393,6 +411,19 @@
   var isFatalHttpStatus = function (status) {
     if (!status) return false;
     return status === 404 || status === 403 || status === 429 || (status >= 500 && status <= 599);
+  };
+  var resolveStatusSummaryKey = function (status) {
+    if (!status) return "";
+    if (status === 404) return "error_summary_http_404";
+    if (status === 403) return "error_summary_http_403";
+    if (status === 429) return "error_summary_http_429";
+    if (status >= 500 && status <= 599) return "error_summary_http_5xx";
+    return "";
+  };
+  var resolveResourceSummary = function (status, fallbackKey) {
+    var key = resolveStatusSummaryKey(status);
+    if (key) return bt(key);
+    return bt(fallbackKey);
   };
 
   var createLoadError = function (kind, src, reason, probe) {
@@ -672,7 +703,7 @@
         details.push(bt("error_hint_flaky"));
         window.__renderBootError({
           title: bt("error_title_resource"),
-          summary: bt("error_summary_core_script"),
+          summary: resolveResourceSummary(status, "error_summary_core_script"),
           details: details,
           suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh"), bt("suggestion_issue_screenshot")],
         });
@@ -1309,7 +1340,7 @@
           }
           window.__renderBootError({
             title: bt("error_title_style"),
-            summary: bt("error_summary_style"),
+            summary: resolveResourceSummary(status, "error_summary_style"),
             details: cssDetails,
             suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
           });
@@ -1331,7 +1362,7 @@
           }
           window.__renderBootError({
             title: bt("error_title_resource"),
-            summary: bt("error_summary_core_resource"),
+            summary: resolveResourceSummary(status, "error_summary_core_resource"),
             details: scriptDetails,
             suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
           });

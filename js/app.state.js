@@ -25,8 +25,10 @@
     state.characterGridTopSpacer = ref(0);
     state.characterGridBottomSpacer = ref(0);
 
-    state.marksStorageKey = "weapon-marks:v1";
+    state.marksStorageKey = "weapon-marks:v2";
+    state.legacyMarksStorageKey = "weapon-marks:v1";
     state.legacyExcludedKey = "excluded-notes:v1";
+    state.migrationStorageKey = "weapon-marks-migration:v1";
     state.tutorialStorageKey = "planner-tutorial:v1";
     state.uiStateStorageKey = "planner-ui-state:v1";
     state.attrHintStorageKey = "planner-attr-hint:v1";
@@ -39,7 +41,7 @@
     state.backgroundApiStorageKey = "planner-bg-api:v1";
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
     // 更新方案推荐设置时递增该版本号，可让红点对所有用户重新显示一次。
-    state.planConfigHintVersion = "3";
+    state.planConfigHintVersion = "4";
 
     state.lowGpuEnabled = ref(false);
     state.perfPreference = ref("auto");
@@ -67,38 +69,90 @@
     state.showPlanConfig = ref(false);
     state.showPlanConfigHintDot = ref(false);
     state.recommendationConfig = ref({
-      hideExcluded: false,
+      hideEssenceOwnedWeapons: false,
+      hideEssenceOwnedOwnedOnly: false,
+      hideEssenceOwnedWeaponsInSelector: false,
+      hideUnownedWeapons: false,
+      hideUnownedWeaponsInSelector: false,
       hideFourStarWeapons: true,
+      hideFourStarWeaponsInSelector: true,
+      attributeFilterAffectsHiddenWeapons: false,
       preferredRegion1: "",
       preferredRegion2: "",
-      priorityMode: "sameCoverage",
-      priorityStrength: 50,
-      prioritySecondaryWeight: 60,
+      regionPriorityMode: "ignore",
+      ownershipPriorityMode: "ignore",
+      strictPriorityOrder: "ownershipFirst",
     });
     state.regionOptions = ref([]);
     state.regionPriorityModeOptions = [
       {
+        value: "ignore",
+        label: "不启用",
+        description: "不使用地区优先，完全按刷取效率排序。",
+      },
+      {
         value: "strict",
         label: "严格优先",
         description:
-          "只要方案覆盖至少一把已选武器，就优先显示优先地区（地区1 > 地区2 > 其他），再比较效率。",
+          "只要方案里包含你设置的优先地区（地区1 > 地区2 > 其他），就先排在前面；同组里再看效率。"
       },
       {
         value: "sameCoverage",
         label: "同覆盖优先",
         description:
-          "先比较已选武器覆盖数量；覆盖数相同后，再按优先地区排序；最后比较可同时刷数量。",
+          "先看每个方案能覆盖多少把待刷武器；数量一样时，再按优先地区（地区1 > 地区2 > 其他）排序。"
       },
       {
         value: "sameEfficiency",
         label: "同效率优先",
         description:
-          "先按默认效率排序（覆盖数、可同时刷数量等）；仅在效率相同时，才使用优先地区打破平局。",
+          "先按效率排序；只有效率完全一样时，才按优先地区（地区1 > 地区2 > 其他）排序。"
+      },
+    ];
+    state.ownershipPriorityModeOptions = [
+      {
+        value: "ignore",
+        label: "不启用",
+        description: "不使用已拥有武器优先，完全按刷取效率排序。",
+      },
+      {
+        value: "strict",
+        label: "严格优先",
+        description: "排序时先比较“已拥有武器命中数量”，数量更多的方案排在前面，再比较效率。",
+      },
+      {
+        value: "sameCoverage",
+        label: "同覆盖优先",
+        description: "先比较待刷覆盖数量；覆盖数相同时，再比较“已拥有武器命中数量”。",
+      },
+      {
+        value: "sameEfficiency",
+        label: "同效率优先",
+        description: "先按效率排序；效率完全相同时，再比较“已拥有武器命中数量”。",
+      },
+    ];
+    state.strictPriorityOrderOptions = [
+      {
+        value: "ownershipFirst",
+        label: "已拥有武器优先在前",
+        description: "当地区与已拥有武器都为严格优先时，先比较已拥有武器优先策略，再比较地区优先策略。",
+      },
+      {
+        value: "regionFirst",
+        label: "地区优先在前",
+        description: "当地区与已拥有武器都为严格优先时，先比较地区优先策略，再比较已拥有武器优先策略。",
       },
     ];
     state.conflictOpenMap = ref({});
     state.showBackToTop = ref(false);
     state.canShowAds = ref(false);
+
+    state.legacyMigrationMarks = ref({});
+    state.showMigrationModal = ref(false);
+    state.migrationMappingMode = ref("essenceOwned");
+    state.migrationConflictStrategy = ref("fillMissing");
+    state.showMigrationConfirmModal = ref(false);
+    state.migrationConfirmAction = ref("");
 
     state.tutorialVersion = "1.0.0";
     state.tutorialActive = ref(false);

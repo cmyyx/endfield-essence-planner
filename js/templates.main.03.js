@@ -202,6 +202,20 @@
                     <div class="weapon-band"></div>
                     <div class="weapon-name">
                       <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
+                      <div class="match-status-line">
+                        <span
+                          class="match-status-chip"
+                          :class="{ 'is-owned': isWeaponOwned(weapon.name), 'is-unowned': !isWeaponOwned(weapon.name) }"
+                        >
+                          {{ isWeaponOwned(weapon.name) ? t("已拥有") : t("未拥有") }}
+                        </span>
+                        <span
+                          class="match-status-chip"
+                          :class="{ 'is-essence-owned': isEssenceOwned(weapon.name) }"
+                        >
+                          {{ isEssenceOwned(weapon.name) ? t("基质已有") : t("基质未有") }}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 </div>
@@ -268,6 +282,20 @@
                           <div class="weapon-title">
                             {{ tTerm("weapon", matchSourceWeapon.name) }}
                           </div>
+                          <div class="match-status-line">
+                            <span
+                              class="match-status-chip"
+                              :class="{ 'is-owned': isWeaponOwned(matchSourceWeapon.name), 'is-unowned': !isWeaponOwned(matchSourceWeapon.name) }"
+                            >
+                              {{ isWeaponOwned(matchSourceWeapon.name) ? t("已拥有") : t("未拥有") }}
+                            </span>
+                            <span
+                              class="match-status-chip"
+                              :class="{ 'is-essence-owned': isEssenceOwned(matchSourceWeapon.name) }"
+                            >
+                              {{ isEssenceOwned(matchSourceWeapon.name) ? t("基质已有") : t("基质未有") }}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div class="scheme-weapon-attrs match-selection-attrs">
@@ -322,6 +350,20 @@
                       <div class="weapon-band"></div>
                       <div class="weapon-name">
                         <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
+                        <div class="match-status-line">
+                          <span
+                            class="match-status-chip"
+                            :class="{ 'is-owned': isWeaponOwned(weapon.name), 'is-unowned': !isWeaponOwned(weapon.name) }"
+                          >
+                            {{ isWeaponOwned(weapon.name) ? t("已拥有") : t("未拥有") }}
+                          </span>
+                          <span
+                            class="match-status-chip"
+                            :class="{ 'is-essence-owned': isEssenceOwned(weapon.name) }"
+                          >
+                            {{ isEssenceOwned(weapon.name) ? t("基质已有") : t("基质未有") }}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -437,6 +479,167 @@
               <div class="about-actions">
                 <button class="ghost-button" @click="closeNotice">{{ t("关闭") }}</button>
               </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
+        <div v-if="showMigrationModal" class="about-overlay migration-overlay">
+          <div class="about-card migration-card">
+            <h3>{{ t("检测到旧版武器标记数据") }}</h3>
+            <p>
+              {{ t("检测到你仍有旧版标记数据，需要进行迁移。") }}
+            </p>
+            <p class="migration-warning-text">
+              {{ t("如果内容极少可直接放弃，建议尽快完成迁移，以免后续编辑时造成冲突或未来不再兼容该数据结构。") }}
+            </p>
+
+            <div class="migration-preview">
+              <div class="migration-preview-item">
+                <span class="migration-preview-label">{{ t("旧数据条目") }}</span>
+                <span class="migration-preview-value">{{ migrationPreview.totalLegacyCount }}</span>
+              </div>
+              <div class="migration-preview-item">
+                <span class="migration-preview-label">{{ t("将影响条目") }}</span>
+                <span class="migration-preview-value">{{ migrationPreview.effectCount }}</span>
+              </div>
+              <div class="migration-preview-item">
+                <span class="migration-preview-label">{{ t("状态变更") }}</span>
+                <span class="migration-preview-value">{{ migrationPreview.statusChangeCount }}</span>
+              </div>
+              <div class="migration-preview-item">
+                <span class="migration-preview-label">{{ t("备注变更") }}</span>
+                <span class="migration-preview-value">{{ migrationPreview.noteChangeCount }}</span>
+              </div>
+              <div class="migration-preview-item warn">
+                <span class="migration-preview-label">{{ t("冲突条目") }}</span>
+                <span class="migration-preview-value">{{ migrationPreview.conflictCount }}</span>
+              </div>
+            </div>
+
+            <div class="migration-block">
+              <div class="migration-block-title">{{ t("迁移映射方案") }}</div>
+              <div class="migration-option-grid">
+                <button
+                  class="ghost-button migration-option"
+                  :class="{ 'is-active': migrationMappingMode === 'essenceOwned' }"
+                  @click="migrationMappingMode = 'essenceOwned'"
+                >
+                  <span class="migration-option-title">{{ t("旧版“排除”标记 → 基质已拥有") }}</span>
+                  <span class="migration-option-desc">{{ t("将旧版“排除”标记理解为“基质已有，不再需要刷基质”。") }}</span>
+                </button>
+                <button
+                  class="ghost-button migration-option"
+                  :class="{ 'is-active': migrationMappingMode === 'weaponUnowned' }"
+                  @click="migrationMappingMode = 'weaponUnowned'"
+                >
+                  <span class="migration-option-title">{{ t("旧版“排除”标记 → 武器未拥有") }}</span>
+                  <span class="migration-option-desc">{{ t("将旧版“排除”标记理解为“武器未拥有”。") }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="shouldShowConflictStrategy" class="migration-block">
+              <div class="migration-block-title">
+                {{ t("检测到冲突，请先选择冲突处理策略") }}
+              </div>
+              <div class="migration-option-grid">
+                <button
+                  v-for="option in migrationConflictOptions"
+                  :key="'migration-conflict-' + option.value"
+                  class="ghost-button migration-option"
+                  :class="{ 'is-active': migrationConflictStrategy === option.value }"
+                  @click="migrationConflictStrategy = option.value"
+                >
+                  <span class="migration-option-title">{{ t(option.label) }}</span>
+                  <span class="migration-option-desc">{{ t(option.description) }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="about-actions migration-actions">
+              <button
+                class="about-button migration-action migration-action-warn"
+                @click="openMigrationConfirm('apply')"
+              >
+                {{ t("开始迁移") }}
+              </button>
+              <button
+                class="about-button migration-action migration-action-danger"
+                @click="openMigrationConfirm('discard')"
+              >
+                {{ t("放弃旧数据") }}
+              </button>
+              <button
+                class="ghost-button migration-action migration-action-secondary"
+                @click="openMigrationConfirm('defer')"
+              >
+                {{ t("稍后再说") }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
+        <div v-if="showMigrationConfirmModal" class="about-overlay migration-overlay migration-confirm-overlay">
+          <div class="about-card migration-card migration-confirm-card">
+            <h3>
+              {{
+                migrationConfirmAction === 'apply'
+                  ? t("确认开始迁移？")
+                  : migrationConfirmAction === 'discard'
+                  ? t("确认放弃旧数据？")
+                  : t("确认稍后再说？")
+              }}
+            </h3>
+
+            <p class="migration-warning-text">
+              {{ t("风险提示：该操作会影响旧数据处理结果，建议尽快完成迁移；若后续网站更新，可能带来更多不确定性。") }}
+            </p>
+
+            <div v-if="migrationConfirmAction === 'apply'" class="migration-confirm-summary">
+              <div class="migration-confirm-row">
+                <span class="migration-confirm-label">{{ t("迁移映射方案") }}</span>
+                <span class="migration-confirm-value migration-confirm-highlight">
+                  {{
+                    migrationMappingMode === 'weaponUnowned'
+                      ? t("旧版“排除”标记 → 武器未拥有")
+                      : t("旧版“排除”标记 → 基质已拥有")
+                  }}
+                </span>
+              </div>
+              <div v-if="shouldShowConflictStrategy" class="migration-confirm-row">
+                <span class="migration-confirm-label">{{ t("冲突处理策略") }}</span>
+                <span class="migration-confirm-value migration-confirm-highlight">
+                  {{
+                    migrationConflictStrategy === 'overwriteLegacy'
+                      ? t("旧数据覆盖新数据")
+                      : migrationConflictStrategy === 'keepCurrent'
+                      ? t("保留新数据，跳过冲突")
+                      : t("仅补全缺失（推荐）")
+                  }}
+                </span>
+              </div>
+            </div>
+
+            <div class="about-actions migration-actions">
+              <button class="ghost-button migration-action migration-action-secondary" @click="closeMigrationConfirm">
+                {{ t("取消") }}
+              </button>
+              <button
+                class="about-button migration-action migration-action-danger"
+                @click="confirmMigrationAction"
+              >
+                {{
+                  migrationConfirmAction === 'apply'
+                    ? t("确认迁移")
+                    : migrationConfirmAction === 'discard'
+                    ? t("确认放弃")
+                    : t("确认稍后")
+                }}
+              </button>
             </div>
           </div>
         </div>
