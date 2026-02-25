@@ -22,7 +22,7 @@
     radial-gradient(700px 500px at 70% 90%, rgba(91, 120, 255, 0.12), transparent 60%),
     linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(235, 243, 255, 0.9) 45%, rgba(226, 236, 252, 0.9)),
     var(--bg-image);
-  background-size: auto, auto, auto, cover, auto;
+  background-size: auto, auto, auto, auto, cover;
   background-position: center, center, center, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
 }
