@@ -15,8 +15,9 @@
       return values;
     };
 
-    const getWeaponMark = (name) => {
-      const mark = state.weaponMarks.value && state.weaponMarks.value[name] ? state.weaponMarks.value[name] : null;
+    const getWeaponMarkFromSource = (name, source) => {
+      const map = source && typeof source === "object" ? source : {};
+      const mark = map && map[name] ? map[name] : null;
       if (!mark || typeof mark !== "object") {
         return { ...defaultMark };
       }
@@ -31,6 +32,7 @@
         note: typeof mark.note === "string" ? mark.note : "",
       };
     };
+    const getWeaponMark = (name) => getWeaponMarkFromSource(name, state.weaponMarks.value);
 
     const normalizeMarkForStore = (mark) => {
       const weaponOwned = typeof mark.weaponOwned === "boolean" ? mark.weaponOwned : false;
@@ -313,6 +315,8 @@
       }
       return isEssenceOwned(name);
     };
+    const isWeaponOwnedForRecommendation = (name) => isWeaponOwned(name);
+    const isEssenceOwnedForRecommendation = (name) => isEssenceOwned(name);
 
     const pendingSelectedWeapons = computed(() =>
       selectedWeaponRows.value.filter((weapon) => !isEssenceOwnedForPlanning(weapon.name))
@@ -447,6 +451,17 @@
       }
 
       const showingAttrs = Boolean(state.showWeaponAttrs.value);
+      if (showingAttrs) {
+        weaponGridVirtual.value = {
+          ...weaponGridVirtual.value,
+          startIndex: 0,
+          endIndex: list.length,
+          columns: 1,
+        };
+        state.weaponGridTopSpacer.value = 0;
+        state.weaponGridBottomSpacer.value = 0;
+        return;
+      }
       const containerSelector = showingAttrs ? ".weapon-attr-list" : ".weapon-list";
       const itemSelector = showingAttrs ? ".weapon-attr-item" : ".weapon-item";
       const grid = document.querySelector(containerSelector);
@@ -557,7 +572,6 @@
       scheduleWeaponGridWindow,
       { immediate: true }
     );
-
     onMounted(() => {
       if (typeof window === "undefined") return;
       window.addEventListener("scroll", scheduleWeaponGridWindow, { passive: true });
@@ -583,6 +597,8 @@
     state.isWeaponOwned = isWeaponOwned;
     state.isUnowned = isUnowned;
     state.isEssenceOwned = isEssenceOwned;
+    state.isWeaponOwnedForRecommendation = isWeaponOwnedForRecommendation;
+    state.isEssenceOwnedForRecommendation = isEssenceOwnedForRecommendation;
     state.isExcluded = isExcluded;
     state.setWeaponOwned = setWeaponOwned;
     state.setEssenceOwned = setEssenceOwned;

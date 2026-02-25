@@ -30,6 +30,7 @@
       preload_status_prepare: "正在准备资源…",
       preload_status_failed: "资源加载失败",
       preload_status_ready: "资源已就绪，正在初始化页面…",
+      preload_status_background_prepare: "资源已就绪，正在准备背景…",
       preload_status_staging: "资源已下载，正在启动下一阶段…",
       preload_status_parallel: "正在并行加载资源…",
       preload_status_loading: "正在加载资源…",
@@ -40,6 +41,7 @@
       preload_current_now: "当前：{label}",
       preload_current_wait_stage: "最近完成：{labels}；等待下一阶段…",
       preload_current_wait_core: "当前：等待核心模块启动…",
+      preload_current_background: "当前：背景",
       preload_current_wait_mount: "等待应用挂载完成…",
       preload_help_short: "加载时间较长通常由网络波动或缓存导致，请稍候。",
       preload_help_long:
@@ -94,6 +96,7 @@
       preload_status_prepare: "正在準備資源…",
       preload_status_failed: "資源載入失敗",
       preload_status_ready: "資源已就緒，正在初始化頁面…",
+      preload_status_background_prepare: "資源已就緒，正在準備背景…",
       preload_status_staging: "資源已下載，正在啟動下一階段…",
       preload_status_parallel: "正在並行載入資源…",
       preload_status_loading: "正在載入資源…",
@@ -104,6 +107,7 @@
       preload_current_now: "目前：{label}",
       preload_current_wait_stage: "最近完成：{labels}；等待下一階段…",
       preload_current_wait_core: "目前：等待核心模組啟動…",
+      preload_current_background: "目前：背景",
       preload_current_wait_mount: "等待應用掛載完成…",
       preload_help_short: "載入較慢通常由網路波動或快取導致，請稍候。",
       preload_help_long:
@@ -158,6 +162,7 @@
       preload_status_prepare: "Preparing resources...",
       preload_status_failed: "Resource loading failed",
       preload_status_ready: "Resources ready, initializing page...",
+      preload_status_background_prepare: "Resources ready, preparing background...",
       preload_status_staging: "Resources downloaded, starting next stage...",
       preload_status_parallel: "Loading resources in parallel...",
       preload_status_loading: "Loading resources...",
@@ -168,6 +173,7 @@
       preload_current_now: "Current: {label}",
       preload_current_wait_stage: "Recently done: {labels}; waiting for next stage...",
       preload_current_wait_core: "Current: waiting for core modules...",
+      preload_current_background: "Current: background",
       preload_current_wait_mount: "Waiting for app mount...",
       preload_help_short: "Longer loading is usually caused by network or cache. Please wait.",
       preload_help_long:
@@ -223,6 +229,7 @@
       preload_status_prepare: "リソースを準備しています…",
       preload_status_failed: "リソースの読み込みに失敗しました",
       preload_status_ready: "リソースの準備が完了しました。ページを初期化しています…",
+      preload_status_background_prepare: "リソースの準備が完了しました。背景を準備しています…",
       preload_status_staging: "リソースの取得完了。次の段階を開始しています…",
       preload_status_parallel: "リソースを並列で読み込み中…",
       preload_status_loading: "リソースを読み込み中…",
@@ -233,6 +240,7 @@
       preload_current_now: "現在：{label}",
       preload_current_wait_stage: "直近の完了：{labels}；次の段階を待機中…",
       preload_current_wait_core: "現在：コアモジュールの起動待ち…",
+      preload_current_background: "現在：背景",
       preload_current_wait_mount: "アプリのマウント完了を待機中…",
       preload_help_short: "読み込みが長い場合、ネットワークやキャッシュが原因のことがあります。",
       preload_help_long:
@@ -342,6 +350,10 @@
       ? fallbackTable[key]
       : key;
     return interpolateBootText(raw, params);
+  };
+  window.__bootI18n = {
+    locale: bootLocale,
+    t: bt,
   };
   var normalizeResourceKey = function (src) {
     try {

@@ -267,6 +267,7 @@
             <div v-if="isPortrait" class="panel-actions">
               <plan-config-control
                 :t="t"
+                :t-term="tTerm"
                 :recommendation-config="recommendationConfig"
                 :show-plan-config="showPlanConfig"
                 :show-plan-config-hint-dot="showPlanConfigHintDot"

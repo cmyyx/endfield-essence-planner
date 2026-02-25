@@ -417,6 +417,7 @@ window.I18N["en"] = {
       "示例类型": "Sample Type"
     },
     "dungeon": {
+      "四号谷地": "Valley IV",
       "四号谷地·枢纽区": "Valley IV - The Hub",
       "四号谷地·源石研究园": "Valley IV - Originium Science Park",
       "四号谷地·供能高地": "Valley IV - Power Plateau",

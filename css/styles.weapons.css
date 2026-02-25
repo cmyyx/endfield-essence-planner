@@ -622,6 +622,11 @@
         font-weight: 700;
       }
 
+      .plan-config-refresh-delay {
+        display: grid;
+        gap: 6px;
+      }
+
       @media (max-width: 720px) {
         .plan-config-panel {
           position: fixed;

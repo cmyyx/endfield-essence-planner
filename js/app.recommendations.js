@@ -160,8 +160,14 @@
 
     const recommendations = computed(() => {
       const selectedSet = new Set(state.selectedNames.value);
-      const isEssenceOwnedForPlanning =
-        typeof state.isEssenceOwnedForPlanning === "function"
+      const isWeaponOwnedForRecommendation =
+        typeof state.isWeaponOwnedForRecommendation === "function"
+          ? state.isWeaponOwnedForRecommendation
+          : state.isWeaponOwned;
+      const isEssenceOwnedForRecommendation =
+        typeof state.isEssenceOwnedForRecommendation === "function"
+          ? state.isEssenceOwnedForRecommendation
+          : typeof state.isEssenceOwnedForPlanning === "function"
           ? state.isEssenceOwnedForPlanning
           : state.isEssenceOwned;
       const recommendationConfig = getRecommendationConfig();
@@ -171,12 +177,12 @@
       const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
       const shouldHideWeaponInPlan = (weapon) => {
         if (!weapon) return true;
-        if (hideEssenceOwnedInPlans && isEssenceOwnedForPlanning(weapon.name)) {
-          if (!hideEssenceOwnedOwnedOnly || state.isWeaponOwned(weapon.name)) {
+        if (hideEssenceOwnedInPlans && isEssenceOwnedForRecommendation(weapon.name)) {
+          if (!hideEssenceOwnedOwnedOnly || isWeaponOwnedForRecommendation(weapon.name)) {
             return true;
           }
         }
-        if (hideUnownedInPlans && !state.isWeaponOwned(weapon.name)) return true;
+        if (hideUnownedInPlans && !isWeaponOwnedForRecommendation(weapon.name)) return true;
         return false;
       };
       const selectedWeapons = Array.isArray(state.selectedWeapons && state.selectedWeapons.value)
@@ -318,10 +324,10 @@
             (weapon) => !coveredSelectedSet.has(weapon.name)
           );
           const autoCoveredOwnedSelected = autoCoveredSelected.filter((weapon) =>
-            state.isWeaponOwned(weapon.name)
+            isWeaponOwnedForRecommendation(weapon.name)
           );
           const coveredOwnedSelected = coveredSelected.filter((weapon) =>
-            state.isWeaponOwned(weapon.name)
+            isWeaponOwnedForRecommendation(weapon.name)
           );
           const autoWeaponCount = schemeWeaponsActive.filter((weapon) =>
             baseAutoPickSet.has(weapon.s1)
@@ -340,17 +346,17 @@
           const weaponRows = planWeapons.map((weapon) => ({
             ...weapon,
             isSelected: selectedSet.has(weapon.name),
-            isWeaponOwned: state.isWeaponOwned(weapon.name),
-            isUnowned: !state.isWeaponOwned(weapon.name),
-            isEssenceOwned: isEssenceOwnedForPlanning(weapon.name),
+            isWeaponOwned: isWeaponOwnedForRecommendation(weapon.name),
+            isUnowned: !isWeaponOwnedForRecommendation(weapon.name),
+            isEssenceOwned: isEssenceOwnedForRecommendation(weapon.name),
             isEssenceOwnedReal: state.isEssenceOwned(weapon.name),
-            isExcluded: isEssenceOwnedForPlanning(weapon.name),
+            isExcluded: isEssenceOwnedForRecommendation(weapon.name),
             note: state.getWeaponNote(weapon.name),
             baseLocked: baseLockedSet.has(weapon.s1),
             baseConflict: baseOverflow && manualPickReady && !activeBaseSet.has(weapon.s1),
             baseDim:
               (baseOverflow && manualPickReady && !activeBaseSet.has(weapon.s1)) ||
-              isEssenceOwnedForPlanning(weapon.name),
+              isEssenceOwnedForRecommendation(weapon.name),
           }));
 
           schemes.push({

@@ -126,13 +126,18 @@
       if (!shouldWarmupDefaultBackground()) {
         return Promise.resolve(false);
       }
-      const t = typeof state.t === "function" ? state.t : (text) => text;
+      const bootT =
+        typeof window !== "undefined" && window.__bootI18n && typeof window.__bootI18n.t === "function"
+          ? window.__bootI18n.t
+          : null;
+      const stateT = typeof state.t === "function" ? state.t : (text) => text;
+      const tByKey = (bootKey, fallbackKey) => (bootT ? bootT(bootKey) : stateT(fallbackKey));
       if (root) {
         root.style.setProperty("--bg-image", defaultBackgroundCssValue);
       }
       setPreloadPhaseText({
-        status: t("资源已就绪，正在准备背景…"),
-        current: t("当前：背景"),
+        status: tByKey("preload_status_background_prepare", "资源已就绪，正在准备背景…"),
+        current: tByKey("preload_current_background", "当前：背景"),
         help: "",
       });
       return new Promise((resolve) => {

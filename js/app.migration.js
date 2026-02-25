@@ -236,16 +236,123 @@
       },
     ];
 
-    const updateMigrationModalScrollable = () => {
+    let migrationModalMeasureRaf = 0;
+    let migrationModalMeasureRaf2 = 0;
+    let migrationModalMeasureTimers = [];
+    let migrationModalResizeObserver = null;
+    let migrationModalMutationObserver = null;
+    let migrationModalObservedCard = null;
+    let migrationModalObservedOverlay = null;
+
+    const getMigrationModalCard = () =>
+      document.querySelector(".migration-overlay .migration-card:not(.migration-confirm-card)");
+
+    const clearMigrationModalMeasureTimers = () => {
+      if (typeof window === "undefined") return;
+      if (!migrationModalMeasureTimers.length) return;
+      migrationModalMeasureTimers.forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      migrationModalMeasureTimers = [];
+    };
+
+    const teardownMigrationModalObservers = () => {
+      if (migrationModalResizeObserver) {
+        migrationModalResizeObserver.disconnect();
+        migrationModalResizeObserver = null;
+      }
+      if (migrationModalMutationObserver) {
+        migrationModalMutationObserver.disconnect();
+        migrationModalMutationObserver = null;
+      }
+      migrationModalObservedCard = null;
+      migrationModalObservedOverlay = null;
+    };
+
+    const cancelMigrationModalMeasure = () => {
+      if (typeof window === "undefined") return;
+      if (migrationModalMeasureRaf) {
+        window.cancelAnimationFrame(migrationModalMeasureRaf);
+        migrationModalMeasureRaf = 0;
+      }
+      if (migrationModalMeasureRaf2) {
+        window.cancelAnimationFrame(migrationModalMeasureRaf2);
+        migrationModalMeasureRaf2 = 0;
+      }
+      clearMigrationModalMeasureTimers();
+    };
+
+    const measureMigrationModalScrollable = () => {
+      const card = getMigrationModalCard();
+      if (!card) {
+        state.migrationModalScrollable.value = false;
+        return;
+      }
+      state.migrationModalScrollable.value = card.scrollHeight - card.clientHeight > 1;
+    };
+
+    const scheduleDelayedMigrationModalMeasure = () => {
+      if (typeof window === "undefined") return;
+      clearMigrationModalMeasureTimers();
+      [120, 300, 600].forEach((delay) => {
+        const timerId = window.setTimeout(() => {
+          if (!state.showMigrationModal.value) return;
+          measureMigrationModalScrollable();
+        }, delay);
+        migrationModalMeasureTimers.push(timerId);
+      });
+    };
+
+    const ensureMigrationModalObservers = () => {
+      if (typeof window === "undefined") return;
+      const overlay = document.querySelector(".migration-overlay");
+      const card = getMigrationModalCard();
+      if (!overlay || !card) return;
+      if (migrationModalObservedCard === card && migrationModalObservedOverlay === overlay) {
+        return;
+      }
+      teardownMigrationModalObservers();
+      if (typeof window.ResizeObserver === "function") {
+        migrationModalResizeObserver = new window.ResizeObserver(() => {
+          if (!state.showMigrationModal.value) return;
+          measureMigrationModalScrollable();
+        });
+        migrationModalResizeObserver.observe(card);
+      }
+      if (typeof window.MutationObserver === "function") {
+        migrationModalMutationObserver = new window.MutationObserver(() => {
+          if (!state.showMigrationModal.value) return;
+          measureMigrationModalScrollable();
+        });
+        migrationModalMutationObserver.observe(card, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          characterData: true,
+        });
+      }
+      migrationModalObservedCard = card;
+      migrationModalObservedOverlay = overlay;
+    };
+
+    const updateMigrationModalScrollable = ({ includeDelayed = false } = {}) => {
       nextTick(() => {
-        const card = document.querySelector(
-          ".migration-overlay .migration-card:not(.migration-confirm-card)"
-        );
-        if (!card) {
-          state.migrationModalScrollable.value = false;
+        if (typeof window === "undefined") {
+          measureMigrationModalScrollable();
           return;
         }
-        state.migrationModalScrollable.value = card.scrollHeight - card.clientHeight > 1;
+        cancelMigrationModalMeasure();
+        migrationModalMeasureRaf = window.requestAnimationFrame(() => {
+          migrationModalMeasureRaf = 0;
+          migrationModalMeasureRaf2 = window.requestAnimationFrame(() => {
+            migrationModalMeasureRaf2 = 0;
+            measureMigrationModalScrollable();
+            ensureMigrationModalObservers();
+            if (includeDelayed) {
+              scheduleDelayedMigrationModalMeasure();
+            }
+          });
+        });
       });
     };
 
@@ -420,10 +527,12 @@
       () => state.showMigrationModal.value,
       (visible) => {
         if (!visible) {
+          cancelMigrationModalMeasure();
+          teardownMigrationModalObservers();
           state.migrationModalScrollable.value = false;
           return;
         }
-        updateMigrationModalScrollable();
+        updateMigrationModalScrollable({ includeDelayed: true });
       }
     );
 
@@ -474,6 +583,8 @@
       if (typeof window !== "undefined") {
         window.removeEventListener("resize", handleWindowResize);
       }
+      cancelMigrationModalMeasure();
+      teardownMigrationModalObservers();
     });
 
     state.hasLegacyMigrationData = hasLegacyData;

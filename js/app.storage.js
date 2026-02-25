@@ -80,7 +80,6 @@
       const strictPriorityOrder = strictPriorityOrders.has(source.strictPriorityOrder)
         ? source.strictPriorityOrder
         : defaults.strictPriorityOrder || "ownershipFirst";
-
       const normalized = {
         hideEssenceOwnedWeapons,
         hideEssenceOwnedOwnedOnly,
