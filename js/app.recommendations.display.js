@@ -198,13 +198,20 @@
           return;
         }
         group.classList.add("is-wrapped");
+        // Keep weapon selection rows readable: do not downscale wrapped attrs there.
+        if (group.closest(".weapon-attr-item")) {
+          return;
+        }
         shrinkToFit(group);
       });
     };
 
     const scheduleAttrWrap = () => {
       nextTick(() => {
-        requestAnimationFrame(updateAttrWrap);
+        requestAnimationFrame(() => {
+          updateAttrWrap();
+          requestAnimationFrame(updateAttrWrap);
+        });
       });
     };
 
@@ -264,12 +271,14 @@
     onMounted(() => {
       scheduleAttrWrap();
       scheduleRecommendationVirtualWindow();
+      window.addEventListener("load", scheduleAttrWrap);
       window.addEventListener("resize", scheduleAttrWrap);
       window.addEventListener("resize", scheduleRecommendationVirtualWindow);
       window.addEventListener("scroll", scheduleRecommendationVirtualWindow, { passive: true });
     });
 
     onBeforeUnmount(() => {
+      window.removeEventListener("load", scheduleAttrWrap);
       window.removeEventListener("resize", scheduleAttrWrap);
       window.removeEventListener("resize", scheduleRecommendationVirtualWindow);
       window.removeEventListener("scroll", scheduleRecommendationVirtualWindow);
@@ -298,6 +307,7 @@
     watch(
       () => state.currentView.value,
       () => {
+        scheduleAttrWrap();
         scheduleRecommendationVirtualWindow();
       },
       { immediate: true }

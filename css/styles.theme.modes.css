@@ -86,7 +86,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .theme-select {
-  background: rgba(244, 248, 255, 0.96);
+  background: rgba(255, 255, 255, 0.7);
   border-color: rgba(22, 44, 72, 0.18);
   color: #1a2a3d;
 }
@@ -289,7 +289,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .plan-config-item {
   border-color: rgba(22, 44, 72, 0.1);
-  background: rgba(234, 243, 255, 0.7);
+  background: rgba(234, 243, 255, 0.4);
 }
 
 [data-theme="light"] .plan-config-hint-dot {
@@ -316,7 +316,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .secondary-select,
 [data-theme="light"] .secondary-input {
-  background: rgba(244, 248, 255, 0.96);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 [data-theme="light"] .lang-menu {
@@ -326,7 +326,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .tag {
-  background: rgba(244, 249, 255, 0.96);
+  background: rgba(244, 248, 255, 0.6);
   border-color: rgba(22, 44, 72, 0.16);
   color: #1f3651;
 }
@@ -334,13 +334,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .tag.is-unowned,
 [data-theme="light"] .tag.is-unowned.is-essence-owned {
   border-color: rgba(214, 150, 46, 0.5);
-  background: rgba(255, 232, 181, 0.62);
+  background: rgba(255, 232, 181, 0.45);
   color: #6c4607;
 }
 
 [data-theme="light"] .tag.is-essence-owned {
   border-color: rgba(212, 90, 90, 0.45);
-  background: rgba(255, 209, 209, 0.56);
+  background: rgba(255, 209, 209, 0.45);
   color: #812f2f;
 }
 
@@ -374,37 +374,37 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .mobile-hint {
   border-color: rgba(22, 44, 72, 0.18);
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.65);
   color: #425a75;
 }
 
 [data-theme="light"] .mobile-tab {
   border-color: rgba(22, 44, 72, 0.2);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.65);
   color: #4c617b;
 }
 
 [data-theme="light"] .mobile-tab:hover {
   border-color: rgba(22, 44, 72, 0.35);
   color: #243e5a;
-  background: rgba(246, 251, 255, 0.96);
+  background: rgba(246, 251, 255, 0.7);
 }
 
 [data-theme="light"] .mobile-tab.active {
   border-color: rgba(31, 200, 183, 0.55);
-  background: rgba(223, 248, 245, 0.95);
+  background: rgba(223, 248, 245, 0.72);
   color: #154763;
   box-shadow: 0 8px 20px rgba(44, 77, 118, 0.18);
 }
 
 [data-theme="light"] .mobile-tab .count {
   border-color: rgba(22, 44, 72, 0.18);
-  background: rgba(244, 248, 255, 0.95);
+  background: rgba(244, 248, 255, 0.65);
   color: #2e4763;
 }
 
 [data-theme="light"] .search-box {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.65);
   border-color: rgba(22, 44, 72, 0.14);
 }
 
@@ -422,7 +422,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .filter-panel {
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.62);
   border-color: rgba(22, 44, 72, 0.14);
 }
 
@@ -446,7 +446,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .tutorial-card,
 [data-theme="light"] .notice-card,
 [data-theme="light"] .changelog-card {
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(255, 255, 255, 0.72);
   border-color: rgba(22, 44, 72, 0.16);
   color: #1a2a3d;
 }
@@ -611,7 +611,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .skill-data-table,
 [data-theme="light"] .potential-card,
 [data-theme="light"] .strategy-guide {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.72);
   border-color: rgba(22, 44, 72, 0.14);
 }
 
@@ -650,7 +650,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .gear-table,
 [data-theme="light"] .team-table {
-  background: rgba(251, 254, 255, 0.98);
+  background: rgba(255, 255, 255, 0.75);
   border-color: rgba(22, 44, 72, 0.14);
 }
 
@@ -668,7 +668,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .gear-weapon,
 [data-theme="light"] .team-card {
-  background: rgba(245, 250, 255, 0.94);
+  background: rgba(245, 250, 255, 0.62);
   border-color: rgba(22, 44, 72, 0.12);
 }
 
@@ -690,7 +690,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .material-row {
-  background: rgba(244, 250, 255, 0.9);
+  background: rgba(245, 250, 255, 0.65);
   border: 1px solid rgba(22, 44, 72, 0.14);
   border-radius: 10px;
 }
@@ -700,13 +700,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .material-tag {
-  background: rgba(233, 242, 252, 0.92);
+  background: rgba(245, 250, 255, 0.65);
   border-color: rgba(22, 44, 72, 0.16);
   color: #254663;
 }
 
 [data-theme="light"] .material-tag.is-empty {
-  background: rgba(243, 249, 255, 0.9);
+  background: rgba(245, 250, 255, 0.65);
   border-color: rgba(22, 44, 72, 0.14);
   color: #6a819b;
 }
@@ -717,7 +717,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .skill-data-grid th {
-  background: rgba(229, 238, 250, 0.9);
+  background: rgba(245, 250, 255, 0.65);
   color: #4e627c;
 }
 
@@ -732,7 +732,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .skill-data-value {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(245, 250, 255, 0.65);
   color: #1a2a3d;
 }
 
@@ -816,6 +816,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   border-color: rgba(215, 144, 50, 0.48);
 }
 
+[data-theme="light"] .scheme-weapon-item .attr-value:not(.base-lock):not(.locked):not(.conflict),
+[data-theme="light"] .weapon-attr-item .attr-value:not(.base-lock):not(.locked):not(.conflict) {
+  border-color: rgba(32, 58, 88, 0.24);
+  background: rgba(236, 244, 255, 0.92);
+  color: #294565;
+}
+
 [data-theme="light"] .attr-value.base-lock {
   border-color: rgba(31, 169, 113, 0.45);
   background: rgba(31, 169, 113, 0.14);
@@ -843,7 +850,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .exclude-note-input {
-  background: rgba(248, 252, 255, 0.98);
+  background: rgba(248, 252, 255, 0.45);
   border-color: rgba(22, 44, 72, 0.2);
   color: #1d334e;
 }
@@ -871,25 +878,11 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #1f4f65;
 }
 
-[data-theme="light"] .exclude-toggle:hover,
-[data-theme="light"] .exclude-toggle.small:hover {
-  background: rgba(31, 200, 183, 0.2);
-  border-color: rgba(31, 200, 183, 0.52);
-  color: #1f4f65;
-}
-
 [data-theme="light"] .exclude-toggle.intent-alert,
 [data-theme="light"] .exclude-toggle.small.intent-alert {
   border-color: rgba(212, 90, 90, 0.58);
   background: rgba(212, 90, 90, 0.17);
   color: #8b3636;
-}
-
-[data-theme="light"] .exclude-toggle.intent-alert:hover,
-[data-theme="light"] .exclude-toggle.small.intent-alert:hover {
-  border-color: rgba(212, 90, 90, 0.68);
-  background: rgba(212, 90, 90, 0.24);
-  color: #7b2b2b;
 }
 
 [data-theme="light"] .weapon-hidden-chip {
@@ -914,10 +907,28 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .slot-inline-card {
   border-color: rgba(120, 150, 185, 0.35);
-  background: rgba(247, 251, 255, 0.9);
+  background: rgba(247, 251, 255, 0.65);
 }
 
 [data-theme="light"] .slot-hero-shell {
   border-color: rgba(120, 150, 185, 0.35);
-  background: rgba(247, 251, 255, 0.9);
+  background: rgba(247, 251, 255, 0.65);
+}
+
+[data-theme="light"] .nav-item:not(.active) {
+  border-color: rgba(22, 44, 72, 0.24);
+  background: rgba(255, 255, 255, 0.42);
+  color: #2b4663;
+}
+
+[data-theme="dark"] .slot-hero-shell.is-slot-compact,
+[data-theme="dark"] .slot-inline-top.is-slot-compact {
+  border-color: rgba(185, 203, 223, 0.2);
+  background: rgba(14, 20, 30, 0.34);
+}
+
+[data-theme="light"] .slot-hero-shell.is-slot-compact,
+[data-theme="light"] .slot-inline-top.is-slot-compact {
+  border-color: rgba(120, 150, 185, 0.2);
+  background: rgba(247, 251, 255, 0.34);
 }

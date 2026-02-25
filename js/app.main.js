@@ -33,7 +33,7 @@
       title: "数据文件缺失",
       summary: "核心数据未加载完成，当前无法生成武器规划。",
       details: [
-        `地牢数据：${dungeons.length ? "已加载" : "缺失"}`,
+        `副本数据：${dungeons.length ? "已加载" : "缺失"}`,
         `武器数据：${weapons.length ? "已加载" : "缺失"}`,
         "请确认 ./data/dungeons.js 与 ./data/weapons.js 可访问",
       ],
@@ -362,16 +362,25 @@
         if (!target || typeof target.tagName !== "string" || target.tagName.toLowerCase() !== "textarea") {
           return;
         }
-        target.style.height = "32px";
+        const computedStyle =
+          typeof window !== "undefined" && typeof window.getComputedStyle === "function"
+            ? window.getComputedStyle(target)
+            : null;
+        const minHeight = computedStyle ? parseFloat(computedStyle.minHeight || "0") : 0;
+        const currentHeight = computedStyle ? parseFloat(computedStyle.height || "0") : 0;
+        const baseHeight = Math.max(minHeight, currentHeight, 24);
+        target.style.height = `${baseHeight}px`;
         if (!target.value) {
           target.style.overflowY = "hidden";
           return;
         }
         target.style.height = "auto";
         const maxHeight = 96;
-        const nextHeight = Math.min(Math.max(target.scrollHeight, 32), maxHeight);
+        const contentHeight = target.scrollHeight;
+        const nextHeight =
+          contentHeight > baseHeight + 1 ? Math.min(contentHeight, maxHeight) : baseHeight;
         target.style.height = `${nextHeight}px`;
-        target.style.overflowY = target.scrollHeight > maxHeight ? "auto" : "hidden";
+        target.style.overflowY = contentHeight > maxHeight ? "auto" : "hidden";
       };
 
       const syncQuery = (replace = false) => {

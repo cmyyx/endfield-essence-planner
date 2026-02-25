@@ -33,11 +33,43 @@
       return 2;
     };
 
-    const compareBaseEfficiency = (a, b) => {
-      if (b.selectedMatchCount !== a.selectedMatchCount) {
-        return b.selectedMatchCount - a.selectedMatchCount;
+    const getSelectedMatchCountForSort = (scheme) => {
+      if (Number.isFinite(scheme && scheme.effectiveSelectedMatchCount)) {
+        return scheme.effectiveSelectedMatchCount;
       }
-      if (b.weaponCount !== a.weaponCount) return b.weaponCount - a.weaponCount;
+      return Number.isFinite(scheme && scheme.selectedMatchCount) ? scheme.selectedMatchCount : 0;
+    };
+
+    const getWeaponCountForSort = (scheme) => {
+      if (Number.isFinite(scheme && scheme.effectiveWeaponCount)) {
+        return scheme.effectiveWeaponCount;
+      }
+      return Number.isFinite(scheme && scheme.weaponCount) ? scheme.weaponCount : 0;
+    };
+
+    const getOwnedPendingMatchCountForSort = (scheme) => {
+      if (Number.isFinite(scheme && scheme.effectiveOwnedPendingMatchCount)) {
+        return scheme.effectiveOwnedPendingMatchCount;
+      }
+      return Number.isFinite(scheme && scheme.ownedPendingMatchCount) ? scheme.ownedPendingMatchCount : 0;
+    };
+
+    const getUnownedPendingMatchCountForSort = (scheme) => {
+      if (Number.isFinite(scheme && scheme.effectiveUnownedPendingMatchCount)) {
+        return scheme.effectiveUnownedPendingMatchCount;
+      }
+      return Number.isFinite(scheme && scheme.unownedPendingMatchCount)
+        ? scheme.unownedPendingMatchCount
+        : 0;
+    };
+
+    const compareBaseEfficiency = (a, b) => {
+      const selectedDiff = getSelectedMatchCountForSort(b) - getSelectedMatchCountForSort(a);
+      if (selectedDiff !== 0) return selectedDiff;
+
+      const weaponDiff = getWeaponCountForSort(b) - getWeaponCountForSort(a);
+      if (weaponDiff !== 0) return weaponDiff;
+
       if (b.maxWeaponCount !== a.maxWeaponCount) {
         return b.maxWeaponCount - a.maxWeaponCount;
       }
@@ -54,11 +86,13 @@
     };
 
     const compareOwnership = (a, b) => {
-      if (b.ownedPendingMatchCount !== a.ownedPendingMatchCount) {
-        return b.ownedPendingMatchCount - a.ownedPendingMatchCount;
-      }
-      if (a.unownedPendingMatchCount !== b.unownedPendingMatchCount) {
-        return a.unownedPendingMatchCount - b.unownedPendingMatchCount;
+      const ownedDiff = getOwnedPendingMatchCountForSort(b) - getOwnedPendingMatchCountForSort(a);
+      if (ownedDiff !== 0) return ownedDiff;
+
+      const unownedDiff =
+        getUnownedPendingMatchCountForSort(a) - getUnownedPendingMatchCountForSort(b);
+      if (unownedDiff !== 0) {
+        return unownedDiff;
       }
       return 0;
     };
@@ -70,7 +104,7 @@
       const ownershipMode = config.ownershipPriorityMode || "ignore";
       const strictPriorityOrder = config.strictPriorityOrder || "ownershipFirst";
       const baseDiff = compareBaseEfficiency(a, b);
-      const coverageDiff = b.selectedMatchCount - a.selectedMatchCount;
+      const coverageDiff = getSelectedMatchCountForSort(b) - getSelectedMatchCountForSort(a);
       const regionDiff = compareRegion(a, b, preferred1, preferred2);
       const ownershipDiff = compareOwnership(a, b);
 
@@ -326,11 +360,21 @@
           const autoCoveredOwnedSelected = autoCoveredSelected.filter((weapon) =>
             isWeaponOwnedForRecommendation(weapon.name)
           );
+          const effectiveAutoCoveredSelected = autoCoveredSelected.filter(
+            (weapon) => !isEssenceOwnedForRecommendation(weapon.name)
+          );
+          const effectiveAutoCoveredOwnedSelected = effectiveAutoCoveredSelected.filter((weapon) =>
+            isWeaponOwnedForRecommendation(weapon.name)
+          );
           const coveredOwnedSelected = coveredSelected.filter((weapon) =>
             isWeaponOwnedForRecommendation(weapon.name)
           );
           const autoWeaponCount = schemeWeaponsActive.filter((weapon) =>
             baseAutoPickSet.has(weapon.s1)
+          ).length;
+          const effectiveAutoWeaponCount = schemeWeaponsActive.filter(
+            (weapon) =>
+              baseAutoPickSet.has(weapon.s1) && !isEssenceOwnedForRecommendation(weapon.name)
           ).length;
           const displayWeaponCount = schemeWeaponsActive.filter((weapon) =>
             activeBaseSet.has(weapon.s1)
@@ -368,15 +412,23 @@
             schemeKey,
             weaponRows,
             weaponCount: autoWeaponCount,
+            effectiveWeaponCount: effectiveAutoWeaponCount,
             maxWeaponCount: schemeWeaponsVisible.length,
             selectedMatchCount: autoCoveredSelected.length,
+            effectiveSelectedMatchCount: effectiveAutoCoveredSelected.length,
             ownedPendingMatchCount: autoCoveredOwnedSelected.length,
+            effectiveOwnedPendingMatchCount: effectiveAutoCoveredOwnedSelected.length,
             unownedPendingMatchCount: Math.max(
               0,
               autoCoveredSelected.length - autoCoveredOwnedSelected.length
             ),
+            effectiveUnownedPendingMatchCount: Math.max(
+              0,
+              effectiveAutoCoveredSelected.length - effectiveAutoCoveredOwnedSelected.length
+            ),
             selectedMissingCount: autoMissingSelected.length,
             selectedMatchNames: autoCoveredSelected.map((weapon) => weapon.name),
+            effectiveSelectedMatchNames: effectiveAutoCoveredSelected.map((weapon) => weapon.name),
             selectedMissingNames: autoMissingSelected.map((weapon) => weapon.name),
             targetCount: targets.length,
             targetNames: targets.map((weapon) => weapon.name),
@@ -427,11 +479,12 @@
       const top = schemes[0];
       const targetNames = Array.isArray(top.targetNames) ? top.targetNames : [];
       if (!targetNames.length) return [];
-      const bestMatch = top.selectedMatchCount;
-      const bestWeaponCount = top.weaponCount;
+      const bestMatch = getSelectedMatchCountForSort(top);
+      const bestWeaponCount = getWeaponCountForSort(top);
       const bestSchemes = schemes.filter(
         (scheme) =>
-          scheme.selectedMatchCount === bestMatch && scheme.weaponCount === bestWeaponCount
+          getSelectedMatchCountForSort(scheme) === bestMatch &&
+          getWeaponCountForSort(scheme) === bestWeaponCount
       );
 
       const remaining = new Set(targetNames);
@@ -440,15 +493,21 @@
       const pickScheme = (scheme) => {
         picked.push(scheme);
         pickedKeys.add(scheme.schemeKey);
-        if (scheme.selectedMatchNames) {
-          scheme.selectedMatchNames.forEach((name) => remaining.delete(name));
+        const names = Array.isArray(scheme.effectiveSelectedMatchNames)
+          ? scheme.effectiveSelectedMatchNames
+          : scheme.selectedMatchNames;
+        if (Array.isArray(names)) {
+          names.forEach((name) => remaining.delete(name));
         }
       };
 
       let seed = null;
       let seedCover = -1;
       bestSchemes.forEach((scheme) => {
-        const cover = scheme.selectedMatchNames ? scheme.selectedMatchNames.length : 0;
+        const names = Array.isArray(scheme.effectiveSelectedMatchNames)
+          ? scheme.effectiveSelectedMatchNames
+          : scheme.selectedMatchNames;
+        const cover = Array.isArray(names) ? names.length : 0;
         if (cover > seedCover) {
           seed = scheme;
           seedCover = cover;
@@ -462,8 +521,11 @@
 
         schemes.forEach((scheme) => {
           if (pickedKeys.has(scheme.schemeKey)) return;
-          const cover = scheme.selectedMatchNames
-            ? scheme.selectedMatchNames.filter((name) => remaining.has(name)).length
+          const names = Array.isArray(scheme.effectiveSelectedMatchNames)
+            ? scheme.effectiveSelectedMatchNames
+            : scheme.selectedMatchNames;
+          const cover = Array.isArray(names)
+            ? names.filter((name) => remaining.has(name)).length
             : 0;
           if (cover > bestCover) {
             best = scheme;

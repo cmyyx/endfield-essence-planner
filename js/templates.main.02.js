@@ -256,7 +256,7 @@
                       <div class="weapon-exclude-row" @click.stop>
                         <button
                           class="exclude-toggle small"
-                          :class="{ active: !isWeaponOwned(weapon.name), 'intent-alert': !isWeaponOwned(weapon.name) }"
+                          :class="{ active: !isWeaponOwned(weapon.name), 'intent-alert': isWeaponOwned(weapon.name) }"
                           @click.stop="toggleWeaponOwned(weapon)"
                         >
                           {{ isWeaponOwned(weapon.name) ? t("标记武器未有") : t("标记武器拥有") }}
@@ -382,7 +382,7 @@
                   <div class="weapon-exclude-row" @click.stop>
                     <button
                       class="exclude-toggle small"
-                      :class="{ active: weapon.isUnowned, 'intent-alert': weapon.isUnowned }"
+                      :class="{ active: weapon.isUnowned, 'intent-alert': !weapon.isUnowned }"
                       @click.stop="toggleWeaponOwned(weapon)"
                     >
                       {{ weapon.isUnowned ? t("标记武器拥有") : t("标记武器未有") }}

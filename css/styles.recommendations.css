@@ -485,6 +485,7 @@
         display: grid;
         gap: 10px;
         margin-top: 12px;
+        min-width: 0;
       }
 
       .scheme-divider {
@@ -565,6 +566,7 @@
         background: rgba(10, 14, 22, 0.72);
         display: grid;
         gap: 6px;
+        min-width: 0;
         content-visibility: auto;
         contain-intrinsic-size: 72px 72px;
       }
@@ -642,6 +644,13 @@
         flex-wrap: wrap;
         position: relative;
         padding-right: 56px;
+        min-width: 0;
+      }
+
+      .scheme-weapon-title .weapon-main-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .scheme-weapon-title .badge {
@@ -692,6 +701,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px 10px;
+        min-width: 0;
       }
 
       .scheme-weapon-list .scheme-weapon-attrs .attr-value {
@@ -706,11 +716,13 @@
       .attr-value {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 2px 8px;
-        border-radius: 999px;
-        border: 1px solid transparent;
-        background: rgba(255, 255, 255, 0.02);
+        gap: 5px;
+        min-height: 20px;
+        padding: 2px 9px;
+        border-radius: 7px;
+        border: 1px solid rgba(180, 202, 228, 0.28);
+        background: rgba(18, 26, 38, 0.46);
+        line-height: 1.2;
         color: inherit;
       }
 
@@ -752,6 +764,23 @@
         border-color: rgba(243, 108, 108, 0.55);
         background: rgba(243, 108, 108, 0.14);
         color: #ffd1d1;
+      }
+
+      @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
+        .scheme-weapon-list .scheme-weapon-attrs {
+          font-size: 10px;
+          gap: 4px 6px;
+          line-height: 1.2;
+        }
+
+        .scheme-weapon-list .scheme-weapon-attrs .attr-label {
+          display: none;
+        }
+
+        .scheme-weapon-list .scheme-weapon-attrs .attr-value {
+          min-height: 18px;
+          padding: 1px 6px;
+        }
       }
 
       .empty {

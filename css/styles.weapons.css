@@ -337,7 +337,6 @@
         }
 
         .scheme-weapon-attrs.is-wrapped {
-          font-size: 8px;
           line-height: 1.2;
         }
 
@@ -689,11 +688,6 @@
         padding: 6px 12px;
       }
 
-      .exclude-toggle:hover {
-        border-color: rgba(77, 214, 201, 0.68);
-        background: rgba(77, 214, 201, 0.18);
-      }
-
       .exclude-toggle.active {
         border-color: rgba(95, 132, 176, 0.62);
         background: rgba(95, 132, 176, 0.24);
@@ -706,16 +700,12 @@
         color: #ffe6e6;
       }
 
-      .exclude-toggle.intent-alert:hover {
-        border-color: rgba(243, 108, 108, 0.9);
-        background: rgba(243, 108, 108, 0.3);
-        color: #fff1f1;
-      }
-
       .exclude-toggle.small {
         position: static;
         padding: 2px 8px;
         font-size: 11px;
+        white-space: nowrap;
+        flex: 0 0 auto;
       }
 
       .exclude-note-badge {
@@ -964,6 +954,14 @@
         word-break: break-word;
       }
 
+      .weapon-attr-item .scheme-weapon-attrs {
+        gap: 4px 6px;
+      }
+
+      .weapon-attr-item .scheme-weapon-attrs .attr-value {
+        padding: 2px 7px;
+      }
+
       .weapon-attr-item:hover {
         border-color: rgba(255, 255, 255, 0.35);
       }
@@ -1011,20 +1009,21 @@
         flex-wrap: nowrap;
         gap: 8px;
         margin-top: 6px;
+        min-width: 0;
       }
 
       .exclude-note-input {
         flex: 1 1 auto;
         min-width: 0;
-        min-height: 32px;
-        height: 32px;
-        padding: 6px 8px;
+        min-height: 30px;
+        height: 30px;
+        padding: 4px 7px;
         border-radius: 6px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background: rgba(10, 14, 20, 0.45);
         color: var(--text);
         font-size: 12px;
-        line-height: 1.35;
+        line-height: 1.2;
         outline: none;
         transition: border-color 0.2s ease;
         resize: none;
@@ -1052,16 +1051,45 @@
       }
 
       @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
+        .weapon-attr-item .scheme-weapon-attrs {
+          gap: 3px 4px;
+        }
+
+        .weapon-attr-item .scheme-weapon-attrs .attr-value {
+          padding: 2px 6px;
+        }
+
         .weapon-exclude-row {
           align-items: center;
           gap: 6px;
         }
 
+        .weapon-exclude-row .exclude-toggle.small,
+        .weapon-exclude-row .exclude-toggle.small.intent-alert {
+          padding: 1px 6px;
+          min-height: 26px;
+          font-size: 10px;
+          line-height: 1.15;
+        }
+
         .weapon-exclude-row .exclude-note-input {
           flex: 1 1 auto;
           min-width: 0;
-          min-height: 32px;
-          height: 32px;
+          min-height: 26px;
+          height: 26px;
+          padding: 3px 6px;
+          font-size: 10.5px;
+          line-height: 1.2;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .weapon-exclude-row {
+          flex-wrap: wrap;
+        }
+
+        .weapon-exclude-row .exclude-note-input {
+          flex-basis: 100%;
         }
       }
 
