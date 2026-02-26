@@ -203,6 +203,30 @@
     template: planConfigTemplate,
   };
 
+  const matchStatusLine = {
+    props: {
+      weaponName: { type: String, required: true },
+      t: { type: Function, required: true },
+      isWeaponOwned: { type: Function, required: true },
+      isEssenceOwned: { type: Function, required: true },
+    },
+    template: `
+<div class="match-status-line">
+  <span
+    class="match-status-chip"
+    :class="{ 'is-owned': isWeaponOwned(weaponName), 'is-unowned': !isWeaponOwned(weaponName) }"
+  >
+    {{ isWeaponOwned(weaponName) ? t("已拥有") : t("未拥有") }}
+  </span>
+  <span
+    class="match-status-chip"
+    :class="{ 'is-essence-owned': isEssenceOwned(weaponName) }"
+  >
+    {{ isEssenceOwned(weaponName) ? t("基质已有") : t("基质未有") }}
+  </span>
+</div>`,
+  };
+
   const app = createApp({
     template: mainAppTemplate,
     setup() {
@@ -643,6 +667,7 @@
   });
 
   app.component("PlanConfigControl", planConfigControl);
+  app.component("MatchStatusLine", matchStatusLine);
   app.directive("lazy-src", lazyImageDirective);
   app.mount("#app");
 })();

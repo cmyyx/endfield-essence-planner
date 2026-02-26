@@ -202,20 +202,12 @@
                     <div class="weapon-band"></div>
                     <div class="weapon-name">
                       <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
-                      <div class="match-status-line">
-                        <span
-                          class="match-status-chip"
-                          :class="{ 'is-owned': isWeaponOwned(weapon.name), 'is-unowned': !isWeaponOwned(weapon.name) }"
-                        >
-                          {{ isWeaponOwned(weapon.name) ? t("已拥有") : t("未拥有") }}
-                        </span>
-                        <span
-                          class="match-status-chip"
-                          :class="{ 'is-essence-owned': isEssenceOwned(weapon.name) }"
-                        >
-                          {{ isEssenceOwned(weapon.name) ? t("基质已有") : t("基质未有") }}
-                        </span>
-                      </div>
+                      <match-status-line
+                        :weapon-name="weapon.name"
+                        :t="t"
+                        :is-weapon-owned="isWeaponOwned"
+                        :is-essence-owned="isEssenceOwned"
+                      ></match-status-line>
                     </div>
                   </button>
                 </div>
@@ -282,20 +274,12 @@
                           <div class="weapon-title">
                             {{ tTerm("weapon", matchSourceWeapon.name) }}
                           </div>
-                          <div class="match-status-line">
-                            <span
-                              class="match-status-chip"
-                              :class="{ 'is-owned': isWeaponOwned(matchSourceWeapon.name), 'is-unowned': !isWeaponOwned(matchSourceWeapon.name) }"
-                            >
-                              {{ isWeaponOwned(matchSourceWeapon.name) ? t("已拥有") : t("未拥有") }}
-                            </span>
-                            <span
-                              class="match-status-chip"
-                              :class="{ 'is-essence-owned': isEssenceOwned(matchSourceWeapon.name) }"
-                            >
-                              {{ isEssenceOwned(matchSourceWeapon.name) ? t("基质已有") : t("基质未有") }}
-                            </span>
-                          </div>
+                          <match-status-line
+                            :weapon-name="matchSourceWeapon.name"
+                            :t="t"
+                            :is-weapon-owned="isWeaponOwned"
+                            :is-essence-owned="isEssenceOwned"
+                          ></match-status-line>
                         </div>
                       </div>
                       <div class="scheme-weapon-attrs match-selection-attrs">
@@ -350,20 +334,12 @@
                       <div class="weapon-band"></div>
                       <div class="weapon-name">
                         <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
-                        <div class="match-status-line">
-                          <span
-                            class="match-status-chip"
-                            :class="{ 'is-owned': isWeaponOwned(weapon.name), 'is-unowned': !isWeaponOwned(weapon.name) }"
-                          >
-                            {{ isWeaponOwned(weapon.name) ? t("已拥有") : t("未拥有") }}
-                          </span>
-                          <span
-                            class="match-status-chip"
-                            :class="{ 'is-essence-owned': isEssenceOwned(weapon.name) }"
-                          >
-                            {{ isEssenceOwned(weapon.name) ? t("基质已有") : t("基质未有") }}
-                          </span>
-                        </div>
+                        <match-status-line
+                          :weapon-name="weapon.name"
+                          :t="t"
+                          :is-weapon-owned="isWeaponOwned"
+                          :is-essence-owned="isEssenceOwned"
+                        ></match-status-line>
                       </div>
                     </div>
                   </div>

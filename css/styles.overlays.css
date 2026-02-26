@@ -29,17 +29,7 @@
 
       .migration-card {
         width: min(760px, 94vw);
-        max-height:
-          min(
-            calc(
-              100vh -
-              (2 * clamp(20px, 4vh, 32px)) -
-              clamp(18px, 3vh, 30px) -
-              env(safe-area-inset-bottom, 0px) -
-              var(--viewport-safe-bottom, 0px)
-            ),
-            780px
-          );
+        max-height: min(calc(100vh - (2 * clamp(20px, 4vh, 32px)) - clamp(18px, 3vh, 30px) - env(safe-area-inset-bottom, 0px) - var(--viewport-safe-bottom, 0px)), 780px);
         overflow: hidden;
         display: grid;
         grid-template-rows: minmax(0, 1fr) auto;

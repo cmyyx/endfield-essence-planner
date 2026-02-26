@@ -206,11 +206,18 @@
       }
       const isEmpty = fullCount === 0;
       const count = affectsHidden ? effectiveCount : fullCount;
+      const affectsNotOwned = Boolean(config.hideUnownedWeapons && config.hideUnownedWeaponsInSelector);
+      const affectsEssenceOwned = Boolean(
+        config.hideEssenceOwnedWeapons && config.hideEssenceOwnedWeaponsInSelector
+      );
+      const affectsFourStar = Boolean(config.hideFourStarWeapons && config.hideFourStarWeaponsInSelector);
       const isOnlyFourStarHidden =
         affectsHidden &&
         !isEmpty &&
         effectiveCount === 0 &&
-        Boolean(config.hideFourStarWeapons && config.hideFourStarWeaponsInSelector);
+        affectsFourStar &&
+        !affectsNotOwned &&
+        !affectsEssenceOwned;
       return {
         value,
         count,
@@ -381,7 +388,10 @@
         if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return;
         if (state.filterS3.value.length && !state.filterS3.value.includes(weapon.s3)) return;
         const flags = getSelectorHiddenFlags(weapon, config);
-        if (!flags.hidden) return;
+        const isHidden =
+          flags.hidden &&
+          (config.attributeFilterAffectsHiddenWeapons !== false || !hasAttributeFilterSelection());
+        if (!isHidden) return;
         total += 1;
         if (flags.hiddenByUnowned) unowned += 1;
         if (flags.hiddenByEssenceOwned) essenceOwned += 1;
