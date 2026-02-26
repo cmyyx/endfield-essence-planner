@@ -43,7 +43,7 @@
       return new Set(values);
     });
 
-    const weaponUnownedNameSet = computed(() => {
+    const markedButUnownedNameSet = computed(() => {
       const names = Object.keys(state.weaponMarks.value || {});
       const values = names.filter((name) => !isWeaponOwned(name));
       return new Set(values);
@@ -443,8 +443,8 @@
         state.weaponGridBottomSpacer.value = 0;
         return;
       }
-      const containerSelector = showingAttrs ? ".weapon-attr-list" : ".weapon-list";
-      const itemSelector = showingAttrs ? ".weapon-attr-item" : ".weapon-item";
+      const containerSelector = ".weapon-list";
+      const itemSelector = ".weapon-item";
       const grid = document.querySelector(containerSelector);
       if (!grid) {
         weaponGridVirtual.value = {
@@ -457,19 +457,16 @@
         return;
       }
 
-      const anchor = showingAttrs ? grid.querySelector(".weapon-attr-anchor") || grid : grid;
+      const anchor = grid;
       const styles = window.getComputedStyle(grid);
       const gap = parseFloat(styles.rowGap || styles.gap || "8") || 8;
       const sampleCard = grid.querySelector(itemSelector);
-      const fallbackHeight = showingAttrs ? 86 : 148;
+      const fallbackHeight = 148;
       const sampleHeight = sampleCard ? sampleCard.getBoundingClientRect().height : fallbackHeight;
       const rowHeight = Math.max(1, sampleHeight + gap);
 
-      let columns = 1;
-      if (!showingAttrs) {
-        const tracks = (styles.gridTemplateColumns || "").split(" ").filter(Boolean);
-        columns = Math.max(1, tracks.length || 1);
-      }
+      const tracks = (styles.gridTemplateColumns || "").split(" ").filter(Boolean);
+      const columns = Math.max(1, tracks.length || 1);
       const totalRows = Math.ceil(list.length / columns);
 
       const viewportHeight =
@@ -570,7 +567,7 @@
     state.s2Options = s2Options;
     state.s3OptionEntries = s3OptionEntries;
     state.weaponOwnedNameSet = weaponOwnedNameSet;
-    state.weaponUnownedNameSet = weaponUnownedNameSet;
+    state.markedButUnownedNameSet = markedButUnownedNameSet;
     state.essenceOwnedNameSet = essenceOwnedNameSet;
     state.getWeaponMark = getWeaponMark;
     state.getWeaponNote = getWeaponNote;
