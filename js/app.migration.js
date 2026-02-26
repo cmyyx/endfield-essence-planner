@@ -250,6 +250,10 @@
     let migrationModalObservedCard = null;
     let migrationModalObservedOverlay = null;
     let migrationModalObservedContent = null;
+    let migrationCardWheelBridgeTarget = null;
+    let migrationCardTouchBridgeActive = false;
+    let migrationCardTouchBridgeFromOutsideContent = false;
+    let migrationCardTouchBridgeLastY = 0;
     let migrationConfirmCountdownTimer = null;
 
     const getMigrationModalCard = () =>
@@ -258,6 +262,98 @@
       document.querySelector(
         ".migration-overlay .migration-card:not(.migration-confirm-card) .migration-content"
       );
+
+    const resetMigrationCardTouchBridge = () => {
+      migrationCardTouchBridgeActive = false;
+      migrationCardTouchBridgeFromOutsideContent = false;
+      migrationCardTouchBridgeLastY = 0;
+    };
+
+    const applyMigrationContentScrollDelta = (content, deltaY) => {
+      if (!content) return false;
+      const maxScroll = Math.max(0, content.scrollHeight - content.clientHeight);
+      if (maxScroll <= 1) return false;
+      const before = content.scrollTop;
+      const next = Math.max(0, Math.min(maxScroll, before + deltaY));
+      if (next === before) return false;
+      content.scrollTop = next;
+      return true;
+    };
+
+    const teardownMigrationCardWheelBridge = () => {
+      if (!migrationCardWheelBridgeTarget) return;
+      migrationCardWheelBridgeTarget.removeEventListener("wheel", handleMigrationCardWheel);
+      migrationCardWheelBridgeTarget.removeEventListener("touchstart", handleMigrationCardTouchStart);
+      migrationCardWheelBridgeTarget.removeEventListener("touchmove", handleMigrationCardTouchMove);
+      migrationCardWheelBridgeTarget.removeEventListener("touchend", handleMigrationCardTouchEnd);
+      migrationCardWheelBridgeTarget.removeEventListener("touchcancel", handleMigrationCardTouchEnd);
+      migrationCardWheelBridgeTarget = null;
+      resetMigrationCardTouchBridge();
+    };
+
+    const handleMigrationCardWheel = (event) => {
+      if (!event || state.showMigrationModal.value !== true) return;
+      const card = getMigrationModalCard();
+      const content = getMigrationModalContent();
+      if (!card || !content) return;
+      if (!card.contains(event.target)) return;
+      if (content.contains(event.target)) return;
+
+      const deltaY = Number(event.deltaY || 0);
+      if (!Number.isFinite(deltaY) || Math.abs(deltaY) < 0.1) return;
+      if (applyMigrationContentScrollDelta(content, deltaY)) {
+        event.preventDefault();
+      }
+    };
+
+    const handleMigrationCardTouchStart = (event) => {
+      if (!event || state.showMigrationModal.value !== true) return;
+      const card = getMigrationModalCard();
+      const content = getMigrationModalContent();
+      if (!card || !content) return;
+      if (!card.contains(event.target)) return;
+      const touch = event.touches && event.touches[0];
+      if (!touch) {
+        resetMigrationCardTouchBridge();
+        return;
+      }
+      migrationCardTouchBridgeActive = true;
+      migrationCardTouchBridgeFromOutsideContent = !content.contains(event.target);
+      migrationCardTouchBridgeLastY = Number(touch.clientY || 0);
+    };
+
+    const handleMigrationCardTouchMove = (event) => {
+      if (!event || !migrationCardTouchBridgeActive) return;
+      if (!migrationCardTouchBridgeFromOutsideContent) return;
+      const content = getMigrationModalContent();
+      if (!content) return;
+      const touch = event.touches && event.touches[0];
+      if (!touch) return;
+      const currentY = Number(touch.clientY || 0);
+      if (!Number.isFinite(currentY)) return;
+      const deltaY = migrationCardTouchBridgeLastY - currentY;
+      if (Math.abs(deltaY) < 0.1) return;
+      migrationCardTouchBridgeLastY = currentY;
+      if (applyMigrationContentScrollDelta(content, deltaY)) {
+        event.preventDefault();
+      }
+    };
+
+    const handleMigrationCardTouchEnd = () => {
+      resetMigrationCardTouchBridge();
+    };
+
+    const ensureMigrationCardWheelBridge = (card) => {
+      if (!card) return;
+      if (migrationCardWheelBridgeTarget === card) return;
+      teardownMigrationCardWheelBridge();
+      card.addEventListener("wheel", handleMigrationCardWheel, { passive: false });
+      card.addEventListener("touchstart", handleMigrationCardTouchStart, { passive: true });
+      card.addEventListener("touchmove", handleMigrationCardTouchMove, { passive: false });
+      card.addEventListener("touchend", handleMigrationCardTouchEnd, { passive: true });
+      card.addEventListener("touchcancel", handleMigrationCardTouchEnd, { passive: true });
+      migrationCardWheelBridgeTarget = card;
+    };
 
     const clearMigrationModalMeasureTimers = () => {
       if (typeof window === "undefined") return;
@@ -289,6 +385,7 @@
     };
 
     const teardownMigrationModalObservers = () => {
+      teardownMigrationCardWheelBridge();
       if (migrationModalResizeObserver) {
         migrationModalResizeObserver.disconnect();
         migrationModalResizeObserver = null;
@@ -348,9 +445,11 @@
         migrationModalObservedOverlay === overlay &&
         migrationModalObservedContent === content
       ) {
+        ensureMigrationCardWheelBridge(card);
         return;
       }
       teardownMigrationModalObservers();
+      ensureMigrationCardWheelBridge(card);
       if (typeof window.ResizeObserver === "function") {
         migrationModalResizeObserver = new window.ResizeObserver(() => {
           if (!state.showMigrationModal.value) return;

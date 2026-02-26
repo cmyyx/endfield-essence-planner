@@ -4,11 +4,7 @@
                 </div>
               </div>
               <div v-else class="empty">
-                {{
-                  pendingCount === 0
-                    ? t("待刷为 0，当前无需刷取。")
-                    : t("当前筛选已隐藏全部结果，请调整筛选开关。")
-                }}
+                {{ t("当前组合无可用方案") }}
               </div>
             </div>
           </div>

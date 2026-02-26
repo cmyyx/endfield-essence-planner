@@ -215,12 +215,6 @@
       });
     };
 
-    const recommendationFilterHidesAll = computed(() => {
-      const all = Array.isArray(state.recommendations.value) ? state.recommendations.value : [];
-      if (!all.length) return false;
-      return !all.some(hasVisibleRows);
-    });
-
     const fallbackPlan = computed(() => {
       const targets = state.selectedWeapons.value;
       if (!targets.length) return null;
@@ -329,7 +323,6 @@
     state.displayDividerIndex = displayDividerIndex;
     state.visibleDisplayRecommendations = visibleDisplayRecommendations;
     state.recommendationVirtualStartIndex = recommendationVirtualStartIndex;
-    state.recommendationFilterHidesAll = recommendationFilterHidesAll;
     state.fallbackPlan = fallbackPlan;
   };
 })();

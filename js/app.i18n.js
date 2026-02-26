@@ -158,17 +158,6 @@
         description: t(item.description),
       }));
 
-    const tPlanPriorityMode = (value) => {
-      const config = state.regionPriorityModeOptions || [];
-      const matched = config.find((item) => item && item.value === value);
-      if (!matched) return value;
-      return {
-        ...matched,
-        label: t(matched.label),
-        description: t(matched.description),
-      };
-    };
-
     const tRegionPriorityModeOptions = computed(() =>
       translateOptionItems(state.regionPriorityModeOptions)
     );
@@ -178,7 +167,6 @@
     const tStrictPriorityOrderOptions = computed(() =>
       translateOptionItems(state.strictPriorityOrderOptions)
     );
-    const tPlanPriorityModeOptions = tRegionPriorityModeOptions;
     const tTerm = (category, value) => {
       void localeRenderVersion.value;
       if (!value) return value;
@@ -267,8 +255,6 @@
     state.showAiNotice = showAiNotice;
     state.updateLangMenuPlacement = updateLangMenuPlacement;
     state.fallbackLocale = fallbackLocale;
-    state.tPlanPriorityMode = tPlanPriorityMode;
-    state.tPlanPriorityModeOptions = tPlanPriorityModeOptions;
     state.tRegionPriorityModeOptions = tRegionPriorityModeOptions;
     state.tOwnershipPriorityModeOptions = tOwnershipPriorityModeOptions;
     state.tStrictPriorityOrderOptions = tStrictPriorityOrderOptions;

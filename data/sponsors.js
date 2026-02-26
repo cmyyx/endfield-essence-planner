@@ -23,4 +23,5 @@ window.SPONSORS = [
   { name: "李帅辰", amount: "CNY 7.99", note: "好用爱用,希望能一直更新下去,加油喵", date: "2026-02-25" },
   { name: "匿名", amount: "CNY 100.00", note: "感谢up的网站", date: "2026-02-25" },
   { name: "victim", amount: "CNY 5.00", note: "很好用", date: "2026-02-25" },
+  { name: "匿名", amount: "CNY 2.00", note: "", date: "2026-02-26" },
 ];

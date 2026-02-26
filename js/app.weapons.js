@@ -308,13 +308,7 @@
         }))
     );
 
-    const isEssenceOwnedForPlanning = (name) => {
-      const selected = state.selectedNames.value || [];
-      if (selected.length === 1 && selected[0] === name) {
-        return false;
-      }
-      return isEssenceOwned(name);
-    };
+    const isEssenceOwnedForPlanning = (name) => isEssenceOwned(name);
     const isWeaponOwnedForRecommendation = (name) => isWeaponOwned(name);
     const isEssenceOwnedForRecommendation = (name) => isEssenceOwnedForPlanning(name);
 
@@ -598,7 +592,6 @@
     state.weaponOwnedNameSet = weaponOwnedNameSet;
     state.weaponUnownedNameSet = weaponUnownedNameSet;
     state.essenceOwnedNameSet = essenceOwnedNameSet;
-    state.excludedNameSet = essenceOwnedNameSet;
     state.getWeaponMark = getWeaponMark;
     state.getWeaponNote = getWeaponNote;
     state.isWeaponOwned = isWeaponOwned;

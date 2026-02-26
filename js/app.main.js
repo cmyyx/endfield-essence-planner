@@ -366,19 +366,11 @@
           typeof window !== "undefined" && typeof window.getComputedStyle === "function"
             ? window.getComputedStyle(target)
             : null;
-        const minHeight = computedStyle ? parseFloat(computedStyle.minHeight || "0") : 0;
-        const currentHeight = computedStyle ? parseFloat(computedStyle.height || "0") : 0;
-        const baseHeight = Math.max(minHeight, currentHeight, 24);
-        target.style.height = `${baseHeight}px`;
-        if (!target.value) {
-          target.style.overflowY = "hidden";
-          return;
-        }
+        const minHeight = Math.max(24, computedStyle ? parseFloat(computedStyle.minHeight || "0") : 0);
         target.style.height = "auto";
         const maxHeight = 96;
         const contentHeight = target.scrollHeight;
-        const nextHeight =
-          contentHeight > baseHeight + 1 ? Math.min(contentHeight, maxHeight) : baseHeight;
+        const nextHeight = Math.max(minHeight, Math.min(contentHeight || 0, maxHeight));
         target.style.height = `${nextHeight}px`;
         target.style.overflowY = contentHeight > maxHeight ? "auto" : "hidden";
       };
@@ -441,8 +433,6 @@
         t: state.t,
         tTerm: state.tTerm,
         localeRenderVersion: state.localeRenderVersion,
-        tPlanPriorityMode: state.tPlanPriorityMode,
-        tPlanPriorityModeOptions: state.tPlanPriorityModeOptions,
         tRegionPriorityModeOptions: state.tRegionPriorityModeOptions,
         tOwnershipPriorityModeOptions: state.tOwnershipPriorityModeOptions,
         tStrictPriorityOrderOptions: state.tStrictPriorityOrderOptions,
@@ -475,7 +465,6 @@
         togglePlanConfig: state.togglePlanConfig,
         recommendationConfig: state.recommendationConfig,
         regionOptions: state.regionOptions,
-        regionPriorityModeOptions: state.regionPriorityModeOptions,
         showBackToTop: state.showBackToTop,
         scrollToTop: state.scrollToTop,
         tutorialActive: state.tutorialActive,
@@ -536,6 +525,7 @@
         weaponGridBottomSpacer: state.weaponGridBottomSpacer,
         allFilteredSelected: state.allFilteredSelected,
         recommendations: state.recommendations,
+        recommendationEmptyReason: state.recommendationEmptyReason,
         coverageSummary: state.coverageSummary,
         primaryRecommendations: state.primaryRecommendations,
         extraRecommendations: state.extraRecommendations,

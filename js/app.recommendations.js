@@ -26,6 +26,49 @@
             strictPriorityOrder: "ownershipFirst",
           };
 
+    const resolveRecommendationContext = () => {
+      const isWeaponOwnedForRecommendation =
+        typeof state.isWeaponOwnedForRecommendation === "function"
+          ? state.isWeaponOwnedForRecommendation
+          : state.isWeaponOwned;
+      const isEssenceOwnedForRecommendation =
+        typeof state.isEssenceOwnedForRecommendation === "function"
+          ? state.isEssenceOwnedForRecommendation
+          : typeof state.isEssenceOwnedForPlanning === "function"
+          ? state.isEssenceOwnedForPlanning
+          : state.isEssenceOwned;
+      const recommendationConfig = getRecommendationConfig();
+      const hideEssenceOwnedInPlans = Boolean(recommendationConfig.hideEssenceOwnedWeapons);
+      const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
+      const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
+      const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
+      const useEffectiveMetrics = hideEssenceOwnedInPlans;
+      const shouldHideWeaponInPlan = (weapon) => {
+        if (!weapon) return true;
+        if (hideEssenceOwnedInPlans && isEssenceOwnedForRecommendation(weapon.name)) {
+          if (!hideEssenceOwnedOwnedOnly || isWeaponOwnedForRecommendation(weapon.name)) {
+            return true;
+          }
+        }
+        if (hideUnownedInPlans && !isWeaponOwnedForRecommendation(weapon.name)) return true;
+        return false;
+      };
+      const selectedWeapons = Array.isArray(state.selectedWeapons && state.selectedWeapons.value)
+        ? state.selectedWeapons.value
+        : [];
+      const targets = selectedWeapons.filter((weapon) => !shouldHideWeaponInPlan(weapon));
+      return {
+        isWeaponOwnedForRecommendation,
+        isEssenceOwnedForRecommendation,
+        recommendationConfig,
+        hideFourStarWeapons,
+        useEffectiveMetrics,
+        shouldHideWeaponInPlan,
+        selectedWeapons,
+        targets,
+      };
+    };
+
     const getRegionRank = (region, preferred1, preferred2) => {
       if (!region) return 99;
       if (preferred1 && region === preferred1) return 0;
@@ -108,9 +151,8 @@
       const regionDiff = compareRegion(a, b, preferred1, preferred2);
       const ownershipDiff = compareOwnership(a, b);
 
-      if (coverageDiff !== 0) return coverageDiff;
-
-      if (regionMode === "strict" && ownershipMode === "strict") {
+      const hasStrictMode = regionMode === "strict" || ownershipMode === "strict";
+      if (hasStrictMode && regionMode === "strict" && ownershipMode === "strict") {
         if (strictPriorityOrder === "ownershipFirst") {
           if (ownershipDiff !== 0) return ownershipDiff;
           if (regionDiff !== 0) return regionDiff;
@@ -118,10 +160,12 @@
           if (regionDiff !== 0) return regionDiff;
           if (ownershipDiff !== 0) return ownershipDiff;
         }
-      } else {
+      } else if (hasStrictMode) {
         if (ownershipMode === "strict" && ownershipDiff !== 0) return ownershipDiff;
         if (regionMode === "strict" && regionDiff !== 0) return regionDiff;
       }
+
+      if (coverageDiff !== 0) return coverageDiff;
 
       if (baseDiff !== 0) return baseDiff;
 
@@ -194,36 +238,16 @@
 
     const recommendations = computed(() => {
       const selectedSet = new Set(state.selectedNames.value);
-      const isWeaponOwnedForRecommendation =
-        typeof state.isWeaponOwnedForRecommendation === "function"
-          ? state.isWeaponOwnedForRecommendation
-          : state.isWeaponOwned;
-      const isEssenceOwnedForRecommendation =
-        typeof state.isEssenceOwnedForRecommendation === "function"
-          ? state.isEssenceOwnedForRecommendation
-          : typeof state.isEssenceOwnedForPlanning === "function"
-          ? state.isEssenceOwnedForPlanning
-          : state.isEssenceOwned;
-      const recommendationConfig = getRecommendationConfig();
-      const hideEssenceOwnedInPlans = Boolean(recommendationConfig.hideEssenceOwnedWeapons);
-      const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
-      const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
-      const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
-      const useEffectiveMetrics = hideEssenceOwnedInPlans;
-      const shouldHideWeaponInPlan = (weapon) => {
-        if (!weapon) return true;
-        if (hideEssenceOwnedInPlans && isEssenceOwnedForRecommendation(weapon.name)) {
-          if (!hideEssenceOwnedOwnedOnly || isWeaponOwnedForRecommendation(weapon.name)) {
-            return true;
-          }
-        }
-        if (hideUnownedInPlans && !isWeaponOwnedForRecommendation(weapon.name)) return true;
-        return false;
-      };
-      const selectedWeapons = Array.isArray(state.selectedWeapons && state.selectedWeapons.value)
-        ? state.selectedWeapons.value
-        : [];
-      const targets = selectedWeapons.filter((weapon) => !shouldHideWeaponInPlan(weapon));
+      const recommendationContext = resolveRecommendationContext();
+      const {
+        isWeaponOwnedForRecommendation,
+        isEssenceOwnedForRecommendation,
+        recommendationConfig,
+        hideFourStarWeapons,
+        useEffectiveMetrics,
+        shouldHideWeaponInPlan,
+        targets,
+      } = recommendationContext;
       if (!targets.length) return [];
 
       const lockOptions = [
@@ -462,6 +486,14 @@
       return schemes.sort((a, b) => compareWithPriorityMode(a, b, recommendationConfig));
     });
 
+    const recommendationEmptyReason = computed(() => {
+      const recommendationContext = resolveRecommendationContext();
+      if (!recommendationContext.selectedWeapons.length) return "";
+      if (!recommendationContext.targets.length) return "filteredOut";
+      if (!recommendations.value.length) return "noScheme";
+      return "";
+    });
+
     const coverageSummary = computed(() => {
       const schemes = recommendations.value;
       if (!schemes.length) return null;
@@ -567,6 +599,7 @@
     state.isConflictOpen = isConflictOpen;
     state.toggleConflictOpen = toggleConflictOpen;
     state.recommendations = recommendations;
+    state.recommendationEmptyReason = recommendationEmptyReason;
     state.coverageSummary = coverageSummary;
     state.primaryRecommendations = primaryRecommendations;
     state.extraRecommendations = extraRecommendations;

@@ -631,10 +631,6 @@
         opacity: 0.85;
       }
 
-      .exclude-note-text.is-excluded {
-        color: var(--muted);
-      }
-
       .scheme-weapon-title {
         display: flex;
         align-items: center;

@@ -51,8 +51,8 @@
             780px
           );
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
         padding: 0;
         border-color: rgba(255, 132, 132, 0.4);
         background:
@@ -61,7 +61,6 @@
       }
 
       .migration-content {
-        flex: 1 1 auto;
         min-height: 0;
         overflow: auto;
         overscroll-behavior: contain;
@@ -69,7 +68,7 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
-        padding: 16px 16px 8px;
+        padding: 14px 12px 10px;
       }
 
       .migration-card h3 {
@@ -149,7 +148,7 @@
 
       .migration-detail-columns {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
         height: min(56vh, 520px);
         max-height: min(56vh, 520px);
@@ -167,7 +166,8 @@
         border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.12);
         background: rgba(10, 14, 22, 0.45);
-        overflow: auto;
+        overflow-x: hidden;
+        overflow-y: auto;
         overscroll-behavior: auto;
       }
 
@@ -223,6 +223,8 @@
         color: #f3fbff;
         font-size: 12px;
         font-weight: 700;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .migration-detail-tags {
@@ -276,6 +278,8 @@
 
       .migration-detail-change-value {
         color: #e7f2ff;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .migration-detail-change-value.is-from {
@@ -289,6 +293,8 @@
       .migration-detail-meta-text {
         color: var(--muted);
         font-size: 12px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .migration-detail-tail {
@@ -346,7 +352,6 @@
         justify-content: flex-end;
         gap: 8px;
         margin-top: 0;
-        flex: 0 0 auto;
         padding: 10px 16px 14px;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         background: none;
@@ -641,7 +646,7 @@
         }
 
         .migration-content {
-          padding: 12px 8px 8px;
+          padding: 12px 8px 10px;
           scrollbar-gutter: auto;
         }
 
@@ -654,8 +659,15 @@
         }
 
         .migration-detail-columns {
+          grid-template-columns: 1fr;
           height: min(50vh, 420px);
           max-height: min(50vh, 420px);
+        }
+      }
+
+      @media (orientation: portrait) and (max-width: 1024px) {
+        .migration-detail-columns {
+          grid-template-columns: 1fr;
         }
       }
 
@@ -666,7 +678,7 @@
         }
 
         .migration-content {
-          padding: 10px 6px 8px;
+          padding: 10px 6px 10px;
         }
 
         .migration-actions {
@@ -1518,20 +1530,13 @@
         display: inline-block;
       }
 
-      .tag.is-excluded {
-        border-color: rgba(243, 108, 108, 0.45);
-        background: rgba(243, 108, 108, 0.12);
-        color: #ffd1d1;
-      }
-
       .tag.is-essence-owned {
         border-color: rgba(243, 108, 108, 0.45);
         background: rgba(243, 108, 108, 0.12);
         color: #ffd1d1;
       }
 
-      .tag.is-essence-owned .tag-name,
-      .tag.is-excluded .tag-name {
+      .tag.is-essence-owned .tag-name {
         text-decoration: line-through;
         text-decoration-thickness: 1px;
       }

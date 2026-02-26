@@ -754,15 +754,16 @@
             {{ t("请选择至少一把武器，系统将自动推荐可共刷的副本方案。") }}
           </div>
 
-          <div v-else-if="!recommendations.length" class="recommendations">
+          <div v-else-if="recommendationEmptyReason === 'filteredOut'" class="empty">
+            {{ t("当前筛选已隐藏全部结果，请调整筛选开关。") }}
+          </div>
+
+          <div v-else-if="recommendationEmptyReason === 'noScheme'" class="recommendations">
             <div class="card">
               <div class="card-header">
                 <div>
                   <div class="card-title">{{ t("当前组合无可用方案") }}</div>
                   <div class="hint">{{ t("附加/技能属性无法统一锁定，或副本池不覆盖所需词条。") }}</div>
-                </div>
-                <div class="strategy-row">
-                  <span class="pill warn">{{ t("请拆分批次刷取") }}</span>
                 </div>
               </div>
 

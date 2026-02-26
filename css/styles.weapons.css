@@ -390,15 +390,6 @@
         text-shadow: 0 2px 10px rgba(77, 214, 201, 0.35);
       }
 
-      .weapon-item.is-excluded {
-        opacity: 0.45;
-      }
-
-      .weapon-item.is-excluded .weapon-name {
-        text-decoration: line-through;
-        text-decoration-thickness: 1px;
-      }
-
       .weapon-item.is-essence-owned .weapon-name {
         text-decoration: line-through;
         text-decoration-thickness: 1px;
@@ -1029,15 +1020,6 @@
         color: #e9fff9;
       }
 
-      .weapon-attr-item.is-excluded {
-        opacity: 0.5;
-      }
-
-      .weapon-attr-item.is-excluded .scheme-weapon-title {
-        color: inherit;
-      }
-
-      .weapon-attr-item.is-excluded .weapon-main-name,
       .weapon-attr-item.is-essence-owned .weapon-main-name {
         text-decoration: line-through;
         text-decoration-thickness: 1px;
@@ -1079,15 +1061,6 @@
 
       .exclude-note-input:focus {
         border-color: rgba(255, 255, 255, 0.35);
-      }
-
-      .exclude-note-input.is-excluded {
-        border-color: rgba(243, 108, 108, 0.45);
-        color: #ffd1d1;
-      }
-
-      .exclude-note-input.is-excluded::placeholder {
-        color: rgba(255, 209, 209, 0.7);
       }
 
       @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
