@@ -287,6 +287,10 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   box-shadow: 0 18px 40px rgba(44, 77, 118, 0.18);
 }
 
+[data-theme="light"] .plan-config-panel-foot {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.86) 70%, rgba(255, 255, 255, 0));
+}
+
 [data-theme="light"] .plan-config-item {
   border-color: rgba(22, 44, 72, 0.1);
   background: rgba(234, 243, 255, 0.4);

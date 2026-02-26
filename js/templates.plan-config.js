@@ -218,6 +218,11 @@
               </div>
             </div>
           </div>
+          <div class="plan-config-panel-foot">
+            <button class="ghost-button plan-config-close" type="button" @click="$emit('toggle')">
+              {{ t("关闭") }}
+            </button>
+          </div>
         </div>
       </div>
 `

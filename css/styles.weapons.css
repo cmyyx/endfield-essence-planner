@@ -594,6 +594,23 @@
         gap: 10px;
       }
 
+      .plan-config-panel-foot {
+        position: sticky;
+        bottom: -12px;
+        z-index: 2;
+        margin: 0 -12px -12px;
+        padding: 8px 12px 10px;
+        display: flex;
+        justify-content: flex-end;
+        background: linear-gradient(0deg, rgba(12, 18, 28, 0.98), rgba(12, 18, 28, 0.88) 70%, rgba(12, 18, 28, 0));
+      }
+
+      .plan-config-close {
+        padding: 4px 10px;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+      }
+
       .plan-config-item {
         display: grid;
         gap: 6px;
@@ -635,6 +652,29 @@
           width: auto;
           max-height: calc(100vh - 96px);
           z-index: 70;
+        }
+      }
+
+      @media (max-width: 720px) and (orientation: portrait) {
+        .plan-config-panel {
+          top: clamp(92px, 14vh, 156px);
+          left: clamp(24px, 7vw, 44px);
+          right: clamp(24px, 7vw, 44px);
+          bottom:
+            calc(
+              clamp(56px, 10vh, 120px) +
+              env(safe-area-inset-bottom, 0px) +
+              var(--viewport-safe-bottom, 0px)
+            );
+          max-height: none;
+          padding: 14px 14px 16px;
+          border-radius: 14px;
+        }
+
+        .plan-config-panel-foot {
+          bottom: -14px;
+          margin: 0 -14px -14px;
+          padding: 10px 14px 12px;
         }
       }
 

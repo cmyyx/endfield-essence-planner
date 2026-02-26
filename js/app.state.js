@@ -67,6 +67,7 @@
     state.showWeaponAttrs = ref(false);
     state.showAttrHint = ref(false);
     state.showFilterPanel = ref(true);
+    state.filterPanelManuallySet = ref(false);
     state.showAllSchemes = ref(false);
     state.showPlanConfig = ref(false);
     state.showPlanConfigHintDot = ref(false);
@@ -155,6 +156,7 @@
     state.migrationConflictStrategy = ref("fillMissing");
     state.showMigrationConfirmModal = ref(false);
     state.migrationConfirmAction = ref("");
+    state.migrationConfirmCountdown = ref(0);
     state.migrationPreviewExpanded = ref(false);
     state.migrationModalScrollable = ref(false);
 

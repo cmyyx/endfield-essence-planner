@@ -487,10 +487,8 @@
       <transition name="fade-scale">
         <div v-if="showMigrationModal" class="about-overlay migration-overlay">
           <div class="about-card migration-card">
-            <h3>{{ t("检测到旧版武器标记数据") }}</h3>
-            <p>
-              {{ t("检测到你仍有旧版标记数据，需要进行迁移。") }}
-            </p>
+            <div class="migration-content">
+              <h3>{{ t("检测到旧版武器标记数据") }}</h3>
             <p class="migration-warning-text">
               {{ t("建议尽快完成迁移或放弃旧数据，以免后续编辑时造成冲突或未来不再兼容该数据结构。") }}
             </p>
@@ -699,6 +697,8 @@
               </div>
             </div>
 
+            </div>
+
             <div class="about-actions migration-actions">
               <button
                 class="about-button migration-action migration-action-warn"
@@ -726,43 +726,46 @@
       <transition name="fade-scale">
         <div v-if="showMigrationConfirmModal" class="about-overlay migration-overlay migration-confirm-overlay">
           <div class="about-card migration-card migration-confirm-card">
-            <h3>
-              {{
-                migrationConfirmAction === 'apply'
-                  ? t("确认开始迁移？")
-                  : migrationConfirmAction === 'discard'
-                  ? t("确认放弃旧数据？")
-                  : t("确认稍后再说？")
-              }}
-            </h3>
+            <div class="migration-content">
+              <h3>
+                {{
+                  migrationConfirmAction === 'apply'
+                    ? t("确认开始迁移？")
+                    : migrationConfirmAction === 'discard'
+                    ? t("确认放弃旧数据？")
+                    : t("确认稍后再说？")
+                }}
+              </h3>
 
-            <p class="migration-warning-text">
-              {{ t("警告：该迁移功能尚未经过充分测试，可能存在异常或结果偏差。但仍建议尽快完成迁移或放弃旧数据。") }}
-            </p>
+              <p class="migration-warning-text">
+                {{ t("警告：该迁移功能尚未经过充分测试，可能存在异常或结果偏差。但仍建议尽快完成迁移或放弃旧数据。") }}
+              </p>
 
-            <div v-if="migrationConfirmAction === 'apply'" class="migration-confirm-summary">
-              <div class="migration-confirm-row">
-                <span class="migration-confirm-label">{{ t("迁移映射方案") }}</span>
-                <span class="migration-confirm-value migration-confirm-highlight">
-                  {{
-                    migrationMappingMode === 'weaponUnowned'
-                      ? t("旧版“排除”标记 → 武器未拥有")
-                      : t("旧版“排除”标记 → 基质已拥有")
-                  }}
-                </span>
+              <div v-if="migrationConfirmAction === 'apply'" class="migration-confirm-summary">
+                <div class="migration-confirm-row">
+                  <span class="migration-confirm-label">{{ t("迁移映射方案") }}</span>
+                  <span class="migration-confirm-value migration-confirm-highlight">
+                    {{
+                      migrationMappingMode === 'weaponUnowned'
+                        ? t("旧版“排除”标记 → 武器未拥有")
+                        : t("旧版“排除”标记 → 基质已拥有")
+                    }}
+                  </span>
+                </div>
+                <div v-if="shouldShowConflictStrategy" class="migration-confirm-row">
+                  <span class="migration-confirm-label">{{ t("冲突处理策略") }}</span>
+                  <span class="migration-confirm-value migration-confirm-highlight">
+                    {{
+                      migrationConflictStrategy === 'overwriteLegacy'
+                        ? t("旧数据覆盖新数据")
+                        : migrationConflictStrategy === 'keepCurrent'
+                        ? t("保留新数据，跳过冲突")
+                        : t("仅补全缺失（推荐）")
+                    }}
+                  </span>
+                </div>
               </div>
-              <div v-if="shouldShowConflictStrategy" class="migration-confirm-row">
-                <span class="migration-confirm-label">{{ t("冲突处理策略") }}</span>
-                <span class="migration-confirm-value migration-confirm-highlight">
-                  {{
-                    migrationConflictStrategy === 'overwriteLegacy'
-                      ? t("旧数据覆盖新数据")
-                      : migrationConflictStrategy === 'keepCurrent'
-                      ? t("保留新数据，跳过冲突")
-                      : t("仅补全缺失（推荐）")
-                  }}
-                </span>
-              </div>
+
             </div>
 
             <div class="about-actions migration-actions">
@@ -771,6 +774,7 @@
               </button>
               <button
                 class="about-button migration-action migration-action-danger"
+                :disabled="migrationConfirmCountdown > 0"
                 @click="confirmMigrationAction"
               >
                 {{
@@ -780,6 +784,7 @@
                     ? t("确认放弃")
                     : t("确认稍后")
                 }}
+                <span v-if="migrationConfirmCountdown > 0">（{{ migrationConfirmCountdown }}s）</span>
               </button>
             </div>
           </div>

@@ -40,7 +40,7 @@
             </div>
           </div>
           <div class="theme-switch" @click.stop>
-            <label class="theme-label" for="theme-mode-select">{{ t("界面主题") }}</label>
+            <label class="theme-label" for="theme-mode-select">{{ t("主题") }}</label>
             <select
               id="theme-mode-select"
               class="theme-select"
@@ -250,16 +250,8 @@
             {{ t("方案推荐") }} <span class="count">{{ recommendations.length }}</span>
           </button>
         </div>
-        <div class="mobile-hint" :class="{ 'mobile-hint-with-action': isPortrait && mobilePanel === 'weapons' }">
+        <div class="mobile-hint">
           <span>{{ t("手机端可通过上方标签切换“武器选择 / 方案推荐”，并可下滑继续浏览列表。") }}</span>
-          <button
-            v-if="isPortrait && mobilePanel === 'weapons'"
-            class="ghost-button mobile-hint-action"
-            type="button"
-            @click="scrollToWeaponList"
-          >
-            {{ t("点我直达武器列表") }}
-          </button>
         </div>
         <section class="panel" :class="{ 'panel-hidden': mobilePanel !== 'weapons' }">
           <div class="panel-title">
@@ -299,7 +291,7 @@
               >
                 {{ showWeaponAttrs ? t("隐藏属性/拥有/备注") : t("显示属性/拥有/备注") }}
               </button>
-              <button class="ghost-button" @click="showFilterPanel = !showFilterPanel">
+              <button class="ghost-button" @click="toggleFilterPanel">
                 {{ showFilterPanel ? t("折叠属性筛选") : t("展开属性筛选") }}
               </button>
             </div>

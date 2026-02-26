@@ -316,7 +316,7 @@
       return isEssenceOwned(name);
     };
     const isWeaponOwnedForRecommendation = (name) => isWeaponOwned(name);
-    const isEssenceOwnedForRecommendation = (name) => isEssenceOwned(name);
+    const isEssenceOwnedForRecommendation = (name) => isEssenceOwnedForPlanning(name);
 
     const pendingSelectedWeapons = computed(() =>
       selectedWeaponRows.value.filter((weapon) => !isEssenceOwnedForPlanning(weapon.name))
@@ -348,6 +348,13 @@
       state.showWeaponAttrs.value = !state.showWeaponAttrs.value;
       if (state.showWeaponAttrs.value) {
         dismissAttrHint();
+      }
+    };
+
+    const toggleFilterPanel = () => {
+      state.showFilterPanel.value = !state.showFilterPanel.value;
+      if (state.filterPanelManuallySet && state.filterPanelManuallySet.value !== true) {
+        state.filterPanelManuallySet.value = true;
       }
     };
 
@@ -615,6 +622,7 @@
     state.isEssenceOwnedForPlanning = isEssenceOwnedForPlanning;
     state.toggleWeapon = toggleWeapon;
     state.toggleShowWeaponAttrs = toggleShowWeaponAttrs;
+    state.toggleFilterPanel = toggleFilterPanel;
     state.clearSelection = clearSelection;
     state.toggleFilterValue = toggleFilterValue;
     state.clearAttributeFilters = clearAttributeFilters;

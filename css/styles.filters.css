@@ -19,27 +19,22 @@
 
       @media (max-width: 960px) and (orientation: portrait) {
         .filter-toolbar {
-          display: flex;
-          flex-wrap: nowrap;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
           gap: 6px;
           margin-bottom: 10px;
-          overflow-x: auto;
-          overflow-y: hidden;
-          -webkit-overflow-scrolling: touch;
+          align-items: center;
+          overflow: visible;
+          container-type: inline-size;
         }
 
         .filter-toolbar-main {
-          display: flex;
-          flex: 1 1 auto;
-          min-width: max-content;
-          flex-wrap: nowrap;
-          gap: 6px;
-          align-items: center;
+          display: contents;
         }
 
-        .filter-toolbar-main .ghost-button {
-          width: auto;
-          flex: 0 0 auto;
+        .filter-toolbar-main > .ghost-button:first-of-type,
+        .filter-toolbar-main > .ghost-button:last-of-type,
+        .filter-toolbar-clear {
           min-width: 0;
           white-space: nowrap;
           overflow: hidden;
@@ -50,32 +45,49 @@
           min-height: 30px;
           font-size: 10px;
           letter-spacing: 0.01em;
+        }
+
+        .filter-toolbar-main > .ghost-button:first-of-type {
+          grid-column: 1;
+        }
+
+        .filter-toolbar-main > .ghost-button:last-of-type {
+          grid-column: 2;
         }
 
         .filter-toolbar-clear {
+          grid-column: 3;
           margin-left: 0;
           width: auto;
-          flex: 0 0 auto;
-          min-width: 0;
-          padding: 5px 8px;
-          min-height: 30px;
-          font-size: 10px;
-          letter-spacing: 0.01em;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          line-height: 1.2;
-          text-align: center;
+          min-width: fit-content;
+        }
+
+        @container (max-width: 440px) {
+          .filter-toolbar {
+            grid-template-columns: minmax(0, 1fr) auto;
+          }
+
+          .filter-toolbar-main > .ghost-button:first-of-type {
+            grid-column: 1 / -1;
+          }
+
+          .filter-toolbar-main > .ghost-button:last-of-type {
+            grid-column: 1;
+          }
+
+          .filter-toolbar-clear {
+            grid-column: 2;
+          }
         }
       }
 
       @media (max-width: 380px) and (orientation: portrait) {
-        .filter-toolbar,
-        .filter-toolbar-main {
+        .filter-toolbar {
           gap: 5px;
         }
 
-        .filter-toolbar-main .ghost-button,
+        .filter-toolbar-main > .ghost-button:first-of-type,
+        .filter-toolbar-main > .ghost-button:last-of-type,
         .filter-toolbar-clear {
           padding: 4px 7px;
           min-height: 28px;

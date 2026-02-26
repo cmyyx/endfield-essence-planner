@@ -103,23 +103,23 @@
       return patch;
     };
 
-    const detectConflictFields = (patch, note, hasCurrentStored, currentRaw) => {
+    const detectConflictFields = (current, patch, note, hasCurrentStored, currentRaw) => {
       if (!hasCurrentStored) return [];
       const raw = currentRaw && typeof currentRaw === "object" ? currentRaw : {};
       const fields = [];
       Object.keys(patch).forEach((key) => {
-        if (Object.prototype.hasOwnProperty.call(raw, key)) {
+        if (Object.prototype.hasOwnProperty.call(raw, key) && current[key] !== patch[key]) {
           fields.push(key);
         }
       });
-      if (note && Object.prototype.hasOwnProperty.call(raw, "note")) {
+      if (note && Object.prototype.hasOwnProperty.call(raw, "note") && current.note !== note) {
         fields.push("note");
       }
       return fields;
     };
 
     const detectConflict = (current, patch, note, hasCurrentStored, currentRaw) => {
-      return detectConflictFields(patch, note, hasCurrentStored, currentRaw).length > 0;
+      return detectConflictFields(current, patch, note, hasCurrentStored, currentRaw).length > 0;
     };
 
     const migrationPreview = computed(() => {
@@ -145,7 +145,13 @@
         const current = normalizeCurrentMark(name, currentMap);
         const patch = buildPatchByMapping(entry, mappingMode);
         const note = entry && typeof entry.note === "string" ? entry.note : "";
-        const conflictFields = detectConflictFields(patch, note, hasCurrentStored, currentRaw);
+        const conflictFields = detectConflictFields(
+          current,
+          patch,
+          note,
+          hasCurrentStored,
+          currentRaw
+        );
         const conflict = conflictFields.length > 0;
 
         const statusChanges = Object.keys(patch)
@@ -243,9 +249,15 @@
     let migrationModalMutationObserver = null;
     let migrationModalObservedCard = null;
     let migrationModalObservedOverlay = null;
+    let migrationModalObservedContent = null;
+    let migrationConfirmCountdownTimer = null;
 
     const getMigrationModalCard = () =>
       document.querySelector(".migration-overlay .migration-card:not(.migration-confirm-card)");
+    const getMigrationModalContent = () =>
+      document.querySelector(
+        ".migration-overlay .migration-card:not(.migration-confirm-card) .migration-content"
+      );
 
     const clearMigrationModalMeasureTimers = () => {
       if (typeof window === "undefined") return;
@@ -254,6 +266,26 @@
         window.clearTimeout(timerId);
       });
       migrationModalMeasureTimers = [];
+    };
+
+    const stopMigrationConfirmCountdown = () => {
+      if (!migrationConfirmCountdownTimer) return;
+      clearInterval(migrationConfirmCountdownTimer);
+      migrationConfirmCountdownTimer = null;
+    };
+
+    const startMigrationConfirmCountdown = () => {
+      stopMigrationConfirmCountdown();
+      state.migrationConfirmCountdown.value = 3;
+      migrationConfirmCountdownTimer = setInterval(() => {
+        if (state.migrationConfirmCountdown.value > 0) {
+          state.migrationConfirmCountdown.value -= 1;
+        }
+        if (state.migrationConfirmCountdown.value <= 0) {
+          state.migrationConfirmCountdown.value = 0;
+          stopMigrationConfirmCountdown();
+        }
+      }, 1000);
     };
 
     const teardownMigrationModalObservers = () => {
@@ -267,6 +299,7 @@
       }
       migrationModalObservedCard = null;
       migrationModalObservedOverlay = null;
+      migrationModalObservedContent = null;
     };
 
     const cancelMigrationModalMeasure = () => {
@@ -288,7 +321,8 @@
         state.migrationModalScrollable.value = false;
         return;
       }
-      state.migrationModalScrollable.value = card.scrollHeight - card.clientHeight > 1;
+      const content = getMigrationModalContent() || card;
+      state.migrationModalScrollable.value = content.scrollHeight - content.clientHeight > 1;
     };
 
     const scheduleDelayedMigrationModalMeasure = () => {
@@ -307,8 +341,13 @@
       if (typeof window === "undefined") return;
       const overlay = document.querySelector(".migration-overlay");
       const card = getMigrationModalCard();
+      const content = getMigrationModalContent();
       if (!overlay || !card) return;
-      if (migrationModalObservedCard === card && migrationModalObservedOverlay === overlay) {
+      if (
+        migrationModalObservedCard === card &&
+        migrationModalObservedOverlay === overlay &&
+        migrationModalObservedContent === content
+      ) {
         return;
       }
       teardownMigrationModalObservers();
@@ -318,6 +357,9 @@
           measureMigrationModalScrollable();
         });
         migrationModalResizeObserver.observe(card);
+        if (content) {
+          migrationModalResizeObserver.observe(content);
+        }
       }
       if (typeof window.MutationObserver === "function") {
         migrationModalMutationObserver = new window.MutationObserver(() => {
@@ -333,6 +375,7 @@
       }
       migrationModalObservedCard = card;
       migrationModalObservedOverlay = overlay;
+      migrationModalObservedContent = content;
     };
 
     const updateMigrationModalScrollable = ({ includeDelayed = false } = {}) => {
@@ -362,8 +405,10 @@
     };
 
     const closeMigrationModals = () => {
+      stopMigrationConfirmCountdown();
       state.showMigrationConfirmModal.value = false;
       state.migrationConfirmAction.value = "";
+      state.migrationConfirmCountdown.value = 0;
       state.showMigrationModal.value = false;
       state.migrationPreviewExpanded.value = false;
       state.migrationModalScrollable.value = false;
@@ -454,14 +499,18 @@
     const openMigrationConfirm = (action) => {
       state.migrationConfirmAction.value = action;
       state.showMigrationConfirmModal.value = true;
+      startMigrationConfirmCountdown();
     };
 
     const closeMigrationConfirm = () => {
+      stopMigrationConfirmCountdown();
       state.showMigrationConfirmModal.value = false;
       state.migrationConfirmAction.value = "";
+      state.migrationConfirmCountdown.value = 0;
     };
 
     const confirmMigrationAction = () => {
+      if (state.migrationConfirmCountdown.value > 0) return;
       const action = state.migrationConfirmAction.value;
       if (action === "apply") {
         applyMigration();
@@ -545,6 +594,15 @@
     );
 
     watch(
+      () => state.showMigrationConfirmModal.value,
+      (visible) => {
+        if (visible) return;
+        stopMigrationConfirmCountdown();
+        state.migrationConfirmCountdown.value = 0;
+      }
+    );
+
+    watch(
       migrationPreview,
       () => {
         if (!state.showMigrationModal.value) return;
@@ -583,6 +641,7 @@
       if (typeof window !== "undefined") {
         window.removeEventListener("resize", handleWindowResize);
       }
+      stopMigrationConfirmCountdown();
       cancelMigrationModalMeasure();
       teardownMigrationModalObservers();
     });

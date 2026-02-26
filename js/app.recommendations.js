@@ -209,6 +209,7 @@
       const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
       const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
       const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
+      const useEffectiveMetrics = hideEssenceOwnedInPlans;
       const shouldHideWeaponInPlan = (weapon) => {
         if (!weapon) return true;
         if (hideEssenceOwnedInPlans && isEssenceOwnedForRecommendation(weapon.name)) {
@@ -360,9 +361,11 @@
           const autoCoveredOwnedSelected = autoCoveredSelected.filter((weapon) =>
             isWeaponOwnedForRecommendation(weapon.name)
           );
-          const effectiveAutoCoveredSelected = autoCoveredSelected.filter(
-            (weapon) => !isEssenceOwnedForRecommendation(weapon.name)
-          );
+          const effectiveAutoCoveredSelected = useEffectiveMetrics
+            ? autoCoveredSelected.filter(
+                (weapon) => !isEssenceOwnedForRecommendation(weapon.name)
+              )
+            : autoCoveredSelected.slice();
           const effectiveAutoCoveredOwnedSelected = effectiveAutoCoveredSelected.filter((weapon) =>
             isWeaponOwnedForRecommendation(weapon.name)
           );
@@ -372,10 +375,12 @@
           const autoWeaponCount = schemeWeaponsActive.filter((weapon) =>
             baseAutoPickSet.has(weapon.s1)
           ).length;
-          const effectiveAutoWeaponCount = schemeWeaponsActive.filter(
-            (weapon) =>
-              baseAutoPickSet.has(weapon.s1) && !isEssenceOwnedForRecommendation(weapon.name)
-          ).length;
+          const effectiveAutoWeaponCount = useEffectiveMetrics
+            ? schemeWeaponsActive.filter(
+                (weapon) =>
+                  baseAutoPickSet.has(weapon.s1) && !isEssenceOwnedForRecommendation(weapon.name)
+              ).length
+            : autoWeaponCount;
           const displayWeaponCount = schemeWeaponsActive.filter((weapon) =>
             activeBaseSet.has(weapon.s1)
           ).length;
@@ -461,14 +466,15 @@
       const schemes = recommendations.value;
       if (!schemes.length) return null;
       const best = schemes[0];
+      const bestMatchCount = getSelectedMatchCountForSort(best);
       const totalSelected =
         Number.isFinite(best.targetCount) && best.targetCount > 0 ? best.targetCount : 0;
       if (!totalSelected) return null;
       return {
         totalSelected,
-        bestMatchCount: best.selectedMatchCount,
+        bestMatchCount,
         missingNames: best.selectedMissingNames || [],
-        hasGap: best.selectedMatchCount < totalSelected,
+        hasGap: bestMatchCount < totalSelected,
       };
     });
 

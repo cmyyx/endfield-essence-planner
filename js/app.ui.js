@@ -581,23 +581,6 @@
       scheduleAdSlotVisibility();
     };
 
-    const scrollToWeaponList = () => {
-      if (typeof window === "undefined" || typeof document === "undefined") return;
-      const anchor = document.querySelector(".weapon-list-anchor");
-      if (!anchor) return;
-      const currentTop = window.scrollY || window.pageYOffset || 0;
-      const targetTop = Math.max(0, currentTop + anchor.getBoundingClientRect().top - 72);
-      if (typeof window.scrollTo === "function") {
-        try {
-          window.scrollTo({ top: targetTop, behavior: "smooth" });
-          return;
-        } catch (error) {
-          // ignore and fall back
-        }
-      }
-      window.scrollTo(0, targetTop);
-    };
-
     const handleDocClick = (event) => {
       if (!event || !event.target || !event.target.closest) {
         showSecondaryMenu.value = false;
@@ -764,7 +747,6 @@
     });
 
     state.scrollToTop = scrollToTop;
-    state.scrollToWeaponList = scrollToWeaponList;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
     state.dismissAdsForSession = dismissAdsForSession;

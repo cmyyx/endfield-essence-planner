@@ -220,7 +220,10 @@
       if (typeof raw.showWeaponAttrs === "boolean") {
         next.showWeaponAttrs = raw.showWeaponAttrs;
       }
-      if (typeof raw.showFilterPanel === "boolean") {
+      if (typeof raw.filterPanelManuallySet === "boolean") {
+        next.filterPanelManuallySet = raw.filterPanelManuallySet;
+      }
+      if (next.filterPanelManuallySet && typeof raw.showFilterPanel === "boolean") {
         next.showFilterPanel = raw.showFilterPanel;
       }
       if (typeof raw.showAllSchemes === "boolean") {
@@ -255,7 +258,7 @@
       return next;
     };
 
-    let restoredShowFilterPanel = false;
+    let restoredFilterPanelPreference = false;
     const shouldCollapseFilterPanelByDefault = () => {
       if (typeof window === "undefined") return false;
       return state.isPortrait.value || window.innerWidth <= 640;
@@ -279,9 +282,12 @@
           if (typeof restored.showWeaponAttrs === "boolean") {
             state.showWeaponAttrs.value = restored.showWeaponAttrs;
           }
-          if (typeof restored.showFilterPanel === "boolean") {
+          if (typeof restored.filterPanelManuallySet === "boolean") {
+            state.filterPanelManuallySet.value = restored.filterPanelManuallySet;
+          }
+          if (state.filterPanelManuallySet.value && typeof restored.showFilterPanel === "boolean") {
             state.showFilterPanel.value = restored.showFilterPanel;
-            restoredShowFilterPanel = true;
+            restoredFilterPanelPreference = true;
           }
           if (typeof restored.showAllSchemes === "boolean") {
             state.showAllSchemes.value = restored.showAllSchemes;
@@ -332,7 +338,7 @@
       state.showPlanConfigHintDot.value = true;
     }
 
-    if (!restoredShowFilterPanel && shouldCollapseFilterPanelByDefault()) {
+    if (!restoredFilterPanelPreference && shouldCollapseFilterPanelByDefault()) {
       state.showFilterPanel.value = false;
     }
 
@@ -400,20 +406,28 @@
       { deep: true }
     );
 
-    const uiState = computed(() => ({
-      searchQuery: state.searchQuery.value,
-      selectedNames: state.selectedNames.value,
-      schemeBaseSelections: state.schemeBaseSelections.value,
-      showWeaponAttrs: state.showWeaponAttrs.value,
-      showFilterPanel: state.showFilterPanel.value,
-      showAllSchemes: state.showAllSchemes.value,
-      backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,
-      recommendationConfig: state.recommendationConfig.value,
-      filterS1: state.filterS1.value,
-      filterS2: state.filterS2.value,
-      filterS3: state.filterS3.value,
-      mobilePanel: state.mobilePanel.value,
-    }));
+    const uiState = computed(() => {
+      const value = {
+        searchQuery: state.searchQuery.value,
+        selectedNames: state.selectedNames.value,
+        schemeBaseSelections: state.schemeBaseSelections.value,
+        showWeaponAttrs: state.showWeaponAttrs.value,
+        showAllSchemes: state.showAllSchemes.value,
+        backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,
+        recommendationConfig: state.recommendationConfig.value,
+        filterS1: state.filterS1.value,
+        filterS2: state.filterS2.value,
+        filterS3: state.filterS3.value,
+        mobilePanel: state.mobilePanel.value,
+        filterPanelManuallySet: Boolean(
+          state.filterPanelManuallySet && state.filterPanelManuallySet.value
+        ),
+      };
+      if (value.filterPanelManuallySet) {
+        value.showFilterPanel = state.showFilterPanel.value;
+      }
+      return value;
+    });
 
     watch(
       uiState,
