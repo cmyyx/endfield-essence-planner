@@ -6,7 +6,6 @@
     const storageKey = state.backgroundStorageKey || "planner-bg-image:v1";
     const apiStorageKey = state.backgroundApiStorageKey || "planner-bg-api:v1";
     const root = typeof document !== "undefined" ? document.documentElement : null;
-    const backgroundDisabledClass = "bg-display-disabled";
     const defaultBackgroundUrl = "https://img.canmoe.com/image?img=ua";
     let mounted = false;
     let fallbackFadeTimer = null;
@@ -62,7 +61,6 @@
     const setBackgroundVisualEnabled = (enabled) => {
       if (!root) return;
       const visualEnabled = Boolean(enabled);
-      root.classList.toggle(backgroundDisabledClass, !visualEnabled);
       root.setAttribute("data-bg-display", visualEnabled ? "on" : "off");
       if (!visualEnabled) {
         clearFadeTimer();
@@ -112,9 +110,6 @@
       if (!root) return;
       if (!isStandardBackgroundEnabled()) {
         setBackgroundVisualEnabled(false);
-        // Hard-disable the image layer so the UI switch always has visible effect.
-        clearFadeTimer();
-        root.style.setProperty("--bg-image", "none");
         return;
       }
       setBackgroundVisualEnabled(true);
@@ -306,7 +301,6 @@
       onBeforeUnmount(() => {
         clearFadeTimer();
         if (root) {
-          root.classList.remove(backgroundDisabledClass);
           root.removeAttribute("data-bg-display");
         }
       });

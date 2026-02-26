@@ -25,6 +25,86 @@
 
       const normalizeText = (value) => (value || "").toString().trim().toLowerCase();
 
+      const defaultWeaponMark = Object.freeze({
+        weaponOwned: false,
+        essenceOwned: false,
+        note: "",
+      });
+
+      const normalizeWeaponMark = (mark, options) => {
+        const allowLegacyExcluded = !options || options.allowLegacyExcluded !== false;
+        let weaponOwned = false;
+        let essenceOwned = false;
+        let note = "";
+        if (mark && typeof mark === "object") {
+          if (typeof mark.weaponOwned === "boolean") {
+            weaponOwned = mark.weaponOwned;
+          }
+          if (typeof mark.essenceOwned === "boolean") {
+            essenceOwned = mark.essenceOwned;
+          } else if (allowLegacyExcluded && typeof mark.excluded === "boolean") {
+            essenceOwned = mark.excluded;
+          }
+          note = typeof mark.note === "string" ? mark.note : "";
+        } else if (typeof mark === "string") {
+          note = mark;
+        }
+        return { weaponOwned, essenceOwned, note };
+      };
+
+      const compactWeaponMark = (mark) => {
+        const normalized = normalizeWeaponMark(mark, { allowLegacyExcluded: false });
+        const compact = {};
+        if (normalized.weaponOwned) compact.weaponOwned = true;
+        if (normalized.essenceOwned) compact.essenceOwned = true;
+        if (normalized.note) compact.note = normalized.note;
+        return Object.keys(compact).length ? compact : null;
+      };
+
+      const getWeaponMarkFromMap = (name, source) => {
+        const map = source && typeof source === "object" ? source : {};
+        if (!name || !Object.prototype.hasOwnProperty.call(map, name)) {
+          return { ...defaultWeaponMark };
+        }
+        return normalizeWeaponMark(map[name]);
+      };
+
+      const normalizeWeaponMarksMap = (raw, weaponNameSet) => {
+        if (!raw || typeof raw !== "object") return {};
+        const normalized = {};
+        Object.keys(raw).forEach((name) => {
+          if (!name) return;
+          if (weaponNameSet && !weaponNameSet.has(name)) return;
+          const compact = compactWeaponMark(raw[name]);
+          if (compact) {
+            normalized[name] = compact;
+          }
+        });
+        return normalized;
+      };
+
+      const normalizeLegacyExcludedMarksMap = (raw, weaponNameSet) => {
+        if (!raw || typeof raw !== "object") return {};
+        const normalized = {};
+        Object.keys(raw).forEach((name) => {
+          if (!name) return;
+          if (weaponNameSet && !weaponNameSet.has(name)) return;
+          const value = raw[name];
+          let excluded = false;
+          let note = "";
+          if (value && typeof value === "object") {
+            excluded = Boolean(value.excluded);
+            note = typeof value.note === "string" ? value.note : "";
+          } else if (typeof value === "string") {
+            note = value;
+          }
+          if (excluded || note) {
+            normalized[name] = { excluded, note };
+          }
+        });
+        return normalized;
+      };
+
       const allSame = (values) => values.length > 0 && values.every((value) => value === values[0]);
 
       const countBy = (values) =>

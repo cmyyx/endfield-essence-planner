@@ -760,7 +760,7 @@
                         ? t("旧数据覆盖新数据")
                         : migrationConflictStrategy === 'keepCurrent'
                         ? t("保留新数据，跳过冲突")
-                        : t("仅补全缺失（推荐）")
+                        : t("优先补全（推荐）")
                     }}
                   </span>
                 </div>

@@ -32,13 +32,6 @@
         pointer-events: none;
       }
 
-      html.bg-display-disabled body::before {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        background-image: none !important;
-      }
-
       html[data-bg-display="off"] body::before {
         display: none !important;
         opacity: 0 !important;
@@ -62,10 +55,6 @@
         pointer-events: none;
         background: var(--bg-overlay-solid);
         opacity: 0.4;
-      }
-
-      html.bg-display-disabled body::after {
-        opacity: 1;
       }
 
       html[data-bg-display="off"] body::after {
@@ -636,7 +625,6 @@
         flex: 1 1 auto;
         min-width: 0;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .slot-preview-notice {
@@ -735,7 +723,6 @@
           min-width: 0;
           white-space: normal;
           overflow-wrap: anywhere;
-          word-break: break-word;
           text-transform: none;
           letter-spacing: 0.04em;
           line-height: 1.2;
@@ -748,7 +735,6 @@
         .mobile-hint > span {
           min-width: 0;
           overflow-wrap: anywhere;
-          word-break: break-word;
         }
 
         .ai-notice {
@@ -1747,7 +1733,6 @@
         color: rgba(195, 205, 219, 0.55);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .gear-empty {
@@ -1919,7 +1904,6 @@
         color: rgba(195, 205, 219, 0.55);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .team-empty {
@@ -2742,7 +2726,6 @@
         z-index: 2;
         background: rgba(10, 14, 20, 0.98);
         white-space: normal;
-        word-break: break-word;
         box-shadow: 1px 0 0 rgba(255, 255, 255, 0.08);
         vertical-align: middle;
       }

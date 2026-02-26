@@ -193,6 +193,8 @@
                         weapon.conflictS2,
                         weapon.conflictS3,
                         weapon.conflictReason,
+                        isWeaponOwned(weapon.name),
+                        isUnowned(weapon.name),
                         isEssenceOwned(weapon.name),
                         weapon.note,
                       ]"
@@ -291,6 +293,7 @@
                     weapon.isSelected,
                     weapon.isEssenceOwned,
                     weapon.isEssenceOwnedReal,
+                    weapon.isUnowned,
                     weapon.baseDim,
                     weapon.baseConflict,
                     weapon.baseLocked,

@@ -5,7 +5,6 @@
     const { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } = ctx;
 
     const weaponMap = new Map(weapons.map((weapon) => [weapon.name, weapon]));
-    const defaultMark = { weaponOwned: false, essenceOwned: false, note: "" };
 
     const uniqueSorted = (items, sorter) => {
       const values = Array.from(new Set(items.filter(Boolean)));
@@ -15,35 +14,8 @@
       return values;
     };
 
-    const getWeaponMarkFromSource = (name, source) => {
-      const map = source && typeof source === "object" ? source : {};
-      const mark = map && map[name] ? map[name] : null;
-      if (!mark || typeof mark !== "object") {
-        return { ...defaultMark };
-      }
-      return {
-        weaponOwned: typeof mark.weaponOwned === "boolean" ? mark.weaponOwned : false,
-        essenceOwned:
-          typeof mark.essenceOwned === "boolean"
-            ? mark.essenceOwned
-            : typeof mark.excluded === "boolean"
-            ? mark.excluded
-            : false,
-        note: typeof mark.note === "string" ? mark.note : "",
-      };
-    };
-    const getWeaponMark = (name) => getWeaponMarkFromSource(name, state.weaponMarks.value);
-
-    const normalizeMarkForStore = (mark) => {
-      const weaponOwned = typeof mark.weaponOwned === "boolean" ? mark.weaponOwned : false;
-      const essenceOwned = typeof mark.essenceOwned === "boolean" ? mark.essenceOwned : false;
-      const note = typeof mark.note === "string" ? mark.note : "";
-      const normalized = {};
-      if (weaponOwned) normalized.weaponOwned = true;
-      if (essenceOwned) normalized.essenceOwned = true;
-      if (note) normalized.note = note;
-      return Object.keys(normalized).length ? normalized : null;
-    };
+    const getWeaponMark = (name) => getWeaponMarkFromMap(name, state.weaponMarks.value);
+    const normalizeMarkForStore = (mark) => compactWeaponMark(mark);
 
     const setWeaponMark = (name, patch) => {
       if (!name) return;
@@ -187,7 +159,7 @@
       if (!weapon) return "";
       const config = state.recommendationConfig.value || {};
       const flags = getSelectorHiddenFlags(weapon, config);
-      if (!flags.hidden) return "";
+      if (!shouldHideInSelector(weapon, config)) return "";
       const reasons = [];
       if (flags.hiddenByUnowned) reasons.push("未拥有");
       if (flags.hiddenByEssenceOwned) reasons.push("基质已有");

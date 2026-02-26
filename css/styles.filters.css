@@ -62,7 +62,7 @@
           min-width: fit-content;
         }
 
-        @container (max-width: 440px) {
+        @media (max-width: 440px) {
           .filter-toolbar {
             grid-template-columns: minmax(0, 1fr) auto;
           }

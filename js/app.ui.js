@@ -608,6 +608,20 @@
       }
     };
 
+    const runAfterLayout = (callback) => {
+      if (typeof callback !== "function") return;
+      const run = () => {
+        requestAnimationFrame(() => {
+          callback();
+        });
+      };
+      if (typeof nextTick === "function") {
+        nextTick(run);
+      } else {
+        run();
+      }
+    };
+
     onMounted(() => {
       state.appReady.value = true;
       bindSystemThemeListener();
@@ -632,17 +646,7 @@
         window.addEventListener("slotfeed:failed", handleAdFailed);
         window.addEventListener("resize", scheduleAdSlotVisibility);
         if (canShowAds.value) {
-          if (typeof nextTick === "function") {
-            nextTick(() => {
-              requestAnimationFrame(() => {
-                ensureAdScriptLoaded();
-              });
-            });
-          } else {
-            requestAnimationFrame(() => {
-              ensureAdScriptLoaded();
-            });
-          }
+          runAfterLayout(ensureAdScriptLoaded);
         }
       }
       document.addEventListener("click", handleAdPotentialMutation, true);
@@ -661,26 +665,12 @@
             }
           });
       };
-      if (typeof nextTick === "function") {
-        nextTick(() => requestAnimationFrame(finalizePreload));
-      } else {
-        requestAnimationFrame(finalizePreload);
-      }
+      runAfterLayout(finalizePreload);
     });
 
     watch([canShowAds, isAdPortrait], () => {
       if (canShowAds.value) {
-        if (typeof nextTick === "function") {
-          nextTick(() => {
-            requestAnimationFrame(() => {
-              ensureAdScriptLoaded();
-            });
-          });
-        } else {
-          requestAnimationFrame(() => {
-            ensureAdScriptLoaded();
-          });
-        }
+        runAfterLayout(ensureAdScriptLoaded);
       }
       primeAdSlotVisibility();
     });
@@ -696,13 +686,7 @@
           primeAdSlotVisibility();
           scheduleAdSlotVisibility();
         };
-        if (typeof nextTick === "function") {
-          nextTick(() => {
-            requestAnimationFrame(refreshAdSlotAfterViewSwitch);
-          });
-        } else {
-          requestAnimationFrame(refreshAdSlotAfterViewSwitch);
-        }
+        runAfterLayout(refreshAdSlotAfterViewSwitch);
       }
     );
 

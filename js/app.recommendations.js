@@ -167,10 +167,11 @@
 
       if (coverageDiff !== 0) return coverageDiff;
 
-      if (baseDiff !== 0) return baseDiff;
-
       if (ownershipMode === "sameCoverage" && ownershipDiff !== 0) return ownershipDiff;
       if (regionMode === "sameCoverage" && regionDiff !== 0) return regionDiff;
+
+      if (baseDiff !== 0) return baseDiff;
+
       if (ownershipMode === "sameEfficiency" && ownershipDiff !== 0) return ownershipDiff;
       if (regionMode === "sameEfficiency" && regionDiff !== 0) return regionDiff;
 
@@ -535,7 +536,9 @@
           ? scheme.effectiveSelectedMatchNames
           : scheme.selectedMatchNames;
         if (Array.isArray(names)) {
-          names.forEach((name) => remaining.delete(name));
+          names.forEach((name) => {
+            remaining.delete(name);
+          });
         }
       };
 

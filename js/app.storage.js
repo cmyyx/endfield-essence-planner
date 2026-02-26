@@ -125,66 +125,11 @@
     };
 
     const normalizeWeaponMarks = (raw) => {
-      if (!raw || typeof raw !== "object") return {};
-      const normalized = {};
-
-      Object.keys(raw).forEach((name) => {
-        if (!name || !weaponNameSet.has(name)) return;
-        const mark = raw[name];
-
-        let weaponOwned = false;
-        let essenceOwned = false;
-        let note = "";
-
-        if (mark && typeof mark === "object") {
-          if (typeof mark.weaponOwned === "boolean") {
-            weaponOwned = mark.weaponOwned;
-          }
-          if (typeof mark.essenceOwned === "boolean") {
-            essenceOwned = mark.essenceOwned;
-          } else if (typeof mark.excluded === "boolean") {
-            essenceOwned = mark.excluded;
-          }
-          note = typeof mark.note === "string" ? mark.note : "";
-        } else if (typeof mark === "string") {
-          note = mark;
-        }
-
-        const compact = {};
-        if (weaponOwned) compact.weaponOwned = true;
-        if (essenceOwned) compact.essenceOwned = true;
-        if (note) compact.note = note;
-        if (Object.keys(compact).length) {
-          normalized[name] = compact;
-        }
-      });
-
-      return normalized;
+      return normalizeWeaponMarksMap(raw, weaponNameSet);
     };
 
     const normalizeLegacyMarks = (raw) => {
-      if (!raw || typeof raw !== "object") return {};
-      const normalized = {};
-
-      Object.keys(raw).forEach((name) => {
-        if (!name || !weaponNameSet.has(name)) return;
-        const value = raw[name];
-        let excluded = false;
-        let note = "";
-
-        if (value && typeof value === "object") {
-          excluded = Boolean(value.excluded);
-          note = typeof value.note === "string" ? value.note : "";
-        } else if (typeof value === "string") {
-          note = value;
-        }
-
-        if (excluded || note) {
-          normalized[name] = { excluded, note };
-        }
-      });
-
-      return normalized;
+      return normalizeLegacyExcludedMarksMap(raw, weaponNameSet);
     };
 
     state.normalizeWeaponMarks = normalizeWeaponMarks;

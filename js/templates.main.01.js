@@ -800,6 +800,8 @@
                     weapon.baseConflict,
                     fallbackPlan.s2Conflict,
                     fallbackPlan.s3Conflict,
+                    isWeaponOwned(weapon.name),
+                    isUnowned(weapon.name),
                     isEssenceOwned(weapon.name),
                     getWeaponNote(weapon.name),
                   ]"

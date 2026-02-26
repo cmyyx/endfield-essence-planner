@@ -4,8 +4,6 @@
   modules.initMigration = function initMigration(ctx, state) {
     const { computed, watch, onMounted, onBeforeUnmount, nextTick } = ctx;
 
-    const defaultMark = { weaponOwned: false, essenceOwned: false, note: "" };
-
     const getStoredDecision = () => {
       try {
         const raw = localStorage.getItem(state.migrationStorageKey);
@@ -45,30 +43,11 @@
     };
 
     const normalizeCurrentMark = (name, map) => {
-      const source = map || state.weaponMarks.value || {};
-      if (!Object.prototype.hasOwnProperty.call(source, name)) {
-        return { ...defaultMark };
-      }
-      const mark = source[name];
-      if (!mark || typeof mark !== "object") {
-        return { ...defaultMark };
-      }
-      return {
-        weaponOwned: typeof mark.weaponOwned === "boolean" ? mark.weaponOwned : false,
-        essenceOwned: typeof mark.essenceOwned === "boolean" ? mark.essenceOwned : false,
-        note: typeof mark.note === "string" ? mark.note : "",
-      };
+      return getWeaponMarkFromMap(name, map || state.weaponMarks.value || {});
     };
 
     const normalizeForStore = (mark) => {
-      const weaponOwned = typeof mark.weaponOwned === "boolean" ? mark.weaponOwned : false;
-      const essenceOwned = typeof mark.essenceOwned === "boolean" ? mark.essenceOwned : false;
-      const note = typeof mark.note === "string" ? mark.note : "";
-      const normalized = {};
-      if (weaponOwned) normalized.weaponOwned = true;
-      if (essenceOwned) normalized.essenceOwned = true;
-      if (note) normalized.note = note;
-      return Object.keys(normalized).length ? normalized : null;
+      return compactWeaponMark(mark);
     };
 
     const getMigrationTargetNames = (legacy, mappingMode) => {
@@ -227,8 +206,8 @@
     const migrationConflictOptions = [
       {
         value: "fillMissing",
-        label: "仅补全缺失（推荐）",
-        description: "只写入当前没有新版标记的武器，避免覆盖你已手动维护的新数据。",
+        label: "优先补全（推荐）",
+        description: "优先补全缺失字段；遇到已存在且字段冲突的新版数据会跳过，避免覆盖你已手动维护的数据。",
       },
       {
         value: "overwriteLegacy",

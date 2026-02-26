@@ -22,10 +22,6 @@
   background: var(--bg-overlay-solid);
 }
 
-html.bg-display-disabled[data-theme="light"] body::after {
-  opacity: 1;
-}
-
 html[data-bg-display="off"][data-theme="light"] body::after {
   opacity: 1;
 }
@@ -820,8 +816,8 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   border-color: rgba(215, 144, 50, 0.48);
 }
 
-[data-theme="light"] .scheme-weapon-item .attr-value:not(.base-lock):not(.locked):not(.conflict),
-[data-theme="light"] .weapon-attr-item .attr-value:not(.base-lock):not(.locked):not(.conflict) {
+[data-theme="light"] .scheme-weapon-item .attr-value:not(.base-lock, .locked, .conflict),
+[data-theme="light"] .weapon-attr-item .attr-value:not(.base-lock, .locked, .conflict) {
   border-color: rgba(32, 58, 88, 0.24);
   background: rgba(236, 244, 255, 0.92);
   color: #294565;

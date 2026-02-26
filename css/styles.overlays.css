@@ -224,7 +224,6 @@
         font-size: 12px;
         font-weight: 700;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .migration-detail-tags {
@@ -279,7 +278,6 @@
       .migration-detail-change-value {
         color: #e7f2ff;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .migration-detail-change-value.is-from {
@@ -294,7 +292,6 @@
         color: var(--muted);
         font-size: 12px;
         overflow-wrap: anywhere;
-        word-break: break-word;
       }
 
       .migration-detail-tail {
