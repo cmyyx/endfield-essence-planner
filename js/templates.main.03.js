@@ -581,6 +581,8 @@
                             {{
                               change.field === 'note'
                                 ? (change.from || t("空"))
+                                : change.field === 'essenceOwned'
+                                ? (change.from ? t("基质已有") : t("基质未有"))
                                 : (change.from ? t("已拥有") : t("未拥有"))
                             }}
                           </span>
@@ -589,6 +591,8 @@
                             {{
                               change.field === 'note'
                                 ? (change.to || t("空"))
+                                : change.field === 'essenceOwned'
+                                ? (change.to ? t("基质已有") : t("基质未有"))
                                 : (change.to ? t("已拥有") : t("未拥有"))
                             }}
                           </span>
@@ -638,6 +642,8 @@
                             {{
                               change.field === 'note'
                                 ? (change.from || t("空"))
+                                : change.field === 'essenceOwned'
+                                ? (change.from ? t("基质已有") : t("基质未有"))
                                 : (change.from ? t("已拥有") : t("未拥有"))
                             }}
                           </span>
@@ -646,6 +652,8 @@
                             {{
                               change.field === 'note'
                                 ? (change.to || t("空"))
+                                : change.field === 'essenceOwned'
+                                ? (change.to ? t("基质已有") : t("基质未有"))
                                 : (change.to ? t("已拥有") : t("未拥有"))
                             }}
                           </span>

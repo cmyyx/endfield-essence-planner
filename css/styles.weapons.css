@@ -651,12 +651,7 @@
           top: clamp(92px, 14vh, 156px);
           left: clamp(24px, 7vw, 44px);
           right: clamp(24px, 7vw, 44px);
-          bottom:
-            calc(
-              clamp(56px, 10vh, 120px)
-              + env(safe-area-inset-bottom, 0px)
-              + var(--viewport-safe-bottom, 0px)
-            );
+          bottom: calc(clamp(56px, 10vh, 120px) + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
           max-height: none;
           padding: 14px 14px 16px;
           border-radius: 14px;

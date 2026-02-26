@@ -42,7 +42,7 @@
       const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
       const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
       const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
-      const useEffectiveMetrics = hideEssenceOwnedInPlans;
+      const useEffectiveMetrics = hideEssenceOwnedInPlans && hideEssenceOwnedOwnedOnly;
       const shouldHideWeaponInPlan = (weapon) => {
         if (!weapon) return true;
         if (hideEssenceOwnedInPlans && isEssenceOwnedForRecommendation(weapon.name)) {
@@ -371,6 +371,8 @@
             .map((weapon) => ({
               ...weapon,
               ...getConflictInfo(weapon, dungeon, option),
+              isUnowned: !isWeaponOwnedForRecommendation(weapon.name),
+              isEssenceOwnedReal: state.isEssenceOwned(weapon.name),
               note: state.getWeaponNote(weapon.name),
             }));
           const autoCoveredSelected = matchedSelected.filter((weapon) => baseAutoPickSet.has(weapon.s1));
@@ -388,7 +390,11 @@
           );
           const effectiveAutoCoveredSelected = useEffectiveMetrics
             ? autoCoveredSelected.filter(
-                (weapon) => !isEssenceOwnedForRecommendation(weapon.name)
+                (weapon) =>
+                  !(
+                    isEssenceOwnedForRecommendation(weapon.name) &&
+                    isWeaponOwnedForRecommendation(weapon.name)
+                  )
               )
             : autoCoveredSelected.slice();
           const effectiveAutoCoveredOwnedSelected = effectiveAutoCoveredSelected.filter((weapon) =>
@@ -403,7 +409,11 @@
           const effectiveAutoWeaponCount = useEffectiveMetrics
             ? schemeWeaponsActive.filter(
                 (weapon) =>
-                  baseAutoPickSet.has(weapon.s1) && !isEssenceOwnedForRecommendation(weapon.name)
+                  baseAutoPickSet.has(weapon.s1) &&
+                  !(
+                    isEssenceOwnedForRecommendation(weapon.name) &&
+                    isWeaponOwnedForRecommendation(weapon.name)
+                  )
               ).length
             : autoWeaponCount;
           const displayWeaponCount = schemeWeaponsActive.filter((weapon) =>

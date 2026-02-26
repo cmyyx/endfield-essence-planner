@@ -160,12 +160,12 @@
       const config = state.recommendationConfig.value || {};
       const flags = getSelectorHiddenFlags(weapon, config);
       if (!shouldHideInSelector(weapon, config)) return "";
-      const reasons = [];
-      if (flags.hiddenByUnowned) reasons.push("未拥有");
-      if (flags.hiddenByEssenceOwned) reasons.push("基质已有");
-      if (flags.hiddenByFourStar) reasons.push("四星");
-      if (!reasons.length) return "";
       const t = typeof state.t === "function" ? state.t : (value) => value;
+      const reasons = [];
+      if (flags.hiddenByUnowned) reasons.push(t("未拥有"));
+      if (flags.hiddenByEssenceOwned) reasons.push(t("基质已有"));
+      if (flags.hiddenByFourStar) reasons.push(t("四星"));
+      if (!reasons.length) return "";
       return t("已隐藏：{reasons}", { reasons: reasons.join(" / ") });
     };
 

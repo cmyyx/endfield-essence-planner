@@ -995,13 +995,7 @@
         color: #f2f7ff;
       }
 
-      .match-status-chip.is-owned {
-        border-color: rgba(255, 169, 169, 0.98);
-        background: rgba(179, 55, 55, 0.96);
-        background-color: rgba(179, 55, 55, 0.96);
-        color: #ffffff;
-      }
-
+      .match-status-chip.is-owned,
       .match-status-chip.is-essence-owned {
         border-color: rgba(255, 169, 169, 0.98);
         background: rgba(179, 55, 55, 0.96);
@@ -1024,13 +1018,7 @@
         color: #f6f9ff;
       }
 
-      [data-theme="light"] .match-status-chip.is-owned {
-        border-color: rgba(118, 34, 34, 0.98);
-        background: rgba(187, 61, 61, 0.95);
-        background-color: rgba(187, 61, 61, 0.95);
-        color: #ffffff;
-      }
-
+      [data-theme="light"] .match-status-chip.is-owned,
       [data-theme="light"] .match-status-chip.is-essence-owned {
         border-color: rgba(118, 34, 34, 0.98);
         background: rgba(187, 61, 61, 0.95);

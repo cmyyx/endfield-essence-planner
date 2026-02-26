@@ -318,20 +318,21 @@
       // ignore storage errors
     }
 
-    try {
-      const legacyFromV1Raw = localStorage.getItem(state.legacyMarksStorageKey);
-      const legacyFromExcludedRaw = localStorage.getItem(state.legacyExcludedKey);
-      const legacyFromV1 = legacyFromV1Raw ? normalizeLegacyMarks(JSON.parse(legacyFromV1Raw)) : {};
-      const legacyFromExcluded = legacyFromExcludedRaw
-        ? normalizeLegacyMarks(JSON.parse(legacyFromExcludedRaw))
-        : {};
-      state.legacyMigrationMarks.value = {
-        ...legacyFromExcluded,
-        ...legacyFromV1,
-      };
-    } catch (error) {
-      state.legacyMigrationMarks.value = {};
-    }
+    const readLegacyMarks = (storageKey) => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return {};
+        return normalizeLegacyMarks(JSON.parse(raw));
+      } catch (error) {
+        return {};
+      }
+    };
+    const legacyFromV1 = readLegacyMarks(state.legacyMarksStorageKey);
+    const legacyFromExcluded = readLegacyMarks(state.legacyExcludedKey);
+    state.legacyMigrationMarks.value = {
+      ...legacyFromExcluded,
+      ...legacyFromV1,
+    };
 
     watch(
       state.weaponMarks,

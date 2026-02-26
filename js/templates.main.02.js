@@ -193,9 +193,8 @@
                         weapon.conflictS2,
                         weapon.conflictS3,
                         weapon.conflictReason,
-                        isWeaponOwned(weapon.name),
-                        isUnowned(weapon.name),
-                        isEssenceOwned(weapon.name),
+                        weapon.isUnowned,
+                        weapon.isEssenceOwnedReal,
                         weapon.note,
                       ]"
                     >
@@ -254,21 +253,21 @@
                       <div class="weapon-exclude-row" @click.stop>
                         <button
                           class="exclude-toggle small"
-                          :class="{ active: !isWeaponOwned(weapon.name), 'intent-alert': isWeaponOwned(weapon.name) }"
+                          :class="{ active: weapon.isUnowned, 'intent-alert': !weapon.isUnowned }"
                           @click.stop="toggleWeaponOwned(weapon)"
                         >
-                          {{ isWeaponOwned(weapon.name) ? t("标记武器未有") : t("标记武器拥有") }}
+                          {{ weapon.isUnowned ? t("标记武器拥有") : t("标记武器未有") }}
                         </button>
                         <button
                           class="exclude-toggle small"
-                          :class="{ active: isEssenceOwned(weapon.name), 'intent-alert': !isEssenceOwned(weapon.name) }"
+                          :class="{ active: weapon.isEssenceOwnedReal, 'intent-alert': !weapon.isEssenceOwnedReal }"
                           @click.stop="toggleEssenceOwned(weapon)"
                         >
-                          {{ isEssenceOwned(weapon.name) ? t("标记基质未有") : t("标记基质已有") }}
+                          {{ weapon.isEssenceOwnedReal ? t("标记基质未有") : t("标记基质已有") }}
                         </button>
                         <textarea
                           class="exclude-note-input"
-                          :class="{ 'is-essence-owned': isEssenceOwned(weapon.name), 'is-unowned': isUnowned(weapon.name) }"
+                          :class="{ 'is-essence-owned': weapon.isEssenceOwnedReal, 'is-unowned': weapon.isUnowned }"
                           rows="1"
                           maxlength="30"
                           :placeholder="t('备注（可选）')"

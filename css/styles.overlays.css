@@ -13,24 +13,14 @@
       .about-overlay.changelog-overlay,
       .about-overlay.about-overlay-main {
         padding-top: clamp(20px, 4vh, 32px);
-        padding-bottom:
-          calc(
-            clamp(20px, 4vh, 32px) +
-            env(safe-area-inset-bottom, 0px) +
-            var(--viewport-safe-bottom, 0px)
-          );
+        padding-bottom: calc(clamp(20px, 4vh, 32px) + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
         transition: padding-bottom 0.22s ease;
       }
 
       .about-overlay.migration-overlay {
         z-index: 36;
         padding-top: clamp(28px, 5vh, 48px);
-        padding-bottom:
-          calc(
-            clamp(56px, 10vh, 120px) +
-            env(safe-area-inset-bottom, 0px) +
-            var(--viewport-safe-bottom, 0px)
-          );
+        padding-bottom: calc(clamp(56px, 10vh, 120px) + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
       }
 
       .about-overlay.migration-overlay.migration-confirm-overlay {
