@@ -388,9 +388,7 @@
         if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return;
         if (state.filterS3.value.length && !state.filterS3.value.includes(weapon.s3)) return;
         const flags = getSelectorHiddenFlags(weapon, config);
-        const isHidden =
-          flags.hidden &&
-          (config.attributeFilterAffectsHiddenWeapons !== false || !hasAttributeFilterSelection());
+        const isHidden = shouldHideInSelector(weapon, config);
         if (!isHidden) return;
         total += 1;
         if (flags.hiddenByUnowned) unowned += 1;
