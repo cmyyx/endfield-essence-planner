@@ -25,9 +25,11 @@
     "./js/app.strategy.js",
     "./js/app.gear-refining.js",
     "./js/templates.plan-config.js",
+    "./js/templates.gear-refining.js",
     "./js/templates.main.01.js",
     "./js/templates.main.02.js",
     "./js/templates.main.03.js",
+    "./js/templates.main.04.js",
     "./js/app.main.js",
   ];
 })();

@@ -27,15 +27,16 @@
     return;
   }
 
-  if (!dungeons.length || !weapons.length) {
+  if (!dungeons.length || !weapons.length || !gears.length) {
     finishPreload();
     showBootError({
       title: "数据文件缺失",
-      summary: "核心数据未加载完成，当前无法生成武器规划。",
+      summary: "核心数据未加载完成，当前无法进入页面。",
       details: [
         `副本数据：${dungeons.length ? "已加载" : "缺失"}`,
         `武器数据：${weapons.length ? "已加载" : "缺失"}`,
-        "请确认 ./data/dungeons.js 与 ./data/weapons.js 可访问",
+        `装备数据：${gears.length ? "已加载" : "缺失"}`,
+        "请确认 ./data/dungeons.js、./data/weapons.js 与 ./data/gears.js 可访问",
       ],
       suggestions: ["检查 data 目录与发布路径", "强制刷新页面后重试"],
     });
@@ -186,6 +187,19 @@
     typeof appTemplates.planConfigControl === "string" && appTemplates.planConfigControl.trim()
       ? appTemplates.planConfigControl.trim()
       : "<div></div>";
+  const gearRefiningListTemplate =
+    typeof appTemplates.gearRefiningList === "string" && appTemplates.gearRefiningList.trim()
+      ? appTemplates.gearRefiningList.trim()
+      : "<div></div>";
+  const gearRefiningDetailTemplate =
+    typeof appTemplates.gearRefiningDetail === "string" && appTemplates.gearRefiningDetail.trim()
+      ? appTemplates.gearRefiningDetail.trim()
+      : "<div></div>";
+  const gearRefiningRecommendationTemplate =
+    typeof appTemplates.gearRefiningRecommendation === "string" &&
+    appTemplates.gearRefiningRecommendation.trim()
+      ? appTemplates.gearRefiningRecommendation.trim()
+      : "<div></div>";
 
   const planConfigControl = {
     props: {
@@ -225,6 +239,56 @@
     {{ isEssenceOwned(weaponName) ? t("基质已有") : t("基质未有") }}
   </span>
 </div>`,
+  };
+
+  const gearRefiningList = {
+    props: {
+      t: { type: Function, required: true },
+      mobilePanel: { type: String, required: true },
+      query: { type: String, required: true },
+      groupedSets: { type: Array, required: true },
+      selectedGearName: { type: String, default: "" },
+      isSetCollapsed: { type: Function, required: true },
+      toggleSetCollapsed: { type: Function, required: true },
+      selectGear: { type: Function, required: true },
+      hasGearImage: { type: Function, required: true },
+      gearImageSrc: { type: Function, required: true },
+      onGearImageError: { type: Function, required: true },
+    },
+    emits: ["update:query"],
+    template: gearRefiningListTemplate,
+  };
+
+  const gearRefiningRecommendation = {
+    props: {
+      t: { type: Function, required: true },
+      recommendation: { type: Object, required: true },
+      visibleCandidates: { type: Array, required: true },
+      hasMoreCandidates: { type: Boolean, required: true },
+      expanded: { type: Boolean, required: true },
+      toggleExpanded: { type: Function, required: true },
+      hasGearImage: { type: Function, required: true },
+      gearImageSrc: { type: Function, required: true },
+      onGearImageError: { type: Function, required: true },
+    },
+    template: gearRefiningRecommendationTemplate,
+  };
+
+  const gearRefiningDetail = {
+    props: {
+      t: { type: Function, required: true },
+      mobilePanel: { type: String, required: true },
+      selectedGear: { type: Object, default: null },
+      recommendations: { type: Array, required: true },
+      visibleRecommendationCandidates: { type: Function, required: true },
+      hasMoreRecommendationCandidates: { type: Function, required: true },
+      isRecommendationExpanded: { type: Function, required: true },
+      toggleRecommendationExpanded: { type: Function, required: true },
+      hasGearImage: { type: Function, required: true },
+      gearImageSrc: { type: Function, required: true },
+      onGearImageError: { type: Function, required: true },
+    },
+    template: gearRefiningDetailTemplate,
   };
 
   const app = createApp({
@@ -423,6 +487,12 @@
         return nextUrl;
       };
 
+      const onPopState = () => {
+        applyRoute(parseRoute());
+        syncLegacyScrollbarMode();
+        trackPageview();
+      };
+
       onMounted(() => {
         const route = parseRoute();
         applyRoute(route);
@@ -430,15 +500,14 @@
         syncQuery(true);
         trackPageview();
         if (typeof window !== "undefined") {
-          window.addEventListener("popstate", () => {
-            applyRoute(parseRoute());
-            syncLegacyScrollbarMode();
-            trackPageview();
-          });
+          window.addEventListener("popstate", onPopState);
         }
       });
 
       onBeforeUnmount(() => {
+        if (typeof window !== "undefined") {
+          window.removeEventListener("popstate", onPopState);
+        }
         if (typeof document === "undefined" || !document.documentElement) return;
         document.documentElement.classList.remove("legacy-scrollbar-hidden");
       });
@@ -735,6 +804,9 @@
 
   app.component("PlanConfigControl", planConfigControl);
   app.component("MatchStatusLine", matchStatusLine);
+  app.component("GearRefiningList", gearRefiningList);
+  app.component("GearRefiningDetail", gearRefiningDetail);
+  app.component("GearRefiningRecommendation", gearRefiningRecommendation);
   app.directive("lazy-src", lazyImageDirective);
   app.mount("#app");
 })();
