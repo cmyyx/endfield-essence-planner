@@ -25,17 +25,6 @@ const extractAnnouncementVersion = async () => {
   return versionMatch ? String(versionMatch[1]).trim() : "";
 };
 
-const getCommitHash = () => {
-  const env = process.env;
-  const raw =
-    env.CF_PAGES_COMMIT_SHA ||
-    env.GITHUB_SHA ||
-    env.CI_COMMIT_SHA ||
-    env.VERCEL_GIT_COMMIT_SHA ||
-    "";
-  return String(raw || "").trim();
-};
-
 const toCompactTime = (date) => {
   const pad = (num) => String(num).padStart(2, "0");
   return (
@@ -51,12 +40,10 @@ const toCompactTime = (date) => {
 const main = async () => {
   const now = new Date();
   const publishedAt = now.toISOString();
-  const commit = getCommitHash();
-  const commitShort = commit ? commit.slice(0, 8) : "";
   const fingerprint = await extractFingerprint();
   const announcementVersion = await extractAnnouncementVersion();
   const timeSuffix = toCompactTime(now);
-  const buildId = commitShort ? `${commitShort}-${timeSuffix}` : `local-${timeSuffix}`;
+  const buildId = timeSuffix;
   const displayVersion = announcementVersion ? `${announcementVersion}+${buildId}` : buildId;
 
   const payload = {

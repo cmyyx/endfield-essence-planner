@@ -46,7 +46,7 @@
 
 `scripts/gen-version.mjs` 会生成 `data/version.js` 与 `data/version.json`，字段含义如下：
 
-- `buildId`：部署唯一标识（用于更新检测比对，推荐每次部署变化）
+- `buildId`：14 位 UTC 时间戳（`YYYYMMDDHHmmss`，用于更新检测比对；前端按“不相等即有变化”处理）
 - `displayVersion`：用于界面展示的版本文案
 - `announcementVersion`：公告版本号（来源于 `data/content.js` 的 `announcement.version`）
 - `fingerprint`：当前页面资源指纹（来源于 `index.html` 的 `data-fingerprint`）
