@@ -301,7 +301,26 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   animation: plan-config-hint-dot-pulse-light 1.6s ease-in-out infinite;
 }
 
+[data-theme="light"] .nav-hint-dot {
+  background: #e14e4e;
+  box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+  animation: nav-hint-dot-pulse-light 1.6s ease-in-out infinite;
+}
+
 @keyframes plan-config-hint-dot-pulse-light {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+  }
+
+  50% {
+    transform: scale(1.22);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.42), 0 0 12px rgba(225, 78, 78, 0.48);
+  }
+}
+
+@keyframes nav-hint-dot-pulse-light {
   0%,
   100% {
     transform: scale(1);

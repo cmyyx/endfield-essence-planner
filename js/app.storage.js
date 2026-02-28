@@ -253,6 +253,7 @@
         state.backgroundApiStorageKey,
         state.backgroundDisplayStorageKey,
         state.planConfigHintStorageKey,
+        state.gearRefiningNavHintStorageKey,
       ].filter(Boolean);
       const unique = Array.from(new Set(keys));
       try {
@@ -820,6 +821,19 @@
       state.showPlanConfigHintDot.value = true;
       reportStorageIssue("storage.read", state.planConfigHintStorageKey, error, {
         scope: "restore-plan-config-hint",
+      });
+    }
+
+    try {
+      const storedGearRefiningNavHintVersion = localStorage.getItem(
+        state.gearRefiningNavHintStorageKey
+      );
+      state.showGearRefiningNavHintDot.value =
+        storedGearRefiningNavHintVersion !== state.gearRefiningNavHintVersion;
+    } catch (error) {
+      state.showGearRefiningNavHintDot.value = true;
+      reportStorageIssue("storage.read", state.gearRefiningNavHintStorageKey, error, {
+        scope: "restore-gear-refining-nav-hint",
       });
     }
 

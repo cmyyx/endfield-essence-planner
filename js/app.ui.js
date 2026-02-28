@@ -9,6 +9,7 @@
     const showSecondaryMenu = state.showSecondaryMenu;
     const showPlanConfig = state.showPlanConfig;
     const showPlanConfigHintDot = state.showPlanConfigHintDot;
+    const showGearRefiningNavHintDot = state.showGearRefiningNavHintDot;
     const isPortrait = state.isPortrait;
     const isAdPortrait = state.isAdPortrait;
     const canShowAds = state.canShowAds;
@@ -442,6 +443,21 @@
       }
     };
 
+    const markGearRefiningNavHintSeen = () => {
+      if (!showGearRefiningNavHintDot.value) return;
+      showGearRefiningNavHintDot.value = false;
+      try {
+        localStorage.setItem(
+          state.gearRefiningNavHintStorageKey,
+          state.gearRefiningNavHintVersion
+        );
+      } catch (error) {
+        reportStorageIssue("storage.write", state.gearRefiningNavHintStorageKey, error, {
+          scope: "ui.gear-refining-nav-hint-write",
+        });
+      }
+    };
+
     const togglePlanConfig = () => {
       const nextOpen = !showPlanConfig.value;
       showPlanConfig.value = nextOpen;
@@ -594,6 +610,7 @@
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
+    state.markGearRefiningNavHintSeen = markGearRefiningNavHintSeen;
     state.dismissAdsForSession = dismissAdsForSession;
   };
 })();

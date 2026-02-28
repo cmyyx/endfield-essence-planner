@@ -4,16 +4,22 @@
   modules.initEmbed = function initEmbed(ctx, state) {
     const { ref, onMounted, onBeforeUnmount } = ctx;
 
-    const content =
-      state.content && typeof state.content === "object" && "value" in state.content
-        ? state.content.value || {}
-        : state.content || window.CONTENT || {};
-    const currentHost = ref(window.location.hostname);
+    const normalizeHost = (value) => String(value || "").trim().toLowerCase();
+    const readContent = () => {
+      if (state.content && typeof state.content === "object" && "value" in state.content) {
+        return state.content.value || window.CONTENT || {};
+      }
+      return state.content || window.CONTENT || {};
+    };
+    const readEmbedAllowedHosts = () => {
+      const content = readContent();
+      const hosts = Array.isArray(content.embed?.allowedHosts) ? content.embed.allowedHosts : [];
+      return new Set(hosts.map(normalizeHost).filter(Boolean));
+    };
+
+    const currentHost = ref(normalizeHost(window.location.hostname));
     const isFileProtocol = window.location.protocol === "file:";
     const allowedHosts = new Set(["end.canmoe.com", "127.0.0.1", "localhost"]);
-    const embedAllowedHosts = new Set(
-      Array.isArray(content.embed?.allowedHosts) ? content.embed.allowedHosts : []
-    );
     const officialSignalHeader = "x-endfield-essence-planner-official";
     let embedded = false;
     try {
@@ -26,6 +32,15 @@
     const embedHostLabel = ref("");
     const isEmbedTrusted = ref(false);
     const isCurrentHostTrusted = allowedHosts.has(currentHost.value);
+    const recomputeEmbedTrust = () => {
+      if (!isEmbedded.value) {
+        isEmbedTrusted.value = false;
+        return;
+      }
+      const embedAllowedHosts = readEmbedAllowedHosts();
+      const host = normalizeHost(embedHost.value);
+      isEmbedTrusted.value = host && embedAllowedHosts.size ? embedAllowedHosts.has(host) : false;
+    };
     if (isEmbedded.value) {
       let embedOrigin = "";
       if (window.location.ancestorOrigins && window.location.ancestorOrigins.length) {
@@ -41,16 +56,13 @@
       }
       if (embedOrigin) {
         try {
-          embedHost.value = new URL(embedOrigin).hostname;
+          embedHost.value = normalizeHost(new URL(embedOrigin).hostname);
         } catch (error) {
           embedHost.value = "";
         }
       }
       embedHostLabel.value = embedHost.value || state.t("未知来源");
-      isEmbedTrusted.value =
-        embedHost.value && embedAllowedHosts.size
-          ? embedAllowedHosts.has(embedHost.value)
-          : false;
+      recomputeEmbedTrust();
     }
 
     const isOfficialDeployment = ref(false);
@@ -125,6 +137,14 @@
     const icpNumber = ref("苏ICP备2026000659号");
 
     onMounted(async () => {
+      if (typeof state.ensureContentLoaded === "function") {
+        try {
+          await state.ensureContentLoaded({ withSponsors: false });
+        } catch (error) {
+          // ignore content prefetch errors and keep fallback behavior
+        }
+      }
+      recomputeEmbedTrust();
       isOfficialDeployment.value = await detectOfficialDeployment();
       recomputeDomainWarning();
       if (!isEmbedded.value && showDomainWarning.value) {

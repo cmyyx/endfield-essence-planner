@@ -461,6 +461,12 @@
       return {
         currentView: state.currentView,
         setView: (view) => {
+          if (
+            view === "gear-refining" &&
+            typeof state.markGearRefiningNavHintSeen === "function"
+          ) {
+            state.markGearRefiningNavHintSeen();
+          }
           state.currentView.value = view;
           window.scrollTo(0, 0);
         },
@@ -503,6 +509,7 @@
         showAllSchemes: state.showAllSchemes,
         showPlanConfig: state.showPlanConfig,
         showPlanConfigHintDot: state.showPlanConfigHintDot,
+        showGearRefiningNavHintDot: state.showGearRefiningNavHintDot,
         togglePlanConfig: state.togglePlanConfig,
         recommendationConfig: state.recommendationConfig,
         regionOptions: state.regionOptions,
