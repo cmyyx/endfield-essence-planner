@@ -750,6 +750,12 @@
         }
       }
 
+      @media (prefers-reduced-motion: reduce) {
+        .nav-hint-dot {
+          animation: none;
+        }
+      }
+
       .nav-item:hover {
         background: rgba(255, 255, 255, 0.05);
         color: var(--text);

@@ -26,6 +26,7 @@
       <button
         type="button"
         class="gear-refining-set-header"
+        :aria-expanded="!isSetCollapsed(setGroup.setName)"
         @click="toggleSetCollapsed(setGroup.setName)"
       >
         <div class="gear-refining-set-title">
@@ -54,7 +55,7 @@
               <img
                 v-if="hasGearImage(gear)"
                 class="weapon-figure"
-                :src="gearImageSrc(gear)"
+                v-lazy-src="gearImageSrc(gear)"
                 :alt="gear.name"
                 loading="lazy"
                 decoding="async"
@@ -105,7 +106,7 @@
           <img
             v-if="hasGearImage(candidate.gear)"
             class="weapon-figure"
-            :src="gearImageSrc(candidate.gear)"
+            v-lazy-src="gearImageSrc(candidate.gear)"
             :alt="candidate.gear.name"
             loading="lazy"
             decoding="async"
@@ -153,7 +154,7 @@
           <img
             v-if="hasGearImage(selectedGear)"
             class="weapon-figure"
-            :src="gearImageSrc(selectedGear)"
+            v-lazy-src="gearImageSrc(selectedGear)"
             :alt="selectedGear.name"
             loading="lazy"
             decoding="async"
