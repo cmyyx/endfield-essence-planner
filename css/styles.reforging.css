@@ -1,0 +1,469 @@
+.reforging-shell {
+  align-items: start;
+  min-height: 0;
+}
+
+.reforging-panel {
+  min-height: 0;
+}
+
+.reforging-panel-left,
+.reforging-panel-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.reforging-panel-left::-webkit-scrollbar,
+.reforging-panel-right::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .reforging-panel-left,
+  .reforging-panel-right {
+    max-height: calc(100dvh - 170px);
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
+.reforging-set-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reforging-set-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reforging-set-header {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.reforging-set-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.reforging-set-header:focus-visible {
+  outline: 2px solid rgba(77, 214, 201, 0.65);
+  outline-offset: 1px;
+}
+
+.reforging-set-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reforging-set-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.reforging-set-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 0;
+  color: var(--text);
+  opacity: 0.78;
+  line-height: 1;
+  transition: color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.reforging-set-chevron::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(135deg);
+  transition: transform 0.22s ease;
+}
+
+.reforging-set-header:hover .reforging-set-chevron {
+  color: var(--text);
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.reforging-set-chevron.is-open {
+  color: var(--text);
+  opacity: 1;
+}
+
+.reforging-set-chevron.is-open::before {
+  transform: rotate(45deg);
+}
+
+.reforging-set-count {
+  min-width: 24px;
+  text-align: center;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.reforging-gear-list {
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 10px;
+}
+
+.reforging-gear-item {
+  width: 100%;
+  container-type: inline-size;
+}
+
+.reforging-gear-item .weapon-name,
+.reforging-candidate-item .weapon-name,
+.reforging-selected-card .weapon-name {
+  bottom: 0;
+  height: auto;
+  min-height: 48px;
+  padding: 11px 6px 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.reforging-gear-item.rarity-5 .weapon-name,
+.reforging-candidate-item.rarity-5 .weapon-name,
+.reforging-selected-card.rarity-5 .weapon-name {
+  background-image: none;
+}
+
+.reforging-name {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.12;
+  font-size: clamp(12px, 0.96vw, 15px);
+  font-weight: 700;
+  transform: translateY(-1px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.reforging-selected-card .reforging-name {
+  font-size: clamp(13px, 1.06vw, 16px);
+}
+
+.reforging-gear-meta {
+  width: 100%;
+  text-align: center;
+  font-size: clamp(11px, 0.82vw, 12px);
+  line-height: 1.12;
+  color: currentColor;
+  opacity: 0.62;
+  font-weight: 600;
+  transform: translateY(-3px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.reforging-selected-card,
+.reforging-candidate-item {
+  cursor: default;
+}
+
+.reforging-selected-card::after,
+.reforging-candidate-item::after {
+  display: none;
+}
+
+.reforging-selected-card:hover,
+.reforging-candidate-item:hover {
+  border-color: var(--stroke);
+  box-shadow: none;
+  background: rgba(12, 14, 18, 0.92);
+}
+
+.reforging-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reforging-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.reforging-selected-card {
+  width: min(156px, 42vw);
+  max-width: 164px;
+}
+
+.reforging-attrs {
+  flex: 1 1 280px;
+  min-width: 250px;
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reforging-attr-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reforging-attr-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.reforging-attr-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.reforging-recommend-list {
+  display: grid;
+  gap: 12px;
+}
+
+.reforging-recommend-card {
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reforging-recommend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.reforging-recommend-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.reforging-recommend-target {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.reforging-recommend-tip,
+.reforging-recommend-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.reforging-tip-value {
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.reforging-candidate-list {
+  grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+  gap: 8px;
+}
+
+.reforging-candidate-item {
+  width: 100%;
+  container-type: inline-size;
+}
+
+.reforging-candidate-toggle {
+  margin-top: 2px;
+  align-self: flex-start;
+  padding: 5px 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.reforging-set-collapse-enter-active,
+.reforging-set-collapse-leave-active {
+  transition: max-height 0.22s ease, opacity 0.18s ease, transform 0.18s ease;
+  overflow: hidden;
+}
+
+.reforging-set-collapse-enter-from,
+.reforging-set-collapse-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-2px);
+}
+
+.reforging-set-collapse-enter-to,
+.reforging-set-collapse-leave-from {
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reforging-panel-left .search-box {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-top: 0;
+  margin-bottom: 10px;
+  background: rgba(20, 28, 40, 0.92);
+}
+
+[data-theme="light"] .reforging-panel-left .search-box {
+  background: rgba(245, 249, 255, 0.95);
+}
+
+@media (max-width: 1024px) {
+  .reforging-panel.panel-hidden {
+    display: none !important;
+  }
+
+  .reforging-shell {
+    gap: 14px;
+  }
+
+  .reforging-panel-left,
+  .reforging-panel-right {
+    max-height: calc(100dvh - 230px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-gutter: stable;
+  }
+
+  .reforging-attrs {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 1024px) and (orientation: portrait) {
+  .reforging-selected-card {
+    width: min(92px, 27vw);
+  }
+
+  .reforging-name {
+    font-size: clamp(8px, 2.4vw, 10.8px);
+    line-height: 1.14;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .reforging-selected-card .reforging-name {
+    font-size: clamp(8px, 2.4vw, 10.8px);
+  }
+
+  .reforging-gear-meta {
+    font-size: clamp(7px, 2vw, 8.8px);
+  }
+}
+
+@media (max-width: 1024px) and (orientation: landscape) {
+  .reforging-selected-card {
+    width: min(118px, 24vw);
+  }
+
+  .reforging-name {
+    font-size: 13px;
+    line-height: 1.16;
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .reforging-selected-card .reforging-name {
+    font-size: 14px;
+  }
+
+  .reforging-gear-meta {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .reforging-gear-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .reforging-candidate-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 138px) {
+  .reforging-gear-item .weapon-name,
+  .reforging-candidate-item .weapon-name {
+    min-height: 52px;
+    padding: 10px 6px 5px;
+    gap: 3px;
+  }
+
+  .reforging-gear-item .reforging-name,
+  .reforging-candidate-item .reforging-name {
+    --reforging-compact-name-size: clamp(10px, 9.5cqw, 12.8px);
+    font-size: var(--reforging-compact-name-size);
+    font-weight: 600;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    text-overflow: clip;
+    line-height: 1.15;
+    transform: translateY(0);
+  }
+
+  .reforging-gear-item .reforging-gear-meta,
+  .reforging-candidate-item .reforging-gear-meta {
+    font-size: clamp(9px, 8.6cqw, 11.8px);
+    line-height: 1.08;
+    transform: translateY(-1px);
+  }
+}

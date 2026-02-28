@@ -9,6 +9,7 @@
     "./css/styles.filters.css",
     "./css/styles.weapons.css",
     "./css/styles.recommendations.css",
+    "./css/styles.reforging.css",
     "./css/styles.theme.modes.css",
   ];
   var startupScripts = [
@@ -16,6 +17,7 @@
     "./data/version.js",
     "./data/dungeons.js",
     "./data/weapons.js",
+    "./data/gears.js",
     "./data/weapon-images.js",
     "./data/i18n.zh-CN.js",
     "./js/app.script-chain.js",
@@ -1323,6 +1325,7 @@
       loadScript("./data/version.js"),
       loadScript("./data/dungeons.js"),
       loadScript("./data/weapons.js"),
+      loadScript("./data/gears.js"),
       loadScript("./data/weapon-images.js"),
       loadScript("./data/i18n.zh-CN.js"),
     ]);

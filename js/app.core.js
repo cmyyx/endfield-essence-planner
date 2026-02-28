@@ -1,5 +1,6 @@
       const dungeons = Array.isArray(window.DUNGEONS) ? window.DUNGEONS : [];
       const weapons = Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
+      const gears = Array.isArray(window.GEARS) ? window.GEARS : [];
       const weaponImages = new Set(Array.isArray(window.WEAPON_IMAGES) ? window.WEAPON_IMAGES : []);
       const i18nState = {
         locale: "zh-CN",

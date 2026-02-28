@@ -12,10 +12,21 @@
         position: relative;
         overflow-y: scroll;
         overflow-x: hidden;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
 
       html {
-        scrollbar-gutter: stable;
+        scrollbar-gutter: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
       }
 
       body::before {
@@ -71,6 +82,14 @@
         padding: 32px 28px 48px;
         max-width: 1400px;
         margin: 0 auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .app-shell::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
       }
 
       .hero {
@@ -294,6 +313,21 @@
         border-radius: var(--radius-lg);
         padding: 22px;
         box-shadow: var(--shadow);
+      }
+
+      .panel,
+      .weapon-list,
+      .match-weapon-grid {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .panel::-webkit-scrollbar,
+      .weapon-list::-webkit-scrollbar,
+      .match-weapon-grid::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
       }
 
       .panel-title {
@@ -1693,7 +1727,7 @@
 
       .gear-icon-frame.gear-rarity-5::after,
       .team-icon-frame.gear-rarity-5::after {
-        background-image: var(--gear-5-frame);
+        background-image: var(--rarity-5-frame);
       }
 
       .gear-icon-frame.gear-rarity-4::after,
