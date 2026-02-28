@@ -56,7 +56,9 @@
       const text = safeText(value);
       if (!text) return "";
       const match = text.match(/(\d{14})/);
-      return match ? safeText(match[1]) : "";
+      if (match) return safeText(match[1]);
+      const fallback = text.replace(/\s+/g, "");
+      return fallback || "";
     };
 
     const buildDisplayText = (info) => {

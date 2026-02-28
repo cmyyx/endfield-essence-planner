@@ -3,17 +3,16 @@
 
   modules.initReforging = function initReforging(ctx, state) {
     const { ref, computed, onMounted, onBeforeUnmount, watch } = ctx;
-    const coreSource = typeof gears !== "undefined" && Array.isArray(gears) ? gears : [];
-    const source = Array.isArray(window.GEARS) ? window.GEARS : coreSource;
+    const source = Array.isArray(window.GEARS) ? window.GEARS : [];
     const partRank = new Map([
       ["护甲", 0],
       ["护手", 1],
       ["配件", 2],
     ]);
     const slotMeta = [
-      { key: "sub1", label: "副属性1", sourceKey: "s1" },
-      { key: "sub2", label: "副属性2", sourceKey: "s2" },
-      { key: "special", label: "特殊效果", sourceKey: "s3" },
+      { key: "sub1", label: "副属性1" },
+      { key: "sub2", label: "副属性2" },
+      { key: "special", label: "特殊效果" },
     ];
     const slotLabelMap = slotMeta.reduce((acc, item) => {
       acc[item.key] = item.label;
@@ -46,37 +45,24 @@
       };
     };
 
-    const formatMainAttr = (defenceText) => {
-      const valueText = String(defenceText || "").trim();
-      if (!valueText) {
-        return {
-          display: "防御力",
-          key: "防御力",
-          value: null,
-          unit: "",
-        };
-      }
-      return {
-        display: `防御力${valueText}`,
-        key: "防御力",
-        value: null,
-        unit: "",
-      };
-    };
+    const normalizeGearAttrText = (value) =>
+      String(value || "")
+        .replace(/\s+/g, " ")
+        .replace(/\s*([+＋])\s*/g, "+")
+        .replace(/\s*%\s*/g, "%")
+        .trim();
 
     const normalizeGear = (gear) => {
       const setName = String((gear && gear.set) || "").trim();
       const part = String((gear && gear.type) || "").trim();
-      const sub1 = parseAttr(gear && gear.s1);
-      const sub2 = parseAttr(gear && gear.s2);
-      const special = parseAttr(gear && gear.s3);
-      const main = formatMainAttr(gear && gear.defence);
+      const sub1 = parseAttr(normalizeGearAttrText(gear && gear.sub1));
+      const sub2 = parseAttr(normalizeGearAttrText(gear && gear.sub2));
+      const special = parseAttr(normalizeGearAttrText(gear && gear.special));
       const searchText = normalizeText(
         [
           gear && gear.name,
           setName,
           part,
-          main.display,
           sub1 ? sub1.display : "",
           sub2 ? sub2.display : "",
           special ? special.display : "",
@@ -87,10 +73,9 @@
       );
       return {
         ...gear,
-        rarity: 5,
+        rarity: Number(gear && gear.rarity) || 5,
         setName,
         part,
-        main,
         sub1,
         sub2,
         special,
@@ -273,11 +258,14 @@
 
     const getCandidateBestMatch = (gear, targetAttr) => {
       if (!gear || !targetAttr || !targetAttr.key || !Number.isFinite(targetAttr.value)) return null;
+      const targetUnit = String(targetAttr.unit == null ? "" : targetAttr.unit).trim();
       let best = null;
       for (let i = 0; i < refinableSlotKeys.length; i += 1) {
         const slotKey = refinableSlotKeys[i];
         const slotAttr = gear[slotKey];
         if (!slotAttr || slotAttr.key !== targetAttr.key) continue;
+        const slotUnit = String(slotAttr.unit == null ? "" : slotAttr.unit).trim();
+        if (slotUnit !== targetUnit) continue;
         if (!Number.isFinite(slotAttr.value) || slotAttr.value <= targetAttr.value) continue;
         if (!best || slotAttr.value > best.matchAttr.value) {
           best = {

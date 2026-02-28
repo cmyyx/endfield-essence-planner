@@ -100,8 +100,8 @@
   content: "";
   width: 9px;
   height: 9px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentcolor;
+  border-bottom: 2px solid currentcolor;
   transform: rotate(135deg);
   transition: transform 0.22s ease;
 }
@@ -185,7 +185,7 @@
   text-align: center;
   font-size: clamp(11px, 0.82vw, 12px);
   line-height: 1.12;
-  color: currentColor;
+  color: currentcolor;
   opacity: 0.62;
   font-weight: 600;
   transform: translateY(-3px);
@@ -391,7 +391,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow-wrap: anywhere;
-    word-break: break-word;
   }
 
   .reforging-selected-card .reforging-name {
@@ -447,6 +446,7 @@
   .reforging-gear-item .reforging-name,
   .reforging-candidate-item .reforging-name {
     --reforging-compact-name-size: clamp(10px, 9.5cqw, 12.8px);
+
     font-size: var(--reforging-compact-name-size);
     font-weight: 600;
     white-space: normal;
@@ -454,7 +454,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow-wrap: anywhere;
-    word-break: break-word;
     text-overflow: clip;
     line-height: 1.15;
     transform: translateY(0);
