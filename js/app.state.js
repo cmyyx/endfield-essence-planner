@@ -64,7 +64,7 @@
     state.currentView = ref("planner");
     state.mobilePanel = ref("weapons");
     state.matchMobilePanel = ref("source");
-    state.reforgingMobilePanel = ref("gears");
+    state.gearRefiningMobilePanel = ref("gears");
     state.showWeaponAttrs = ref(false);
     state.showAttrHint = ref(false);
     state.showFilterPanel = ref(true);

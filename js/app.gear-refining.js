@@ -1,7 +1,7 @@
-(function () {
+﻿(function () {
   const modules = (window.AppModules = window.AppModules || {});
 
-  modules.initReforging = function initReforging(ctx, state) {
+  modules.initGearRefining = function initGearRefining(ctx, state) {
     const { ref, computed, onMounted, onBeforeUnmount, watch } = ctx;
     const source = Array.isArray(window.GEARS) ? window.GEARS : [];
     const partRank = new Map([
@@ -95,21 +95,21 @@
     const gearMap = new Map(gearList.map((gear) => [gear.name, gear]));
     const refinableSlotKeys = slotMeta.map((item) => item.key);
     const imageErrorNameSet = ref(new Set());
-    const reforgingQuery = ref("");
-    const reforgingCollapsedSetMap = ref({});
-    const reforgingExpandedRecommendationMap = ref({});
-    const isReforgingCompact = ref(false);
-    const reforgingMobileListScrollY = ref(0);
+    const gearRefiningQuery = ref("");
+    const gearRefiningCollapsedSetMap = ref({});
+    const gearRefiningExpandedRecommendationMap = ref({});
+    const isGearRefiningCompact = ref(false);
+    const gearRefiningMobileListScrollY = ref(0);
     const recommendationRowCapacity = ref(1);
-    const selectedReforgingGearName = ref(gearList.length ? gearList[0].name : "");
+    const selectedGearRefiningGearName = ref(gearList.length ? gearList[0].name : "");
 
-    const hasReforgingGearImage = (gear) =>
+    const hasGearRefiningGearImage = (gear) =>
       Boolean(gear && gear.name) && !imageErrorNameSet.value.has(gear.name);
-    const reforgingGearImageSrc = (gear) =>
+    const gearRefiningGearImageSrc = (gear) =>
       gear && gear.name
         ? encodeURI(`./image/gear/5/${gear.name}.png`)
         : "";
-    const handleReforgingGearImageError = (event, gear) => {
+    const handleGearRefiningGearImageError = (event, gear) => {
       if (!gear || !gear.name) return;
       const next = new Set(imageErrorNameSet.value);
       next.add(gear.name);
@@ -119,9 +119,9 @@
       }
     };
 
-    const selectedReforgingGear = computed(() => {
-      if (!selectedReforgingGearName.value) return null;
-      return gearMap.get(selectedReforgingGearName.value) || null;
+    const selectedGearRefiningGear = computed(() => {
+      if (!selectedGearRefiningGearName.value) return null;
+      return gearMap.get(selectedGearRefiningGearName.value) || null;
     });
 
     const detectCompactLayout = () => {
@@ -133,13 +133,13 @@
     };
     const syncCompactLayout = () => {
       const compact = detectCompactLayout();
-      isReforgingCompact.value = compact;
-      if (state.reforgingMobilePanel && !state.reforgingMobilePanel.value) {
-        state.reforgingMobilePanel.value = "gears";
+      isGearRefiningCompact.value = compact;
+      if (state.gearRefiningMobilePanel && !state.gearRefiningMobilePanel.value) {
+        state.gearRefiningMobilePanel.value = "gears";
       }
     };
     const fallbackRecommendationRowCapacity = () => {
-      if (typeof window === "undefined") return isReforgingCompact.value ? 2 : 4;
+      if (typeof window === "undefined") return isGearRefiningCompact.value ? 2 : 4;
       const viewportWidth = Number(window.innerWidth) || 0;
       if (viewportWidth <= 1024) return 2;
       if (viewportWidth <= 1280) return 3;
@@ -148,7 +148,7 @@
     const syncRecommendationRowCapacity = () => {
       let next = fallbackRecommendationRowCapacity();
       if (typeof window !== "undefined" && typeof document !== "undefined") {
-        const candidateList = document.querySelector(".reforging-candidate-list");
+        const candidateList = document.querySelector(".gear-refining-candidate-list");
         if (candidateList) {
           const gridText = window.getComputedStyle(candidateList).gridTemplateColumns || "";
           const columns = gridText
@@ -169,58 +169,58 @@
       }
       window.requestAnimationFrame(syncRecommendationRowCapacity);
     };
-    const syncReforgingLayout = () => {
+    const syncGearRefiningLayout = () => {
       syncCompactLayout();
       syncRecommendationRowCapacity();
     };
 
     onMounted(() => {
-      syncReforgingLayout();
+      syncGearRefiningLayout();
       if (typeof window !== "undefined") {
-        window.addEventListener("resize", syncReforgingLayout);
+        window.addEventListener("resize", syncGearRefiningLayout);
       }
     });
     onBeforeUnmount(() => {
       if (typeof window !== "undefined") {
-        window.removeEventListener("resize", syncReforgingLayout);
+        window.removeEventListener("resize", syncGearRefiningLayout);
       }
     });
 
-    const isReforgingSetCollapsed = (setName) =>
-      Boolean((reforgingCollapsedSetMap.value || {})[setName || ""]);
+    const isGearRefiningSetCollapsed = (setName) =>
+      Boolean((gearRefiningCollapsedSetMap.value || {})[setName || ""]);
 
-    const toggleReforgingSetCollapsed = (setName) => {
+    const toggleGearRefiningSetCollapsed = (setName) => {
       const key = String(setName || "");
       if (!key) return;
-      const next = { ...(reforgingCollapsedSetMap.value || {}) };
+      const next = { ...(gearRefiningCollapsedSetMap.value || {}) };
       next[key] = !Boolean(next[key]);
-      reforgingCollapsedSetMap.value = next;
+      gearRefiningCollapsedSetMap.value = next;
     };
 
-    const selectReforgingGear = (gear) => {
+    const selectGearRefiningGear = (gear) => {
       if (!gear || !gear.name || !gearMap.has(gear.name)) return;
-      if (selectedReforgingGearName.value === gear.name) {
-        selectedReforgingGearName.value = "";
+      if (selectedGearRefiningGearName.value === gear.name) {
+        selectedGearRefiningGearName.value = "";
         return;
       }
-      selectedReforgingGearName.value = gear.name;
-      if (isReforgingCompact.value) setReforgingMobilePanel("recommend");
+      selectedGearRefiningGearName.value = gear.name;
+      if (isGearRefiningCompact.value) setGearRefiningMobilePanel("recommend");
     };
 
-    const setReforgingMobilePanel = (panel, options) => {
+    const setGearRefiningMobilePanel = (panel, options) => {
       const target = panel === "recommend" ? "recommend" : "gears";
-      if (!state.reforgingMobilePanel) return;
-      const panelRef = state.reforgingMobilePanel;
+      if (!state.gearRefiningMobilePanel) return;
+      const panelRef = state.gearRefiningMobilePanel;
       const current = panelRef.value === "recommend" ? "recommend" : "gears";
       if (current === target) return;
-      if (!isReforgingCompact.value) {
+      if (!isGearRefiningCompact.value) {
         panelRef.value = target;
         return;
       }
       const shouldRestoreScroll = !(options && options.skipRestore === true);
       if (target === "recommend") {
         if (typeof window !== "undefined") {
-          reforgingMobileListScrollY.value = window.scrollY || window.pageYOffset || 0;
+          gearRefiningMobileListScrollY.value = window.scrollY || window.pageYOffset || 0;
         }
         panelRef.value = "recommend";
         scheduleRecommendationRowCapacitySync();
@@ -228,23 +228,23 @@
       }
       panelRef.value = "gears";
       if (shouldRestoreScroll && typeof window !== "undefined") {
-        const top = Math.max(0, Number(reforgingMobileListScrollY.value) || 0);
+        const top = Math.max(0, Number(gearRefiningMobileListScrollY.value) || 0);
         window.requestAnimationFrame(() => {
           window.scrollTo({ top, behavior: "auto" });
         });
       }
     };
 
-    const reforgingFilteredGears = computed(() => {
-      const query = normalizeText(reforgingQuery.value);
+    const gearRefiningFilteredGears = computed(() => {
+      const query = normalizeText(gearRefiningQuery.value);
       if (!query) return gearList;
       return gearList.filter((gear) => gear.searchText.includes(query));
     });
 
-    const reforgingGroupedSets = computed(() => {
+    const gearRefiningGroupedSets = computed(() => {
       const groups = [];
       const map = new Map();
-      reforgingFilteredGears.value.forEach((gear) => {
+      gearRefiningFilteredGears.value.forEach((gear) => {
         const key = gear.setName || "未分类";
         if (!map.has(key)) {
           const bucket = { setName: key, gears: [] };
@@ -361,21 +361,21 @@
       };
     };
 
-    const reforgingRecommendations = computed(() => {
-      const selected = selectedReforgingGear.value;
+    const gearRefiningRecommendations = computed(() => {
+      const selected = selectedGearRefiningGear.value;
       if (!selected) return [];
       return slotMeta.map((slotInfo) => buildSlotRecommendation(selected, slotInfo));
     });
 
-    const recommendationExpandKey = (slotKey) => `${selectedReforgingGearName.value || ""}::${slotKey || ""}`;
+    const recommendationExpandKey = (slotKey) => `${selectedGearRefiningGearName.value || ""}::${slotKey || ""}`;
     const isRecommendationExpanded = (slotKey) =>
-      Boolean((reforgingExpandedRecommendationMap.value || {})[recommendationExpandKey(slotKey)]);
+      Boolean((gearRefiningExpandedRecommendationMap.value || {})[recommendationExpandKey(slotKey)]);
     const toggleRecommendationExpanded = (slotKey) => {
       const key = recommendationExpandKey(slotKey);
       if (!key) return;
-      const next = { ...(reforgingExpandedRecommendationMap.value || {}) };
+      const next = { ...(gearRefiningExpandedRecommendationMap.value || {}) };
       next[key] = !Boolean(next[key]);
-      reforgingExpandedRecommendationMap.value = next;
+      gearRefiningExpandedRecommendationMap.value = next;
     };
     const hasMoreRecommendationCandidates = (recommendation) => {
       if (!recommendation || !Array.isArray(recommendation.candidates)) return false;
@@ -390,7 +390,7 @@
 
     if (typeof watch === "function") {
       watch(
-        [selectedReforgingGearName, reforgingRecommendations],
+        [selectedGearRefiningGearName, gearRefiningRecommendations],
         () => {
           scheduleRecommendationRowCapacitySync();
         },
@@ -398,26 +398,26 @@
       );
     }
 
-    const reforgingGearCount = computed(() => gearList.length);
+    const gearRefiningGearCount = computed(() => gearList.length);
 
-    state.reforgingQuery = reforgingQuery;
-    state.reforgingGearCount = reforgingGearCount;
-    state.isReforgingCompact = isReforgingCompact;
-    state.setReforgingMobilePanel = setReforgingMobilePanel;
-    state.reforgingCollapsedSetMap = reforgingCollapsedSetMap;
-    state.isReforgingSetCollapsed = isReforgingSetCollapsed;
-    state.toggleReforgingSetCollapsed = toggleReforgingSetCollapsed;
+    state.gearRefiningQuery = gearRefiningQuery;
+    state.gearRefiningGearCount = gearRefiningGearCount;
+    state.isGearRefiningCompact = isGearRefiningCompact;
+    state.setGearRefiningMobilePanel = setGearRefiningMobilePanel;
+    state.gearRefiningCollapsedSetMap = gearRefiningCollapsedSetMap;
+    state.isGearRefiningSetCollapsed = isGearRefiningSetCollapsed;
+    state.toggleGearRefiningSetCollapsed = toggleGearRefiningSetCollapsed;
     state.isRecommendationExpanded = isRecommendationExpanded;
     state.toggleRecommendationExpanded = toggleRecommendationExpanded;
     state.hasMoreRecommendationCandidates = hasMoreRecommendationCandidates;
     state.visibleRecommendationCandidates = visibleRecommendationCandidates;
-    state.reforgingGroupedSets = reforgingGroupedSets;
-    state.selectedReforgingGearName = selectedReforgingGearName;
-    state.selectedReforgingGear = selectedReforgingGear;
-    state.selectReforgingGear = selectReforgingGear;
-    state.reforgingRecommendations = reforgingRecommendations;
-    state.reforgingGearImageSrc = reforgingGearImageSrc;
-    state.hasReforgingGearImage = hasReforgingGearImage;
-    state.handleReforgingGearImageError = handleReforgingGearImageError;
+    state.gearRefiningGroupedSets = gearRefiningGroupedSets;
+    state.selectedGearRefiningGearName = selectedGearRefiningGearName;
+    state.selectedGearRefiningGear = selectedGearRefiningGear;
+    state.selectGearRefiningGear = selectGearRefiningGear;
+    state.gearRefiningRecommendations = gearRefiningRecommendations;
+    state.gearRefiningGearImageSrc = gearRefiningGearImageSrc;
+    state.hasGearRefiningGearImage = hasGearRefiningGearImage;
+    state.handleGearRefiningGearImageError = handleGearRefiningGearImageError;
   };
 })();

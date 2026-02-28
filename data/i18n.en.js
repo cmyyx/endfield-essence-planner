@@ -149,7 +149,7 @@ window.I18N["en"] = {
     "主导航": "Main Navigation",
     "基质规划": "Essence Planner",
     "角色攻略": "Character Guide",
-    "装备精锻": "Gear Reforging",
+    "装备精锻": "Gear Refining",
     "隐藏属性/拥有/备注": "Hide attributes / ownership / notes",
     "显示属性/拥有/备注": "Show attributes / ownership / notes",
     "隐藏属性": "Hide attributes",

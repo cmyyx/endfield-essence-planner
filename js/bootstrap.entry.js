@@ -9,7 +9,7 @@
     "./css/styles.filters.css",
     "./css/styles.weapons.css",
     "./css/styles.recommendations.css",
-    "./css/styles.reforging.css",
+    "./css/styles.gear-refining.css",
     "./css/styles.theme.modes.css",
   ];
   var startupScripts = [

@@ -23,7 +23,7 @@
     "./js/app.update.js",
     "./js/app.media.js",
     "./js/app.strategy.js",
-    "./js/app.reforging.js",
+    "./js/app.gear-refining.js",
     "./js/templates.plan-config.js",
     "./js/templates.main.01.js",
     "./js/templates.main.02.js",

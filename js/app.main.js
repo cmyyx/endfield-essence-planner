@@ -261,7 +261,7 @@
       init("initUpdate");
       init("initMedia");
       init("initStrategy");
-      init("initReforging");
+      init("initGearRefining");
 
       const weaponCatalog =
         typeof window !== "undefined" && Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
@@ -296,8 +296,8 @@
         if (view === "strategy") {
           return { view: "strategy", characterId, weaponNames, hasWeaponParam };
         }
-        if (view === "reforging") {
-          return { view: "reforging", weaponNames, hasWeaponParam };
+        if (view === "gear-refining") {
+          return { view: "gear-refining", weaponNames, hasWeaponParam };
         }
         if (view === "match") {
           return { view: "match" };
@@ -349,13 +349,21 @@
           if (id) return `/strategy/${encodeURIComponent(id)}`;
           return "/strategy";
         }
-        if (view === "reforging") {
-          return "/reforging";
+        if (view === "gear-refining") {
+          return "/gear-refining";
         }
         if (view === "match") {
           return "/match";
         }
         return "/planner";
+      };
+
+      const legacyScrollbarHiddenViews = new Set(["planner", "match", "strategy", "gear-refining"]);
+      const syncLegacyScrollbarMode = () => {
+        if (typeof document === "undefined" || !document.documentElement) return;
+        const root = document.documentElement;
+        const currentView = String(state.currentView.value || "planner");
+        root.classList.toggle("legacy-scrollbar-hidden", legacyScrollbarHiddenViews.has(currentView));
       };
 
       const buildAnalyticsUrl = () => {
@@ -418,17 +426,25 @@
       onMounted(() => {
         const route = parseRoute();
         applyRoute(route);
+        syncLegacyScrollbarMode();
         syncQuery(true);
         trackPageview();
         if (typeof window !== "undefined") {
           window.addEventListener("popstate", () => {
             applyRoute(parseRoute());
+            syncLegacyScrollbarMode();
             trackPageview();
           });
         }
       });
 
+      onBeforeUnmount(() => {
+        if (typeof document === "undefined" || !document.documentElement) return;
+        document.documentElement.classList.remove("legacy-scrollbar-hidden");
+      });
+
       watch([state.currentView, state.selectedCharacterId], () => {
+        syncLegacyScrollbarMode();
         syncQuery(false);
         trackPageview();
       });
@@ -578,25 +594,25 @@
         matchSourceWeapon: state.matchSourceWeapon,
         matchResults: state.matchResults,
         selectMatchSource: state.selectMatchSource,
-        reforgingMobilePanel: state.reforgingMobilePanel,
-        isReforgingCompact: state.isReforgingCompact,
-        setReforgingMobilePanel: state.setReforgingMobilePanel,
-        reforgingQuery: state.reforgingQuery,
-        reforgingGearCount: state.reforgingGearCount,
-        isReforgingSetCollapsed: state.isReforgingSetCollapsed,
-        toggleReforgingSetCollapsed: state.toggleReforgingSetCollapsed,
+        gearRefiningMobilePanel: state.gearRefiningMobilePanel,
+        isGearRefiningCompact: state.isGearRefiningCompact,
+        setGearRefiningMobilePanel: state.setGearRefiningMobilePanel,
+        gearRefiningQuery: state.gearRefiningQuery,
+        gearRefiningGearCount: state.gearRefiningGearCount,
+        isGearRefiningSetCollapsed: state.isGearRefiningSetCollapsed,
+        toggleGearRefiningSetCollapsed: state.toggleGearRefiningSetCollapsed,
         isRecommendationExpanded: state.isRecommendationExpanded,
         toggleRecommendationExpanded: state.toggleRecommendationExpanded,
         hasMoreRecommendationCandidates: state.hasMoreRecommendationCandidates,
         visibleRecommendationCandidates: state.visibleRecommendationCandidates,
-        reforgingGroupedSets: state.reforgingGroupedSets,
-        selectedReforgingGearName: state.selectedReforgingGearName,
-        selectedReforgingGear: state.selectedReforgingGear,
-        selectReforgingGear: state.selectReforgingGear,
-        reforgingRecommendations: state.reforgingRecommendations,
-        reforgingGearImageSrc: state.reforgingGearImageSrc,
-        hasReforgingGearImage: state.hasReforgingGearImage,
-        handleReforgingGearImageError: state.handleReforgingGearImageError,
+        gearRefiningGroupedSets: state.gearRefiningGroupedSets,
+        selectedGearRefiningGearName: state.selectedGearRefiningGearName,
+        selectedGearRefiningGear: state.selectedGearRefiningGear,
+        selectGearRefiningGear: state.selectGearRefiningGear,
+        gearRefiningRecommendations: state.gearRefiningRecommendations,
+        gearRefiningGearImageSrc: state.gearRefiningGearImageSrc,
+        hasGearRefiningGearImage: state.hasGearRefiningGearImage,
+        handleGearRefiningGearImageError: state.handleGearRefiningGearImageError,
         hasImage: state.hasImage,
         weaponImageSrc: state.weaponImageSrc,
         weaponCharacters: state.weaponCharacters,

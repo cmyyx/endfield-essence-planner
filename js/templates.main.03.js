@@ -349,86 +349,86 @@
               </section>
             </div>
           </div>
-          <div v-else key="reforging" class="view-shell planner-shell reforging-shell">
+          <div v-else key="gear-refining" class="view-shell planner-shell gear-refining-shell">
             <div class="mobile-tabs">
               <button
                 class="mobile-tab"
                 type="button"
-                :class="{ active: reforgingMobilePanel === 'gears' }"
-                @click="setReforgingMobilePanel('gears')"
+                :class="{ active: gearRefiningMobilePanel === 'gears' }"
+                @click="setGearRefiningMobilePanel('gears')"
               >
-                {{ t("装备列表") }} <span class="count">{{ reforgingGearCount }}</span>
+                {{ t("装备列表") }} <span class="count">{{ gearRefiningGearCount }}</span>
               </button>
               <button
                 class="mobile-tab"
                 type="button"
-                :class="{ active: reforgingMobilePanel === 'recommend' }"
-                @click="setReforgingMobilePanel('recommend')"
+                :class="{ active: gearRefiningMobilePanel === 'recommend' }"
+                @click="setGearRefiningMobilePanel('recommend')"
               >
                 {{ t("精锻推荐") }}
-                <span class="count">{{ selectedReforgingGear ? reforgingRecommendations.length : 0 }}</span>
+                <span class="count">{{ selectedGearRefiningGear ? gearRefiningRecommendations.length : 0 }}</span>
               </button>
             </div>
             <section
-              class="panel reforging-panel reforging-panel-left"
-              :class="{ 'panel-hidden': reforgingMobilePanel !== 'gears' }"
+              class="panel gear-refining-panel gear-refining-panel-left"
+              :class="{ 'panel-hidden': gearRefiningMobilePanel !== 'gears' }"
             >
               <div class="panel-title">
                 <h2>{{ t("装备列表") }}</h2>
               </div>
               <div class="search-box">
                 <span>🔍</span>
-                <input v-model="reforgingQuery" :placeholder="t('搜索装备 / 套装 / 属性...')" />
+                <input v-model="gearRefiningQuery" :placeholder="t('搜索装备 / 套装 / 属性...')" />
               </div>
-              <div v-if="reforgingGroupedSets.length" class="reforging-set-list">
+              <div v-if="gearRefiningGroupedSets.length" class="gear-refining-set-list">
                 <section
-                  v-for="setGroup in reforgingGroupedSets"
+                  v-for="setGroup in gearRefiningGroupedSets"
                   :key="setGroup.setName"
-                  class="reforging-set-group"
+                  class="gear-refining-set-group"
                 >
                   <button
                     type="button"
-                    class="reforging-set-header"
-                    @click="toggleReforgingSetCollapsed(setGroup.setName)"
+                    class="gear-refining-set-header"
+                    @click="toggleGearRefiningSetCollapsed(setGroup.setName)"
                   >
-                    <div class="reforging-set-title">
+                    <div class="gear-refining-set-title">
                       <h3>{{ setGroup.setName }}</h3>
-                      <span class="reforging-set-count">{{ setGroup.gears.length }}</span>
+                      <span class="gear-refining-set-count">{{ setGroup.gears.length }}</span>
                     </div>
                     <span
-                      class="reforging-set-chevron"
-                      :class="{ 'is-open': !isReforgingSetCollapsed(setGroup.setName) }"
+                      class="gear-refining-set-chevron"
+                      :class="{ 'is-open': !isGearRefiningSetCollapsed(setGroup.setName) }"
                       aria-hidden="true"
                     >
                       &gt;
                     </span>
                   </button>
-                  <transition name="reforging-set-collapse">
-                    <div v-show="!isReforgingSetCollapsed(setGroup.setName)" class="weapon-list reforging-gear-list">
+                  <transition name="gear-refining-set-collapse">
+                    <div v-show="!isGearRefiningSetCollapsed(setGroup.setName)" class="weapon-list gear-refining-gear-list">
                       <button
                         v-for="gear in setGroup.gears"
                         :key="gear.name"
                         type="button"
-                        class="weapon-item reforging-gear-item rarity-5"
-                        :class="{ 'is-selected': selectedReforgingGear && selectedReforgingGear.name === gear.name }"
-                        @click="selectReforgingGear(gear)"
+                        class="weapon-item gear-refining-gear-item rarity-5"
+                        :class="{ 'is-selected': selectedGearRefiningGear && selectedGearRefiningGear.name === gear.name }"
+                        @click="selectGearRefiningGear(gear)"
                       >
                         <div class="weapon-art">
                           <img
-                            v-if="hasReforgingGearImage(gear)"
+                            v-if="hasGearRefiningGearImage(gear)"
                             class="weapon-figure"
-                            :src="reforgingGearImageSrc(gear)"
+                            :src="gearRefiningGearImageSrc(gear)"
                             :alt="gear.name"
                             loading="lazy"
                             decoding="async"
-                            @error="handleReforgingGearImageError($event, gear)"
+                            @error="handleGearRefiningGearImageError($event, gear)"
                           />
                           <span v-else class="weapon-fallback-large">5★</span>
                         </div>
                         <div class="weapon-band"></div>
                         <div class="weapon-name">
-                          <div class="weapon-title reforging-name">{{ gear.name }}</div>
-                          <div class="reforging-gear-meta">{{ gear.part }}</div>
+                          <div class="weapon-title gear-refining-name">{{ gear.name }}</div>
+                          <div class="gear-refining-gear-meta">{{ gear.part }}</div>
                         </div>
                       </button>
                     </div>
@@ -440,108 +440,108 @@
               </div>
             </section>
             <section
-              class="panel reforging-panel reforging-panel-right"
-              :class="{ 'panel-hidden': reforgingMobilePanel !== 'recommend' }"
+              class="panel gear-refining-panel gear-refining-panel-right"
+              :class="{ 'panel-hidden': gearRefiningMobilePanel !== 'recommend' }"
             >
               <div class="panel-title">
                 <h2>{{ t("精锻推荐") }}</h2>
               </div>
-              <div v-if="!selectedReforgingGear" class="empty-state match-empty">
+              <div v-if="!selectedGearRefiningGear" class="empty-state match-empty">
                 <h2>{{ t("请选择一件装备") }}</h2>
               </div>
-              <div v-else class="reforging-detail">
-                <div class="reforging-selected">
-                  <div class="weapon-item reforging-selected-card rarity-5">
+              <div v-else class="gear-refining-detail">
+                <div class="gear-refining-selected">
+                  <div class="weapon-item gear-refining-selected-card rarity-5">
                     <div class="weapon-art">
                       <img
-                        v-if="hasReforgingGearImage(selectedReforgingGear)"
+                        v-if="hasGearRefiningGearImage(selectedGearRefiningGear)"
                         class="weapon-figure"
-                        :src="reforgingGearImageSrc(selectedReforgingGear)"
-                        :alt="selectedReforgingGear.name"
+                        :src="gearRefiningGearImageSrc(selectedGearRefiningGear)"
+                        :alt="selectedGearRefiningGear.name"
                         loading="lazy"
                         decoding="async"
-                        @error="handleReforgingGearImageError($event, selectedReforgingGear)"
+                        @error="handleGearRefiningGearImageError($event, selectedGearRefiningGear)"
                       />
                       <span v-else class="weapon-fallback-large">5★</span>
                     </div>
                     <div class="weapon-band"></div>
                     <div class="weapon-name">
-                      <div class="weapon-title reforging-name">{{ selectedReforgingGear.name }}</div>
-                      <div class="reforging-gear-meta">{{ selectedReforgingGear.part }}</div>
+                      <div class="weapon-title gear-refining-name">{{ selectedGearRefiningGear.name }}</div>
+                      <div class="gear-refining-gear-meta">{{ selectedGearRefiningGear.part }}</div>
                     </div>
                   </div>
-                  <div class="reforging-attrs">
-                    <div class="reforging-attr-row">
-                      <span class="reforging-attr-label">{{ t("副属性1") }}</span>
-                      <span class="reforging-attr-value">
-                        {{ selectedReforgingGear.sub1 ? selectedReforgingGear.sub1.display : t("无") }}
+                  <div class="gear-refining-attrs">
+                    <div class="gear-refining-attr-row">
+                      <span class="gear-refining-attr-label">{{ t("副属性1") }}</span>
+                      <span class="gear-refining-attr-value">
+                        {{ selectedGearRefiningGear.sub1 ? selectedGearRefiningGear.sub1.display : t("无") }}
                       </span>
                     </div>
-                    <div class="reforging-attr-row">
-                      <span class="reforging-attr-label">{{ t("副属性2") }}</span>
-                      <span class="reforging-attr-value">
-                        {{ selectedReforgingGear.sub2 ? selectedReforgingGear.sub2.display : t("无") }}
+                    <div class="gear-refining-attr-row">
+                      <span class="gear-refining-attr-label">{{ t("副属性2") }}</span>
+                      <span class="gear-refining-attr-value">
+                        {{ selectedGearRefiningGear.sub2 ? selectedGearRefiningGear.sub2.display : t("无") }}
                       </span>
                     </div>
-                    <div class="reforging-attr-row">
-                      <span class="reforging-attr-label">{{ t("特殊效果") }}</span>
-                      <span class="reforging-attr-value">
-                        {{ selectedReforgingGear.special ? selectedReforgingGear.special.display : t("无") }}
+                    <div class="gear-refining-attr-row">
+                      <span class="gear-refining-attr-label">{{ t("特殊效果") }}</span>
+                      <span class="gear-refining-attr-value">
+                        {{ selectedGearRefiningGear.special ? selectedGearRefiningGear.special.display : t("无") }}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div class="reforging-recommend-list">
+                <div class="gear-refining-recommend-list">
                   <article
-                    v-for="recommendation in reforgingRecommendations"
+                    v-for="recommendation in gearRefiningRecommendations"
                     :key="recommendation.slotKey"
-                    class="reforging-recommend-card"
+                    class="gear-refining-recommend-card"
                   >
-                    <header class="reforging-recommend-head">
-                      <div class="reforging-recommend-title">{{ t(recommendation.slotLabel) }}</div>
-                      <div v-if="recommendation.targetAttr" class="reforging-recommend-target">
+                    <header class="gear-refining-recommend-head">
+                      <div class="gear-refining-recommend-title">{{ t(recommendation.slotLabel) }}</div>
+                      <div v-if="recommendation.targetAttr" class="gear-refining-recommend-target">
                         {{ recommendation.targetAttr.display }}
                       </div>
                     </header>
-                    <div v-if="!recommendation.targetAttr" class="reforging-recommend-empty">
+                    <div v-if="!recommendation.targetAttr" class="gear-refining-recommend-empty">
                       {{ t("该装备没有这一条属性") }}
                     </div>
                     <template v-else>
-                      <p class="reforging-recommend-tip" v-if="recommendation.recommendSelf">
+                      <p class="gear-refining-recommend-tip" v-if="recommendation.recommendSelf">
                         {{ t("没有更高属性，推荐使用自身进行精锻") }}
                       </p>
-                      <p class="reforging-recommend-tip" v-else>
-                        {{ t("推荐同部位中可提供更高数值的装备") }}（<span class="reforging-tip-value">{{ recommendation.topValueDisplay }}</span>）
+                      <p class="gear-refining-recommend-tip" v-else>
+                        {{ t("推荐同部位中可提供更高数值的装备") }}（<span class="gear-refining-tip-value">{{ recommendation.topValueDisplay }}</span>）
                       </p>
-                      <div class="weapon-list reforging-candidate-list">
+                      <div class="weapon-list gear-refining-candidate-list">
                         <div
                           v-for="candidate in visibleRecommendationCandidates(recommendation)"
                           :key="candidate.gear.name"
-                          class="weapon-item reforging-candidate-item rarity-5"
+                          class="weapon-item gear-refining-candidate-item rarity-5"
                         >
                           <div class="weapon-art">
                             <img
-                              v-if="hasReforgingGearImage(candidate.gear)"
+                              v-if="hasGearRefiningGearImage(candidate.gear)"
                               class="weapon-figure"
-                              :src="reforgingGearImageSrc(candidate.gear)"
+                              :src="gearRefiningGearImageSrc(candidate.gear)"
                               :alt="candidate.gear.name"
                               loading="lazy"
                               decoding="async"
-                              @error="handleReforgingGearImageError($event, candidate.gear)"
+                              @error="handleGearRefiningGearImageError($event, candidate.gear)"
                             />
                             <span v-else class="weapon-fallback-large">5★</span>
                           </div>
                           <div class="weapon-band"></div>
                           <div class="weapon-name">
-                            <div class="weapon-title reforging-name">{{ candidate.gear.name }}</div>
-                            <div class="reforging-gear-meta">{{ candidate.gear.part }}</div>
+                            <div class="weapon-title gear-refining-name">{{ candidate.gear.name }}</div>
+                            <div class="gear-refining-gear-meta">{{ candidate.gear.part }}</div>
                           </div>
                         </div>
                       </div>
                       <button
                         v-if="hasMoreRecommendationCandidates(recommendation)"
                         type="button"
-                        class="ghost-button reforging-candidate-toggle"
+                        class="ghost-button gear-refining-candidate-toggle"
                         @click="toggleRecommendationExpanded(recommendation.slotKey)"
                       >
                         {{
