@@ -527,6 +527,141 @@
         { deep: true }
       );
 
+      const parseExceptionTime = (value) => {
+        const time = Date.parse(String(value || ""));
+        return Number.isFinite(time) ? time : 0;
+      };
+      const toExceptionKey = (entry, kind) => {
+        if (!entry || typeof entry !== "object") return `${kind}:unknown`;
+        if (entry.id) return `${kind}:${entry.id}`;
+        return [
+          kind,
+          entry.occurredAt || "",
+          entry.operation || "",
+          entry.key || "",
+          entry.errorName || "",
+          entry.errorMessage || "",
+        ].join("|");
+      };
+      const unifiedExceptionCurrent = computed(() => {
+        const storageShown = Boolean(state.showStorageErrorModal && state.showStorageErrorModal.value);
+        const runtimeShown = Boolean(state.showRuntimeWarningModal && state.showRuntimeWarningModal.value);
+        const storageCurrent = state.storageErrorCurrent ? state.storageErrorCurrent.value : null;
+        const runtimeCurrent = state.runtimeWarningCurrent ? state.runtimeWarningCurrent.value : null;
+        if (!storageShown && !runtimeShown) return null;
+        if (storageShown && !runtimeShown) {
+          return storageCurrent ? { ...storageCurrent, __kind: "storage" } : null;
+        }
+        if (!storageShown && runtimeShown) {
+          return runtimeCurrent ? { ...runtimeCurrent, __kind: "runtime" } : null;
+        }
+        const storageTime = parseExceptionTime(storageCurrent && storageCurrent.occurredAt);
+        const runtimeTime = parseExceptionTime(runtimeCurrent && runtimeCurrent.occurredAt);
+        if (runtimeTime >= storageTime) {
+          return runtimeCurrent
+            ? { ...runtimeCurrent, __kind: "runtime" }
+            : storageCurrent
+            ? { ...storageCurrent, __kind: "storage" }
+            : null;
+        }
+        return storageCurrent
+          ? { ...storageCurrent, __kind: "storage" }
+          : runtimeCurrent
+          ? { ...runtimeCurrent, __kind: "runtime" }
+          : null;
+      });
+      const activeUnifiedExceptionKind = computed(() => {
+        const current = unifiedExceptionCurrent.value;
+        return current && current.__kind === "runtime" ? "runtime" : "storage";
+      });
+      const showUnifiedExceptionModal = computed(() =>
+        Boolean(
+          (state.showStorageErrorModal && state.showStorageErrorModal.value) ||
+            (state.showRuntimeWarningModal && state.showRuntimeWarningModal.value)
+        )
+      );
+      const unifiedExceptionLogs = computed(() => {
+        const runtimeLogs =
+          state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)
+            ? state.runtimeWarningLogs.value
+            : [];
+        const storageLogs =
+          state.storageErrorLogs && Array.isArray(state.storageErrorLogs.value)
+            ? state.storageErrorLogs.value
+            : [];
+        const merged = [];
+        runtimeLogs.forEach((entry) => {
+          if (!entry || typeof entry !== "object") return;
+          merged.push({ ...entry, __kind: "runtime" });
+        });
+        storageLogs.forEach((entry) => {
+          if (!entry || typeof entry !== "object") return;
+          merged.push({ ...entry, __kind: "storage" });
+        });
+        const storageCurrent = state.storageErrorCurrent ? state.storageErrorCurrent.value : null;
+        const runtimeCurrent = state.runtimeWarningCurrent ? state.runtimeWarningCurrent.value : null;
+        if (runtimeCurrent && typeof runtimeCurrent === "object") {
+          merged.push({ ...runtimeCurrent, __kind: "runtime" });
+        }
+        if (storageCurrent && typeof storageCurrent === "object") {
+          merged.push({ ...storageCurrent, __kind: "storage" });
+        }
+        const dedup = new Map();
+        merged.forEach((entry) => {
+          const key = toExceptionKey(entry, entry.__kind || "storage");
+          if (!dedup.has(key)) {
+            dedup.set(key, entry);
+          }
+        });
+        return Array.from(dedup.values())
+          .sort((a, b) => parseExceptionTime(b.occurredAt) - parseExceptionTime(a.occurredAt))
+          .slice(0, 20);
+      });
+      const unifiedExceptionPreviewText = computed(() => {
+        const current = unifiedExceptionCurrent.value;
+        if (!current) return "";
+        if (current.__kind === "runtime") {
+          return state.runtimeWarningPreviewText ? state.runtimeWarningPreviewText.value || "" : "";
+        }
+        return state.storageErrorPreviewText ? state.storageErrorPreviewText.value || "" : "";
+      });
+      const exportUnifiedExceptionDiagnostic = () => {
+        if (
+          activeUnifiedExceptionKind.value === "runtime" &&
+          typeof state.exportRuntimeDiagnosticBundle === "function"
+        ) {
+          state.exportRuntimeDiagnosticBundle();
+          return;
+        }
+        if (typeof state.exportStorageDiagnosticBundle === "function") {
+          state.exportStorageDiagnosticBundle();
+        }
+      };
+      const refreshUnifiedException = () => {
+        if (
+          activeUnifiedExceptionKind.value === "runtime" &&
+          typeof state.reloadBypassCache === "function"
+        ) {
+          state.reloadBypassCache();
+          return;
+        }
+        if (typeof state.requestStorageDataClear === "function") {
+          state.requestStorageDataClear();
+        }
+      };
+      const ignoreUnifiedException = () => {
+        if (
+          activeUnifiedExceptionKind.value === "runtime" &&
+          typeof state.requestIgnoreRuntimeWarnings === "function"
+        ) {
+          state.requestIgnoreRuntimeWarnings();
+          return;
+        }
+        if (typeof state.requestIgnoreStorageErrors === "function") {
+          state.requestIgnoreStorageErrors();
+        }
+      };
+
       return {
         currentView: state.currentView,
         setView: (view) => {
@@ -721,14 +856,34 @@
         closeMigrationConfirm: state.closeMigrationConfirm,
         confirmMigrationAction: state.confirmMigrationAction,
         showStorageErrorModal: state.showStorageErrorModal,
+        showRuntimeWarningModal: state.showRuntimeWarningModal,
+        showRuntimeIgnoreConfirmModal: state.showRuntimeIgnoreConfirmModal,
         showStorageClearConfirmModal: state.showStorageClearConfirmModal,
         showStorageIgnoreConfirmModal: state.showStorageIgnoreConfirmModal,
         storageErrorCurrent: state.storageErrorCurrent,
         storageErrorLogs: state.storageErrorLogs,
         storageErrorPreviewText: state.storageErrorPreviewText,
+        runtimeWarningCurrent: state.runtimeWarningCurrent,
+        runtimeWarningLogs: state.runtimeWarningLogs,
+        runtimeWarningPreviewText: state.runtimeWarningPreviewText,
         storageErrorClearCountdown: state.storageErrorClearCountdown,
         storageErrorClearTargetKeys: state.storageErrorClearTargetKeys,
         storageFeedbackUrl: state.storageFeedbackUrl,
+        dismissRuntimeWarning: state.dismissRuntimeWarning,
+        ignoreRuntimeWarnings: state.ignoreRuntimeWarnings,
+        requestIgnoreRuntimeWarnings: state.requestIgnoreRuntimeWarnings,
+        cancelIgnoreRuntimeWarnings: state.cancelIgnoreRuntimeWarnings,
+        confirmIgnoreRuntimeWarnings: state.confirmIgnoreRuntimeWarnings,
+        reloadBypassCache: state.reloadBypassCache,
+        exportRuntimeDiagnosticBundle: state.exportRuntimeDiagnosticBundle,
+        showUnifiedExceptionModal,
+        unifiedExceptionCurrent,
+        activeUnifiedExceptionKind,
+        unifiedExceptionLogs,
+        unifiedExceptionPreviewText,
+        exportUnifiedExceptionDiagnostic,
+        refreshUnifiedException,
+        ignoreUnifiedException,
         ignoreStorageErrors: state.ignoreStorageErrors,
         requestIgnoreStorageErrors: state.requestIgnoreStorageErrors,
         cancelIgnoreStorageErrors: state.cancelIgnoreStorageErrors,

@@ -169,6 +169,12 @@
     state.storageErrorCurrent = ref(null);
     state.storageErrorLogs = ref([]);
     state.storageErrorPreviewText = ref("");
+    state.showRuntimeWarningModal = ref(false);
+    state.runtimeWarningIgnored = ref(false);
+    state.runtimeWarningCurrent = ref(null);
+    state.runtimeWarningLogs = ref([]);
+    state.runtimeWarningPreviewText = ref("");
+    state.showRuntimeIgnoreConfirmModal = ref(false);
     state.showStorageClearConfirmModal = ref(false);
     state.showStorageIgnoreConfirmModal = ref(false);
     state.storageErrorClearCountdown = ref(0);

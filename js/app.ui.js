@@ -118,6 +118,185 @@
       if (helpEl) helpEl.textContent = help;
     };
 
+    const runtimeWarningLogLimit = 20;
+    const runtimeWarningDedupWindowMs = 4000;
+    let lastRuntimeWarningSignature = "";
+    let lastRuntimeWarningAt = 0;
+    const nowIsoString = () => new Date().toISOString();
+    const truncateText = (value, maxLength) => {
+      const text = String(value || "");
+      if (!text || maxLength <= 0) return "";
+      if (text.length <= maxLength) return text;
+      return `${text.slice(0, maxLength)}…`;
+    };
+    const getAppFingerprint = () => {
+      if (typeof document === "undefined") return "";
+      const appEl = document.getElementById("app");
+      if (appEl && appEl.dataset && appEl.dataset.fingerprint) {
+        return String(appEl.dataset.fingerprint);
+      }
+      const meta = document.querySelector('meta[name="fingerprint"]');
+      if (meta && meta.getAttribute("content")) {
+        return String(meta.getAttribute("content"));
+      }
+      return "";
+    };
+    const triggerJsonDownload = (filename, payload) => {
+      if (typeof window === "undefined" || typeof document === "undefined") return;
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 0);
+    };
+    const buildRuntimeWarningEntry = (error, meta) => {
+      const scope = meta && meta.scope ? String(meta.scope) : "init-ui";
+      const operation = meta && meta.operation ? String(meta.operation) : "runtime.init";
+      const key = meta && meta.key ? String(meta.key) : "app.ui:onMounted";
+      return {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        title: "页面初始化异常",
+        summary: "页面初始化阶段发生异常，部分功能可能不可用。",
+        occurredAt: nowIsoString(),
+        operation,
+        key,
+        scope,
+        errorName: error && error.name ? String(error.name) : "Error",
+        errorMessage: error && error.message ? String(error.message) : "unknown",
+        errorStack: error && error.stack ? String(error.stack) : "",
+        note: meta && meta.note ? String(meta.note) : "",
+      };
+    };
+    const buildRuntimeWarningPreviewText = (entry) => {
+      if (!entry) return "";
+      const lines = [
+        `scope: ${entry.scope || "unknown"}`,
+        `operation: ${entry.operation || "unknown"}`,
+        `key: ${entry.key || "unknown"}`,
+        `error: ${entry.errorName || "Error"}: ${entry.errorMessage || "unknown"}`,
+      ];
+      if (entry.note) {
+        lines.push(`note: ${entry.note}`);
+      }
+      if (entry.errorStack) {
+        lines.push("", "stack:", truncateText(entry.errorStack, 1800));
+      }
+      return lines.join("\n");
+    };
+    const showUiInitWarning = (error, meta) => {
+      const runtimeWarningCurrent = state.runtimeWarningCurrent;
+      const runtimeWarningLogs = state.runtimeWarningLogs;
+      const runtimeWarningPreviewText = state.runtimeWarningPreviewText;
+      const showRuntimeWarningModal = state.showRuntimeWarningModal;
+      const runtimeWarningIgnored = state.runtimeWarningIgnored;
+      if (
+        !runtimeWarningCurrent ||
+        !runtimeWarningLogs ||
+        !runtimeWarningPreviewText ||
+        !showRuntimeWarningModal
+      ) {
+        return;
+      }
+      if (runtimeWarningIgnored && runtimeWarningIgnored.value) {
+        return;
+      }
+      const entry = buildRuntimeWarningEntry(error, meta);
+      const signature = `${entry.operation}|${entry.key}|${entry.errorName}|${entry.errorMessage}`;
+      const now = Date.now();
+      if (
+        signature === lastRuntimeWarningSignature &&
+        now - lastRuntimeWarningAt <= runtimeWarningDedupWindowMs
+      ) {
+        return;
+      }
+      lastRuntimeWarningSignature = signature;
+      lastRuntimeWarningAt = now;
+      runtimeWarningCurrent.value = entry;
+      runtimeWarningPreviewText.value = buildRuntimeWarningPreviewText(entry);
+      const nextLogs = [entry].concat(
+        Array.isArray(runtimeWarningLogs.value) ? runtimeWarningLogs.value : []
+      );
+      runtimeWarningLogs.value = nextLogs.slice(0, runtimeWarningLogLimit);
+      showRuntimeWarningModal.value = true;
+    };
+
+    const dismissRuntimeWarning = () => {
+      if (state.showRuntimeWarningModal) {
+        state.showRuntimeWarningModal.value = false;
+      }
+    };
+
+    const ignoreRuntimeWarnings = () => {
+      if (state.runtimeWarningIgnored) {
+        state.runtimeWarningIgnored.value = true;
+      }
+      if (state.showRuntimeIgnoreConfirmModal) {
+        state.showRuntimeIgnoreConfirmModal.value = false;
+      }
+      dismissRuntimeWarning();
+    };
+
+    const requestIgnoreRuntimeWarnings = () => {
+      if (state.showRuntimeIgnoreConfirmModal) {
+        state.showRuntimeIgnoreConfirmModal.value = true;
+      }
+    };
+
+    const cancelIgnoreRuntimeWarnings = () => {
+      if (state.showRuntimeIgnoreConfirmModal) {
+        state.showRuntimeIgnoreConfirmModal.value = false;
+      }
+    };
+
+    const confirmIgnoreRuntimeWarnings = () => {
+      ignoreRuntimeWarnings();
+    };
+
+    const reloadBypassCache = () => {
+      if (typeof window === "undefined") return;
+      const url = new URL(window.location.href);
+      url.searchParams.set("__reload_ts", String(Date.now()));
+      window.location.replace(url.toString());
+    };
+
+    const exportRuntimeDiagnosticBundle = () => {
+      try {
+        const payload = {
+          exportedAt: nowIsoString(),
+          fingerprint: getAppFingerprint(),
+          location: typeof window !== "undefined" ? window.location.href : "",
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+          online:
+            typeof navigator !== "undefined" && typeof navigator.onLine === "boolean"
+              ? navigator.onLine
+              : null,
+          feedbackUrl: state.storageFeedbackUrl || "https://github.com/cmyyx/endfield-essence-planner/issues",
+          currentIssue: state.runtimeWarningCurrent ? state.runtimeWarningCurrent.value || null : null,
+          issueLogs:
+            state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)
+              ? state.runtimeWarningLogs.value
+              : [],
+          preview:
+            state.runtimeWarningPreviewText && typeof state.runtimeWarningPreviewText.value === "string"
+              ? state.runtimeWarningPreviewText.value
+              : "",
+        };
+        const stamp = nowIsoString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
+        triggerJsonDownload(`planner-runtime-diagnostic-${stamp}.json`, payload);
+      } catch (error) {
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error("[runtime-warning] export diagnostic failed", error);
+        }
+      }
+    };
+
     const shouldWarmupDefaultBackground = () => {
       if (!root || typeof Image !== "function") return false;
       if (!root.classList.contains("preload")) return false;
@@ -501,9 +680,18 @@
     const runAfterLayout = (callback) => {
       if (typeof callback !== "function") return;
       const run = () => {
-        requestAnimationFrame(() => {
+        let settled = false;
+        const invoke = () => {
+          if (settled) return;
+          settled = true;
           callback();
-        });
+        };
+        if (typeof requestAnimationFrame === "function") {
+          requestAnimationFrame(invoke);
+          setTimeout(invoke, 120);
+          return;
+        }
+        setTimeout(invoke, 0);
       };
       if (typeof nextTick === "function") {
         nextTick(run);
@@ -513,33 +701,6 @@
     };
 
     onMounted(() => {
-      state.appReady.value = true;
-      bindSystemThemeListener();
-      applyTheme(state.themePreference.value || "auto");
-      syncAdPreviewFlags();
-      updateViewportOrientation();
-      window.addEventListener("resize", updateViewportOrientation);
-      updateViewportSafeBottom();
-      window.addEventListener("resize", scheduleViewportSafeBottom);
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", scheduleViewportSafeBottom);
-        window.visualViewport.addEventListener("scroll", scheduleViewportSafeBottom);
-      }
-      if (typeof window !== "undefined") {
-        if (!window.__slotProviderScriptReady) {
-          window.__slotProviderScriptError = false;
-        }
-        backToTopLastScroll = window.scrollY || window.pageYOffset || 0;
-        updateBackToTopVisibility();
-        window.addEventListener("scroll", handleBackToTopScroll, { passive: true });
-        evaluateAdVisibility();
-        window.addEventListener("slotfeed:failed", handleAdFailed);
-        if (canShowAds.value) {
-          runAfterLayout(ensureAdScriptLoaded);
-        }
-      }
-      document.addEventListener("click", handleDocClick);
-      document.addEventListener("keydown", handleDocKeydown);
       const finalizePreload = () => {
         warmupBackgroundBeforeFinish()
           .catch(() => false)
@@ -552,7 +713,42 @@
             }
           });
       };
-      runAfterLayout(finalizePreload);
+      state.appReady.value = true;
+      try {
+        bindSystemThemeListener();
+        applyTheme(state.themePreference.value || "auto");
+        syncAdPreviewFlags();
+        updateViewportOrientation();
+        window.addEventListener("resize", updateViewportOrientation);
+        updateViewportSafeBottom();
+        window.addEventListener("resize", scheduleViewportSafeBottom);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", scheduleViewportSafeBottom);
+          window.visualViewport.addEventListener("scroll", scheduleViewportSafeBottom);
+        }
+        if (typeof window !== "undefined") {
+          if (!window.__slotProviderScriptReady) {
+            window.__slotProviderScriptError = false;
+          }
+          backToTopLastScroll = window.scrollY || window.pageYOffset || 0;
+          updateBackToTopVisibility();
+          window.addEventListener("scroll", handleBackToTopScroll, { passive: true });
+          evaluateAdVisibility();
+          window.addEventListener("slotfeed:failed", handleAdFailed);
+          if (canShowAds.value) {
+            runAfterLayout(ensureAdScriptLoaded);
+          }
+        }
+        document.addEventListener("click", handleDocClick);
+        document.addEventListener("keydown", handleDocKeydown);
+      } catch (error) {
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error("[initUi:onMounted] failed, fallback to finalize preload", error);
+        }
+        showUiInitWarning(error, { scope: "init-ui.onMounted" });
+      } finally {
+        runAfterLayout(finalizePreload);
+      }
     });
 
     watch([canShowAds, isAdPortrait], () => {
@@ -612,5 +808,12 @@
     state.togglePlanConfig = togglePlanConfig;
     state.markGearRefiningNavHintSeen = markGearRefiningNavHintSeen;
     state.dismissAdsForSession = dismissAdsForSession;
+    state.dismissRuntimeWarning = dismissRuntimeWarning;
+    state.ignoreRuntimeWarnings = ignoreRuntimeWarnings;
+    state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
+    state.cancelIgnoreRuntimeWarnings = cancelIgnoreRuntimeWarnings;
+    state.confirmIgnoreRuntimeWarnings = confirmIgnoreRuntimeWarnings;
+    state.reloadBypassCache = reloadBypassCache;
+    state.exportRuntimeDiagnosticBundle = exportRuntimeDiagnosticBundle;
   };
 })();

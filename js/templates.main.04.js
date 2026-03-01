@@ -102,51 +102,77 @@
       </transition>
 
       <transition name="fade-scale">
-        <div v-if="showStorageErrorModal" class="about-overlay storage-error-overlay">
+        <div v-if="showUnifiedExceptionModal" class="about-overlay storage-error-overlay">
           <div class="about-card storage-error-card">
-            <h3>{{ t("本地存储异常") }}</h3>
-            <p class="storage-error-warning">
+            <h3>
+              {{
+                activeUnifiedExceptionKind === "runtime"
+                  ? t((unifiedExceptionCurrent && unifiedExceptionCurrent.title) || "页面初始化异常")
+                  : t("本地存储异常")
+              }}
+            </h3>
+            <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
+              {{
+                t(
+                  (unifiedExceptionCurrent && unifiedExceptionCurrent.summary) ||
+                    "页面初始化阶段发生异常，部分功能可能不可用。"
+                )
+              }}
+              {{ t("请刷新页面后重试；如问题持续，请附控制台日志反馈。") }}
+            </p>
+            <p class="storage-error-warning" v-else>
               {{ t("检测到浏览器本地数据读写异常，继续使用可能导致数据丢失。") }}
             </p>
             <p class="storage-error-warning">
               {{
                 t("失败操作：{operation}", {
-                  operation: (storageErrorCurrent && storageErrorCurrent.operation) || t("未知")
+                  operation: (unifiedExceptionCurrent && unifiedExceptionCurrent.operation) || t("未知")
+                })
+              }}
+            </p>
+            <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
+              {{
+                t("异常来源：{scope}", {
+                  scope: (unifiedExceptionCurrent && unifiedExceptionCurrent.scope) || t("未知")
                 })
               }}
             </p>
             <p class="storage-error-warning">
               {{
                 t("失败键：{key}", {
-                  key: (storageErrorCurrent && storageErrorCurrent.key) || t("未知")
+                  key: (unifiedExceptionCurrent && unifiedExceptionCurrent.key) || t("未知")
                 })
               }}
             </p>
 
-            <div class="storage-error-meta" v-if="storageErrorCurrent">
+            <div class="storage-error-meta" v-if="unifiedExceptionCurrent">
               <div class="storage-error-meta-line">
                 <span class="storage-error-label">{{ t("错误：") }}</span>
                 <span class="storage-error-value">
-                  {{ storageErrorCurrent.errorName }}: {{ storageErrorCurrent.errorMessage }}
+                  {{ unifiedExceptionCurrent.errorName }}: {{ unifiedExceptionCurrent.errorMessage }}
                 </span>
               </div>
               <div class="storage-error-meta-line">
                 <span class="storage-error-label">{{ t("时间：") }}</span>
-                <span class="storage-error-value">{{ storageErrorCurrent.occurredAt }}</span>
+                <span class="storage-error-value">{{ unifiedExceptionCurrent.occurredAt }}</span>
               </div>
             </div>
 
             <div class="storage-error-preview">
               <div class="storage-error-preview-title">{{ t("诊断预览（截断）") }}</div>
-              <pre class="storage-error-preview-content">{{ storageErrorPreviewText || t("暂无预览数据") }}</pre>
+              <pre class="storage-error-preview-content">{{ unifiedExceptionPreviewText || t("暂无预览数据") }}</pre>
             </div>
 
             <div class="storage-error-log">
               <div class="storage-error-log-title">
-                {{ t("最近异常记录") }}（{{ storageErrorLogs.length }}）
+                {{ t("最近异常记录") }}（{{ unifiedExceptionLogs.length }}）
               </div>
               <ul class="storage-error-log-list">
-                <li v-for="item in storageErrorLogs" :key="item.id" class="storage-error-log-item">
+                <li
+                  v-for="item in unifiedExceptionLogs"
+                  :key="item.id || [item.__kind, item.occurredAt, item.operation, item.key].join('|')"
+                  class="storage-error-log-item"
+                >
                   <span class="storage-error-log-time">{{ item.occurredAt }}</span>
                   <span class="storage-error-log-op">{{ item.operation }}</span>
                   <span class="storage-error-log-key">{{ item.key }}</span>
@@ -155,17 +181,40 @@
             </div>
 
             <div class="about-actions storage-error-actions">
-              <button class="about-button storage-export-button" @click="exportStorageDiagnosticBundle">
+              <button class="about-button storage-export-button" @click="exportUnifiedExceptionDiagnostic">
                 {{ t("导出数据与诊断") }}
               </button>
-              <button class="about-button migration-action migration-action-warn" @click="requestStorageDataClear">
-                {{ t("清理数据并刷新") }}
+              <button class="about-button migration-action migration-action-warn" @click="refreshUnifiedException">
+                {{ activeUnifiedExceptionKind === "runtime" ? t("立即刷新") : t("清理数据并刷新") }}
               </button>
               <a class="storage-feedback-button" :href="storageFeedbackUrl" target="_blank" rel="noreferrer">
                 {{ t("反馈问题") }}
               </a>
-              <button class="ghost-button" @click="requestIgnoreStorageErrors">
+              <button class="ghost-button" @click="ignoreUnifiedException">
                 {{ t("无视错误,继续使用") }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
+        <div v-if="showRuntimeIgnoreConfirmModal" class="about-overlay storage-error-confirm-overlay">
+          <div class="about-card storage-confirm-card">
+            <h3>{{ t("确认无视错误") }}</h3>
+            <p class="storage-clear-confirm-warning">
+              {{
+                t(
+                  "确认后本次会话将不再弹出该异常提醒，继续使用可能导致数据丢失。"
+                )
+              }}
+            </p>
+            <div class="about-actions storage-error-actions storage-clear-actions">
+              <button class="ghost-button" @click="cancelIgnoreRuntimeWarnings">
+                {{ t("取消") }}
+              </button>
+              <button class="about-button migration-action migration-action-warn" @click="confirmIgnoreRuntimeWarnings">
+                {{ t("确认无视错误,继续使用") }}
               </button>
             </div>
           </div>
