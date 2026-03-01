@@ -123,38 +123,21 @@
     let lastRuntimeWarningSignature = "";
     let lastRuntimeWarningAt = 0;
     const nowIsoString = () => new Date().toISOString();
+    const appUtils =
+      typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
+        ? window.AppUtils
+        : {};
+    const getAppFingerprint =
+      typeof appUtils.getAppFingerprint === "function" ? appUtils.getAppFingerprint : () => "";
+    const triggerJsonDownload =
+      typeof appUtils.triggerJsonDownload === "function"
+        ? appUtils.triggerJsonDownload
+        : () => {};
     const truncateText = (value, maxLength) => {
       const text = String(value || "");
       if (!text || maxLength <= 0) return "";
       if (text.length <= maxLength) return text;
       return `${text.slice(0, maxLength)}…`;
-    };
-    const getAppFingerprint = () => {
-      if (typeof document === "undefined") return "";
-      const appEl = document.getElementById("app");
-      if (appEl && appEl.dataset && appEl.dataset.fingerprint) {
-        return String(appEl.dataset.fingerprint);
-      }
-      const meta = document.querySelector('meta[name="fingerprint"]');
-      if (meta && meta.getAttribute("content")) {
-        return String(meta.getAttribute("content"));
-      }
-      return "";
-    };
-    const triggerJsonDownload = (filename, payload) => {
-      if (typeof window === "undefined" || typeof document === "undefined") return;
-      const json = JSON.stringify(payload, null, 2);
-      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 0);
     };
     const buildRuntimeWarningEntry = (error, meta) => {
       const scope = meta && meta.scope ? String(meta.scope) : "init-ui";

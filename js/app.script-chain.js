@@ -3,6 +3,7 @@
   if (Array.isArray(window.__APP_SCRIPT_CHAIN) && window.__APP_SCRIPT_CHAIN.length) return;
   window.__APP_SCRIPT_CHAIN = [
     "./js/app.core.js",
+    "./js/app.utils.js",
     "./js/app.state.js",
     "./js/app.i18n.js",
     "./js/app.content.js",

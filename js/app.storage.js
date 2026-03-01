@@ -183,16 +183,16 @@
     let storageClearCountdownTimer = null;
 
     const nowIsoString = () => new Date().toISOString();
-
-    const getAppFingerprint = () => {
-      if (typeof document === "undefined") return "";
-      const meta = document.querySelector('meta[name="fingerprint"]');
-      const metaValue = meta && meta.getAttribute ? meta.getAttribute("content") : "";
-      if (metaValue) return String(metaValue);
-      const app = document.getElementById("app");
-      const attr = app && app.getAttribute ? app.getAttribute("data-fingerprint") : "";
-      return attr ? String(attr) : "";
-    };
+    const appUtils =
+      typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
+        ? window.AppUtils
+        : {};
+    const getAppFingerprint =
+      typeof appUtils.getAppFingerprint === "function" ? appUtils.getAppFingerprint : () => "";
+    const triggerJsonDownload =
+      typeof appUtils.triggerJsonDownload === "function"
+        ? appUtils.triggerJsonDownload
+        : () => {};
 
     const truncateText = (value, maxLength = 320) => {
       const text = String(value == null ? "" : value);
@@ -541,22 +541,6 @@
       } catch (error) {
         return null;
       }
-    };
-
-    const triggerJsonDownload = (filename, payload) => {
-      if (typeof window === "undefined" || typeof document === "undefined") return;
-      const json = JSON.stringify(payload, null, 2);
-      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 0);
     };
 
     const buildDiagnosticBundle = async () => {
