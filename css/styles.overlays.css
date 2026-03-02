@@ -1158,13 +1158,62 @@
         font-size: 11px;
       }
 
+      .planner-bottom-right-overlays {
+        --overlay-right-gap: 14px;
+        --overlay-bottom-base: calc(
+          14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+        );
+        --overlay-update-base: calc(
+          196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+        );
+        --optional-toast-stack-gap: 154px;
+      }
+
       .update-toast {
         position: fixed;
-        right: 14px;
-        bottom: calc(14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        right: var(--overlay-right-gap, 14px);
+        bottom: var(
+          --overlay-bottom-base,
+          calc(14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))
+        );
         width: min(440px, calc(100vw - 28px));
         z-index: 39;
         pointer-events: none;
+      }
+
+      .update-version-toast {
+        z-index: 39;
+      }
+
+      .optional-failure-toast {
+        z-index: 40;
+      }
+
+      .optional-failure-toast.optional-failure-toast-0 {
+        bottom: var(--overlay-bottom-base);
+      }
+
+      .optional-failure-toast.optional-failure-toast-1 {
+        bottom: calc(var(--overlay-bottom-base) + var(--optional-toast-stack-gap));
+      }
+
+      .planner-bottom-right-overlays.has-update-toast .optional-failure-toast.optional-failure-toast-0 {
+        bottom: var(--overlay-update-base);
+      }
+
+      .planner-bottom-right-overlays.has-update-toast .optional-failure-toast.optional-failure-toast-1 {
+        bottom: calc(var(--overlay-update-base) + var(--optional-toast-stack-gap));
+      }
+
+      .optional-failure-history-entry {
+        position: fixed;
+        right: var(--overlay-right-gap, 14px);
+        bottom: var(--overlay-bottom-base);
+        z-index: 40;
+      }
+
+      .planner-bottom-right-overlays.has-update-toast .optional-failure-history-entry {
+        bottom: var(--overlay-update-base);
       }
 
       .update-toast-card {
@@ -1289,6 +1338,17 @@
       }
 
       @media (max-width: 640px) {
+        .planner-bottom-right-overlays {
+          --overlay-right-gap: 8px;
+          --overlay-bottom-base: calc(
+            8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+          );
+          --overlay-update-base: calc(
+            182px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+          );
+          --optional-toast-stack-gap: 134px;
+        }
+
         .version-debug-badge-wrap {
           left: 6px;
           bottom: calc(6px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
@@ -1328,8 +1388,11 @@
         }
 
         .update-toast {
-          right: 8px;
-          bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          right: var(--overlay-right-gap, 8px);
+          bottom: var(
+            --overlay-bottom-base,
+            calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))
+          );
           width: calc(100vw - 16px);
         }
 

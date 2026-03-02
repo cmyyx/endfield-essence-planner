@@ -331,57 +331,55 @@
         {{ versionCopyFeedbackText }}
       </div>
 
-      <transition name="fade-scale">
-        <div
-          v-if="optionalFailureNotice"
-          class="update-toast"
-          role="status"
-          aria-live="polite"
-          :style="
-            showUpdatePrompt
-              ? { bottom: 'calc(196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
-              : null
-          "
-        >
-          <div class="update-toast-card">
-            <h3>{{ optionalFailureNotice.title || t(\"可选功能加载失败\") }}</h3>
-            <p class="update-check-desc">
-              {{
-                optionalFailureNotice.summary || t(\"部分可选功能未能加载，页面主体仍可继续使用。\")
-              }}
-            </p>
-            <p v-if="optionalFailureNotice.note" class="update-check-desc" style="white-space: pre-line;">
-              {{ optionalFailureNotice.note }}
-            </p>
-            <div class="about-actions update-check-actions">
-              <button class="about-button update-action-secondary" @click="openLatestOptionalFailureDetail">
-                {{ t(\"查看详情\") }}
-              </button>
-              <button class="about-button update-action-secondary" @click="dismissOptionalFailureNotice">
-                {{ t(\"稍后提醒\") }}
-              </button>
+      <div
+        class="planner-bottom-right-overlays"
+        :class="{
+          'has-update-toast': showUpdatePrompt,
+          'has-optional-toast': optionalFailureNotices && optionalFailureNotices.length > 0,
+        }"
+      >
+        <transition-group name="fade-scale" tag="div" class="optional-toast-stack">
+          <div
+            v-for="(notice, index) in optionalFailureNotices"
+            :key="notice.id || ['optional-failure', index].join('|')"
+            class="update-toast optional-failure-toast"
+            :class="'optional-failure-toast-' + index"
+            role="status"
+            aria-live="polite"
+          >
+            <div class="update-toast-card">
+              <h3>{{ notice.title || t(\"可选功能加载失败\") }}</h3>
+              <p class="update-check-desc">
+                {{
+                  notice.summary || t(\"部分可选功能未能加载，页面主体仍可继续使用。\")
+                }}
+              </p>
+              <p v-if="notice.note" class="update-check-desc" style="white-space: pre-line;">
+                {{ notice.note }}
+              </p>
+              <div class="about-actions update-check-actions">
+                <button class="about-button update-action-secondary" @click="openLatestOptionalFailureDetail">
+                  {{ t(\"查看详情\") }}
+                </button>
+                <button class="about-button update-action-secondary" @click="dismissOptionalFailureNotice(notice.id)">
+                  {{ t(\"稍后提醒\") }}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </transition>
+        </transition-group>
 
-      <button
-        v-if="hasOptionalFailureHistory && !optionalFailureNotice"
-        type="button"
-        class="about-button update-action-secondary"
-        style="position: fixed; right: 14px; z-index: 39;"
-        :style="
-          showUpdatePrompt
-            ? { bottom: 'calc(196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
-            : { bottom: 'calc(14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
-        "
-        @click="openLatestOptionalFailureDetail"
-      >
-        {{ t(\"查看可选失败详情\") }}
-      </button>
+        <button
+          v-if="hasOptionalFailureHistory && (!optionalFailureNotices || !optionalFailureNotices.length)"
+          type="button"
+          class="about-button update-action-secondary optional-failure-history-entry"
+          @click="openLatestOptionalFailureDetail"
+        >
+          {{ t(\"查看可选失败详情\") }}
+        </button>
 
-      <transition name="fade-scale">
-        <div v-if="showUpdatePrompt" class="update-toast" role="status" aria-live="polite">
+        <transition name="fade-scale">
+          <div v-if="showUpdatePrompt" class="update-toast update-version-toast" role="status" aria-live="polite">
           <div class="update-toast-card">
             <h3>{{ t("检测到新版本") }}</h3>
             <p class="update-check-desc">
@@ -410,8 +408,9 @@
               </button>
             </div>
           </div>
-        </div>
-      </transition>
+          </div>
+        </transition>
+      </div>
 
       <div v-if="showDomainWarning" class="domain-overlay">
         <div class="domain-card">

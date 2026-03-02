@@ -942,6 +942,7 @@
         storageErrorClearTargetKeys: state.storageErrorClearTargetKeys,
         storageFeedbackUrl: state.storageFeedbackUrl,
         dismissRuntimeWarning: state.dismissRuntimeWarning,
+        optionalFailureNotices: state.optionalFailureNotices,
         optionalFailureNotice: state.optionalFailureNotice,
         hasOptionalFailureHistory: state.hasOptionalFailureHistory,
         dismissOptionalFailureNotice: state.dismissOptionalFailureNotice,
