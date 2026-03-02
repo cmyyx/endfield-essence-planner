@@ -934,6 +934,10 @@
         list-style: none;
         display: grid;
         gap: 6px;
+        max-height: min(28vh, 280px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 4px;
       }
 
       .storage-error-log-item {

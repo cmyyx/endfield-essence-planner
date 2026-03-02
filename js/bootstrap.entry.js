@@ -1311,6 +1311,10 @@
         };
         script.onerror = function () {
           setResourceStatus(key, "failed");
+          var failedEntry = resourceState.get(key);
+          if (failedEntry && failedEntry.optional) {
+            reportOptionalResourceFailure(failedEntry);
+          }
           scriptLoadRegistry.delete(key);
           probeResourceStatus(requestSrc).then(function (probe) {
             reject(createLoadError("script", src, "error", probe));
