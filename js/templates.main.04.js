@@ -347,36 +347,65 @@
             role="status"
             aria-live="polite"
           >
-            <div class="update-toast-card">
-              <h3>{{ notice.title || t(\"可选功能加载失败\") }}</h3>
-              <p class="update-check-desc">
-                {{
-                  notice.summary || t(\"部分可选功能未能加载，页面主体仍可继续使用。\")
-                }}
-              </p>
-              <p v-if="notice.note" class="update-check-desc" style="white-space: pre-line;">
-                {{ notice.note }}
-              </p>
-              <div class="about-actions update-check-actions">
-                <button class="about-button update-action-secondary" @click="openLatestOptionalFailureDetail">
-                  {{ t(\"查看详情\") }}
+            <div class="update-toast-card optional-failure-toast-card">
+              <div class="optional-failure-toast-main">
+                <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
+                <div class="optional-failure-toast-text">
+                  <strong>{{ notice.title || t("可选功能加载失败") }}</strong>
+                  <span>{{ t("部分可选功能未能加载，页面主体仍可继续使用。") }}</span>
+                </div>
+              </div>
+              <div class="optional-failure-toast-actions">
+                <button
+                  type="button"
+                  class="optional-failure-icon-button"
+                  :aria-label="t('查看详情')"
+                  :title="t('查看详情')"
+                  @click="openLatestOptionalFailureDetail"
+                >
+                  i
                 </button>
-                <button class="about-button update-action-secondary" @click="dismissOptionalFailureNotice(notice.id)">
-                  {{ t(\"稍后提醒\") }}
+                <button
+                  type="button"
+                  class="optional-failure-icon-button"
+                  :aria-label="t('关闭')"
+                  :title="t('关闭')"
+                  @click="dismissOptionalFailureNotice(notice.id)"
+                >
+                  x
                 </button>
               </div>
             </div>
           </div>
         </transition-group>
 
-        <button
-          v-if="hasOptionalFailureHistory && (!optionalFailureNotices || !optionalFailureNotices.length)"
-          type="button"
-          class="about-button update-action-secondary optional-failure-history-entry"
-          @click="openLatestOptionalFailureDetail"
+        <div
+          v-if="
+            hasOptionalFailureHistory &&
+            (!optionalFailureNotices || !optionalFailureNotices.length) &&
+            !optionalFailureHistoryEntryDismissed
+          "
+          class="optional-failure-history-entry-group"
         >
-          {{ t(\"查看可选失败详情\") }}
-        </button>
+          <button
+            type="button"
+            class="optional-failure-history-entry"
+            :aria-label="t('查看可选失败详情')"
+            :title="t('查看可选失败详情')"
+            @click="openLatestOptionalFailureDetail"
+          >
+            !
+          </button>
+          <button
+            type="button"
+            class="optional-failure-history-dismiss"
+            :aria-label="t('关闭')"
+            :title="t('关闭')"
+            @click="dismissOptionalFailureHistoryEntry"
+          >
+            x
+          </button>
+        </div>
 
         <transition name="fade-scale">
           <div v-if="showUpdatePrompt" class="update-toast update-version-toast" role="status" aria-live="polite">

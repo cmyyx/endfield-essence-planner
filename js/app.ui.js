@@ -134,6 +134,8 @@
     const optionalFailureNotice = state.optionalFailureNotice || ref(null);
     const optionalFailureHistory = state.optionalFailureHistory || ref([]);
     const hasOptionalFailureHistory = state.hasOptionalFailureHistory || ref(false);
+    const optionalFailureHistoryEntryDismissed =
+      state.optionalFailureHistoryEntryDismissed || ref(false);
     hasOptionalFailureHistory.value =
       Array.isArray(optionalFailureHistory.value) && optionalFailureHistory.value.length > 0;
     const nowIsoString = () => new Date().toISOString();
@@ -268,6 +270,7 @@
       );
       optionalFailureHistory.value = nextHistory.slice(0, runtimeWarningLogLimit);
       hasOptionalFailureHistory.value = optionalFailureHistory.value.length > 0;
+      optionalFailureHistoryEntryDismissed.value = false;
       const now = Date.now();
       if (signature) {
         const lastAt = optionalFailureLastSeenAt.get(signature) || 0;
@@ -317,6 +320,9 @@
           : null;
       if (!first) return;
       openOptionalFailureDetailByLogId(first.logId);
+    };
+    const dismissOptionalFailureHistoryEntry = () => {
+      optionalFailureHistoryEntryDismissed.value = true;
     };
     const showUiInitWarning = (error, meta) => {
       const runtimeWarningCurrent = state.runtimeWarningCurrent;
@@ -1057,7 +1063,9 @@
     state.optionalFailureNotice = optionalFailureNotice;
     state.optionalFailureHistory = optionalFailureHistory;
     state.hasOptionalFailureHistory = hasOptionalFailureHistory;
+    state.optionalFailureHistoryEntryDismissed = optionalFailureHistoryEntryDismissed;
     state.dismissOptionalFailureNotice = dismissOptionalFailureNotice;
+    state.dismissOptionalFailureHistoryEntry = dismissOptionalFailureHistoryEntry;
     state.openOptionalFailureDetailByLogId = openOptionalFailureDetailByLogId;
     state.openLatestOptionalFailureDetail = openLatestOptionalFailureDetail;
     state.reloadBypassCache = reloadBypassCache;
