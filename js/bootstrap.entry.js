@@ -973,9 +973,10 @@
     };
     ensurePreloadAssist();
 
-    var optionalFailureReported = new Set();
     var optionalFailureEventName = "planner:optional-resource-failed";
     var optionalFailureQueueKey = "__bootOptionalLoadFailures";
+    var optionalFailureQueueLimit = 20;
+    var optionalFailureIdSeed = 0;
     var resolveOptionalFeatureKey = function (entry) {
       if (entry && entry.featureKey) return String(entry.featureKey);
       return "";
@@ -987,11 +988,63 @@
       if (!translated || translated === key) return "";
       return translated;
     };
+    var toOptionalFailureIsoTime = function (value) {
+      var parsed = Date.parse(String(value || ""));
+      if (!isNaN(parsed)) {
+        return new Date(parsed).toISOString();
+      }
+      return new Date().toISOString();
+    };
+    var buildOptionalFailurePayload = function (entry) {
+      var featureKey = resolveOptionalFeatureKey(entry);
+      var featureLabel = resolveOptionalFeatureLabel(featureKey);
+      if (!featureLabel && entry && entry.featureLabel) {
+        featureLabel = String(entry.featureLabel);
+      }
+      var resourceLabel = String(
+        (entry && entry.resource) ||
+          (entry && entry.resourceLabel) ||
+          (entry && entry.label) ||
+          (entry && entry.src) ||
+          ""
+      ).trim();
+      if (!resourceLabel) {
+        var fallbackResource = bt("unknown_resource");
+        resourceLabel =
+          fallbackResource && fallbackResource !== "unknown_resource"
+            ? fallbackResource
+            : "optional-resource";
+      }
+      var signature = String((entry && entry.signature) || "").trim();
+      if (!signature) {
+        signature = String(featureKey || "") + "|" + resourceLabel;
+      }
+      optionalFailureIdSeed += 1;
+      return {
+        id:
+          "bootopt-" +
+          Date.now() +
+          "-" +
+          optionalFailureIdSeed +
+          "-" +
+          Math.random().toString(16).slice(2, 6),
+        occurredAt: toOptionalFailureIsoTime(entry && entry.occurredAt),
+        feature: featureKey,
+        featureKey: featureKey,
+        featureLabel: featureLabel,
+        resource: resourceLabel,
+        resourceLabel: resourceLabel,
+        signature: signature,
+        source: String((entry && (entry.source || entry.scope || entry.stage)) || "bootstrap.optional"),
+        src: String((entry && entry.src) || resourceLabel),
+        label: resourceLabel,
+      };
+    };
     var enqueueOptionalFailure = function (payload) {
       if (typeof window === "undefined") return;
       var queue = Array.isArray(window[optionalFailureQueueKey]) ? window[optionalFailureQueueKey] : [];
       queue.push(payload);
-      window[optionalFailureQueueKey] = queue.slice(-20);
+      window[optionalFailureQueueKey] = queue.slice(-optionalFailureQueueLimit);
       if (typeof window.dispatchEvent === "function") {
         try {
           var event = new CustomEvent(optionalFailureEventName, { detail: payload });
@@ -1001,22 +1054,19 @@
         }
       }
     };
-    var reportOptionalResourceFailure = function (entry) {
-      if (!entry || !entry.optional) return;
-      var featureKey = resolveOptionalFeatureKey(entry);
-      var resourceLabel = String((entry && entry.label) || (entry && entry.src) || "").trim();
-      var signature = String(featureKey || "") + "|" + resourceLabel;
-      if (optionalFailureReported.has(signature)) return;
-      optionalFailureReported.add(signature);
-      enqueueOptionalFailure({
-        id: "bootopt-" + Date.now() + "-" + Math.random().toString(16).slice(2, 8),
-        occurredAt: new Date().toISOString(),
-        featureKey: featureKey,
-        featureLabel: resolveOptionalFeatureLabel(featureKey),
-        src: String((entry && entry.src) || ""),
-        label: resourceLabel,
-      });
+    var reportOptionalResourceFailure = function (entry, options) {
+      if (!entry || typeof entry !== "object") return null;
+      var allowUnsafe = Boolean(options && options.allowUnsafe);
+      if (!allowUnsafe && !entry.optional) return null;
+      var payload = buildOptionalFailurePayload(entry);
+      enqueueOptionalFailure(payload);
+      return payload;
     };
+    if (typeof window !== "undefined") {
+      window.__reportOptionalResourceFailure = function (entry) {
+        return reportOptionalResourceFailure(entry, { allowUnsafe: true });
+      };
+    }
 
     var toResourceLabel = function (src) {
       var value = String(src || "");
