@@ -14,7 +14,6 @@
   ];
   var startupScripts = [
     "./vendor/vue.global.prod.js",
-    "./vendor/pinyin-pro.min.js",
     "./data/version.js",
     "./data/dungeons.js",
     "./data/weapons.js",
@@ -24,6 +23,11 @@
     "./js/app.script-chain.js",
     "./js/app.js",
   ];
+  var optionalScriptConfigs = {
+    "./vendor/pinyin-pro.min.js": {
+      featureKey: "pinyin",
+    },
+  };
   var langStorageKey = "planner-lang";
   var fallbackBootLocale = "zh-CN";
   var supportedBootLocales = ["zh-CN", "zh-TW", "en", "ja"];
@@ -93,6 +97,21 @@
       suggestion_hard_refresh: "按 Ctrl + F5 强制刷新后重试",
       suggestion_issue_screenshot: "若问题持续，请在 GitHub Issues 附上控制台报错截图",
       list_sep: "、",
+      preload_current_optional_failed: "可选失败：{label}",
+      optional_modal_title: "可选功能加载失败",
+      optional_modal_summary: "部分可选功能未能加载，页面主体仍可继续使用。",
+      optional_modal_detail_features: "失败功能：{features}",
+      optional_modal_detail_resources: "失败资源：{resources}",
+      optional_modal_detail_non_blocking: "影响说明：仅影响可选功能，不影响核心功能。",
+      optional_feature_pinyin: "拼音搜索",
+      optional_feature_i18n: "扩展语言支持",
+      optional_feature_notice_content: "公告与说明内容",
+      optional_feature_sponsor_data: "赞助名单展示",
+      optional_feature_weapon_images: "武器图片索引",
+      optional_feature_version_meta: "版本元数据展示",
+      optional_feature_core_data: "核心游戏数据",
+      optional_feature_ui_scripts: "界面交互脚本",
+      optional_feature_runtime: "页面运行时依赖",
     },
     "zh-TW": {
       preload_title: "少女祈禱中",
@@ -159,6 +178,21 @@
       suggestion_hard_refresh: "按 Ctrl + F5 強制重新整理後重試",
       suggestion_issue_screenshot: "若問題持續，請在 GitHub Issues 附上控制台錯誤截圖",
       list_sep: "、",
+      preload_current_optional_failed: "可選失敗：{label}",
+      optional_modal_title: "可選功能載入失敗",
+      optional_modal_summary: "部分可選功能未能載入，頁面主體仍可繼續使用。",
+      optional_modal_detail_features: "失敗功能：{features}",
+      optional_modal_detail_resources: "失敗資源：{resources}",
+      optional_modal_detail_non_blocking: "影響說明：僅影響可選功能，不影響核心功能。",
+      optional_feature_pinyin: "拼音搜尋",
+      optional_feature_i18n: "擴展語言支援",
+      optional_feature_notice_content: "公告與說明內容",
+      optional_feature_sponsor_data: "贊助名單展示",
+      optional_feature_weapon_images: "武器圖片索引",
+      optional_feature_version_meta: "版本中繼資料顯示",
+      optional_feature_core_data: "核心遊戲資料",
+      optional_feature_ui_scripts: "介面互動腳本",
+      optional_feature_runtime: "頁面執行時依賴",
     },
     en: {
       preload_title: "少女祈祷中 / A Maiden at Prayer...",
@@ -226,6 +260,21 @@
       suggestion_hard_refresh: "Press Ctrl + F5 for a hard refresh and retry",
       suggestion_issue_screenshot: "If the issue persists, attach console screenshots in GitHub Issues",
       list_sep: ", ",
+      preload_current_optional_failed: "Optional failed: {label}",
+      optional_modal_title: "Optional Feature Load Failed",
+      optional_modal_summary: "Some optional features could not be loaded. Core page usage is still available.",
+      optional_modal_detail_features: "Affected features: {features}",
+      optional_modal_detail_resources: "Failed resources: {resources}",
+      optional_modal_detail_non_blocking: "Impact: optional features only, core functionality remains available.",
+      optional_feature_pinyin: "Pinyin search",
+      optional_feature_i18n: "Extended language support",
+      optional_feature_notice_content: "Announcement content",
+      optional_feature_sponsor_data: "Sponsor list display",
+      optional_feature_weapon_images: "Weapon image index",
+      optional_feature_version_meta: "Version metadata display",
+      optional_feature_core_data: "Core game data",
+      optional_feature_ui_scripts: "UI interaction scripts",
+      optional_feature_runtime: "Runtime dependency",
     },
     ja: {
       preload_title: "少女祈祷中 / 少女、祈りの最中…",
@@ -298,6 +347,21 @@
       suggestion_issue_screenshot:
         "改善しない場合は GitHub Issues にコンソールのスクリーンショットを添付してください",
       list_sep: "、",
+      preload_current_optional_failed: "任意機能の失敗：{label}",
+      optional_modal_title: "任意機能の読み込みに失敗しました",
+      optional_modal_summary: "一部の任意機能を読み込めませんでしたが、ページ本体は引き続き利用できます。",
+      optional_modal_detail_features: "失敗した機能：{features}",
+      optional_modal_detail_resources: "失敗したリソース：{resources}",
+      optional_modal_detail_non_blocking: "影響：任意機能のみ。コア機能は利用可能です。",
+      optional_feature_pinyin: "ピンイン検索",
+      optional_feature_i18n: "追加言語サポート",
+      optional_feature_notice_content: "お知らせ内容表示",
+      optional_feature_sponsor_data: "スポンサー一覧表示",
+      optional_feature_weapon_images: "武器画像インデックス",
+      optional_feature_version_meta: "バージョンメタデータ表示",
+      optional_feature_core_data: "コアゲームデータ",
+      optional_feature_ui_scripts: "UI操作スクリプト",
+      optional_feature_runtime: "ランタイム依存",
     },
   };
 
@@ -909,6 +973,51 @@
     };
     ensurePreloadAssist();
 
+    var optionalFailureReported = new Set();
+    var optionalFailureEventName = "planner:optional-resource-failed";
+    var optionalFailureQueueKey = "__bootOptionalLoadFailures";
+    var resolveOptionalFeatureKey = function (entry) {
+      if (entry && entry.featureKey) return String(entry.featureKey);
+      return "";
+    };
+    var resolveOptionalFeatureLabel = function (featureKey) {
+      if (!featureKey) return "";
+      var key = "optional_feature_" + featureKey;
+      var translated = bt(key);
+      if (!translated || translated === key) return "";
+      return translated;
+    };
+    var enqueueOptionalFailure = function (payload) {
+      if (typeof window === "undefined") return;
+      var queue = Array.isArray(window[optionalFailureQueueKey]) ? window[optionalFailureQueueKey] : [];
+      queue.push(payload);
+      window[optionalFailureQueueKey] = queue.slice(-20);
+      if (typeof window.dispatchEvent === "function") {
+        try {
+          var event = new CustomEvent(optionalFailureEventName, { detail: payload });
+          window.dispatchEvent(event);
+        } catch (error) {
+          // ignore event dispatch failures
+        }
+      }
+    };
+    var reportOptionalResourceFailure = function (entry) {
+      if (!entry || !entry.optional) return;
+      var featureKey = resolveOptionalFeatureKey(entry);
+      var resourceLabel = String((entry && entry.label) || (entry && entry.src) || "").trim();
+      var signature = String(featureKey || "") + "|" + resourceLabel;
+      if (optionalFailureReported.has(signature)) return;
+      optionalFailureReported.add(signature);
+      enqueueOptionalFailure({
+        id: "bootopt-" + Date.now() + "-" + Math.random().toString(16).slice(2, 8),
+        occurredAt: new Date().toISOString(),
+        featureKey: featureKey,
+        featureLabel: resolveOptionalFeatureLabel(featureKey),
+        src: String((entry && entry.src) || ""),
+        label: resourceLabel,
+      });
+    };
+
     var toResourceLabel = function (src) {
       var value = String(src || "");
       if (!value) return bt("unknown_resource");
@@ -925,7 +1034,9 @@
     var preloadFailStallMs = 60000;
     var preloadLongHelpStallMs = 45000;
     var triggerStallTimeout = null;
-    var ensureResource = function (src, kind) {
+    var ensureResource = function (src, kind, options) {
+      var normalizedOptions = options && typeof options === "object" ? options : {};
+      var optionalConfig = optionalScriptConfigs[src] || null;
       var key = normalizeResourceKey(src);
       if (!resourceState.has(key)) {
         resourceState.set(key, {
@@ -935,7 +1046,17 @@
           label: toResourceLabel(src),
           status: "pending",
           statusAt: 0,
+          optional: Boolean(normalizedOptions.optional || optionalConfig),
+          featureKey: normalizedOptions.featureKey || (optionalConfig ? optionalConfig.featureKey : ""),
         });
+      } else if (normalizedOptions.optional || optionalConfig) {
+        var existing = resourceState.get(key);
+        if (existing) {
+          existing.optional = true;
+          if (!existing.featureKey) {
+            existing.featureKey = normalizedOptions.featureKey || (optionalConfig ? optionalConfig.featureKey : "");
+          }
+        }
       }
       return key;
     };
@@ -949,8 +1070,11 @@
       var loaded = entries.filter(function (entry) {
         return entry.status === "loaded";
       }).length;
-      var failedItem = entries.find(function (entry) {
-        return entry.status === "failed";
+      var criticalFailedItem = entries.find(function (entry) {
+        return entry.status === "failed" && !entry.optional;
+      });
+      var optionalFailedItems = entries.filter(function (entry) {
+        return entry.status === "failed" && entry.optional;
       });
       var loadingItems = entries.filter(function (entry) {
         return entry.status === "loading";
@@ -984,10 +1108,10 @@
       }
       var stagnantMs = Date.now() - progressMeta.lastLoadedAt;
       var shouldShowAssist =
-        !failedItem && loaded < total && stagnantMs >= preloadAssistStallMs;
+        !criticalFailedItem && loaded < total && stagnantMs >= preloadAssistStallMs;
       var shouldForceTimeout =
-        !failedItem && loaded < total && stagnantMs >= preloadFailStallMs;
-      var hasStagingGap = !failedItem && !loadingItem && loaded < total;
+        !criticalFailedItem && loaded < total && stagnantMs >= preloadFailStallMs;
+      var hasStagingGap = !criticalFailedItem && !loadingItem && loaded < total;
       if (refs.count) {
         refs.count.textContent = loaded + "/" + total;
       }
@@ -997,7 +1121,7 @@
         refs.progressFill.setAttribute("aria-valuenow", String(percent));
       }
       if (refs.status) {
-        if (failedItem) {
+        if (criticalFailedItem) {
           refs.status.textContent = bt("preload_status_failed");
         } else if (total === 0) {
           refs.status.textContent = bt("preload_status_prepare");
@@ -1012,8 +1136,9 @@
         }
       }
       if (refs.current) {
-        if (failedItem) {
-          refs.current.textContent = bt("preload_current_failed", { label: failedItem.label });
+        var currentText = "";
+        if (criticalFailedItem) {
+          currentText = bt("preload_current_failed", { label: criticalFailedItem.label });
         } else if (loadingCount > 1) {
           var parallelText = bt("preload_current_parallel", {
             labels: loadingPreview,
@@ -1022,23 +1147,34 @@
                 ? bt("preload_current_parallel_more", { count: loadingCount })
                 : "",
           });
-          refs.current.textContent = recentLoadedPreview
+          currentText = recentLoadedPreview
             ? parallelText + " | " + bt("preload_current_done", { labels: recentLoadedPreview })
             : parallelText;
         } else if (loadingItem) {
-          refs.current.textContent = bt("preload_current_now", { label: loadingItem.label });
+          currentText = bt("preload_current_now", { label: loadingItem.label });
         } else if (hasStagingGap) {
-          refs.current.textContent = recentLoadedPreview
+          currentText = recentLoadedPreview
             ? bt("preload_current_wait_stage", { labels: recentLoadedPreview })
             : bt("preload_current_wait_core");
         } else if (loaded >= total && total > 0) {
-          refs.current.textContent = bt("preload_current_wait_mount");
-        } else {
-          refs.current.textContent = "";
+          currentText = bt("preload_current_wait_mount");
         }
+        if (!criticalFailedItem && optionalFailedItems.length) {
+          var optionalFailedPreview = optionalFailedItems
+            .slice(0, 2)
+            .map(function (entry) {
+              return entry.label;
+            })
+            .join(bt("list_sep"));
+          var optionalFailedText = bt("preload_current_optional_failed", {
+            label: optionalFailedPreview,
+          });
+          currentText = currentText ? currentText + " | " + optionalFailedText : optionalFailedText;
+        }
+        refs.current.textContent = currentText;
       }
       if (refs.help) {
-        if (failedItem) {
+        if (criticalFailedItem) {
           refs.help.textContent = "";
         } else if (loaded < total && stagnantMs >= preloadLongHelpStallMs) {
           refs.help.textContent = bt("preload_help_long");
@@ -1094,9 +1230,9 @@
     }, 1000);
 
     var scriptLoadRegistry = new Map();
-    var loadScript = function (src) {
+    var loadScript = function (src, options) {
       var requestSrc = applyBootCacheBust(src);
-      var key = ensureResource(src, "script");
+      var key = ensureResource(src, "script", options);
       if (scriptLoadRegistry.has(key)) {
         return scriptLoadRegistry.get(key);
       }
@@ -1322,12 +1458,33 @@
 
     var cssPromise = Promise.all(cssFiles.map(loadStyle));
     var vuePromise = loadScript("./vendor/vue.global.prod.js");
-    var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js").catch(function () {
+    var pinyinOptionalOptions = { optional: true, featureKey: "pinyin" };
+    var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions).catch(function () {
+      var firstEntry = resourceState.get(normalizeResourceKey("./vendor/pinyin-pro.min.js"));
+      if (firstEntry) {
+        reportOptionalResourceFailure(firstEntry);
+      } else {
+        reportOptionalResourceFailure({
+          optional: true,
+          label: "./vendor/pinyin-pro.min.js",
+          featureKey: "pinyin",
+          src: "./vendor/pinyin-pro.min.js",
+        });
+      }
       return new Promise(function (resolve) {
         setTimeout(function () {
-          loadScript("./vendor/pinyin-pro.min.js")
+          loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions)
             .catch(function () {
-              // non-blocking optional dependency
+              var entry = resourceState.get(normalizeResourceKey("./vendor/pinyin-pro.min.js"));
+              if (entry) {
+                reportOptionalResourceFailure(entry);
+              } else {
+                reportOptionalResourceFailure({
+                  optional: true,
+                  label: "./vendor/pinyin-pro.min.js",
+                  featureKey: "pinyin",
+                });
+              }
             })
             .finally(resolve);
         }, 1200);

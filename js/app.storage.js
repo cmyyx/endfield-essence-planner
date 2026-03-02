@@ -719,6 +719,29 @@
       return next;
     };
 
+    const getUrlSelectedWeaponNames = () => {
+      if (typeof window === "undefined") return [];
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        if (!params.has("weapons") && !params.has("weapon")) return [];
+        const names = [];
+        const packed = params.get("weapons");
+        if (packed) {
+          names.push(...packed.split(","));
+        }
+        const repeated = params.getAll("weapon");
+        if (repeated.length) {
+          names.push(...repeated);
+        }
+        if (!names.length) return [];
+        const unique = Array.from(new Set(names.map((name) => String(name || "").trim()).filter(Boolean)));
+        return unique.filter((name) => weaponNameSet.has(name));
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const urlSelectedWeaponNames = getUrlSelectedWeaponNames();
     let restoredFilterPanelPreference = false;
     const shouldCollapseFilterPanelByDefault = () => {
       if (typeof window === "undefined") return false;
@@ -768,9 +791,32 @@
         }
       }
     } catch (error) {
-      reportStorageIssue("storage.read", state.uiStateStorageKey, error, {
-        scope: "restore-ui-state",
-      });
+      const isJsonParseError =
+        error &&
+        (error.name === "SyntaxError" ||
+          /json|unexpected token|unterminated/i.test(String(error.message || "")));
+      const shouldRepairFromUrl = isJsonParseError && urlSelectedWeaponNames.length > 0;
+      if (shouldRepairFromUrl) {
+        try {
+          state.selectedNames.value = urlSelectedWeaponNames.slice();
+          writeJsonStorageWithVerify(
+            state.uiStateStorageKey,
+            { selectedNames: urlSelectedWeaponNames.slice() },
+            { scope: "repair-ui-state-from-url", note: "repair invalid planner-ui-state via url weapons" }
+          );
+        } catch (repairError) {
+          reportStorageIssue("storage.write", state.uiStateStorageKey, repairError, {
+            scope: "repair-ui-state-from-url",
+          });
+          reportStorageIssue("storage.read", state.uiStateStorageKey, error, {
+            scope: "restore-ui-state",
+          });
+        }
+      } else {
+        reportStorageIssue("storage.read", state.uiStateStorageKey, error, {
+          scope: "restore-ui-state",
+        });
+      }
     }
 
     try {

@@ -120,8 +120,12 @@
 
     const runtimeWarningLogLimit = 20;
     const runtimeWarningDedupWindowMs = 4000;
+    const optionalFailureQueueKey = "__bootOptionalLoadFailures";
+    const optionalFailureEventName = "planner:optional-resource-failed";
+    let optionalFailurePollTimer = null;
     let lastRuntimeWarningSignature = "";
     let lastRuntimeWarningAt = 0;
+    const seenOptionalFailureSignatures = new Set();
     const nowIsoString = () => new Date().toISOString();
     const appUtils =
       typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
@@ -143,10 +147,15 @@
       const scope = meta && meta.scope ? String(meta.scope) : "init-ui";
       const operation = meta && meta.operation ? String(meta.operation) : "runtime.init";
       const key = meta && meta.key ? String(meta.key) : "app.ui:onMounted";
+      const title = meta && meta.title ? String(meta.title) : "页面初始化异常";
+      const summary =
+        meta && meta.summary
+          ? String(meta.summary)
+          : "页面初始化阶段发生异常，部分功能可能不可用。";
       return {
         id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-        title: "页面初始化异常",
-        summary: "页面初始化阶段发生异常，部分功能可能不可用。",
+        title,
+        summary,
         occurredAt: nowIsoString(),
         operation,
         key,
@@ -187,7 +196,8 @@
       ) {
         return;
       }
-      if (runtimeWarningIgnored && runtimeWarningIgnored.value) {
+      const forceShow = Boolean(meta && meta.forceShow);
+      if (!forceShow && runtimeWarningIgnored && runtimeWarningIgnored.value) {
         return;
       }
       const entry = buildRuntimeWarningEntry(error, meta);
@@ -208,6 +218,91 @@
       );
       runtimeWarningLogs.value = nextLogs.slice(0, runtimeWarningLogLimit);
       showRuntimeWarningModal.value = true;
+    };
+    const flushBootOptionalFailureQueue = (incomingItems) => {
+      const queued =
+        incomingItems && Array.isArray(incomingItems)
+          ? incomingItems
+          : typeof window !== "undefined" && Array.isArray(window[optionalFailureQueueKey])
+          ? window[optionalFailureQueueKey]
+          : [];
+      if (!queued.length) return;
+      if (typeof window !== "undefined" && window[optionalFailureQueueKey] === queued) {
+        window[optionalFailureQueueKey] = [];
+      }
+      const normalized = [];
+      queued.forEach((item) => {
+        if (!item || typeof item !== "object") return;
+        const featureKey = String(item.featureKey || "").trim();
+        const resourceLabel = String(item.label || item.src || "").trim();
+        const signature = `${featureKey}|${resourceLabel}`;
+        if (!resourceLabel || seenOptionalFailureSignatures.has(signature)) return;
+        seenOptionalFailureSignatures.add(signature);
+        normalized.push({
+          featureKey,
+          featureLabel: String(item.featureLabel || "").trim(),
+          resourceLabel,
+        });
+      });
+      if (!normalized.length) return;
+      const featureLabels = Array.from(
+        new Set(
+          normalized
+            .filter((item) => item.featureKey || item.featureLabel)
+            .map((item) => {
+              const featureKey = item.featureKey;
+              if (typeof state.t !== "function") return featureKey || item.featureLabel;
+              if (!featureKey) return item.featureLabel;
+              const i18nKey = `optional_feature_${featureKey}`;
+              const translated = state.t(i18nKey);
+              if (translated && translated !== i18nKey) return translated;
+              return item.featureLabel || featureKey;
+            })
+        )
+      );
+      const resourceLabels = Array.from(new Set(normalized.map((item) => item.resourceLabel)));
+      const detailLines = [];
+      if (featureLabels.length && typeof state.t === "function") {
+        detailLines.push(
+          state.t("失败功能：{features}", {
+            features: featureLabels.join(", "),
+          })
+        );
+      }
+      if (resourceLabels.length && typeof state.t === "function") {
+        detailLines.push(
+          state.t("失败资源：{resources}", {
+            resources: resourceLabels.join(", "),
+          })
+        );
+      }
+      if (typeof state.t === "function") {
+        detailLines.push(state.t("影响说明：仅影响可选功能，不影响核心功能。"));
+      }
+      const firstFeature = featureLabels[0] || "";
+      const firstResource = resourceLabels[0] || "optional-resource";
+      const messageParts = [];
+      if (firstFeature) {
+        messageParts.push(firstFeature);
+      }
+      if (firstResource) {
+        messageParts.push(firstResource);
+      }
+      const error = new Error(messageParts.join(" / ") || "optional resource failed");
+      error.name = "OptionalResourceLoadError";
+      showUiInitWarning(error, {
+        scope: "boot.optional-resource",
+        operation: "optional.load",
+        key: resourceLabels.join(", ") || "optional-resource",
+        title: "可选功能加载失败",
+        summary: "部分可选功能未能加载，页面主体仍可继续使用。",
+        note: detailLines.join("\n"),
+        forceShow: true,
+      });
+    };
+    const handleOptionalFailureEvent = (event) => {
+      if (!event) return;
+      flushBootOptionalFailureQueue();
     };
 
     const dismissRuntimeWarning = () => {
@@ -698,6 +793,13 @@
       };
       state.appReady.value = true;
       try {
+        if (typeof window !== "undefined") {
+          window.addEventListener(optionalFailureEventName, handleOptionalFailureEvent);
+        }
+        flushBootOptionalFailureQueue();
+        optionalFailurePollTimer = setInterval(() => {
+          flushBootOptionalFailureQueue();
+        }, 1200);
         bindSystemThemeListener();
         applyTheme(state.themePreference.value || "auto");
         syncAdPreviewFlags();
@@ -728,6 +830,7 @@
         if (typeof console !== "undefined" && typeof console.error === "function") {
           console.error("[initUi:onMounted] failed, fallback to finalize preload", error);
         }
+        flushBootOptionalFailureQueue();
         showUiInitWarning(error, { scope: "init-ui.onMounted" });
       } finally {
         runAfterLayout(finalizePreload);
@@ -772,9 +875,14 @@
       if (typeof window !== "undefined") {
         window.removeEventListener("scroll", handleBackToTopScroll);
         window.removeEventListener("slotfeed:failed", handleAdFailed);
+        window.removeEventListener(optionalFailureEventName, handleOptionalFailureEvent);
       }
       clearAdScriptRetry();
       clearBackToTopTimer();
+      if (optionalFailurePollTimer) {
+        clearInterval(optionalFailurePollTimer);
+        optionalFailurePollTimer = null;
+      }
       document.removeEventListener("click", handleDocClick);
       document.removeEventListener("keydown", handleDocKeydown);
       if (preloadBackgroundFadeTimer) {

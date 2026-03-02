@@ -185,7 +185,7 @@
                 {{ t("导出数据与诊断") }}
               </button>
               <button class="about-button migration-action migration-action-warn" @click="refreshUnifiedException">
-                {{ activeUnifiedExceptionKind === "runtime" ? t("立即刷新") : t("清理数据并刷新") }}
+                {{ activeUnifiedExceptionKind === "runtime" ? t("刷新页面") : t("清理数据并刷新") }}
               </button>
               <a class="storage-feedback-button" :href="storageFeedbackUrl" target="_blank" rel="noreferrer">
                 {{ t("反馈问题") }}

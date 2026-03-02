@@ -445,12 +445,11 @@
       setCurrentVersionInfo(getLocalVersionInfo());
       applyGameCompatState();
       if (typeof state.ensureContentLoaded === "function") {
-        state
-          .ensureContentLoaded()
-          .catch(() => false)
+        Promise.resolve(state.ensureContentLoaded())
           .then(() => {
             applyGameCompatState();
-          });
+          })
+          .catch(() => false);
       }
       firstCheckTimer = window.setTimeout(() => {
         firstCheckTimer = null;

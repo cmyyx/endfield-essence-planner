@@ -53,9 +53,9 @@
         normalizeSearchText(value).replace(/[^a-z0-9\u3400-\u9fff]+/g, "");
       const normalizeSearchLatin = (value) =>
         normalizeSearchText(value)
+          .replace(/ü/g, "v")
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
-          .replace(/ü/g, "v")
           .replace(/[^a-z0-9]+/g, "");
       const safeToPinyin = (value, options) => {
         if (!value || !hasChineseChar(value)) return "";

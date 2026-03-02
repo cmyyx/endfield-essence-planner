@@ -2,7 +2,7 @@ window.CONTENT = {
   gameCompat: {
     supportedVersion: "1.0",
     nextVersion: "1.1",
-    nextVersionAt: "2026-02-12T04:00:00Z",
+    nextVersionAt: "2026-03-12T04:00:00Z",
   },
   announcement: {
     version: "1.5.0",

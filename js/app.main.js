@@ -580,6 +580,13 @@
             (state.showRuntimeWarningModal && state.showRuntimeWarningModal.value)
         )
       );
+      const isOptionalUnifiedException = computed(() => {
+        const current = unifiedExceptionCurrent.value;
+        if (!current || current.__kind !== "runtime") return false;
+        const operation = String(current.operation || "");
+        const scope = String(current.scope || "");
+        return operation === "optional.load" || scope === "boot.optional-resource";
+      });
       const unifiedExceptionLogs = computed(() => {
         const runtimeLogs =
           state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)
@@ -650,6 +657,14 @@
         }
       };
       const ignoreUnifiedException = () => {
+        if (
+          activeUnifiedExceptionKind.value === "runtime" &&
+          isOptionalUnifiedException.value &&
+          typeof state.dismissRuntimeWarning === "function"
+        ) {
+          state.dismissRuntimeWarning();
+          return;
+        }
         if (
           activeUnifiedExceptionKind.value === "runtime" &&
           typeof state.requestIgnoreRuntimeWarnings === "function"
