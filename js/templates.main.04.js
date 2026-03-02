@@ -287,6 +287,24 @@
         </div>
       </transition>
 
+      <button
+        type="button"
+        class="version-debug-badge"
+        :class="{ 'is-update-toast-active': showUpdatePrompt }"
+        :title="versionCopyFeedbackText || t('点击复制完整版本信息')"
+        @click="copyCurrentVersionInfo"
+      >
+        {{ updateCurrentVersionText || t("当前版本获取失败") }}
+      </button>
+      <div
+        v-if="versionCopyFeedbackText"
+        class="version-debug-copy-tip"
+        :class="{ 'is-update-toast-active': showUpdatePrompt }"
+        aria-live="polite"
+      >
+        {{ versionCopyFeedbackText }}
+      </div>
+
       <transition name="fade-scale">
         <div v-if="showUpdatePrompt" class="update-toast" role="status" aria-live="polite">
           <div class="update-toast-card">
@@ -297,7 +315,7 @@
             <div class="update-version-grid">
               <div class="update-version-row">
                 <span class="update-version-label">{{ t("当前版本") }}</span>
-                <span class="update-version-value">{{ updateCurrentVersionText || t("未知") }}</span>
+                <span class="update-version-value">{{ updateCurrentVersionText || t("当前版本获取失败") }}</span>
               </div>
               <div class="update-version-row">
                 <span class="update-version-label">{{ t("最新版本") }}</span>

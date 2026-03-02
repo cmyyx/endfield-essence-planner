@@ -29,25 +29,23 @@
       const index = new Map();
       baseSortedWeapons.forEach((weapon) => {
         const characters = weaponCharacterMap.get(weapon.name) || [];
-        const searchText = normalizeText(
-          [
-            weapon.name,
-            state.tTerm("weapon", weapon.name),
-            weapon.short,
-            state.tTerm("short", weapon.short),
-            weapon.type,
-            state.tTerm("type", weapon.type),
-            weapon.s1,
-            state.tTerm("s1", weapon.s1),
-            weapon.s2,
-            state.tTerm("s2", weapon.s2),
-            weapon.s3,
-            state.tTerm("s3", weapon.s3),
-            characters.join(" "),
-            characters.map((name) => state.tTerm("character", name)).join(" "),
-          ].join(" ")
-        );
-        index.set(weapon.name, searchText);
+        const searchEntry = buildSearchEntry([
+          { value: weapon.name, typo: true },
+          { value: state.tTerm("weapon", weapon.name), typo: true },
+          { value: weapon.short, typo: false },
+          { value: state.tTerm("short", weapon.short), typo: false },
+          { value: weapon.type, typo: false },
+          { value: state.tTerm("type", weapon.type), typo: false },
+          { value: weapon.s1, tier: "secondary" },
+          { value: state.tTerm("s1", weapon.s1), tier: "secondary" },
+          { value: weapon.s2, tier: "secondary" },
+          { value: state.tTerm("s2", weapon.s2), tier: "secondary" },
+          { value: weapon.s3, tier: "secondary" },
+          { value: state.tTerm("s3", weapon.s3), tier: "secondary" },
+          ...characters.map((name) => ({ value: name, typo: false })),
+          ...characters.map((name) => ({ value: state.tTerm("character", name), typo: false })),
+        ]);
+        index.set(weapon.name, searchEntry);
       });
       weaponSearchIndex.value = index;
     };

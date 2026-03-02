@@ -58,19 +58,17 @@
       const sub1 = parseAttr(normalizeGearAttrText(gear && gear.sub1));
       const sub2 = parseAttr(normalizeGearAttrText(gear && gear.sub2));
       const special = parseAttr(normalizeGearAttrText(gear && gear.special));
-      const searchText = normalizeText(
-        [
-          gear && gear.name,
-          setName,
-          part,
-          sub1 ? sub1.display : "",
-          sub2 ? sub2.display : "",
-          special ? special.display : "",
-          sub1 ? sub1.key : "",
-          sub2 ? sub2.key : "",
-          special ? special.key : "",
-        ].join(" ")
-      );
+      const searchEntry = buildSearchEntry([
+        { value: gear && gear.name, typo: true },
+        { value: setName, typo: false },
+        { value: part, typo: false },
+        { value: sub1 ? sub1.display : "", tier: "secondary" },
+        { value: sub2 ? sub2.display : "", tier: "secondary" },
+        { value: special ? special.display : "", tier: "secondary" },
+        { value: sub1 ? sub1.key : "", tier: "secondary" },
+        { value: sub2 ? sub2.key : "", tier: "secondary" },
+        { value: special ? special.key : "", tier: "secondary" },
+      ]);
       return {
         ...gear,
         rarity: Number(gear && gear.rarity) || 5,
@@ -79,7 +77,8 @@
         sub1,
         sub2,
         special,
-        searchText,
+        searchText: searchEntry.searchText || "",
+        searchEntry,
       };
     };
 
@@ -236,9 +235,19 @@
     };
 
     const gearRefiningFilteredGears = computed(() => {
-      const query = normalizeText(gearRefiningQuery.value);
-      if (!query) return gearList;
-      return gearList.filter((gear) => gear.searchText.includes(query));
+      const queryMeta = createSearchQueryMeta(gearRefiningQuery.value);
+      if (!queryMeta.active) return gearList;
+      const matched = [];
+      gearList.forEach((gear, index) => {
+        const score = scoreSearchEntry(gear.searchEntry, queryMeta);
+        if (score <= 0) return;
+        matched.push({ gear, score, index });
+      });
+      matched.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.index - b.index;
+      });
+      return matched.map((item) => item.gear);
     });
 
     const gearRefiningGroupedSets = computed(() => {

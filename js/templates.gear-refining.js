@@ -9,14 +9,14 @@
   <div class="panel-title">
     <h2>{{ t("装备列表") }}</h2>
   </div>
-  <div class="search-box">
+  <label class="search-box">
     <span>🔍</span>
     <input
       :value="query"
-      :placeholder="t('搜索装备 / 套装 / 属性...')"
+      :placeholder="t('搜索装备 / 套装 / 属性（仅中文支持拼音/首字母）...')"
       @input="$emit('update:query', $event.target.value)"
     />
-  </div>
+  </label>
   <div v-if="groupedSets.length" class="gear-refining-set-list">
     <section
       v-for="setGroup in groupedSets"

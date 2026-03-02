@@ -158,10 +158,10 @@
                 <div class="panel-title">
                   <h2>{{ t("武器选择") }}</h2>
                 </div>
-                <div class="search-box match-search">
+                <label class="search-box match-search">
                   <span>🔍</span>
-                  <input v-model="matchQuery" :placeholder="t('搜索武器...')" />
-                </div>
+                  <input v-model="matchQuery" :placeholder="t('搜索武器（仅中文支持拼音/首字母）...')" />
+                </label>
                 <div class="weapon-list match-weapon-grid match-source-grid">
                   <button
                     v-for="weapon in matchSourceList"
@@ -224,6 +224,9 @@
                         "用于查找与目标武器相同词条的其他武器，帮助完成“终极武器奖章”的镀层条件（RANK 需要达到 25），可借助低星同词条武器提升潜能并补足第三词条等级。"
                       )
                     }}
+                  </p>
+                  <p class="match-info-text">
+                    {{ t("此界面不支持修改武器/基质管拥有状态；如需修改请前往“基质规划”。") }}
                   </p>
                 </div>
                 <div v-if="!matchSourceWeapon" class="empty-state match-empty">

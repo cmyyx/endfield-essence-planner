@@ -2,7 +2,10 @@ window.I18N = window.I18N || {};
 window.I18N["en"] = {
   "strings": {
     "搜索武器 / 属性 / 角色...": "Search weapons / attributes / characters...",
+    "搜索武器 / 属性 / 角色（仅中文支持拼音/首字母）...": "Search weapons / attributes / characters...",
     "搜索武器...": "Search weapons...",
+    "搜索武器（仅中文支持拼音/首字母）...": "Search weapons...",
+    "搜索装备 / 套装 / 属性（仅中文支持拼音/首字母）...": "Search gear / set / attributes...",
     "搜索六星/五星武器...": "Search 6★/5★ weapons...",
     "六星/五星武器": "6★/5★ Weapons",
     "四星对照": "4★ Match",
@@ -18,6 +21,7 @@ window.I18N["en"] = {
     "手机端可通过上方标签切换“武器选择 / 词条对照”，并可下滑继续浏览列表。": "On mobile, switch between “Weapon Selection / Trait Match” via the tabs above, then scroll down to continue browsing.",
     "功能说明": "Purpose",
     "用于查找与目标武器相同词条的其他武器，帮助完成“终极武器奖章”的镀层条件（RANK 需要达到 25），可借助低星同词条武器提升潜能并补足第三词条等级。": "Find other weapons with identical traits to meet the 'Ultimate Weapon Medal' plating requirement (RANK 25), and use lower-rarity matches to raise potential and fill the third-trait level.",
+    "此界面不支持修改武器/基质管拥有状态；如需修改请前往“基质规划”。": "This page does not support editing weapon/essence ownership. To modify ownership, go to Essence Planning.",
     "赞助支持": "Sponsor Support",
     "您的赞助将用于服务器维护，功能开发，内容创作": "Your sponsorship will be used for server maintenance, feature development, and content creation.",
     "支付宝": "Alipay",
@@ -415,7 +419,13 @@ window.I18N["en"] = {
     "检测到新版本": "New version detected",
     "检测到站点已有更新，刷新后可使用最新功能与修复。": "A newer site version is available. Refresh to get the latest features and fixes.",
     "当前版本": "Current version",
+    "当前版本获取失败": "Failed to load current version",
+    "点击复制完整版本信息": "Click to copy full version info",
+    "版本信息已复制": "Version info copied",
+    "复制失败，请手动复制": "Copy failed, please copy manually",
     "最新版本": "Latest version",
+    "构建ID": "Build ID",
+    "公告版本": "Announcement version",
     "发布时间": "Published at",
     "立即刷新": "Refresh now",
     "稍后提醒": "Remind me later"

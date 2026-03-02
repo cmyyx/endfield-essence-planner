@@ -37,6 +37,12 @@ const toCompactTime = (date) => {
   );
 };
 
+const toDisplayTime = (buildId) => {
+  const token = String(buildId || "").trim();
+  if (!/^\d{14}$/.test(token)) return "";
+  return `${token.slice(2, 8)}-${token.slice(8, 12)}`;
+};
+
 const main = async () => {
   const now = new Date();
   const publishedAt = now.toISOString();
@@ -44,7 +50,10 @@ const main = async () => {
   const announcementVersion = await extractAnnouncementVersion();
   const timeSuffix = toCompactTime(now);
   const buildId = timeSuffix;
-  const displayVersion = announcementVersion ? `${announcementVersion}+${buildId}` : buildId;
+  const displayTime = toDisplayTime(buildId);
+  const displayVersion = announcementVersion
+    ? `v${announcementVersion}@${displayTime || buildId}`
+    : `v0.0.0@${displayTime || buildId}`;
 
   const payload = {
     buildId,

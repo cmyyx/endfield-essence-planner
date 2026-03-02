@@ -896,6 +896,8 @@
         updateCurrentVersionText: state.updateCurrentVersionText,
         updateLatestVersionText: state.updateLatestVersionText,
         updateLatestPublishedAt: state.updateLatestPublishedAt,
+        versionCopyFeedbackText: state.versionCopyFeedbackText,
+        copyCurrentVersionInfo: state.copyCurrentVersionInfo,
         dismissUpdatePrompt: state.dismissUpdatePrompt,
         reloadToLatestVersion: state.reloadToLatestVersion,
         skipNotice: state.skipNotice,

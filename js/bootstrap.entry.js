@@ -14,6 +14,7 @@
   ];
   var startupScripts = [
     "./vendor/vue.global.prod.js",
+    "./vendor/pinyin-pro.min.js",
     "./data/version.js",
     "./data/dungeons.js",
     "./data/weapons.js",
@@ -1321,6 +1322,7 @@
 
     var cssPromise = Promise.all(cssFiles.map(loadStyle));
     var vuePromise = loadScript("./vendor/vue.global.prod.js");
+    var pinyinPromise = loadScript("./vendor/pinyin-pro.min.js");
     var dataPromise = Promise.all([
       loadScript("./data/version.js"),
       loadScript("./data/dungeons.js"),
@@ -1375,6 +1377,7 @@
       shellReadyPromise,
       cssPromise,
       vuePromise,
+      pinyinPromise,
       dataPromise,
       scriptChainPromise,
     ])

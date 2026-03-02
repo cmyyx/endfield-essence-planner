@@ -185,6 +185,8 @@
     state.updateCurrentVersionText = ref("");
     state.updateLatestVersionText = ref("");
     state.updateLatestPublishedAt = ref("");
+    state.versionCopyFeedbackText = ref("");
+    state.copyCurrentVersionInfo = () => {};
 
     state.tutorialVersion = "1.0.0";
     state.tutorialActive = ref(false);

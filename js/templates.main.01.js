@@ -276,10 +276,10 @@
           </div>
 
           <div class="weapon-list-anchor" aria-hidden="true"></div>
-          <div class="search-box">
+          <label class="search-box">
             <span>🔍</span>
-            <input v-model="searchQuery" :placeholder="t('搜索武器 / 属性 / 角色...')" />
-          </div>
+            <input v-model="searchQuery" :placeholder="t('搜索武器 / 属性 / 角色（仅中文支持拼音/首字母）...')" />
+          </label>
 
           <div class="filter-toolbar">
             <div class="filter-toolbar-main">

@@ -1046,6 +1046,57 @@
         color: #d9fffb;
       }
 
+      .version-debug-badge {
+        appearance: none;
+        -webkit-appearance: none;
+        text-align: left;
+        position: fixed;
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        left: 8px;
+        max-width: min(78vw, 220px);
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(12, 18, 28, 0.56);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.16);
+        color: rgba(232, 241, 250, 0.82);
+        font-size: 10px;
+        line-height: 1.35;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        pointer-events: auto;
+        user-select: none;
+        cursor: copy;
+        z-index: 41;
+        backdrop-filter: blur(2px);
+      }
+
+      .version-debug-badge.is-update-toast-active {
+        z-index: 38;
+      }
+
+      .version-debug-copy-tip {
+        position: fixed;
+        left: 10px;
+        bottom: calc(34px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        max-width: min(70vw, 220px);
+        padding: 2px 6px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(12, 18, 28, 0.72);
+        color: rgba(232, 241, 250, 0.92);
+        font-size: 10px;
+        line-height: 1.3;
+        pointer-events: none;
+        z-index: 41;
+      }
+
+      .version-debug-copy-tip.is-update-toast-active {
+        z-index: 38;
+      }
+
       .update-toast {
         position: fixed;
         right: 14px;
@@ -1147,6 +1198,73 @@
         border-color: rgba(243, 108, 108, 0.42);
         background: rgba(26, 14, 18, 0.92);
         color: #e6e9ef;
+      }
+
+      [data-theme="light"] .version-debug-badge {
+        border-color: rgba(22, 44, 72, 0.18);
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: 0 5px 14px rgba(44, 77, 118, 0.14);
+        color: rgba(31, 56, 86, 0.78);
+      }
+
+      [data-theme="light"] .version-debug-copy-tip {
+        border-color: rgba(22, 44, 72, 0.2);
+        background: rgba(255, 255, 255, 0.76);
+        color: rgba(31, 56, 86, 0.86);
+      }
+
+      @media (max-width: 640px) {
+        .version-debug-badge {
+          left: 6px;
+          bottom: calc(6px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          max-width: min(64vw, 180px);
+          padding: 2px 7px;
+          font-size: 10px;
+        }
+
+        .version-debug-copy-tip {
+          left: 8px;
+          bottom: calc(30px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          max-width: min(58vw, 170px);
+          padding: 2px 5px;
+        }
+
+        .update-toast {
+          right: 8px;
+          bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          width: calc(100vw - 16px);
+        }
+
+        .update-toast-card {
+          border-radius: 12px;
+          padding: 10px;
+        }
+
+        .update-check-desc {
+          margin-top: 6px;
+          font-size: 12px;
+        }
+
+        .update-version-grid {
+          margin-top: 8px;
+          padding: 8px 9px;
+          gap: 6px;
+        }
+
+        .update-version-label,
+        .update-version-value {
+          font-size: 11px;
+        }
+
+        .update-check-actions {
+          margin-top: 8px;
+        }
+
+        .update-check-actions .about-button {
+          min-height: 32px;
+          padding: 6px 10px;
+          font-size: 12px;
+        }
       }
 
       [data-theme="light"] .update-toast-card {
@@ -1907,6 +2025,12 @@
         background: rgba(8, 12, 18, 0.7);
         border: 1px solid var(--stroke);
         margin-bottom: 16px;
+        cursor: text;
+      }
+
+      .search-box > span {
+        user-select: none;
+        pointer-events: none;
       }
 
       .search-box input {

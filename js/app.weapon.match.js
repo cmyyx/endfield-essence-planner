@@ -16,33 +16,41 @@
     const sourceWeapons = allWeapons;
     const sourceWeaponMap = new Map(sourceWeapons.map((weapon) => [weapon.name, weapon]));
 
-    const getSearchText = (weapon) => {
+    const getSearchEntry = (weapon) => {
       const index = state.weaponSearchIndex && state.weaponSearchIndex.value;
       if (index && index.has(weapon.name)) {
         return index.get(weapon.name);
       }
-      return normalizeText(
-        [
-          weapon.name,
-          state.tTerm("weapon", weapon.name),
-          weapon.short,
-          state.tTerm("short", weapon.short),
-          weapon.type,
-          state.tTerm("type", weapon.type),
-          weapon.s1,
-          state.tTerm("s1", weapon.s1),
-          weapon.s2,
-          state.tTerm("s2", weapon.s2),
-          weapon.s3,
-          state.tTerm("s3", weapon.s3),
-        ].join(" ")
-      );
+      return buildSearchEntry([
+        { value: weapon.name, typo: true },
+        { value: state.tTerm("weapon", weapon.name), typo: true },
+        { value: weapon.short, typo: false },
+        { value: state.tTerm("short", weapon.short), typo: false },
+        { value: weapon.type, typo: false },
+        { value: state.tTerm("type", weapon.type), typo: false },
+        { value: weapon.s1, tier: "secondary" },
+        { value: state.tTerm("s1", weapon.s1), tier: "secondary" },
+        { value: weapon.s2, tier: "secondary" },
+        { value: state.tTerm("s2", weapon.s2), tier: "secondary" },
+        { value: weapon.s3, tier: "secondary" },
+        { value: state.tTerm("s3", weapon.s3), tier: "secondary" },
+      ]);
     };
 
     const matchSourceList = computed(() => {
-      const query = normalizeText(matchQuery.value);
-      if (!query) return sourceWeapons;
-      return sourceWeapons.filter((weapon) => getSearchText(weapon).includes(query));
+      const queryMeta = createSearchQueryMeta(matchQuery.value);
+      if (!queryMeta.active) return sourceWeapons;
+      const matched = [];
+      sourceWeapons.forEach((weapon, index) => {
+        const score = scoreSearchEntry(getSearchEntry(weapon), queryMeta);
+        if (score <= 0) return;
+        matched.push({ weapon, score, index });
+      });
+      matched.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.index - b.index;
+      });
+      return matched.map((item) => item.weapon);
     });
 
     const matchSourceWeapon = computed(() => sourceWeaponMap.get(matchSourceName.value) || null);

@@ -213,9 +213,9 @@
       return "";
     };
 
-    const matchesSearchQuery = (weapon, query, searchIndex) => {
-      if (!query) return true;
-      return (searchIndex.get(weapon.name) || "").includes(query);
+    const matchesSearchQuery = (weapon, queryMeta, searchIndex) => {
+      if (!queryMeta || !queryMeta.active) return true;
+      return scoreSearchEntry(searchIndex.get(weapon.name), queryMeta) > 0;
     };
 
     const matchesCrossGroupFilters = (weapon, group) => {
@@ -231,7 +231,7 @@
       return true;
     };
 
-    const buildFilterOptionEntry = (group, value, query, searchIndex, config) => {
+    const buildFilterOptionEntry = (group, value, queryMeta, searchIndex, config) => {
       const list = Array.isArray(state.baseSortedWeapons) && state.baseSortedWeapons.length
         ? state.baseSortedWeapons
         : weapons;
@@ -241,7 +241,7 @@
       const hiddenReasonSet = new Set();
       for (let i = 0; i < list.length; i += 1) {
         const weapon = list[i];
-        if (!matchesSearchQuery(weapon, query, searchIndex)) continue;
+        if (!matchesSearchQuery(weapon, queryMeta, searchIndex)) continue;
         if (!matchesCrossGroupFilters(weapon, group)) continue;
         if (weapon[group] !== value) continue;
         fullCount += 1;
@@ -284,31 +284,31 @@
     };
 
     const s1Options = computed(() => {
-      const query = normalizeText(state.searchQuery.value);
+      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const values = uniqueSorted(weapons.map((weapon) => weapon.s1), (a, b) => {
         return getS1OrderIndex(a) - getS1OrderIndex(b);
       });
       return values.map((value) =>
-        buildFilterOptionEntry("s1", value, query, searchIndex, config)
+        buildFilterOptionEntry("s1", value, queryMeta, searchIndex, config)
       );
     });
 
     const s2Options = computed(() => {
-      const query = normalizeText(state.searchQuery.value);
+      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const values = uniqueSorted(weapons.map((weapon) => weapon.s2), (a, b) => {
         return a.localeCompare(b, "zh-Hans-CN");
       });
       return values.map((value) =>
-        buildFilterOptionEntry("s2", value, query, searchIndex, config)
+        buildFilterOptionEntry("s2", value, queryMeta, searchIndex, config)
       );
     });
 
     const s3OptionEntries = computed(() => {
-      const query = normalizeText(state.searchQuery.value);
+      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const weaponValues = weapons.map((weapon) => weapon.s3).filter(Boolean);
@@ -323,7 +323,7 @@
         (a, b) => a.localeCompare(b, "zh-Hans-CN")
       );
       return values.map((value) =>
-        buildFilterOptionEntry("s3", value, query, searchIndex, config)
+        buildFilterOptionEntry("s3", value, queryMeta, searchIndex, config)
       );
     });
 
@@ -411,22 +411,29 @@
     );
 
     const filteredWeapons = computed(() => {
-      const query = normalizeText(state.searchQuery.value);
+      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
-      return state.baseSortedWeapons.filter((weapon) => {
-        const matchQuery = !query || (searchIndex.get(weapon.name) || "").includes(query);
-        if (!matchQuery) return false;
-        if (state.filterS1.value.length && !state.filterS1.value.includes(weapon.s1)) return false;
-        if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return false;
-        if (state.filterS3.value.length && !state.filterS3.value.includes(weapon.s3)) return false;
-        if (shouldHideInSelector(weapon, config)) return false;
-        return true;
+      const matched = [];
+      state.baseSortedWeapons.forEach((weapon, index) => {
+        const matchScore = queryMeta.active ? scoreSearchEntry(searchIndex.get(weapon.name), queryMeta) : 1;
+        if (queryMeta.active && matchScore <= 0) return;
+        if (state.filterS1.value.length && !state.filterS1.value.includes(weapon.s1)) return;
+        if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return;
+        if (state.filterS3.value.length && !state.filterS3.value.includes(weapon.s3)) return;
+        if (shouldHideInSelector(weapon, config)) return;
+        matched.push({ weapon, score: matchScore, index });
       });
+      if (!queryMeta.active) return matched.map((item) => item.weapon);
+      matched.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.index - b.index;
+      });
+      return matched.map((item) => item.weapon);
     });
 
     const hiddenInSelectorSummary = computed(() => {
-      const query = normalizeText(state.searchQuery.value);
+      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const list = Array.isArray(state.baseSortedWeapons) && state.baseSortedWeapons.length
@@ -437,7 +444,7 @@
       let essenceOwned = 0;
       let fourStar = 0;
       list.forEach((weapon) => {
-        if (!matchesSearchQuery(weapon, query, searchIndex)) return;
+        if (!matchesSearchQuery(weapon, queryMeta, searchIndex)) return;
         if (state.filterS1.value.length && !state.filterS1.value.includes(weapon.s1)) return;
         if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return;
         if (state.filterS3.value.length && !state.filterS3.value.includes(weapon.s3)) return;

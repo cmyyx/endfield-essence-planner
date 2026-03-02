@@ -21,8 +21,11 @@
     let firstCheckTimer = null;
     let checking = false;
     let lastCheckAt = 0;
+    let copyFeedbackTimer = null;
 
     const safeText = (value) => String(value == null ? "" : value).trim();
+    const getCurrentVersionLoadFailedText = () =>
+      (typeof state.t === "function" ? state.t("当前版本获取失败") : "current version load failed");
     const formatPublishedAtLocal = (value) => {
       const raw = safeText(value);
       if (!raw) return "";
@@ -67,13 +70,16 @@
       const buildId = safeText(info.buildId);
       const announcementVersion = safeText(info.announcementVersion);
       const fingerprint = safeText(info.fingerprint);
+      const buildTimeToken = extractBuildTimeToken(buildId);
 
-      if (announcementVersion && buildId) {
-        return `${announcementVersion} (${shortenToken(buildId)})`;
+      if (displayVersion) return displayVersion;
+      if (announcementVersion && /^\d{14}$/.test(buildTimeToken)) {
+        const shortTime = `${buildTimeToken.slice(2, 8)}-${buildTimeToken.slice(8, 12)}`;
+        return `v${announcementVersion}@${shortTime}`;
       }
+
       if (announcementVersion) return announcementVersion;
       if (buildId) return shortenToken(buildId);
-      if (displayVersion) return shortenToken(displayVersion);
       if (fingerprint) return shortenToken(fingerprint);
       return "";
     };
@@ -133,11 +139,81 @@
       });
     };
 
+    const buildVersionCopyText = (info) => {
+      if (!info) return getCurrentVersionLoadFailedText();
+      return [
+        `displayVersion: ${safeText(info.display) || safeText(info.displayVersion) || getCurrentVersionLoadFailedText()}`,
+        `buildId: ${safeText(info.buildId) || "n/a"}`,
+        `announcementVersion: ${safeText(info.announcementVersion) || "n/a"}`,
+        `publishedAt: ${safeText(info.publishedAt) || "n/a"}`,
+        `fingerprint: ${safeText(info.fingerprint) || "n/a"}`,
+      ].join("\n");
+    };
+
+    const clearCopyFeedbackTimer = () => {
+      if (copyFeedbackTimer) {
+        clearTimeout(copyFeedbackTimer);
+        copyFeedbackTimer = null;
+      }
+    };
+
+    const showCopyFeedback = (key) => {
+      if (
+        !state.versionCopyFeedbackText ||
+        typeof state.versionCopyFeedbackText.value === "undefined"
+      ) {
+        return;
+      }
+      state.versionCopyFeedbackText.value = typeof state.t === "function" ? state.t(key) : key;
+      clearCopyFeedbackTimer();
+      copyFeedbackTimer = window.setTimeout(() => {
+        copyFeedbackTimer = null;
+        if (state.versionCopyFeedbackText) {
+          state.versionCopyFeedbackText.value = "";
+        }
+      }, 1500);
+    };
+
+    const copyTextToClipboard = async (text) => {
+      const copyText = safeText(text);
+      if (!copyText) return false;
+      try {
+        if (
+          typeof navigator !== "undefined" &&
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText === "function"
+        ) {
+          await navigator.clipboard.writeText(copyText);
+          return true;
+        }
+      } catch (error) {
+        // fallback to legacy copy flow
+      }
+      if (typeof document === "undefined") return false;
+      const textarea = document.createElement("textarea");
+      textarea.value = copyText;
+      textarea.setAttribute("readonly", "readonly");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        // ignore copy errors
+      }
+      document.body.removeChild(textarea);
+      return copied;
+    };
+
     const setCurrentVersionInfo = (info) => {
       currentVersionInfo = info;
       state.updateCurrentVersionText.value =
         (currentVersionInfo && currentVersionInfo.display) ||
-        (typeof state.t === "function" ? state.t("未知") : "unknown");
+        getCurrentVersionLoadFailedText();
     };
 
     const setLatestVersionInfo = (info) => {
@@ -215,8 +291,17 @@
       window.location.reload();
     };
 
+    const copyCurrentVersionInfo = async () => {
+      if (!currentVersionInfo) {
+        setCurrentVersionInfo(getLocalVersionInfo());
+      }
+      const copied = await copyTextToClipboard(buildVersionCopyText(currentVersionInfo));
+      showCopyFeedback(copied ? "版本信息已复制" : "复制失败，请手动复制");
+    };
+
     state.dismissUpdatePrompt = dismissUpdatePrompt;
     state.reloadToLatestVersion = reloadToLatestVersion;
+    state.copyCurrentVersionInfo = copyCurrentVersionInfo;
 
     onMounted(() => {
       setCurrentVersionInfo(getLocalVersionInfo());
@@ -233,6 +318,10 @@
     });
 
     onBeforeUnmount(() => {
+      clearCopyFeedbackTimer();
+      if (state.versionCopyFeedbackText) {
+        state.versionCopyFeedbackText.value = "";
+      }
       if (checkTimer) {
         clearInterval(checkTimer);
         checkTimer = null;

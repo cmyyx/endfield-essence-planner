@@ -1,7 +1,7 @@
 window.__APP_VERSION_INFO = {
-  "buildId": "local-20260228100314",
-  "displayVersion": "1.4.1+local-20260228100314",
-  "announcementVersion": "1.4.1",
+  "buildId": "20260301143840",
+  "displayVersion": "v1.5.0@260301-1438",
+  "announcementVersion": "1.5.0",
   "fingerprint": "cmty-ep-2026-02-07",
-  "publishedAt": "2026-02-28T10:03:14.722Z"
+  "publishedAt": "2026-03-01T14:38:40.644Z"
 };
