@@ -172,6 +172,11 @@
                   v-for="item in unifiedExceptionLogs"
                   :key="item.id || [item.__kind, item.occurredAt, item.operation, item.key].join('|')"
                   class="storage-error-log-item"
+                  role="button"
+                  tabindex="0"
+                  @click="openUnifiedExceptionFromLog(item)"
+                  @keydown.enter.prevent="openUnifiedExceptionFromLog(item)"
+                  @keydown.space.prevent="openUnifiedExceptionFromLog(item)"
                 >
                   <span class="storage-error-log-time">{{ item.occurredAt }}</span>
                   <span class="storage-error-log-op">{{ item.operation }}</span>
@@ -325,6 +330,55 @@
       >
         {{ versionCopyFeedbackText }}
       </div>
+
+      <transition name="fade-scale">
+        <div
+          v-if="optionalFailureNotice"
+          class="update-toast"
+          role="status"
+          aria-live="polite"
+          :style="
+            showUpdatePrompt
+              ? { bottom: 'calc(196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
+              : null
+          "
+        >
+          <div class="update-toast-card">
+            <h3>{{ optionalFailureNotice.title || t(\"可选功能加载失败\") }}</h3>
+            <p class="update-check-desc">
+              {{
+                optionalFailureNotice.summary || t(\"部分可选功能未能加载，页面主体仍可继续使用。\")
+              }}
+            </p>
+            <p v-if="optionalFailureNotice.note" class="update-check-desc" style="white-space: pre-line;">
+              {{ optionalFailureNotice.note }}
+            </p>
+            <div class="about-actions update-check-actions">
+              <button class="about-button update-action-secondary" @click="openLatestOptionalFailureDetail">
+                {{ t(\"查看详情\") }}
+              </button>
+              <button class="about-button update-action-secondary" @click="dismissOptionalFailureNotice">
+                {{ t(\"稍后提醒\") }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <button
+        v-if="hasOptionalFailureHistory && !optionalFailureNotice"
+        type="button"
+        class="about-button update-action-secondary"
+        style="position: fixed; right: 14px; z-index: 39;"
+        :style="
+          showUpdatePrompt
+            ? { bottom: 'calc(196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
+            : { bottom: 'calc(14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px))' }
+        "
+        @click="openLatestOptionalFailureDetail"
+      >
+        {{ t(\"查看可选失败详情\") }}
+      </button>
 
       <transition name="fade-scale">
         <div v-if="showUpdatePrompt" class="update-toast" role="status" aria-live="polite">

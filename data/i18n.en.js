@@ -441,7 +441,9 @@ window.I18N["en"] = {
     "发布时间": "Published at",
     "刷新页面": "Refresh page",
     "立即刷新": "Refresh now",
-    "稍后提醒": "Remind me later"
+    "稍后提醒": "Remind me later",
+    "查看详情": "View details",
+    "查看可选失败详情": "View optional failure details"
   },
   "terms": {
     "s1": {
