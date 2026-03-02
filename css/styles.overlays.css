@@ -1164,9 +1164,9 @@
           14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
         );
         --overlay-update-base: calc(
-          196px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+          236px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
         );
-        --optional-toast-stack-gap: 154px;
+        --optional-toast-stack-gap: 206px;
       }
 
       .update-toast {
@@ -1344,9 +1344,9 @@
             8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
           --overlay-update-base: calc(
-            182px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
+            220px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
-          --optional-toast-stack-gap: 134px;
+          --optional-toast-stack-gap: 176px;
         }
 
         .version-debug-badge-wrap {
