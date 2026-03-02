@@ -185,8 +185,14 @@
     state.updateCurrentVersionText = ref("");
     state.updateLatestVersionText = ref("");
     state.updateLatestPublishedAt = ref("");
+    state.versionBadgeDisplayText = ref("");
+    state.gameCompatSupportedVersion = ref("");
+    state.gameCompatNextVersion = ref("");
+    state.gameCompatNextVersionAtText = ref("");
+    state.showGameCompatWarning = ref(false);
     state.versionCopyFeedbackText = ref("");
     state.copyCurrentVersionInfo = () => {};
+    state.dismissGameCompatWarning = () => {};
 
     state.tutorialVersion = "1.0.0";
     state.tutorialActive = ref(false);

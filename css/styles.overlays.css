@@ -1046,13 +1046,22 @@
         color: #d9fffb;
       }
 
+      .version-debug-badge-wrap {
+        position: fixed;
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        left: 8px;
+        pointer-events: auto;
+        z-index: 41;
+      }
+
+      .version-debug-badge-wrap.is-update-toast-active {
+        z-index: 38;
+      }
+
       .version-debug-badge {
         appearance: none;
         -webkit-appearance: none;
         text-align: left;
-        position: fixed;
-        bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
-        left: 8px;
         max-width: min(78vw, 220px);
         padding: 3px 8px;
         border-radius: 999px;
@@ -1066,15 +1075,61 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        pointer-events: auto;
         user-select: none;
         cursor: copy;
-        z-index: 41;
         backdrop-filter: blur(2px);
       }
 
-      .version-debug-badge.is-update-toast-active {
-        z-index: 38;
+      .version-debug-badge-panel-float {
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 8px);
+        width: fit-content;
+        min-width: 216px;
+        max-width: min(286px, calc(100vw - 16px));
+        padding: 7px 9px;
+        border-radius: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(12, 18, 28, 0.9);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);
+      }
+
+      .version-debug-badge-panel-title {
+        margin: 0;
+        color: rgba(235, 245, 255, 0.95);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .version-debug-badge-panel-text {
+        margin: 3px 0 0;
+        color: rgba(210, 223, 239, 0.94);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .version-debug-badge-panel-actions {
+        margin-top: 5px;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .version-badge-expand-enter-active,
+      .version-badge-expand-leave-active {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        transform-origin: bottom left;
+      }
+
+      .version-badge-expand-enter-from,
+      .version-badge-expand-leave-to {
+        opacity: 0;
+        transform: translateY(4px) scaleY(0.96);
+      }
+
+      .version-badge-expand-enter-to,
+      .version-badge-expand-leave-from {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
       }
 
       .version-debug-copy-tip {
@@ -1095,6 +1150,12 @@
 
       .version-debug-copy-tip.is-update-toast-active {
         z-index: 38;
+      }
+
+      .ghost-button.version-compat-ack {
+        min-height: 24px;
+        padding: 2px 9px;
+        font-size: 11px;
       }
 
       .update-toast {
@@ -1213,10 +1274,27 @@
         color: rgba(31, 56, 86, 0.86);
       }
 
+      [data-theme="light"] .version-debug-badge-panel-float {
+        border-color: rgba(22, 44, 72, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 8px 18px rgba(44, 77, 118, 0.16);
+      }
+
+      [data-theme="light"] .version-debug-badge-panel-title {
+        color: rgba(31, 56, 86, 0.95);
+      }
+
+      [data-theme="light"] .version-debug-badge-panel-text {
+        color: rgba(67, 92, 120, 0.92);
+      }
+
       @media (max-width: 640px) {
-        .version-debug-badge {
+        .version-debug-badge-wrap {
           left: 6px;
           bottom: calc(6px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        }
+
+        .version-debug-badge {
           max-width: min(64vw, 180px);
           padding: 2px 7px;
           font-size: 10px;
@@ -1227,6 +1305,26 @@
           bottom: calc(30px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
           max-width: min(58vw, 170px);
           padding: 2px 5px;
+        }
+
+        .version-debug-badge-panel-float {
+          min-width: 184px;
+          max-width: min(82vw, 252px);
+          padding: 6px 8px;
+        }
+
+        .version-debug-badge-panel-title {
+          font-size: 11px;
+        }
+
+        .version-debug-badge-panel-text {
+          font-size: 10px;
+        }
+
+        .ghost-button.version-compat-ack {
+          min-height: 22px;
+          padding: 2px 7px;
+          font-size: 10px;
         }
 
         .update-toast {

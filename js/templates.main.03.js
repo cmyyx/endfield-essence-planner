@@ -226,7 +226,7 @@
                     }}
                   </p>
                   <p class="match-info-text">
-                    {{ t("此界面不支持修改武器/基质管拥有状态；如需修改请前往“基质规划”。") }}
+                    {{ t("此界面不支持修改武器/基质拥有状态；如需修改请前往“基质规划”。") }}
                   </p>
                 </div>
                 <div v-if="!matchSourceWeapon" class="empty-state match-empty">

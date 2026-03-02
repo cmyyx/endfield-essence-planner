@@ -47,7 +47,7 @@
 `scripts/gen-version.mjs` 会生成 `data/version.js` 与 `data/version.json`，字段含义如下：
 
 - `buildId`：14 位 UTC 时间戳（`YYYYMMDDHHmmss`，用于更新检测比对；前端按“不相等即有变化”处理）
-- `displayVersion`：用于界面展示的版本文案
+- `displayVersion`：用于界面展示的版本文案，由 `announcementVersion`、`buildId` 与 `toDisplayTime(buildId)` 计算生成，格式为 `v{announcementVersion}@{YYMMDD-HHmm}`（例如 `v1.2.3@240301-1530`）；当公告版本缺失时回退为 `v0.0.0@{buildId}`
 - `announcementVersion`：公告版本号（来源于 `data/content.js` 的 `announcement.version`）
 - `fingerprint`：当前页面资源指纹（来源于 `index.html` 的 `data-fingerprint`）
 - `publishedAt`：发布时间（ISO 时间，前端展示时会转换为设备本地时区）
@@ -56,6 +56,19 @@
 
 - 日常代码发布：只需确保部署时会执行 `node scripts/gen-version.mjs`
 - 公告更新：手动更新 `data/content.js` 的 `announcement.version`，脚本会自动同步到版本文件
+
+## 游戏适配版本提示（手动维护）
+
+在 `data/content.js` 中可维护 `gameCompat`：
+
+- `supportedVersion`：站点当前已适配的游戏版本（例如 `1.0`）
+- `nextVersion`：下一目标游戏版本（例如 `1.1`）
+- `nextVersionAt`：下一版本预计开启时间（可选，建议 ISO UTC，如 `2026-03-12T04:00:00Z`）
+
+提醒规则：
+
+- 当 `nextVersionAt` 未设置时，仅显示适配版本，不触发到时提醒
+- 当设备时间已超过 `nextVersionAt` 且 `supportedVersion < nextVersion` 时，页面左下角会展开提醒
 
 ## 规则说明（简要）
 

@@ -1,4 +1,9 @@
 window.CONTENT = {
+  gameCompat: {
+    supportedVersion: "1.0",
+    nextVersion: "1.1",
+    nextVersionAt: "2026-02-12T04:00:00Z",
+  },
   announcement: {
     version: "1.5.0",
     title: "公告",
@@ -14,6 +19,13 @@ window.CONTENT = {
   changelog: {
     title: "更新日志",
     entries: [
+      {
+        date: "2026-03-02",
+        items: [
+          "增加版本显示,如果被我发现你正在使用考古版本进行反馈,哼哼!",
+          "支持拼音搜索/模糊搜索",
+        ],
+      },
       {
         date: "2026-03-01",
         items: [

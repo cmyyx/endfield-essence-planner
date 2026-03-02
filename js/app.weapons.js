@@ -215,7 +215,30 @@
 
     const matchesSearchQuery = (weapon, queryMeta, searchIndex) => {
       if (!queryMeta || !queryMeta.active) return true;
-      return scoreSearchEntry(searchIndex.get(weapon.name), queryMeta) > 0;
+      const entry = getWeaponSearchEntry(weapon, searchIndex);
+      if (!entry) return false;
+      return scoreSearchEntry(entry, queryMeta) > 0;
+    };
+
+    const getWeaponSearchEntry = (weapon, searchIndex) => {
+      if (!weapon || !weapon.name) return null;
+      if (searchIndex && searchIndex.has(weapon.name)) {
+        return searchIndex.get(weapon.name);
+      }
+      return buildSearchEntry([
+        { value: weapon.name, typo: true },
+        { value: state.tTerm("weapon", weapon.name), typo: true },
+        { value: weapon.short, typo: false },
+        { value: state.tTerm("short", weapon.short), typo: false },
+        { value: weapon.type, typo: false },
+        { value: state.tTerm("type", weapon.type), typo: false },
+        { value: weapon.s1, tier: "secondary" },
+        { value: state.tTerm("s1", weapon.s1), tier: "secondary" },
+        { value: weapon.s2, tier: "secondary" },
+        { value: state.tTerm("s2", weapon.s2), tier: "secondary" },
+        { value: weapon.s3, tier: "secondary" },
+        { value: state.tTerm("s3", weapon.s3), tier: "secondary" },
+      ]);
     };
 
     const matchesCrossGroupFilters = (weapon, group) => {
@@ -283,8 +306,10 @@
       };
     };
 
+    const searchQueryMeta = computed(() => createSearchQueryMeta(state.searchQuery.value));
+
     const s1Options = computed(() => {
-      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
+      const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const values = uniqueSorted(weapons.map((weapon) => weapon.s1), (a, b) => {
@@ -296,7 +321,7 @@
     });
 
     const s2Options = computed(() => {
-      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
+      const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const values = uniqueSorted(weapons.map((weapon) => weapon.s2), (a, b) => {
@@ -308,7 +333,7 @@
     });
 
     const s3OptionEntries = computed(() => {
-      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
+      const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const weaponValues = weapons.map((weapon) => weapon.s3).filter(Boolean);
@@ -411,12 +436,13 @@
     );
 
     const filteredWeapons = computed(() => {
-      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
+      const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const matched = [];
       state.baseSortedWeapons.forEach((weapon, index) => {
-        const matchScore = queryMeta.active ? scoreSearchEntry(searchIndex.get(weapon.name), queryMeta) : 1;
+        const entry = queryMeta.active ? getWeaponSearchEntry(weapon, searchIndex) : null;
+        const matchScore = queryMeta.active ? scoreSearchEntry(entry, queryMeta) : 1;
         if (queryMeta.active && matchScore <= 0) return;
         if (state.filterS1.value.length && !state.filterS1.value.includes(weapon.s1)) return;
         if (state.filterS2.value.length && !state.filterS2.value.includes(weapon.s2)) return;
@@ -433,7 +459,7 @@
     });
 
     const hiddenInSelectorSummary = computed(() => {
-      const queryMeta = createSearchQueryMeta(state.searchQuery.value);
+      const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
       const list = Array.isArray(state.baseSortedWeapons) && state.baseSortedWeapons.length

@@ -1322,7 +1322,17 @@
 
     var cssPromise = Promise.all(cssFiles.map(loadStyle));
     var vuePromise = loadScript("./vendor/vue.global.prod.js");
-    var pinyinPromise = loadScript("./vendor/pinyin-pro.min.js");
+    var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js").catch(function () {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          loadScript("./vendor/pinyin-pro.min.js")
+            .catch(function () {
+              // non-blocking optional dependency
+            })
+            .finally(resolve);
+        }, 1200);
+      });
+    });
     var dataPromise = Promise.all([
       loadScript("./data/version.js"),
       loadScript("./data/dungeons.js"),
@@ -1377,7 +1387,6 @@
       shellReadyPromise,
       cssPromise,
       vuePromise,
-      pinyinPromise,
       dataPromise,
       scriptChainPromise,
     ])
@@ -1393,6 +1402,9 @@
           });
           renderProgress();
         }
+        pinyinOptionalPromise.catch(function () {
+          // non-blocking optional dependency
+        });
         return loadScript("./js/app.js");
       });
     Promise.race([bootLoadPromise, stallTimeoutPromise])

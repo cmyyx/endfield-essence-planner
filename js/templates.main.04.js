@@ -287,15 +287,36 @@
         </div>
       </transition>
 
-      <button
-        type="button"
-        class="version-debug-badge"
-        :class="{ 'is-update-toast-active': showUpdatePrompt }"
-        :title="versionCopyFeedbackText || t('点击复制完整版本信息')"
-        @click="copyCurrentVersionInfo"
-      >
-        {{ updateCurrentVersionText || t("当前版本获取失败") }}
-      </button>
+      <div class="version-debug-badge-wrap" :class="{ 'is-update-toast-active': showUpdatePrompt }">
+        <transition name="version-badge-expand">
+          <div
+            v-if="showGameCompatWarning"
+            class="version-debug-badge-panel-float"
+            role="status"
+            aria-live="polite"
+          >
+            <p class="version-debug-badge-panel-title">
+              {{ t("网站当前适配版本为 {version}", { version: gameCompatSupportedVersion || t("未知") }) }}
+            </p>
+            <p class="version-debug-badge-panel-text">
+              {{ t("若游戏已更新至 {version}，请等待站点适配。", { version: gameCompatNextVersion || t("未知") }) }}
+            </p>
+            <div class="version-debug-badge-panel-actions">
+              <button type="button" class="ghost-button version-compat-ack" @click="dismissGameCompatWarning">
+                {{ t("我知道了") }}
+              </button>
+            </div>
+          </div>
+        </transition>
+        <button
+          type="button"
+          class="version-debug-badge"
+          :title="versionCopyFeedbackText || t('点击复制完整版本信息')"
+          @click="copyCurrentVersionInfo"
+        >
+          {{ versionBadgeDisplayText || updateCurrentVersionText || t("当前版本获取失败") }}
+        </button>
+      </div>
       <div
         v-if="versionCopyFeedbackText"
         class="version-debug-copy-tip"

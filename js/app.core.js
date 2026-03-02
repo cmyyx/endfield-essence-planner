@@ -213,6 +213,7 @@
         const target = String(haystack || "");
         if (!source || !target) return maxDistance + 1;
         if (target.includes(source)) return 0;
+        if (maxDistance <= 0) return maxDistance + 1;
         const minLen = Math.max(1, source.length - maxDistance);
         const maxLen = Math.min(target.length, source.length + maxDistance);
         let best = maxDistance + 1;
@@ -225,6 +226,7 @@
             if (distance < best) {
               best = distance;
               if (best === 0) return 0;
+              if (best === 1) return 1;
             }
           }
         }
@@ -242,6 +244,7 @@
         if (!target || !Array.isArray(queries) || !queries.length || maxDistance < 0) {
           return maxDistance + 1;
         }
+        if (includesAny(target, queries)) return 0;
         let best = maxDistance + 1;
         for (let i = 0; i < queries.length; i += 1) {
           const query = queries[i];
