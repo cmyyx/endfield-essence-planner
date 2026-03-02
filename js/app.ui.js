@@ -121,14 +121,16 @@
     const runtimeWarningLogLimit = 20;
     const runtimeWarningDedupWindowMs = 4000;
     const optionalFailureNotificationDedupWindowMs = 10000;
+    const optionalFailureVisibleLimit = 2;
     const optionalFailureToastDurationMs = 6500;
     const optionalFailureQueueKey = "__bootOptionalLoadFailures";
     const optionalFailureEventName = "planner:optional-resource-failed";
     let optionalFailurePollTimer = null;
-    let optionalFailureToastTimer = null;
+    const optionalFailureToastTimers = new Map();
     let lastRuntimeWarningSignature = "";
     let lastRuntimeWarningAt = 0;
     const optionalFailureLastSeenAt = new Map();
+    const optionalFailureNotices = state.optionalFailureNotices || ref([]);
     const optionalFailureNotice = state.optionalFailureNotice || ref(null);
     const optionalFailureHistory = state.optionalFailureHistory || ref([]);
     const hasOptionalFailureHistory = state.hasOptionalFailureHistory || ref(false);
@@ -190,21 +192,82 @@
       }
       return lines.join("\n");
     };
-    const clearOptionalFailureToastTimer = () => {
-      if (optionalFailureToastTimer) {
-        clearTimeout(optionalFailureToastTimer);
-        optionalFailureToastTimer = null;
-      }
+    const syncOptionalFailurePrimaryNotice = () => {
+      if (!optionalFailureNotice || !optionalFailureNotices) return;
+      const list = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
+      optionalFailureNotice.value = list.length ? list[0] : null;
     };
-    const dismissOptionalFailureNotice = () => {
-      clearOptionalFailureToastTimer();
-      if (optionalFailureNotice) {
-        optionalFailureNotice.value = null;
+    const setVisibleOptionalFailureNotices = (nextList) => {
+      if (!optionalFailureNotices) return;
+      const list = Array.isArray(nextList) ? nextList.slice(0, optionalFailureVisibleLimit) : [];
+      optionalFailureNotices.value = list;
+      syncOptionalFailurePrimaryNotice();
+    };
+    const clearOptionalFailureToastTimer = (noticeId) => {
+      const key = String(noticeId || "");
+      if (!key) return;
+      const timer = optionalFailureToastTimers.get(key);
+      if (!timer) return;
+      clearTimeout(timer);
+      optionalFailureToastTimers.delete(key);
+    };
+    const clearAllOptionalFailureToastTimers = () => {
+      optionalFailureToastTimers.forEach((timer) => clearTimeout(timer));
+      optionalFailureToastTimers.clear();
+    };
+    const removeVisibleOptionalFailureNotice = (noticeId) => {
+      if (!optionalFailureNotices) return;
+      const key = String(noticeId || "");
+      if (!key) {
+        setVisibleOptionalFailureNotices([]);
+        return;
       }
+      const current = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
+      const next = current.filter((item) => String((item && item.id) || "") !== key);
+      setVisibleOptionalFailureNotices(next);
+    };
+    const scheduleOptionalFailureAutoDismiss = (noticeId) => {
+      const key = String(noticeId || "");
+      if (!key) return;
+      clearOptionalFailureToastTimer(key);
+      const timer = setTimeout(() => {
+        optionalFailureToastTimers.delete(key);
+        removeVisibleOptionalFailureNotice(key);
+      }, optionalFailureToastDurationMs);
+      optionalFailureToastTimers.set(key, timer);
+    };
+    const dismissOptionalFailureNotice = (noticeId) => {
+      if (!optionalFailureNotices) return;
+      if (!noticeId) {
+        const first =
+          Array.isArray(optionalFailureNotices.value) && optionalFailureNotices.value.length
+            ? optionalFailureNotices.value[0]
+            : null;
+        if (!first || !first.id) return;
+        clearOptionalFailureToastTimer(first.id);
+        removeVisibleOptionalFailureNotice(first.id);
+        return;
+      }
+      clearOptionalFailureToastTimer(noticeId);
+      removeVisibleOptionalFailureNotice(noticeId);
     };
     const pushOptionalFailureNotice = (entry, meta) => {
-      if (!optionalFailureNotice || !optionalFailureHistory) return;
+      if (!optionalFailureNotices || !optionalFailureHistory) return;
       const signature = String((meta && meta.optionalSignature) || entry.key || "").trim();
+      const notice = {
+        id: entry.id,
+        logId: entry.id,
+        occurredAt: entry.occurredAt || nowIsoString(),
+        title: entry.title,
+        summary: entry.summary,
+        note: entry.note || "",
+        signature,
+      };
+      const nextHistory = [notice].concat(
+        Array.isArray(optionalFailureHistory.value) ? optionalFailureHistory.value : []
+      );
+      optionalFailureHistory.value = nextHistory.slice(0, runtimeWarningLogLimit);
+      hasOptionalFailureHistory.value = optionalFailureHistory.value.length > 0;
       const now = Date.now();
       if (signature) {
         const lastAt = optionalFailureLastSeenAt.get(signature) || 0;
@@ -213,27 +276,19 @@
         }
         optionalFailureLastSeenAt.set(signature, now);
       }
-      const notice = {
-        id: entry.id,
-        logId: entry.id,
-        occurredAt: entry.occurredAt || nowIsoString(),
-        title: entry.title,
-        summary: entry.summary,
-        note: entry.note || "",
-      };
-      optionalFailureNotice.value = notice;
-      const nextHistory = [notice].concat(
-        Array.isArray(optionalFailureHistory.value) ? optionalFailureHistory.value : []
-      );
-      optionalFailureHistory.value = nextHistory.slice(0, runtimeWarningLogLimit);
-      hasOptionalFailureHistory.value = optionalFailureHistory.value.length > 0;
-      clearOptionalFailureToastTimer();
-      optionalFailureToastTimer = setTimeout(() => {
-        optionalFailureToastTimer = null;
-        if (optionalFailureNotice.value && optionalFailureNotice.value.id === notice.id) {
-          optionalFailureNotice.value = null;
+      const current = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
+      const withoutSameSignature = signature
+        ? current.filter((item) => String((item && item.signature) || "") !== signature)
+        : current.slice();
+      const nextVisible = [notice].concat(withoutSameSignature).slice(0, optionalFailureVisibleLimit);
+      const dropped = [notice].concat(withoutSameSignature).slice(optionalFailureVisibleLimit);
+      dropped.forEach((item) => {
+        if (item && item.id) {
+          clearOptionalFailureToastTimer(item.id);
         }
-      }, optionalFailureToastDurationMs);
+      });
+      setVisibleOptionalFailureNotices(nextVisible);
+      scheduleOptionalFailureAutoDismiss(notice.id);
     };
     const resolveRuntimeWarningLogById = (logId) => {
       if (!state.runtimeWarningLogs || !Array.isArray(state.runtimeWarningLogs.value)) return null;
@@ -284,8 +339,12 @@
       }
       const entry = buildRuntimeWarningEntry(error, meta);
       const signature = `${entry.operation}|${entry.key}|${entry.errorName}|${entry.errorMessage}`;
+      const isOptionalToast = Boolean(
+        asToast && meta && String(meta.optionalSignature || "").trim()
+      );
       const now = Date.now();
       if (
+        !isOptionalToast &&
         signature === lastRuntimeWarningSignature &&
         now - lastRuntimeWarningAt <= runtimeWarningDedupWindowMs
       ) {
@@ -317,14 +376,12 @@
         window[optionalFailureQueueKey] = [];
       }
       const normalized = [];
-      const seenBatchSignatures = new Set();
       queued.forEach((item) => {
         if (!item || typeof item !== "object") return;
         const featureKey = String(item.featureKey || "").trim();
         const resourceLabel = String(item.resource || item.resourceLabel || item.label || item.src || "").trim();
         const signature = String(item.signature || `${featureKey}|${resourceLabel}`).trim();
-        if (!resourceLabel || !signature || seenBatchSignatures.has(signature)) return;
-        seenBatchSignatures.add(signature);
+        if (!resourceLabel || !signature) return;
         normalized.push({
           occurredAt: String(item.occurredAt || nowIsoString()),
           signature,
@@ -334,68 +391,60 @@
         });
       });
       if (!normalized.length) return;
-      const featureLabels = Array.from(
-        new Set(
-          normalized
-            .filter((item) => item.featureKey || item.featureLabel)
-            .map((item) => {
-              const featureKey = item.featureKey;
-              if (typeof state.t !== "function") return featureKey || item.featureLabel;
-              if (!featureKey) return item.featureLabel;
-              const i18nKey = `optional_feature_${featureKey}`;
-              const translated = state.t(i18nKey);
-              if (translated && translated !== i18nKey) return translated;
-              return item.featureLabel || featureKey;
+      normalized.forEach((item) => {
+        const featureLabel = (() => {
+          if (!item.featureKey && !item.featureLabel) return "";
+          if (typeof state.t !== "function") return item.featureKey || item.featureLabel || "";
+          if (!item.featureKey) return item.featureLabel || "";
+          const i18nKey = `optional_feature_${item.featureKey}`;
+          const translated = state.t(i18nKey);
+          if (translated && translated !== i18nKey) return translated;
+          return item.featureLabel || item.featureKey;
+        })();
+        const detailLines = [];
+        if (featureLabel && typeof state.t === "function") {
+          detailLines.push(
+            state.t("失败功能：{features}", {
+              features: featureLabel,
             })
-        )
-      );
-      const resourceLabels = Array.from(new Set(normalized.map((item) => item.resourceLabel)));
-      const signatures = Array.from(new Set(normalized.map((item) => item.signature)));
-      const detailLines = [];
-      if (featureLabels.length && typeof state.t === "function") {
-        detailLines.push(
-          state.t("失败功能：{features}", {
-            features: featureLabels.join(", "),
-          })
-        );
-      }
-      if (resourceLabels.length && typeof state.t === "function") {
-        detailLines.push(
-          state.t("失败资源：{resources}", {
-            resources: resourceLabels.join(", "),
-          })
-        );
-      }
-      if (typeof state.t === "function") {
-        detailLines.push(state.t("影响说明：仅影响可选功能，不影响核心功能。"));
-      }
-      const firstFeature = featureLabels[0] || "";
-      const firstResource = resourceLabels[0] || "optional-resource";
-      const messageParts = [];
-      if (firstFeature) {
-        messageParts.push(firstFeature);
-      }
-      if (firstResource) {
-        messageParts.push(firstResource);
-      }
-      const error = new Error(messageParts.join(" / ") || "optional resource failed");
-      error.name = "OptionalResourceLoadError";
-      showUiInitWarning(error, {
-        scope: "boot.optional-resource",
-        operation: "optional.load",
-        key: signatures.join(" | ") || resourceLabels.join(", ") || "optional-resource",
-        title:
-          typeof state.t === "function"
-            ? state.t("可选功能加载失败")
-            : "可选功能加载失败",
-        summary:
-          typeof state.t === "function"
-            ? state.t("部分可选功能未能加载，页面主体仍可继续使用。")
-            : "部分可选功能未能加载，页面主体仍可继续使用。",
-        note: detailLines.join("\n"),
-        asToast: true,
-        optionalSignature: signatures.join(" | "),
-        occurredAt: normalized[0].occurredAt || nowIsoString(),
+          );
+        }
+        if (item.resourceLabel && typeof state.t === "function") {
+          detailLines.push(
+            state.t("失败资源：{resources}", {
+              resources: item.resourceLabel,
+            })
+          );
+        }
+        if (typeof state.t === "function") {
+          detailLines.push(state.t("影响说明：仅影响可选功能，不影响核心功能。"));
+        }
+        const messageParts = [];
+        if (featureLabel) {
+          messageParts.push(featureLabel);
+        }
+        if (item.resourceLabel) {
+          messageParts.push(item.resourceLabel);
+        }
+        const error = new Error(messageParts.join(" / ") || "optional resource failed");
+        error.name = "OptionalResourceLoadError";
+        showUiInitWarning(error, {
+          scope: "boot.optional-resource",
+          operation: "optional.load",
+          key: item.signature,
+          title:
+            typeof state.t === "function"
+              ? state.t("可选功能加载失败")
+              : "可选功能加载失败",
+          summary:
+            typeof state.t === "function"
+              ? state.t("部分可选功能未能加载，页面主体仍可继续使用。")
+              : "部分可选功能未能加载，页面主体仍可继续使用。",
+          note: detailLines.join("\n"),
+          asToast: true,
+          optionalSignature: item.signature,
+          occurredAt: item.occurredAt || nowIsoString(),
+        });
       });
     };
     const handleOptionalFailureEvent = (event) => {
@@ -981,7 +1030,7 @@
         clearInterval(optionalFailurePollTimer);
         optionalFailurePollTimer = null;
       }
-      clearOptionalFailureToastTimer();
+      clearAllOptionalFailureToastTimers();
       document.removeEventListener("click", handleDocClick);
       document.removeEventListener("keydown", handleDocKeydown);
       if (preloadBackgroundFadeTimer) {
@@ -993,6 +1042,7 @@
       }
     });
 
+    syncOptionalFailurePrimaryNotice();
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
@@ -1003,6 +1053,7 @@
     state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
     state.cancelIgnoreRuntimeWarnings = cancelIgnoreRuntimeWarnings;
     state.confirmIgnoreRuntimeWarnings = confirmIgnoreRuntimeWarnings;
+    state.optionalFailureNotices = optionalFailureNotices;
     state.optionalFailureNotice = optionalFailureNotice;
     state.optionalFailureHistory = optionalFailureHistory;
     state.hasOptionalFailureHistory = hasOptionalFailureHistory;

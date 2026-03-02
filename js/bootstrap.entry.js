@@ -995,6 +995,9 @@
       }
       return new Date().toISOString();
     };
+    var buildOptionalFailureSignature = function (featureKey, resourceLabel) {
+      return String(featureKey || "").trim() + "|" + String(resourceLabel || "").trim();
+    };
     var buildOptionalFailurePayload = function (entry) {
       var featureKey = resolveOptionalFeatureKey(entry);
       var featureLabel = resolveOptionalFeatureLabel(featureKey);
@@ -1015,10 +1018,7 @@
             ? fallbackResource
             : "optional-resource";
       }
-      var signature = String((entry && entry.signature) || "").trim();
-      if (!signature) {
-        signature = String(featureKey || "") + "|" + resourceLabel;
-      }
+      var signature = buildOptionalFailureSignature(featureKey, resourceLabel);
       optionalFailureIdSeed += 1;
       return {
         id:
