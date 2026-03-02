@@ -1472,6 +1472,7 @@
                   optional: true,
                   label: "./vendor/pinyin-pro.min.js",
                   featureKey: "pinyin",
+                  src: "./vendor/pinyin-pro.min.js",
                 });
               }
             })

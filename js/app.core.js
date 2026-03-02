@@ -65,8 +65,9 @@
         normalizeSearchText(value).replace(/[^a-z0-9\u3400-\u9fff]+/g, "");
       const normalizeSearchLatin = (value) =>
         normalizeSearchText(value)
-          .replace(/ü/g, "v")
           .normalize("NFD")
+          .replace(/ü/g, "v")
+          .replace(/u\u0308/g, "v")
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-z0-9]+/g, "");
       const safeToPinyin = (value, options) => {
@@ -91,7 +92,7 @@
             : "primary";
         const allowTypo =
           isObjectPart
-            ? value.typo === true
+            ? (typeof value.typo === "boolean" ? value.typo : tier === "primary")
             : tier === "primary";
         const original = String(rawValue || "").trim();
         if (!original) return null;
@@ -110,13 +111,13 @@
         source.forEach((part) => {
           const alias = createSearchAlias(part);
           if (!alias) return;
-          const key = [
+          const key = JSON.stringify([
             alias.text,
             alias.compact,
             alias.latin,
             alias.pinyinFull,
             alias.pinyinInitial,
-          ].join("|");
+          ]);
           if (dedupIndex.has(key)) {
             const index = dedupIndex.get(key);
             const existing = aliases[index];
