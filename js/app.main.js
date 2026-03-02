@@ -676,6 +676,63 @@
           state.requestIgnoreStorageErrors();
         }
       };
+      const buildRuntimeWarningPreviewFromEntry = (entry) => {
+        if (!entry) return "";
+        const lines = [
+          `scope: ${entry.scope || "unknown"}`,
+          `operation: ${entry.operation || "unknown"}`,
+          `key: ${entry.key || "unknown"}`,
+          `error: ${entry.errorName || "Error"}: ${entry.errorMessage || "unknown"}`,
+        ];
+        if (entry.note) {
+          lines.push(`note: ${entry.note}`);
+        }
+        if (entry.errorStack) {
+          lines.push("", "stack:", String(entry.errorStack));
+        }
+        return lines.join("\n");
+      };
+      const openUnifiedExceptionFromLog = (item) => {
+        if (!item || typeof item !== "object") return;
+        const kind = String(item.__kind || "runtime");
+        if (kind === "storage") {
+          const storageEntry = { ...item };
+          delete storageEntry.__kind;
+          if (state.storageErrorCurrent) {
+            state.storageErrorCurrent.value = storageEntry;
+          }
+          if (state.showRuntimeWarningModal) {
+            state.showRuntimeWarningModal.value = false;
+          }
+          if (state.showStorageErrorModal) {
+            state.showStorageErrorModal.value = true;
+          }
+          return;
+        }
+        const runtimeEntry = { ...item };
+        delete runtimeEntry.__kind;
+        if (state.runtimeWarningCurrent) {
+          state.runtimeWarningCurrent.value = runtimeEntry;
+        }
+        if (state.runtimeWarningPreviewText) {
+          state.runtimeWarningPreviewText.value = buildRuntimeWarningPreviewFromEntry(runtimeEntry);
+        }
+        if (state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)) {
+          const nextLogs = [runtimeEntry].concat(
+            state.runtimeWarningLogs.value.filter(
+              (entry) => String((entry && entry.id) || "") !== String(runtimeEntry.id || "")
+            )
+          );
+          state.runtimeWarningLogs.value = nextLogs.slice(0, 20);
+        }
+        if (state.showStorageErrorModal) {
+          state.showStorageErrorModal.value = false;
+        }
+        if (state.showRuntimeWarningModal) {
+          state.showRuntimeWarningModal.value = true;
+        }
+      };
+      state.openUnifiedExceptionFromLog = openUnifiedExceptionFromLog;
 
       return {
         currentView: state.currentView,
@@ -885,6 +942,10 @@
         storageErrorClearTargetKeys: state.storageErrorClearTargetKeys,
         storageFeedbackUrl: state.storageFeedbackUrl,
         dismissRuntimeWarning: state.dismissRuntimeWarning,
+        optionalFailureNotice: state.optionalFailureNotice,
+        hasOptionalFailureHistory: state.hasOptionalFailureHistory,
+        dismissOptionalFailureNotice: state.dismissOptionalFailureNotice,
+        openLatestOptionalFailureDetail: state.openLatestOptionalFailureDetail,
         ignoreRuntimeWarnings: state.ignoreRuntimeWarnings,
         requestIgnoreRuntimeWarnings: state.requestIgnoreRuntimeWarnings,
         cancelIgnoreRuntimeWarnings: state.cancelIgnoreRuntimeWarnings,
@@ -899,6 +960,7 @@
         exportUnifiedExceptionDiagnostic,
         refreshUnifiedException,
         ignoreUnifiedException,
+        openUnifiedExceptionFromLog,
         ignoreStorageErrors: state.ignoreStorageErrors,
         requestIgnoreStorageErrors: state.requestIgnoreStorageErrors,
         cancelIgnoreStorageErrors: state.cancelIgnoreStorageErrors,

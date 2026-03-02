@@ -120,12 +120,20 @@
 
     const runtimeWarningLogLimit = 20;
     const runtimeWarningDedupWindowMs = 4000;
+    const optionalFailureNotificationDedupWindowMs = 10000;
+    const optionalFailureToastDurationMs = 6500;
     const optionalFailureQueueKey = "__bootOptionalLoadFailures";
     const optionalFailureEventName = "planner:optional-resource-failed";
     let optionalFailurePollTimer = null;
+    let optionalFailureToastTimer = null;
     let lastRuntimeWarningSignature = "";
     let lastRuntimeWarningAt = 0;
-    const seenOptionalFailureSignatures = new Set();
+    const optionalFailureLastSeenAt = new Map();
+    const optionalFailureNotice = state.optionalFailureNotice || ref(null);
+    const optionalFailureHistory = state.optionalFailureHistory || ref([]);
+    const hasOptionalFailureHistory = state.hasOptionalFailureHistory || ref(false);
+    hasOptionalFailureHistory.value =
+      Array.isArray(optionalFailureHistory.value) && optionalFailureHistory.value.length > 0;
     const nowIsoString = () => new Date().toISOString();
     const appUtils =
       typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
@@ -182,12 +190,86 @@
       }
       return lines.join("\n");
     };
+    const clearOptionalFailureToastTimer = () => {
+      if (optionalFailureToastTimer) {
+        clearTimeout(optionalFailureToastTimer);
+        optionalFailureToastTimer = null;
+      }
+    };
+    const dismissOptionalFailureNotice = () => {
+      clearOptionalFailureToastTimer();
+      if (optionalFailureNotice) {
+        optionalFailureNotice.value = null;
+      }
+    };
+    const pushOptionalFailureNotice = (entry, meta) => {
+      if (!optionalFailureNotice || !optionalFailureHistory) return;
+      const signature = String((meta && meta.optionalSignature) || entry.key || "").trim();
+      const now = Date.now();
+      if (signature) {
+        const lastAt = optionalFailureLastSeenAt.get(signature) || 0;
+        if (now - lastAt <= optionalFailureNotificationDedupWindowMs) {
+          return;
+        }
+        optionalFailureLastSeenAt.set(signature, now);
+      }
+      const notice = {
+        id: entry.id,
+        logId: entry.id,
+        occurredAt: entry.occurredAt || nowIsoString(),
+        title: entry.title,
+        summary: entry.summary,
+        note: entry.note || "",
+      };
+      optionalFailureNotice.value = notice;
+      const nextHistory = [notice].concat(
+        Array.isArray(optionalFailureHistory.value) ? optionalFailureHistory.value : []
+      );
+      optionalFailureHistory.value = nextHistory.slice(0, runtimeWarningLogLimit);
+      hasOptionalFailureHistory.value = optionalFailureHistory.value.length > 0;
+      clearOptionalFailureToastTimer();
+      optionalFailureToastTimer = setTimeout(() => {
+        optionalFailureToastTimer = null;
+        if (optionalFailureNotice.value && optionalFailureNotice.value.id === notice.id) {
+          optionalFailureNotice.value = null;
+        }
+      }, optionalFailureToastDurationMs);
+    };
+    const resolveRuntimeWarningLogById = (logId) => {
+      if (!state.runtimeWarningLogs || !Array.isArray(state.runtimeWarningLogs.value)) return null;
+      const idText = String(logId || "");
+      return state.runtimeWarningLogs.value.find((item) => String(item && item.id || "") === idText) || null;
+    };
+    const openOptionalFailureDetailByLogId = (logId) => {
+      const target = resolveRuntimeWarningLogById(logId);
+      if (target && typeof state.openUnifiedExceptionFromLog === "function") {
+        state.openUnifiedExceptionFromLog(target);
+      } else if (target && state.runtimeWarningCurrent && state.showRuntimeWarningModal) {
+        state.runtimeWarningCurrent.value = target;
+        if (state.runtimeWarningPreviewText) {
+          state.runtimeWarningPreviewText.value = buildRuntimeWarningPreviewText(target);
+        }
+        state.showRuntimeWarningModal.value = true;
+      } else if (state.showRuntimeWarningModal) {
+        state.showRuntimeWarningModal.value = true;
+      }
+      dismissOptionalFailureNotice();
+    };
+    const openLatestOptionalFailureDetail = () => {
+      const first =
+        optionalFailureHistory && Array.isArray(optionalFailureHistory.value)
+          ? optionalFailureHistory.value[0]
+          : null;
+      if (!first) return;
+      openOptionalFailureDetailByLogId(first.logId);
+    };
     const showUiInitWarning = (error, meta) => {
       const runtimeWarningCurrent = state.runtimeWarningCurrent;
       const runtimeWarningLogs = state.runtimeWarningLogs;
       const runtimeWarningPreviewText = state.runtimeWarningPreviewText;
       const showRuntimeWarningModal = state.showRuntimeWarningModal;
       const runtimeWarningIgnored = state.runtimeWarningIgnored;
+      const asToast = Boolean(meta && meta.asToast);
       if (
         !runtimeWarningCurrent ||
         !runtimeWarningLogs ||
@@ -197,7 +279,7 @@
         return;
       }
       const forceShow = Boolean(meta && meta.forceShow);
-      if (!forceShow && runtimeWarningIgnored && runtimeWarningIgnored.value) {
+      if (!asToast && !forceShow && runtimeWarningIgnored && runtimeWarningIgnored.value) {
         return;
       }
       const entry = buildRuntimeWarningEntry(error, meta);
@@ -217,6 +299,10 @@
         Array.isArray(runtimeWarningLogs.value) ? runtimeWarningLogs.value : []
       );
       runtimeWarningLogs.value = nextLogs.slice(0, runtimeWarningLogLimit);
+      if (asToast) {
+        pushOptionalFailureNotice(entry, meta);
+        return;
+      }
       showRuntimeWarningModal.value = true;
     };
     const flushBootOptionalFailureQueue = (incomingItems) => {
@@ -231,14 +317,17 @@
         window[optionalFailureQueueKey] = [];
       }
       const normalized = [];
+      const seenBatchSignatures = new Set();
       queued.forEach((item) => {
         if (!item || typeof item !== "object") return;
         const featureKey = String(item.featureKey || "").trim();
-        const resourceLabel = String(item.label || item.src || "").trim();
-        const signature = `${featureKey}|${resourceLabel}`;
-        if (!resourceLabel || seenOptionalFailureSignatures.has(signature)) return;
-        seenOptionalFailureSignatures.add(signature);
+        const resourceLabel = String(item.resource || item.resourceLabel || item.label || item.src || "").trim();
+        const signature = String(item.signature || `${featureKey}|${resourceLabel}`).trim();
+        if (!resourceLabel || !signature || seenBatchSignatures.has(signature)) return;
+        seenBatchSignatures.add(signature);
         normalized.push({
+          occurredAt: String(item.occurredAt || nowIsoString()),
+          signature,
           featureKey,
           featureLabel: String(item.featureLabel || "").trim(),
           resourceLabel,
@@ -261,6 +350,7 @@
         )
       );
       const resourceLabels = Array.from(new Set(normalized.map((item) => item.resourceLabel)));
+      const signatures = Array.from(new Set(normalized.map((item) => item.signature)));
       const detailLines = [];
       if (featureLabels.length && typeof state.t === "function") {
         detailLines.push(
@@ -293,7 +383,7 @@
       showUiInitWarning(error, {
         scope: "boot.optional-resource",
         operation: "optional.load",
-        key: resourceLabels.join(", ") || "optional-resource",
+        key: signatures.join(" | ") || resourceLabels.join(", ") || "optional-resource",
         title:
           typeof state.t === "function"
             ? state.t("可选功能加载失败")
@@ -303,7 +393,9 @@
             ? state.t("部分可选功能未能加载，页面主体仍可继续使用。")
             : "部分可选功能未能加载，页面主体仍可继续使用。",
         note: detailLines.join("\n"),
-        forceShow: true,
+        asToast: true,
+        optionalSignature: signatures.join(" | "),
+        occurredAt: normalized[0].occurredAt || nowIsoString(),
       });
     };
     const handleOptionalFailureEvent = (event) => {
@@ -889,6 +981,7 @@
         clearInterval(optionalFailurePollTimer);
         optionalFailurePollTimer = null;
       }
+      clearOptionalFailureToastTimer();
       document.removeEventListener("click", handleDocClick);
       document.removeEventListener("keydown", handleDocKeydown);
       if (preloadBackgroundFadeTimer) {
@@ -910,6 +1003,12 @@
     state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
     state.cancelIgnoreRuntimeWarnings = cancelIgnoreRuntimeWarnings;
     state.confirmIgnoreRuntimeWarnings = confirmIgnoreRuntimeWarnings;
+    state.optionalFailureNotice = optionalFailureNotice;
+    state.optionalFailureHistory = optionalFailureHistory;
+    state.hasOptionalFailureHistory = hasOptionalFailureHistory;
+    state.dismissOptionalFailureNotice = dismissOptionalFailureNotice;
+    state.openOptionalFailureDetailByLogId = openOptionalFailureDetailByLogId;
+    state.openLatestOptionalFailureDetail = openLatestOptionalFailureDetail;
     state.reloadBypassCache = reloadBypassCache;
     state.exportRuntimeDiagnosticBundle = exportRuntimeDiagnosticBundle;
   };
