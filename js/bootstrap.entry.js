@@ -1460,17 +1460,6 @@
     var vuePromise = loadScript("./vendor/vue.global.prod.js");
     var pinyinOptionalOptions = { optional: true, featureKey: "pinyin" };
     var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions).catch(function () {
-      var firstEntry = resourceState.get(normalizeResourceKey("./vendor/pinyin-pro.min.js"));
-      if (firstEntry) {
-        reportOptionalResourceFailure(firstEntry);
-      } else {
-        reportOptionalResourceFailure({
-          optional: true,
-          label: "./vendor/pinyin-pro.min.js",
-          featureKey: "pinyin",
-          src: "./vendor/pinyin-pro.min.js",
-        });
-      }
       return new Promise(function (resolve) {
         setTimeout(function () {
           loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions)

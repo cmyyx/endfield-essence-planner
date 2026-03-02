@@ -46,6 +46,18 @@
         }
         return window.pinyinPro;
       };
+      const SEARCH_SCORE = Object.freeze({
+        EXACT_TEXT: 120,
+        COMPACT_MATCH: 115,
+        LATIN_MATCH: 112,
+        PINYIN_FULL: 110,
+        PHONETIC_QUERY: 108,
+        INITIAL_QUERY: 100,
+        TYPO_FULL_BASE: 84,
+        TYPO_FULL_DISTANCE_STEP: 12,
+        TYPO_INITIAL_BASE: 74,
+        TYPO_INITIAL_DISTANCE_STEP: 10,
+      });
 
       const hasChineseChar = (value) => /[\u3400-\u9fff]/.test(String(value || ""));
       const normalizeSearchText = (value) => normalizeText(value).replace(/\s+/g, " ");
@@ -263,20 +275,20 @@
         const allowTypo = Boolean(alias.allowTypo);
         let best = 0;
         if (queryMeta.rawText && alias.text.includes(queryMeta.rawText)) {
-          best = Math.max(best, 120);
+          best = Math.max(best, SEARCH_SCORE.EXACT_TEXT);
         }
         if (queryMeta.compact && alias.compact && alias.compact.includes(queryMeta.compact)) {
-          best = Math.max(best, 115);
+          best = Math.max(best, SEARCH_SCORE.COMPACT_MATCH);
         }
         if (queryMeta.latin && alias.latin && alias.latin.includes(queryMeta.latin)) {
-          best = Math.max(best, 112);
+          best = Math.max(best, SEARCH_SCORE.LATIN_MATCH);
         }
         if (
           queryMeta.pinyinFull &&
           alias.pinyinFull &&
           alias.pinyinFull.includes(queryMeta.pinyinFull)
         ) {
-          best = Math.max(best, 110);
+          best = Math.max(best, SEARCH_SCORE.PINYIN_FULL);
         }
         if (
           Array.isArray(queryMeta.phoneticQueries) &&
@@ -284,7 +296,7 @@
           alias.pinyinFull &&
           includesAny(alias.pinyinFull, queryMeta.phoneticQueries)
         ) {
-          best = Math.max(best, 108);
+          best = Math.max(best, SEARCH_SCORE.PHONETIC_QUERY);
         }
         if (
           Array.isArray(queryMeta.initialQueries) &&
@@ -292,9 +304,9 @@
           alias.pinyinInitial &&
           includesAny(alias.pinyinInitial, queryMeta.initialQueries)
         ) {
-          best = Math.max(best, 100);
+          best = Math.max(best, SEARCH_SCORE.INITIAL_QUERY);
         }
-        if (best >= 108) return best;
+        if (best >= SEARCH_SCORE.PHONETIC_QUERY) return best;
         if (
           allowTypo &&
           queryMeta.typoBudget > 0 &&
@@ -316,7 +328,10 @@
               const relativeDistance = fullDistance / baseLength;
               const relativeLimit = queryMeta.typoBudget >= 2 ? 0.3 : 0.45;
               if (relativeDistance <= relativeLimit) {
-                best = Math.max(best, 84 - fullDistance * 12);
+                best = Math.max(
+                  best,
+                  SEARCH_SCORE.TYPO_FULL_BASE - fullDistance * SEARCH_SCORE.TYPO_FULL_DISTANCE_STEP
+                );
               }
             }
           }
@@ -332,7 +347,11 @@
                   initialBudget
                 );
                 if (initialDistance <= initialBudget) {
-                  best = Math.max(best, 74 - initialDistance * 10);
+                  best = Math.max(
+                    best,
+                    SEARCH_SCORE.TYPO_INITIAL_BASE -
+                      initialDistance * SEARCH_SCORE.TYPO_INITIAL_DISTANCE_STEP
+                  );
                 }
               }
             }
@@ -354,7 +373,7 @@
         for (let i = 0; i < aliases.length; i += 1) {
           const score = scoreSearchAlias(aliases[i], queryMeta);
           if (score > best) best = score;
-          if (best >= 120) break;
+          if (best >= SEARCH_SCORE.EXACT_TEXT) break;
         }
         return best;
       };

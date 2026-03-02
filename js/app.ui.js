@@ -294,8 +294,14 @@
         scope: "boot.optional-resource",
         operation: "optional.load",
         key: resourceLabels.join(", ") || "optional-resource",
-        title: "可选功能加载失败",
-        summary: "部分可选功能未能加载，页面主体仍可继续使用。",
+        title:
+          typeof state.t === "function"
+            ? state.t("可选功能加载失败")
+            : "可选功能加载失败",
+        summary:
+          typeof state.t === "function"
+            ? state.t("部分可选功能未能加载，页面主体仍可继续使用。")
+            : "部分可选功能未能加载，页面主体仍可继续使用。",
         note: detailLines.join("\n"),
         forceShow: true,
       });
