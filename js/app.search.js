@@ -3,6 +3,10 @@
 
   modules.initSearch = function initSearch(ctx, state) {
     const { ref, watch } = ctx;
+    const hasSearchPinyinApi = () =>
+      typeof window !== "undefined" &&
+      window.pinyinPro &&
+      typeof window.pinyinPro.pinyin === "function";
 
     const baseSortedWeapons = weapons.slice().sort((a, b) => {
       if (b.rarity !== a.rarity) return b.rarity - a.rarity;
@@ -13,17 +17,17 @@
     const characterImageSrcCache = new Map();
     const weaponSearchIndex = ref(new Map());
 
-      baseSortedWeapons.forEach((weapon) => {
-        const chars = Array.isArray(weapon.chars) ? weapon.chars.filter(Boolean) : [];
-        const uniqueChars = Array.from(new Set(chars));
-        weaponCharacterMap.set(weapon.name, uniqueChars);
-        weaponImageSrcCache.set(weapon.name, encodeURI(`./image/${weapon.name}.png`));
-        uniqueChars.forEach((name) => {
-          if (!characterImageSrcCache.has(name)) {
-            characterImageSrcCache.set(name, encodeURI(`./image/characters/${name}.png`));
-          }
-        });
+    baseSortedWeapons.forEach((weapon) => {
+      const chars = Array.isArray(weapon.chars) ? weapon.chars.filter(Boolean) : [];
+      const uniqueChars = Array.from(new Set(chars));
+      weaponCharacterMap.set(weapon.name, uniqueChars);
+      weaponImageSrcCache.set(weapon.name, encodeURI(`./image/${weapon.name}.png`));
+      uniqueChars.forEach((name) => {
+        if (!characterImageSrcCache.has(name)) {
+          characterImageSrcCache.set(name, encodeURI(`./image/characters/${name}.png`));
+        }
       });
+    });
 
     const buildWeaponSearchIndex = () => {
       const index = new Map();
@@ -50,8 +54,30 @@
       weaponSearchIndex.value = index;
     };
 
-    buildWeaponSearchIndex();
-    watch(state.locale, buildWeaponSearchIndex);
+    let searchIndexBuiltWithPinyin = false;
+    const rebuildWeaponSearchIndex = () => {
+      buildWeaponSearchIndex();
+      searchIndexBuiltWithPinyin = hasSearchPinyinApi();
+    };
+
+    rebuildWeaponSearchIndex();
+    watch(state.locale, rebuildWeaponSearchIndex);
+    if (!searchIndexBuiltWithPinyin && typeof window !== "undefined") {
+      const pollIntervalMs = 800;
+      const maxPollAttempts = 300;
+      let pollAttempts = 0;
+      const pollTimer = setInterval(() => {
+        if (hasSearchPinyinApi()) {
+          clearInterval(pollTimer);
+          rebuildWeaponSearchIndex();
+          return;
+        }
+        pollAttempts += 1;
+        if (pollAttempts >= maxPollAttempts) {
+          clearInterval(pollTimer);
+        }
+      }, pollIntervalMs);
+    }
 
     state.baseSortedWeapons = baseSortedWeapons;
     state.weaponCharacterMap = weaponCharacterMap;

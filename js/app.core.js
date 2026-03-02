@@ -94,7 +94,7 @@
           isObjectPart
             ? (typeof value.typo === "boolean" ? value.typo : tier === "primary")
             : tier === "primary";
-        const original = String(rawValue || "").trim();
+        const original = String(rawValue ?? "").trim();
         if (!original) return null;
         const text = normalizeSearchText(original);
         if (!text) return null;

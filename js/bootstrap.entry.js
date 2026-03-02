@@ -1027,8 +1027,8 @@
     var resourceState = new Map();
     var progressMeta = {
       startedAt: Date.now(),
-      lastLoaded: -1,
-      lastLoadedAt: Date.now(),
+      lastCompleted: -1,
+      lastCompletedAt: Date.now(),
     };
     var preloadAssistStallMs = 30000;
     var preloadFailStallMs = 60000;
@@ -1076,6 +1076,7 @@
       var optionalFailedItems = entries.filter(function (entry) {
         return entry.status === "failed" && entry.optional;
       });
+      var completedCount = loaded + optionalFailedItems.length;
       var loadingItems = entries.filter(function (entry) {
         return entry.status === "loading";
       });
@@ -1102,21 +1103,21 @@
           return entry.label;
         })
         .join(bt("list_sep"));
-      if (loaded !== progressMeta.lastLoaded) {
-        progressMeta.lastLoaded = loaded;
-        progressMeta.lastLoadedAt = Date.now();
+      if (completedCount !== progressMeta.lastCompleted) {
+        progressMeta.lastCompleted = completedCount;
+        progressMeta.lastCompletedAt = Date.now();
       }
-      var stagnantMs = Date.now() - progressMeta.lastLoadedAt;
+      var stagnantMs = Date.now() - progressMeta.lastCompletedAt;
       var shouldShowAssist =
-        !criticalFailedItem && loaded < total && stagnantMs >= preloadAssistStallMs;
+        !criticalFailedItem && completedCount < total && stagnantMs >= preloadAssistStallMs;
       var shouldForceTimeout =
-        !criticalFailedItem && loaded < total && stagnantMs >= preloadFailStallMs;
-      var hasStagingGap = !criticalFailedItem && !loadingItem && loaded < total;
+        !criticalFailedItem && completedCount < total && stagnantMs >= preloadFailStallMs;
+      var hasStagingGap = !criticalFailedItem && !loadingItem && completedCount < total;
       if (refs.count) {
-        refs.count.textContent = loaded + "/" + total;
+        refs.count.textContent = completedCount + "/" + total;
       }
       if (refs.progressFill) {
-        var percent = total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+        var percent = total > 0 ? Math.min(100, Math.round((completedCount / total) * 100)) : 0;
         refs.progressFill.style.width = percent + "%";
         refs.progressFill.setAttribute("aria-valuenow", String(percent));
       }
@@ -1125,7 +1126,7 @@
           refs.status.textContent = bt("preload_status_failed");
         } else if (total === 0) {
           refs.status.textContent = bt("preload_status_prepare");
-        } else if (loaded >= total) {
+        } else if (completedCount >= total) {
           refs.status.textContent = bt("preload_status_ready");
         } else if (hasStagingGap) {
           refs.status.textContent = bt("preload_status_staging");
@@ -1156,7 +1157,7 @@
           currentText = recentLoadedPreview
             ? bt("preload_current_wait_stage", { labels: recentLoadedPreview })
             : bt("preload_current_wait_core");
-        } else if (loaded >= total && total > 0) {
+        } else if (completedCount >= total && total > 0) {
           currentText = bt("preload_current_wait_mount");
         }
         if (!criticalFailedItem && optionalFailedItems.length) {
@@ -1176,7 +1177,7 @@
       if (refs.help) {
         if (criticalFailedItem) {
           refs.help.textContent = "";
-        } else if (loaded < total && stagnantMs >= preloadLongHelpStallMs) {
+        } else if (completedCount < total && stagnantMs >= preloadLongHelpStallMs) {
           refs.help.textContent = bt("preload_help_long");
         } else if (shouldShowAssist) {
           refs.help.textContent = bt("preload_help_short");
@@ -1460,14 +1461,23 @@
     var vuePromise = loadScript("./vendor/vue.global.prod.js");
     var pinyinOptionalOptions = { optional: true, featureKey: "pinyin" };
     var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions).catch(function () {
+      var capturedRunId = runId;
       return new Promise(function (resolve) {
         setTimeout(function () {
+          if (runSerial !== capturedRunId) {
+            resolve();
+            return;
+          }
           loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions)
             .catch(function () {
+              if (runSerial !== capturedRunId) return;
               var entry = resourceState.get(normalizeResourceKey("./vendor/pinyin-pro.min.js"));
+              if (runSerial !== capturedRunId) return;
               if (entry) {
+                if (runSerial !== capturedRunId) return;
                 reportOptionalResourceFailure(entry);
               } else {
+                if (runSerial !== capturedRunId) return;
                 reportOptionalResourceFailure({
                   optional: true,
                   label: "./vendor/pinyin-pro.min.js",
