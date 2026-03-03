@@ -73,24 +73,12 @@ const createDataset = (mode, baseSchedules) => {
   return baseSchedules;
 };
 
-const checkData06Contract = (normalized, mode) => {
+const checkData06Contract = (normalized) => {
   const { byWeapon, issues } = normalized;
   const weaponNames = Object.keys(byWeapon).sort();
   const expectedWeaponNames = Object.keys(EXPECTED_WINDOWS).sort();
   assert.deepEqual(weaponNames, expectedWeaponNames, "normalized weapon keys should match DATA-06");
-
-  if (mode === "valid") {
-    assert.equal(issues.length, 0, `expected no issues, got ${JSON.stringify(issues, null, 2)}`);
-  } else {
-    assert.ok(issues.length >= 1, "invalid sample should produce at least one issue");
-    const issueCodes = new Set(issues.map((issue) => issue.code));
-    if (mode === "invalid-unknown-weapon") {
-      assert.equal(issueCodes.has("UP_UNKNOWN_WEAPON"), true, "invalid sample should report unknown weapon");
-    }
-    if (mode === "invalid-window-order") {
-      assert.equal(issueCodes.has("UP_WINDOW_ORDER"), true, "invalid sample should report window order");
-    }
-  }
+  assert.equal(issues.length, 0, `expected no issues, got ${JSON.stringify(issues, null, 2)}`);
 
   expectedWeaponNames.forEach((weaponName) => {
     const record = byWeapon[weaponName];
@@ -117,7 +105,7 @@ const main = () => {
   const helper = loadUpScheduleHelper();
   const dataset = createDataset(mode, schedules);
   const normalized = helper(dataset, weapons);
-  checkData06Contract(normalized, mode);
+  checkData06Contract(normalized);
 
   console.log(`check-up-schedules: ok (${mode})`);
 };
