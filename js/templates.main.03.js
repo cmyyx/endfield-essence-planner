@@ -133,6 +133,55 @@
             </transition>
           </div>
 
+          <div v-else-if="currentView === 'rerun-ranking'" key="rerun-ranking" class="view-shell rerun-ranking-view">
+            <section class="panel rerun-ranking-panel">
+              <div class="panel-title">
+                <h2>{{ t("复刻排行") }}</h2>
+              </div>
+              <div v-if="!hasRerunRankingRows" class="rerun-ranking-empty">
+                {{ t("暂无复刻排行数据") }}
+              </div>
+              <div v-else class="rerun-ranking-list">
+                <article
+                  v-for="row in rerunRankingRows"
+                  :key="row.characterName"
+                  class="rerun-ranking-card"
+                >
+                  <div class="rerun-ranking-avatar-shell">
+                    <img
+                      v-if="row.avatarSrc"
+                      class="rerun-ranking-avatar"
+                      v-lazy-src="row.avatarSrc"
+                      :alt="tTerm('character', row.characterName)"
+                      loading="lazy"
+                      decoding="async"
+                      @error="handleCharacterImageError"
+                    />
+                    <div v-else class="rerun-ranking-avatar-fallback">
+                      {{ tTerm("character", row.characterName).slice(0, 1) }}
+                    </div>
+                  </div>
+                  <div class="rerun-ranking-main">
+                    <div class="rerun-ranking-name">{{ tTerm("character", row.characterName) }}</div>
+                    <div class="rerun-ranking-meta">
+                      {{ t("复刻间隔：{days} 天", { days: row.gapDays }) }}
+                    </div>
+                    <div class="rerun-ranking-meta">
+                      {{
+                        t("上次复刻：{date}", {
+                          date: new Date(row.lastEndMs).toLocaleDateString(locale || undefined),
+                        })
+                      }}
+                    </div>
+                  </div>
+                  <span v-if="row.isActive" class="rerun-ranking-up-chip">
+                    {{ t("当前UP") }}
+                  </span>
+                </article>
+              </div>
+            </section>
+          </div>
+
           <div v-else-if="currentView === 'match'" key="match" class="view-shell match-view">
             <div class="mobile-tabs">
               <button
