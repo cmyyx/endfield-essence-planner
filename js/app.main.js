@@ -365,6 +365,9 @@
         if (view === "gear-refining") {
           return { view: "gear-refining", weaponNames, hasWeaponParam };
         }
+        if (view === "rerun-ranking") {
+          return { view: "rerun-ranking" };
+        }
         if (view === "match") {
           return { view: "match" };
         }
@@ -418,13 +421,22 @@
         if (view === "gear-refining") {
           return "/gear-refining";
         }
+        if (view === "rerun-ranking") {
+          return "/rerun-ranking";
+        }
         if (view === "match") {
           return "/match";
         }
         return "/planner";
       };
 
-      const legacyScrollbarHiddenViews = new Set(["planner", "match", "strategy", "gear-refining"]);
+      const legacyScrollbarHiddenViews = new Set([
+        "planner",
+        "match",
+        "strategy",
+        "gear-refining",
+        "rerun-ranking",
+      ]);
       const syncLegacyScrollbarMode = () => {
         if (typeof document === "undefined" || !document.documentElement) return;
         const root = document.documentElement;

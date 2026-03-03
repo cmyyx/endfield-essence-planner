@@ -213,6 +213,13 @@
             ></span>
             {{ t("装备精锻") }}
           </button>
+          <button
+            class="nav-item"
+            :class="{ active: currentView === 'rerun-ranking' }"
+            @click="setView('rerun-ranking')"
+          >
+            {{ t("复刻排行") }}
+          </button>
           </nav>
         </div>
       </header>
