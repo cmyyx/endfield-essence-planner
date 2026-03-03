@@ -29,7 +29,7 @@ const run = () => {
   const weaponNames = Object.keys(schedules).sort();
   assert.deepEqual(
     weaponNames,
-    ["使命必达", "艺术暴君", "熔铸火焰"],
+    ["使命必达", "艺术暴君", "熔铸火焰"].sort(),
     "seed data must contain only DATA-06 required weapons"
   );
 
