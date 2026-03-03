@@ -155,6 +155,7 @@ window.I18N["en"] = {
     "角色攻略": "Character Guide",
     "复刻排行": "Rerun Ranking",
     "复刻间隔：{days} 天": "Rerun gap: {days} days",
+    "复刻次数：{count} 次": "Rerun count: {count}",
     "上次复刻：{date}": "Last rerun: {date}",
     "当前UP": "Active UP",
     "暂无复刻排行数据": "No rerun ranking data",

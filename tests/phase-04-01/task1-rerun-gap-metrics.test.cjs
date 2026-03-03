@@ -68,13 +68,20 @@ const run = () => {
         ],
       },
     }),
+    getWeaponUpWindowAt: () => ({
+      ActiveOnly: { weaponName: "ActiveOnly" },
+    }),
   };
 
   initRerunRanking({ ref }, state, { nowMs });
 
   assert.equal(state.hasRerunRankingRows.value, true, "should expose hasRerunRankingRows");
   assert.equal(Array.isArray(state.rerunRankingRows.value), true, "should expose rerun rows array");
-  assert.equal(state.rerunRankingRows.value.length, 2, "only valid historical rows should be included");
+  assert.equal(
+    state.rerunRankingRows.value.length,
+    3,
+    "valid historical rows and current active rows should be included"
+  );
 
   const byWeapon = new Map(
     state.rerunRankingRows.value.map((row) => [String(row.weaponName || ""), row])
@@ -84,7 +91,7 @@ const run = () => {
   assert.equal(byWeapon.has("ValidTwo"), true, "ValidTwo should be included");
   assert.equal(byWeapon.has("MissingWindows"), false, "record without windows should be filtered");
   assert.equal(byWeapon.has("InvalidWindowShape"), false, "invalid window record should be filtered");
-  assert.equal(byWeapon.has("ActiveOnly"), false, "active-only without ended window should be filtered");
+  assert.equal(byWeapon.has("ActiveOnly"), true, "active-only row should be retained");
 
   const rowOne = byWeapon.get("ValidOne");
   const rowTwo = byWeapon.get("ValidTwo");
@@ -94,6 +101,15 @@ const run = () => {
   assert.equal(rowTwo.gapMs, oneDayMs, "gapMs should equal nowMs - lastEndMs");
   assert.equal(rowOne.gapDays, 4, "gapDays should be derived from gapMs");
   assert.equal(rowTwo.gapDays, 1, "gapDays should be derived from gapMs");
+  assert.equal(rowOne.rerunCount, 1, "rerunCount should count ended windows");
+  assert.equal(rowTwo.rerunCount, 1, "rerunCount should count ended windows");
+
+  const activeOnlyRow = byWeapon.get("ActiveOnly");
+  assert.equal(activeOnlyRow.isActive, true, "active-only row should be marked active");
+  assert.equal(activeOnlyRow.hasEndedHistory, false, "active-only row should be marked as no ended history");
+  assert.equal(activeOnlyRow.gapDays, null, "active-only row should keep gapDays empty when no ended history");
+  assert.equal(activeOnlyRow.lastEndMs, null, "active-only row should not fake lastEndMs");
+  assert.equal(activeOnlyRow.rerunCount, 0, "active-only row should expose zero ended reruns");
 
   assert.equal(
     Number.isFinite(state.rerunRankingGeneratedAt.value),

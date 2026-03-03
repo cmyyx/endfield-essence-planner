@@ -53,6 +53,11 @@ assert.match(
 );
 assert.match(
   rerunViewBlock,
+  /row\.rerunCount/,
+  "rerun-ranking card should show rerun count"
+);
+assert.match(
+  rerunViewBlock,
   /row\.lastEndMs/,
   "rerun-ranking card should show last rerun time"
 );
@@ -60,6 +65,21 @@ assert.match(
   rerunViewBlock,
   /row\.isActive/,
   "rerun-ranking card should expose active UP status"
+);
+assert.match(
+  rerunViewBlock,
+  /row\.hasEndedHistory/,
+  "rerun-ranking card should use ended-history guard for placeholder rendering"
+);
+assert.match(
+  rerunViewBlock,
+  /class=\"weapon-up-chip rerun-ranking-up-chip\"/,
+  "rerun-ranking active tag should reuse weapon UP chip class"
+);
+assert.match(
+  rerunViewBlock,
+  /weapon-up-chip-fallback/,
+  "rerun-ranking active tag should keep weapon chip fallback text"
 );
 assert.match(
   rerunViewBlock,
@@ -76,10 +96,21 @@ assert.match(styleSource, /\.rerun-ranking-view\b/, "layout css should include r
 assert.match(styleSource, /\.rerun-ranking-list\b/, "layout css should include rerun-ranking list styles");
 assert.match(styleSource, /\.rerun-ranking-card\b/, "layout css should include rerun-ranking card styles");
 assert.match(styleSource, /\.rerun-ranking-empty\b/, "layout css should include rerun-ranking empty state styles");
+assert.match(
+  styleSource,
+  /\.rerun-ranking-list\s*\{[\s\S]*grid-template-columns:\s*1fr;/,
+  "rerun-ranking list should stay single-column on all orientations"
+);
+assert.match(
+  styleSource,
+  /\.rerun-ranking-avatar-shell\s*\{[\s\S]*clamp\(/,
+  "rerun-ranking avatar should use adaptive clamp sizing"
+);
 
 const requiredI18nKeys = [
   "\"复刻排行\"",
   "\"复刻间隔：{days} 天\"",
+  "\"复刻次数：{count} 次\"",
   "\"上次复刻：{date}\"",
   "\"当前UP\"",
   "\"暂无复刻排行数据\"",

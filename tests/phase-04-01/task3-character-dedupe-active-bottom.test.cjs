@@ -51,16 +51,27 @@ const runModuleLevelChecks = () => {
           { startMs: nowMs - oneDayMs, endMs: nowMs + oneDayMs },
         ],
       },
+      WeaponToggleInactive: {
+        weaponName: "WeaponToggleInactive",
+        primaryCharacter: "ToggleChar",
+        windows: [{ startMs: nowMs - 18 * oneDayMs, endMs: nowMs - 14 * oneDayMs }],
+      },
+      WeaponToggleActive: {
+        weaponName: "WeaponToggleActive",
+        primaryCharacter: "ToggleChar",
+        windows: [{ startMs: nowMs - oneDayMs, endMs: nowMs + oneDayMs }],
+      },
     }),
     getWeaponUpWindowAt: () => ({
       WeaponActiveHugeGap: { weaponName: "WeaponActiveHugeGap" },
+      WeaponToggleActive: { weaponName: "WeaponToggleActive" },
     }),
   };
 
   initRerunRanking({ ref }, state, { nowMs });
 
   const rows = state.rerunRankingRows.value;
-  assert.equal(rows.length, 3, "rows should be deduped to one row per character");
+  assert.equal(rows.length, 4, "rows should be deduped to one row per character");
 
   const sharedRows = rows.filter((row) => row.characterName === "SharedChar");
   assert.equal(sharedRows.length, 1, "same character should appear only once");
@@ -70,10 +81,18 @@ const runModuleLevelChecks = () => {
     "dedupe should keep deterministic winner for same character"
   );
 
+  const toggleRows = rows.filter((row) => row.characterName === "ToggleChar");
+  assert.equal(toggleRows.length, 1, "active/inactive duplicate character should keep a single row");
+  assert.equal(
+    toggleRows[0].weaponName,
+    "WeaponToggleActive",
+    "dedupe should prefer active row for character currently in UP"
+  );
+
   const order = Array.from(rows, (row) => row.weaponName);
   assert.deepEqual(
     order,
-    ["WeaponDupOld", "WeaponInactive", "WeaponActiveHugeGap"],
+    ["WeaponDupOld", "WeaponInactive", "WeaponActiveHugeGap", "WeaponToggleActive"],
     "active rows should always be moved to list bottom while keeping bottom-zone stable"
   );
 };

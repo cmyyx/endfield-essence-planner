@@ -29,6 +29,17 @@
     return candidate;
   };
 
+  const countEndedWindows = (windows, nowMs) => {
+    if (!Array.isArray(windows)) return 0;
+    let count = 0;
+    windows.forEach((item) => {
+      const endMs = Number(item && item.endMs);
+      if (!Number.isFinite(endMs) || endMs > nowMs) return;
+      count += 1;
+    });
+    return count;
+  };
+
   const toCharacterName = (record) => {
     if (!record || typeof record !== "object") return "";
     if (record.primaryCharacter) return String(record.primaryCharacter);
@@ -51,52 +62,72 @@
     Object.keys(source).forEach((weaponName) => {
       const record = source[weaponName];
       if (!record || typeof record !== "object") return;
-      const lastWindow = pickLastEndedWindow(record.windows, nowMs);
-      if (!lastWindow) return;
-      const lastEndMs = Number(lastWindow.endMs);
-      if (!Number.isFinite(lastEndMs)) return;
       const characterName = toCharacterName(record);
       if (!characterName) return;
-      const gapMs = nowMs - lastEndMs;
-      if (!Number.isFinite(gapMs) || gapMs < 0) return;
+      const weaponLabel = String(record.weaponName || weaponName);
+      const isActive = Boolean(activeByWeapon[weaponName] || activeByWeapon[weaponLabel]);
+      const lastWindow = pickLastEndedWindow(record.windows, nowMs);
+      const lastEndMs = lastWindow ? Number(lastWindow.endMs) : Number.NaN;
+      const hasEndedHistory = Number.isFinite(lastEndMs);
+      if (!hasEndedHistory && !isActive) return;
+      const gapMs = hasEndedHistory ? nowMs - lastEndMs : null;
+      if (hasEndedHistory && (!Number.isFinite(gapMs) || gapMs < 0)) return;
 
       rows.push({
-        weaponName: String(record.weaponName || weaponName),
+        weaponName: weaponLabel,
         characterName,
         avatarSrc: String(record.avatarSrc || ""),
-        lastEndMs,
+        hasEndedHistory,
+        lastEndMs: hasEndedHistory ? lastEndMs : null,
         gapMs,
-        gapDays: Math.floor(gapMs / DAY_MS),
-        isActive: false,
+        gapDays: hasEndedHistory ? Math.floor(gapMs / DAY_MS) : null,
+        rerunCount: countEndedWindows(record.windows, nowMs),
+        isActive,
       });
     });
 
-    rows.sort((a, b) => {
-      if (b.gapMs !== a.gapMs) return b.gapMs - a.gapMs;
-      if (a.lastEndMs !== b.lastEndMs) return a.lastEndMs - b.lastEndMs;
+    const compareRankingRow = (a, b) => {
+      const gapA = Number.isFinite(a.gapMs) ? a.gapMs : -1;
+      const gapB = Number.isFinite(b.gapMs) ? b.gapMs : -1;
+      if (gapB !== gapA) return gapB - gapA;
+
+      const lastEndA = Number.isFinite(a.lastEndMs) ? a.lastEndMs : Number.POSITIVE_INFINITY;
+      const lastEndB = Number.isFinite(b.lastEndMs) ? b.lastEndMs : Number.POSITIVE_INFINITY;
+      if (lastEndA !== lastEndB) return lastEndA - lastEndB;
+
       const characterDiff = compareTextSafe(a.characterName, b.characterName);
       if (characterDiff !== 0) return characterDiff;
       return compareTextSafe(a.weaponName, b.weaponName);
-    });
+    };
 
-    const deduped = [];
-    const seenCharacters = new Set();
+    rows.sort(compareRankingRow);
+
+    const dedupedByCharacter = new Map();
     rows.forEach((row) => {
       const key = String(row.characterName || "");
-      if (!key || seenCharacters.has(key)) return;
-      seenCharacters.add(key);
-      deduped.push(row);
+      if (!key) return;
+      if (!dedupedByCharacter.has(key)) {
+        dedupedByCharacter.set(key, row);
+        return;
+      }
+      const existing = dedupedByCharacter.get(key);
+      if (row.isActive !== existing.isActive) {
+        dedupedByCharacter.set(key, row.isActive ? row : existing);
+        return;
+      }
+      if (compareRankingRow(row, existing) < 0) {
+        dedupedByCharacter.set(key, row);
+      }
     });
+    const deduped = Array.from(dedupedByCharacter.values()).sort(compareRankingRow);
 
     const inactive = [];
     const active = [];
     deduped.forEach((row) => {
-      const isActive = Boolean(activeByWeapon[row.weaponName]);
-      const nextRow = { ...row, isActive };
-      if (isActive) {
-        active.push(nextRow);
+      if (row.isActive) {
+        active.push(row);
       } else {
-        inactive.push(nextRow);
+        inactive.push(row);
       }
     });
 

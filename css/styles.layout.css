@@ -951,16 +951,16 @@
 
       .rerun-ranking-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 12px;
+        grid-template-columns: 1fr;
+        gap: 14px;
       }
 
       .rerun-ranking-card {
         position: relative;
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px;
+        gap: 16px;
+        padding: 14px;
         border-radius: 14px;
         border: 1px solid var(--stroke);
         background: var(--panel-strong);
@@ -968,9 +968,9 @@
       }
 
       .rerun-ranking-avatar-shell {
-        width: 56px;
-        height: 56px;
-        flex: 0 0 56px;
+        width: clamp(64px, 10vw, 108px);
+        height: clamp(64px, 10vw, 108px);
+        flex: 0 0 clamp(64px, 10vw, 108px);
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.12);
@@ -989,6 +989,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: clamp(18px, 2.6vw, 28px);
         font-weight: 700;
         letter-spacing: 0.04em;
         color: var(--text);
@@ -1001,31 +1002,20 @@
       }
 
       .rerun-ranking-name {
-        font-size: 16px;
+        font-size: clamp(18px, 2.1vw, 24px);
         font-weight: 700;
         color: var(--text);
         line-height: 1.25;
       }
 
       .rerun-ranking-meta {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--muted);
       }
 
       .rerun-ranking-up-chip {
         margin-left: auto;
         align-self: flex-start;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 3px 8px;
-        border-radius: 999px;
-        border: 1px solid rgba(96, 211, 198, 0.42);
-        background: rgba(62, 189, 175, 0.2);
-        color: #c8fff8;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
       }
 
       .rerun-ranking-empty {
@@ -1035,12 +1025,6 @@
         border-radius: 12px;
         padding: 14px;
         text-align: center;
-      }
-
-      [data-theme="light"] .rerun-ranking-up-chip {
-        border-color: rgba(36, 131, 122, 0.42);
-        background: rgba(45, 164, 154, 0.2);
-        color: #1f5e57;
       }
 
       .match-grid {
@@ -1341,13 +1325,13 @@
         }
 
         .rerun-ranking-avatar-shell {
-          width: 50px;
-          height: 50px;
-          flex-basis: 50px;
+          width: clamp(56px, 20vw, 84px);
+          height: clamp(56px, 20vw, 84px);
+          flex-basis: clamp(56px, 20vw, 84px);
         }
 
         .rerun-ranking-name {
-          font-size: 15px;
+          font-size: clamp(16px, 4.3vw, 20px);
         }
       }
 
