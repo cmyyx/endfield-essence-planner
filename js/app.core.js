@@ -1,5 +1,9 @@
       const dungeons = Array.isArray(window.DUNGEONS) ? window.DUNGEONS : [];
       const weapons = Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
+      const weaponUpSchedules =
+        window.WEAPON_UP_SCHEDULES && typeof window.WEAPON_UP_SCHEDULES === "object"
+          ? window.WEAPON_UP_SCHEDULES
+          : {};
       const gears = Array.isArray(window.GEARS) ? window.GEARS : [];
       const weaponImages = new Set(Array.isArray(window.WEAPON_IMAGES) ? window.WEAPON_IMAGES : []);
       const i18nState = {

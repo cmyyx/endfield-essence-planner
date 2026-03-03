@@ -17,6 +17,11 @@
     state.contentLoaded = ref(Boolean(window.CONTENT));
     state.charactersLoading = ref(false);
     state.charactersLoaded = ref(Array.isArray(window.characters) && window.characters.length > 0);
+    state.upScheduleRawSource = weaponUpSchedules && typeof weaponUpSchedules === "object"
+      ? weaponUpSchedules
+      : {};
+    state.upScheduleNormalized = ref({});
+    state.upScheduleIssues = ref([]);
 
     state.weaponGridTopSpacer = ref(0);
     state.weaponGridBottomSpacer = ref(0);
