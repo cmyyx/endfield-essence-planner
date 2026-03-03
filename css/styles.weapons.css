@@ -212,14 +212,32 @@
           font-size: 11px;
         }
 
-        .weapon-hidden-chip {
-          left: auto;
-          right: 4px;
+        .weapon-corner-stack {
           top: 4px;
-          bottom: auto;
-          transform: none;
-          max-width: 48%;
-          font-size: 9px;
+          right: 4px;
+          gap: 2px;
+          max-width: 56%;
+        }
+
+        .weapon-up-chip {
+          padding: 1px 4px;
+          gap: 3px;
+        }
+
+        .weapon-up-chip-icon {
+          width: 24px;
+          height: 10px;
+        }
+
+        .weapon-up-chip-fallback {
+          font-size: 8px;
+          line-height: 1.1;
+        }
+
+        .weapon-hidden-chip {
+          position: static;
+          max-width: 100%;
+          font-size: 8px;
           line-height: 1.1;
           padding: 1px 4px;
           text-align: center;
@@ -371,10 +389,28 @@
       }
 
       @media (max-width: 430px) and (orientation: portrait) {
-        .weapon-hidden-chip {
-          right: 3px;
+        .weapon-corner-stack {
           top: 3px;
-          max-width: 42%;
+          right: 3px;
+          gap: 2px;
+          max-width: 52%;
+        }
+
+        .weapon-up-chip {
+          padding: 1px 3px;
+        }
+
+        .weapon-up-chip-icon {
+          width: 22px;
+          height: 9px;
+        }
+
+        .weapon-up-chip-fallback {
+          font-size: 7px;
+        }
+
+        .weapon-hidden-chip {
+          max-width: 100%;
           font-size: 7px;
           padding: 1px 3px;
         }
@@ -898,15 +934,57 @@
         z-index: 2;
       }
 
-      .weapon-hidden-chip {
+      .weapon-corner-stack {
         position: absolute;
-        left: auto;
-        right: 6px;
         top: 6px;
-        bottom: auto;
-        transform: none;
-        z-index: 4;
+        right: 6px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 3px;
         max-width: 52%;
+        pointer-events: none;
+      }
+
+      .weapon-up-chip {
+        order: 1;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        max-width: 100%;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(95, 201, 228, 0.5);
+        background: rgba(13, 43, 58, 0.76);
+        color: #dff8ff;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .weapon-up-chip-icon {
+        width: 28px;
+        height: 12px;
+        object-fit: contain;
+        flex: 0 0 auto;
+      }
+
+      .weapon-up-chip-fallback {
+        display: inline-block;
+        font-size: 10px;
+        letter-spacing: 0.06em;
+      }
+
+      .weapon-hidden-chip {
+        position: static;
+        order: 2;
+        z-index: 1;
+        max-width: 100%;
         padding: 2px 6px;
         border-radius: 999px;
         border: 1px solid rgba(255, 196, 83, 0.65);
