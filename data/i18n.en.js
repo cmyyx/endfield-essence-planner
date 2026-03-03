@@ -443,6 +443,7 @@ window.I18N["en"] = {
     "立即刷新": "Refresh now",
     "稍后提醒": "Remind me later",
     "查看详情": "View details",
+    "点击通知查看详情": "Tap the notification to view details",
     "查看可选失败详情": "View optional failure details"
   },
   "terms": {

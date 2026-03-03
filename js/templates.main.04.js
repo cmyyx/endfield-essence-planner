@@ -360,7 +360,7 @@
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
                 <div class="optional-failure-toast-text">
                   <strong>{{ t("可选功能加载失败") }}</strong>
-                  <span>{{ t("更多设置") }} · {{ t("查看可选失败详情") }}</span>
+                  <span>{{ t("更多设置") }} · {{ t("点击通知查看详情") }}</span>
                 </div>
               </div>
               <div class="optional-failure-toast-actions">
@@ -371,7 +371,7 @@
                   :title="t('关闭')"
                   @click.stop="dismissOptionalFailureNotice(notice.id)"
                 >
-                  x
+                  &times;
                 </button>
               </div>
             </div>
