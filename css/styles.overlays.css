@@ -1438,7 +1438,7 @@
           --overlay-bottom-base: calc(
             8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
-          --overlay-top-base: calc(8px + env(safe-area-inset-top, 0px));
+          --overlay-top-base: calc(52px + env(safe-area-inset-top, 0px));
           --overlay-update-base: calc(
             220px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );

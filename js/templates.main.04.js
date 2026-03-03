@@ -359,7 +359,7 @@
               <div class="optional-failure-toast-main">
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
                 <div class="optional-failure-toast-text">
-                  <strong>{{ notice.title || t("可选功能加载失败") }}</strong>
+                  <strong>{{ t("可选功能加载失败") }}</strong>
                   <span>{{ t("更多设置") }} · {{ t("查看可选失败详情") }}</span>
                 </div>
               </div>

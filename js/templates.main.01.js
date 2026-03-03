@@ -137,6 +137,12 @@
                 <div class="secondary-label">{{ t("新手教程") }}</div>
                 <button class="ghost-button" @click="startTutorial(true)">{{ t("再次体验") }}</button>
               </div>
+              <div class="secondary-item secondary-desc">
+                <label class="notice-skip">
+                  <input type="checkbox" v-model="tutorialSkipAll" />
+                  {{ t("不再自动弹出当前版本新手教程") }}
+                </label>
+              </div>
               <div v-if="hasOptionalFailureHistory" class="secondary-item">
                 <div class="secondary-label">{{ t("可选功能加载失败") }}</div>
                 <div class="secondary-actions">
@@ -147,12 +153,6 @@
                 <div class="secondary-hint secondary-warning">
                   {{ t("部分可选功能未能加载，页面主体仍可继续使用。") }}
                 </div>
-              </div>
-              <div class="secondary-item secondary-desc">
-                <label class="notice-skip">
-                  <input type="checkbox" v-model="tutorialSkipAll" />
-                  {{ t("不再自动弹出当前版本新手教程") }}
-                </label>
               </div>
             </div>
           </div>
