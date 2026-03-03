@@ -462,7 +462,7 @@
               v-for="weapon in visibleFilteredWeapons"
               :key="weapon.name"
               class="weapon-item"
-              v-memo="[locale, localeRenderVersion, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name), selectorHiddenMemoKey]"
+              v-memo="[locale, localeRenderVersion, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name), weaponUpBadgeMemoKey, selectorHiddenMemoKey]"
               :class="{
                 'is-selected': selectedNameSet.has(weapon.name),
                 'is-unowned': isUnowned(weapon.name),

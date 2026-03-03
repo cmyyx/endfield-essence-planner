@@ -846,6 +846,8 @@
         s2Options: state.s2Options,
         s3OptionEntries: state.s3OptionEntries,
         selectorHiddenMemoKey: state.selectorHiddenMemoKey,
+        weaponUpBadgeMemoKey: state.weaponUpBadgeMemoKey,
+        isWeaponUpActive: state.isWeaponUpActive,
         toggleFilterValue: state.toggleFilterValue,
         clearAttributeFilters: state.clearAttributeFilters,
         hasAttributeFilters: state.hasAttributeFilters,
