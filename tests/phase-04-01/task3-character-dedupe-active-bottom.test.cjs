@@ -5,6 +5,8 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const targetFile = path.join(root, "js/app.rerun-ranking.js");
+const scriptChainFile = path.join(root, "js/app.script-chain.js");
+const appMainFile = path.join(root, "js/app.main.js");
 
 const runModuleLevelChecks = () => {
   assert.equal(fs.existsSync(targetFile), true, "js/app.rerun-ranking.js should exist");
@@ -77,4 +79,33 @@ const runModuleLevelChecks = () => {
 };
 
 runModuleLevelChecks();
+const scriptChainSource = fs.readFileSync(scriptChainFile, "utf8");
+assert.match(
+  scriptChainSource,
+  /\"\.\/js\/app\.rerun-ranking\.js\"/,
+  "app.script-chain.js should include ./js/app.rerun-ranking.js"
+);
+
+const appMainSource = fs.readFileSync(appMainFile, "utf8");
+assert.match(
+  appMainSource,
+  /init\(\"initRerunRanking\"\)/,
+  "app.main.js should initialize initRerunRanking"
+);
+assert.match(
+  appMainSource,
+  /rerunRankingRows:\s*state\.rerunRankingRows/,
+  "app.main.js should expose rerunRankingRows in return bindings"
+);
+assert.match(
+  appMainSource,
+  /hasRerunRankingRows:\s*state\.hasRerunRankingRows/,
+  "app.main.js should expose hasRerunRankingRows in return bindings"
+);
+assert.match(
+  appMainSource,
+  /rerunRankingGeneratedAt:\s*state\.rerunRankingGeneratedAt/,
+  "app.main.js should expose rerunRankingGeneratedAt in return bindings"
+);
+
 console.log("task3-character-dedupe-active-bottom: ok");
