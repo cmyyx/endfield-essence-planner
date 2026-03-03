@@ -712,6 +712,12 @@
         }
         const runtimeEntry = { ...item };
         delete runtimeEntry.__kind;
+        if (!runtimeEntry.errorName && runtimeEntry.code) {
+          runtimeEntry.errorName = String(runtimeEntry.code);
+        }
+        if (!runtimeEntry.errorMessage && runtimeEntry.message) {
+          runtimeEntry.errorMessage = String(runtimeEntry.message);
+        }
         if (state.runtimeWarningCurrent) {
           state.runtimeWarningCurrent.value = runtimeEntry;
         }

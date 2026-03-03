@@ -364,6 +364,9 @@
       }
       showRuntimeWarningModal.value = true;
     };
+    const reportRuntimeWarning = (error, meta) => {
+      showUiInitWarning(error, meta);
+    };
     const flushBootOptionalFailureQueue = (incomingItems) => {
       const queued =
         incomingItems && Array.isArray(incomingItems)
@@ -1043,6 +1046,7 @@
     });
 
     syncOptionalFailurePrimaryNotice();
+    state.reportRuntimeWarning = reportRuntimeWarning;
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;

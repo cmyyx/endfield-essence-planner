@@ -4,6 +4,12 @@
   const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
   const DATE_TIME_RE =
     /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?(Z|[+\-]\d{2}:\d{2})?$/;
+  const ISSUE_CODES = Object.freeze({
+    UNKNOWN_WEAPON: "UP_UNKNOWN_WEAPON",
+    UNKNOWN_KEY: "UP_UNKNOWN_KEY",
+    INVALID_TIME: "UP_INVALID_TIME",
+    WINDOW_ORDER: "UP_WINDOW_ORDER",
+  });
 
   const toInt = (value) => Number.parseInt(String(value), 10);
   const isValidDateTime = (year, month, day, hour, minute, second) => {
@@ -67,15 +73,67 @@
       iso: new Date(utcMs).toISOString(),
     };
   };
-  const normalizeWindows = (windows) => {
-    if (!Array.isArray(windows)) return [];
+  const normalizeWindows = (windows, weaponName, reportIssue) => {
+    if (!Array.isArray(windows)) {
+      reportIssue({
+        code: ISSUE_CODES.UNKNOWN_KEY,
+        weaponName,
+        path: "windows",
+        message: "windows must be an array",
+      });
+      return null;
+    }
     const normalized = [];
+    const allowedWindowKeys = new Set(["start", "end"]);
     windows.forEach((windowItem, sourceIndex) => {
-      if (!windowItem || typeof windowItem !== "object") return;
+      if (!windowItem || typeof windowItem !== "object" || Array.isArray(windowItem)) {
+        reportIssue({
+          code: ISSUE_CODES.UNKNOWN_KEY,
+          weaponName,
+          path: `windows[${sourceIndex}]`,
+          message: "window must be an object",
+        });
+        return;
+      }
+      const unknownWindowKeys = Object.keys(windowItem).filter((key) => !allowedWindowKeys.has(key));
+      if (unknownWindowKeys.length) {
+        reportIssue({
+          code: ISSUE_CODES.UNKNOWN_KEY,
+          weaponName,
+          path: `windows[${sourceIndex}]`,
+          message: `unknown keys: ${unknownWindowKeys.join(", ")}`,
+        });
+        return;
+      }
+      if (typeof windowItem.start !== "string" || typeof windowItem.end !== "string") {
+        reportIssue({
+          code: ISSUE_CODES.INVALID_TIME,
+          weaponName,
+          path: `windows[${sourceIndex}]`,
+          message: "window.start/window.end must be string",
+        });
+        return;
+      }
       const startParsed = parseScheduleTime(windowItem.start);
       const endParsed = parseScheduleTime(windowItem.end);
-      if (!startParsed || !endParsed) return;
-      if (startParsed.ms >= endParsed.ms) return;
+      if (!startParsed || !endParsed) {
+        reportIssue({
+          code: ISSUE_CODES.INVALID_TIME,
+          weaponName,
+          path: `windows[${sourceIndex}]`,
+          message: `invalid time range: ${String(windowItem.start)} ~ ${String(windowItem.end)}`,
+        });
+        return;
+      }
+      if (startParsed.ms >= endParsed.ms) {
+        reportIssue({
+          code: ISSUE_CODES.WINDOW_ORDER,
+          weaponName,
+          path: `windows[${sourceIndex}]`,
+          message: "window start must be earlier than end",
+        });
+        return;
+      }
       normalized.push({
         startMs: startParsed.ms,
         endMs: endParsed.ms,
@@ -119,11 +177,66 @@
 
     const weaponMap = new Map((Array.isArray(weapons) ? weapons : []).map((weapon) => [weapon.name, weapon]));
     const byWeapon = {};
+    const issues = [];
+    const reportIssue = (issue) => {
+      if (!issue || typeof issue !== "object") return;
+      const entry = {
+        code: String(issue.code || ISSUE_CODES.UNKNOWN_KEY),
+        weaponName: String(issue.weaponName || ""),
+        path: String(issue.path || ""),
+        message: String(issue.message || ""),
+      };
+      issues.push(entry);
+      if (typeof state.reportRuntimeWarning === "function") {
+        const error = new Error(`[${entry.code}] ${entry.message || "invalid up schedule entry"}`);
+        error.name = entry.code;
+        state.reportRuntimeWarning(error, {
+          scope: "up-schedule.normalize",
+          operation: "up-schedule.validate",
+          key: `${entry.code}:${entry.weaponName || "unknown"}:${entry.path || "-"}`,
+          title: "武器 UP 数据异常",
+          summary: "部分武器 UP 记录已被拒绝，请检查数据格式。",
+          note: `weapon: ${entry.weaponName || "unknown"}\npath: ${entry.path || "-"}\nmessage: ${entry.message || "-"}`,
+          asToast: true,
+        });
+      }
+    };
+
     Object.keys(runtimeRawSource).forEach((weaponName) => {
-      const weapon = weaponMap.get(weaponName);
       const entry = runtimeRawSource[weaponName];
-      if (!weapon || !entry || typeof entry !== "object") return;
-      const windows = normalizeWindows(entry.windows);
+      const weapon = weaponMap.get(weaponName);
+      if (!weapon) {
+        reportIssue({
+          code: ISSUE_CODES.UNKNOWN_WEAPON,
+          weaponName,
+          path: "weapon",
+          message: "weapon key does not exist in WEAPONS",
+        });
+        return;
+      }
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        reportIssue({
+          code: ISSUE_CODES.UNKNOWN_KEY,
+          weaponName,
+          path: "entry",
+          message: "weapon entry must be an object",
+        });
+        return;
+      }
+      const allowedEntryKeys = new Set(["windows"]);
+      const unknownEntryKeys = Object.keys(entry).filter((key) => !allowedEntryKeys.has(key));
+      if (unknownEntryKeys.length) {
+        reportIssue({
+          code: ISSUE_CODES.UNKNOWN_KEY,
+          weaponName,
+          path: "entry",
+          message: `unknown keys: ${unknownEntryKeys.join(", ")}`,
+        });
+        return;
+      }
+      const windows = normalizeWindows(entry.windows, weaponName, reportIssue);
+      if (!windows) return;
+      if (issues.some((item) => item.weaponName === weaponName)) return;
       const characters = Array.isArray(weapon.chars)
         ? Array.from(new Set(weapon.chars.filter(Boolean)))
         : [];
@@ -138,25 +251,15 @@
     });
 
     state.upScheduleNormalized.value = { byWeapon };
-    state.upScheduleIssues.value = [];
+    state.upScheduleIssues.value = issues;
     state.weaponUpByWeapon.value = byWeapon;
-    state.weaponUpIssues.value = [];
+    state.weaponUpIssues.value = issues;
     if (typeof state.normalizeUpSchedule !== "function") {
       state.normalizeUpSchedule = () => state.upScheduleNormalized.value;
     }
     if (typeof state.validateUpSchedule !== "function") {
       state.validateUpSchedule = () => state.upScheduleIssues.value;
     }
-    if (typeof state.reportUpScheduleIssue !== "function") {
-      state.reportUpScheduleIssue = (issue) => {
-        const next = Array.isArray(state.upScheduleIssues.value)
-          ? state.upScheduleIssues.value.slice()
-          : [];
-        if (issue && typeof issue === "object") {
-          next.push({ ...issue });
-        }
-        state.upScheduleIssues.value = next.slice(-50);
-      };
-    }
+    state.reportUpScheduleIssue = reportIssue;
   };
 })();
