@@ -164,14 +164,14 @@
                   <div class="rerun-ranking-main">
                     <div class="rerun-ranking-name">{{ tTerm("character", row.characterName) }}</div>
                     <div class="rerun-ranking-meta">
-                      {{ t("复刻间隔：{days} 天", { days: row.hasEndedHistory ? row.gapDays : "-" }) }}
+                      {{ t("间隔：{days} 天", { days: row.hasEndedHistory ? row.gapDays : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
-                      {{ t("复刻次数：{count} 次", { count: row.hasEndedHistory ? row.rerunCount : "-" }) }}
+                      {{ t("次数：{count} 次", { count: row.hasEndedHistory ? row.rerunCount : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
                       {{
-                        t("上次复刻：{date}", {
+                        t("上次：{date}", {
                           date: row.hasEndedHistory
                             ? new Date(row.lastEndMs).toLocaleDateString(locale || undefined)
                             : "-",
