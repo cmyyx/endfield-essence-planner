@@ -22,6 +22,8 @@
       : {};
     state.upScheduleNormalized = ref({});
     state.upScheduleIssues = ref([]);
+    state.weaponUpByWeapon = ref({});
+    state.weaponUpIssues = ref([]);
 
     state.weaponGridTopSpacer = ref(0);
     state.weaponGridBottomSpacer = ref(0);
