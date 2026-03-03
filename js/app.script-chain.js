@@ -10,6 +10,7 @@
     "./js/app.search.js",
     "./js/app.ui.js",
     "./js/app.up-schedule.js",
+    "./js/app.rerun-ranking.js",
     "./js/app.storage.js",
     "./js/app.migration.js",
     "./js/app.analytics.js",

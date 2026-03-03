@@ -311,6 +311,7 @@
       init("initSearch");
       init("initUi");
       init("initUpSchedule");
+      init("initRerunRanking");
       init("initStorage");
       init("initMigration");
       init("initAnalytics");
@@ -848,6 +849,9 @@
         selectorHiddenMemoKey: state.selectorHiddenMemoKey,
         weaponUpBadgeMemoKey: state.weaponUpBadgeMemoKey,
         isWeaponUpActive: state.isWeaponUpActive,
+        rerunRankingRows: state.rerunRankingRows,
+        hasRerunRankingRows: state.hasRerunRankingRows,
+        rerunRankingGeneratedAt: state.rerunRankingGeneratedAt,
         toggleFilterValue: state.toggleFilterValue,
         clearAttributeFilters: state.clearAttributeFilters,
         hasAttributeFilters: state.hasAttributeFilters,
