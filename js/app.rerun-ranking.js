@@ -1,6 +1,10 @@
 (function () {
   const modules = (window.AppModules = window.AppModules || {});
   const DAY_MS = 24 * 60 * 60 * 1000;
+  const compareTextSafe = (a, b) => {
+    if (typeof compareText === "function") return compareText(a, b);
+    return String(a || "").localeCompare(String(b || ""), "zh-Hans-CN");
+  };
 
   const resolveNowMs = (value) => {
     if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -38,6 +42,10 @@
   const deriveRerunRankingRows = (weaponUpByWeapon, options) => {
     const source = weaponUpByWeapon && typeof weaponUpByWeapon === "object" ? weaponUpByWeapon : {};
     const nowMs = resolveNowMs(options && options.nowMs);
+    const activeByWeapon =
+      options && options.activeByWeapon && typeof options.activeByWeapon === "object"
+        ? options.activeByWeapon
+        : {};
     const rows = [];
 
     Object.keys(source).forEach((weaponName) => {
@@ -63,8 +71,36 @@
       });
     });
 
-    rows.sort((a, b) => b.gapMs - a.gapMs);
-    return rows;
+    rows.sort((a, b) => {
+      if (b.gapMs !== a.gapMs) return b.gapMs - a.gapMs;
+      if (a.lastEndMs !== b.lastEndMs) return a.lastEndMs - b.lastEndMs;
+      const characterDiff = compareTextSafe(a.characterName, b.characterName);
+      if (characterDiff !== 0) return characterDiff;
+      return compareTextSafe(a.weaponName, b.weaponName);
+    });
+
+    const deduped = [];
+    const seenCharacters = new Set();
+    rows.forEach((row) => {
+      const key = String(row.characterName || "");
+      if (!key || seenCharacters.has(key)) return;
+      seenCharacters.add(key);
+      deduped.push(row);
+    });
+
+    const inactive = [];
+    const active = [];
+    deduped.forEach((row) => {
+      const isActive = Boolean(activeByWeapon[row.weaponName]);
+      const nextRow = { ...row, isActive };
+      if (isActive) {
+        active.push(nextRow);
+      } else {
+        inactive.push(nextRow);
+      }
+    });
+
+    return inactive.concat(active);
   };
 
   modules.deriveRerunRankingRows = deriveRerunRankingRows;
@@ -92,7 +128,9 @@
             : undefined
           : nextNow
       );
-      const rows = deriveRerunRankingRows(source, { nowMs });
+      const activeByWeapon =
+        typeof state.getWeaponUpWindowAt === "function" ? state.getWeaponUpWindowAt(nowMs) : {};
+      const rows = deriveRerunRankingRows(source, { nowMs, activeByWeapon });
       state.rerunRankingRows.value = rows;
       state.hasRerunRankingRows.value = rows.length > 0;
       state.rerunRankingGeneratedAt.value = nowMs;
@@ -102,4 +140,3 @@
     state.refreshRerunRanking();
   };
 })();
-

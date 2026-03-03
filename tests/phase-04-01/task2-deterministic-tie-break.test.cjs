@@ -36,7 +36,7 @@ const run = () => {
     },
     WeaponB: {
       weaponName: "WeaponB",
-      primaryCharacter: "Alpha",
+      primaryCharacter: "Delta",
       windows: [{ startMs: nowMs - 4 * oneDayMs, endMs: nowMs - 2 * oneDayMs }],
     },
     WeaponOld: {
@@ -47,10 +47,10 @@ const run = () => {
   };
 
   const rows = deriveRerunRankingRows(sourceMap, { nowMs });
-  const order = rows.map((row) => row.weaponName);
+  const order = Array.from(rows, (row) => row.weaponName);
   assert.deepEqual(
     order,
-    ["WeaponOld", "WeaponA", "WeaponB", "WeaponZ"],
+    ["WeaponOld", "WeaponA", "WeaponZ", "WeaponB"],
     "rows should be deterministic by gap desc then character/weapon tie-break"
   );
 
