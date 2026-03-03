@@ -1063,7 +1063,7 @@
 
       .version-debug-badge-wrap {
         position: fixed;
-        bottom: calc(8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        top: calc(8px + env(safe-area-inset-top, 0px));
         left: 8px;
         pointer-events: auto;
         z-index: 41;
@@ -1098,7 +1098,8 @@
       .version-debug-badge-panel-float {
         position: absolute;
         left: 0;
-        bottom: calc(100% + 8px);
+        top: calc(100% + 8px);
+        bottom: auto;
         width: fit-content;
         min-width: 216px;
         max-width: min(286px, calc(100vw - 16px));
@@ -1150,7 +1151,7 @@
       .version-debug-copy-tip {
         position: fixed;
         left: 10px;
-        bottom: calc(34px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+        top: calc(34px + env(safe-area-inset-top, 0px));
         max-width: min(70vw, 220px);
         padding: 2px 6px;
         border-radius: 8px;
@@ -1178,11 +1179,11 @@
         --overlay-bottom-base: calc(
           14px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
         );
+        --overlay-top-base: calc(14px + env(safe-area-inset-top, 0px));
         --overlay-update-base: calc(
           236px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
         );
-        --optional-toast-stack-gap: 128px;
-        --optional-toast-lift: 44px;
+        --optional-toast-stack-gap: 78px;
       }
 
       .update-toast {
@@ -1203,66 +1204,49 @@
 
       .optional-failure-toast {
         z-index: 40;
-        width: min(280px, calc(100vw - 136px));
+        width: min(304px, calc(100vw - 26px));
       }
 
       .optional-failure-toast.optional-failure-toast-0 {
-        bottom: calc(var(--overlay-bottom-base) + var(--optional-toast-lift));
+        top: var(--overlay-top-base);
+        bottom: auto;
       }
 
       .optional-failure-toast.optional-failure-toast-1 {
-        bottom: calc(var(--overlay-bottom-base) + var(--optional-toast-lift) + var(--optional-toast-stack-gap));
+        top: calc(var(--overlay-top-base) + var(--optional-toast-stack-gap));
+        bottom: auto;
       }
 
       .planner-bottom-right-overlays.has-update-toast .optional-failure-toast.optional-failure-toast-0 {
-        bottom: var(--overlay-update-base);
+        top: var(--overlay-top-base);
+        bottom: auto;
       }
 
       .planner-bottom-right-overlays.has-update-toast .optional-failure-toast.optional-failure-toast-1 {
-        bottom: calc(var(--overlay-update-base) + var(--optional-toast-stack-gap));
+        top: calc(var(--overlay-top-base) + var(--optional-toast-stack-gap));
+        bottom: auto;
       }
 
-      .optional-failure-history-entry-group {
-        position: fixed;
-        right: var(--overlay-right-gap, 14px);
-        bottom: calc(var(--overlay-bottom-base) + var(--optional-toast-lift));
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        z-index: 40;
-      }
-
-      .planner-bottom-right-overlays.has-update-toast .optional-failure-history-entry-group {
-        bottom: var(--overlay-update-base);
-      }
-
-      .optional-failure-history-entry,
-      .optional-failure-history-dismiss,
-      .optional-failure-icon-button {
+      .optional-failure-close-button {
         width: 28px;
         height: 28px;
         min-height: 28px;
         border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: rgba(18, 28, 38, 0.92);
-        color: #e6e9ef;
+        border: 1px solid rgba(255, 224, 148, 0.55);
+        background: rgba(68, 52, 18, 0.92);
+        color: #ffe7b6;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
+        pointer-events: auto;
       }
 
-      .optional-failure-history-entry:hover,
-      .optional-failure-icon-button:hover {
-        border-color: rgba(77, 214, 201, 0.62);
-        color: #d7fff8;
-      }
-
-      .optional-failure-history-dismiss:hover {
-        border-color: rgba(243, 108, 108, 0.62);
-        color: #ffd7d7;
+      .optional-failure-close-button:hover {
+        border-color: rgba(255, 204, 112, 0.78);
+        color: #fff2d8;
       }
 
       .update-toast-card {
@@ -1293,8 +1277,12 @@
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding: 9px 10px;
+        padding: 8px 9px;
         border-radius: 12px;
+        border-color: rgba(255, 224, 148, 0.52);
+        background: rgba(78, 58, 14, 0.94);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+        cursor: pointer;
       }
 
       .optional-failure-toast-main {
@@ -1308,8 +1296,8 @@
         width: 18px;
         height: 18px;
         border-radius: 999px;
-        border: 1px solid rgba(243, 108, 108, 0.58);
-        color: #ffd8d8;
+        border: 1px solid rgba(255, 224, 148, 0.62);
+        color: #ffe2ab;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1331,7 +1319,7 @@
       }
 
       .optional-failure-toast-text span {
-        color: #d6e6f7;
+        color: #ffe7bf;
         font-size: 11px;
         line-height: 1.25;
         white-space: nowrap;
@@ -1343,6 +1331,7 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        flex: 0 0 auto;
       }
 
       .update-version-grid {
@@ -1449,16 +1438,16 @@
           --overlay-bottom-base: calc(
             8px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
+          --overlay-top-base: calc(8px + env(safe-area-inset-top, 0px));
           --overlay-update-base: calc(
             220px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
-          --optional-toast-stack-gap: 116px;
-          --optional-toast-lift: 38px;
+          --optional-toast-stack-gap: 72px;
         }
 
         .version-debug-badge-wrap {
           left: 6px;
-          bottom: calc(6px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          top: calc(6px + env(safe-area-inset-top, 0px));
         }
 
         .version-debug-badge {
@@ -1469,7 +1458,7 @@
 
         .version-debug-copy-tip {
           left: 8px;
-          bottom: calc(30px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px));
+          top: calc(30px + env(safe-area-inset-top, 0px));
           max-width: min(58vw, 170px);
           padding: 2px 5px;
         }
@@ -1504,7 +1493,7 @@
         }
 
         .optional-failure-toast {
-          width: min(224px, calc(100vw - 122px));
+          width: min(252px, calc(100vw - 18px));
         }
 
         .update-toast-card {
@@ -1538,9 +1527,7 @@
           font-size: 12px;
         }
 
-        .optional-failure-history-entry,
-        .optional-failure-history-dismiss,
-        .optional-failure-icon-button {
+        .optional-failure-close-button {
           width: 26px;
           height: 26px;
           min-height: 26px;
@@ -1562,12 +1549,25 @@
         color: #4a617b;
       }
 
-      [data-theme="light"] .optional-failure-history-entry,
-      [data-theme="light"] .optional-failure-history-dismiss,
-      [data-theme="light"] .optional-failure-icon-button {
-        border-color: rgba(22, 44, 72, 0.24);
-        background: rgba(255, 255, 255, 0.92);
-        color: #1f3957;
+      [data-theme="light"] .optional-failure-toast-card {
+        border-color: rgba(218, 160, 57, 0.58);
+        background: rgba(255, 234, 189, 0.96);
+        color: #5d4510;
+      }
+
+      [data-theme="light"] .optional-failure-toast-icon {
+        border-color: rgba(218, 160, 57, 0.64);
+        color: #8f6a13;
+      }
+
+      [data-theme="light"] .optional-failure-toast-text span {
+        color: #7f6320;
+      }
+
+      [data-theme="light"] .optional-failure-close-button {
+        border-color: rgba(218, 160, 57, 0.58);
+        background: rgba(255, 242, 214, 0.94);
+        color: #7b5b18;
       }
 
       [data-theme="light"] .update-version-grid {

@@ -137,6 +137,17 @@
                 <div class="secondary-label">{{ t("新手教程") }}</div>
                 <button class="ghost-button" @click="startTutorial(true)">{{ t("再次体验") }}</button>
               </div>
+              <div v-if="hasOptionalFailureHistory" class="secondary-item">
+                <div class="secondary-label">{{ t("可选功能加载失败") }}</div>
+                <div class="secondary-actions">
+                  <button class="ghost-button secondary-warning-action" @click="openLatestOptionalFailureDetail">
+                    {{ t("查看可选失败详情") }}
+                  </button>
+                </div>
+                <div class="secondary-hint secondary-warning">
+                  {{ t("部分可选功能未能加载，页面主体仍可继续使用。") }}
+                </div>
+              </div>
               <div class="secondary-item secondary-desc">
                 <label class="notice-skip">
                   <input type="checkbox" v-model="tutorialSkipAll" />

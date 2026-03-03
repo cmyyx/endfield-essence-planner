@@ -347,30 +347,29 @@
             role="status"
             aria-live="polite"
           >
-            <div class="update-toast-card optional-failure-toast-card">
+            <div
+              class="update-toast-card optional-failure-toast-card"
+              role="button"
+              tabindex="0"
+              :aria-label="t('查看可选失败详情')"
+              @click="openLatestOptionalFailureDetail"
+              @keydown.enter.prevent="openLatestOptionalFailureDetail"
+              @keydown.space.prevent="openLatestOptionalFailureDetail"
+            >
               <div class="optional-failure-toast-main">
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
                 <div class="optional-failure-toast-text">
                   <strong>{{ notice.title || t("可选功能加载失败") }}</strong>
-                  <span>{{ t("部分可选功能未能加载，页面主体仍可继续使用。") }}</span>
+                  <span>{{ t("更多设置") }} · {{ t("查看可选失败详情") }}</span>
                 </div>
               </div>
               <div class="optional-failure-toast-actions">
                 <button
                   type="button"
-                  class="optional-failure-icon-button"
-                  :aria-label="t('查看详情')"
-                  :title="t('查看详情')"
-                  @click="openLatestOptionalFailureDetail"
-                >
-                  i
-                </button>
-                <button
-                  type="button"
-                  class="optional-failure-icon-button"
+                  class="optional-failure-close-button"
                   :aria-label="t('关闭')"
                   :title="t('关闭')"
-                  @click="dismissOptionalFailureNotice(notice.id)"
+                  @click.stop="dismissOptionalFailureNotice(notice.id)"
                 >
                   x
                 </button>
@@ -378,34 +377,6 @@
             </div>
           </div>
         </transition-group>
-
-        <div
-          v-if="
-            hasOptionalFailureHistory &&
-            (!optionalFailureNotices || !optionalFailureNotices.length) &&
-            !optionalFailureHistoryEntryDismissed
-          "
-          class="optional-failure-history-entry-group"
-        >
-          <button
-            type="button"
-            class="optional-failure-history-entry"
-            :aria-label="t('查看可选失败详情')"
-            :title="t('查看可选失败详情')"
-            @click="openLatestOptionalFailureDetail"
-          >
-            !
-          </button>
-          <button
-            type="button"
-            class="optional-failure-history-dismiss"
-            :aria-label="t('关闭')"
-            :title="t('关闭')"
-            @click="dismissOptionalFailureHistoryEntry"
-          >
-            x
-          </button>
-        </div>
 
         <transition name="fade-scale">
           <div v-if="showUpdatePrompt" class="update-toast update-version-toast" role="status" aria-live="polite">

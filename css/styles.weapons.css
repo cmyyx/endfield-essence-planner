@@ -105,7 +105,7 @@
 
         .mobile-tabs {
           margin-bottom: 10px;
-          top: 8px;
+          top: 54px;
         }
 
         .mobile-tab {
@@ -554,6 +554,17 @@
 
       .secondary-warning {
         color: #f0b45a;
+      }
+
+      .secondary-warning-action {
+        border-color: rgba(255, 188, 106, 0.55);
+        background: rgba(255, 188, 106, 0.18);
+        color: #ffe8bf;
+      }
+
+      .secondary-warning-action:hover {
+        border-color: rgba(255, 201, 132, 0.78);
+        background: rgba(255, 188, 106, 0.28);
       }
 
       .secondary-desc {

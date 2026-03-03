@@ -305,6 +305,7 @@
       @media (max-width: 1024px) {
         .mobile-tabs {
           display: flex;
+          top: 48px;
         }
 
         .mobile-hint {
