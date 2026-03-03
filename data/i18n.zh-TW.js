@@ -397,6 +397,7 @@ window.I18N["zh-TW"] = {
     "隐藏（{reasons}）": "隱藏（{reasons}）",
     "命中隐藏规则（{reasons}）": "命中隱藏規則（{reasons}）",
     "被隐藏": "被隱藏",
+    "up_badge_text": "UP",
     "当前筛选下有武器被隐藏：{reasons}": "目前篩選下有武器被隱藏：{reasons}",
     "四星": "四星",
     "本地存储异常": "本地儲存異常",

@@ -497,8 +497,20 @@
                 />
               </div>
               <div class="weapon-band"></div>
-              <div v-if="getSelectorHiddenReason(weapon)" class="weapon-hidden-chip">
-                {{ t("被隐藏") }}
+              <div class="weapon-corner-stack">
+                <div v-if="isWeaponUpActive(weapon.name)" class="weapon-up-chip">
+                  <img
+                    class="weapon-up-chip-icon"
+                    src="./image/ui/weapon-up-chip.webp"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="weapon-up-chip-fallback">{{ t("up_badge_text") }}</span>
+                </div>
+                <div v-if="getSelectorHiddenReason(weapon)" class="weapon-hidden-chip">
+                  {{ t("被隐藏") }}
+                </div>
               </div>
               <div class="weapon-name">
                 <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>

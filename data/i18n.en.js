@@ -397,6 +397,7 @@ window.I18N["en"] = {
     "隐藏（{reasons}）": "Hidden ({reasons})",
     "命中隐藏规则（{reasons}）": "Matches hide rules ({reasons})",
     "被隐藏": "Hidden",
+    "up_badge_text": "UP",
     "当前筛选下有武器被隐藏：{reasons}": "Weapons are hidden under current filters: {reasons}",
     "四星": "4★",
     "本地存储异常": "Local storage error",

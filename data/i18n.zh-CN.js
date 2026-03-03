@@ -91,6 +91,7 @@ window.I18N["zh-CN"] = {
       "隐藏（{reasons}）": "隐藏（{reasons}）",
       "命中隐藏规则（{reasons}）": "命中隐藏规则（{reasons}）",
       "被隐藏": "被隐藏",
+      "up_badge_text": "UP",
       "当前筛选下有武器被隐藏：{reasons}": "当前筛选下有武器被隐藏：{reasons}",
       "四星": "四星",
       "开": "开",
