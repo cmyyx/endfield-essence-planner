@@ -435,10 +435,42 @@
       () => state.filterS1.value.length || state.filterS2.value.length || state.filterS3.value.length
     );
 
+    const getCurrentWeaponUpActiveMap = () => {
+      if (typeof state.getWeaponUpWindowAt !== "function") return {};
+      const activeByWeapon = state.getWeaponUpWindowAt(Date.now());
+      if (!activeByWeapon || typeof activeByWeapon !== "object") return {};
+      return activeByWeapon;
+    };
+
+    const partitionWeaponsByUpActive = (rows, activeByWeapon) => {
+      const upActiveRows = [];
+      const fallbackRows = [];
+      rows.forEach((weapon) => {
+        if (weapon && activeByWeapon[weapon.name]) {
+          upActiveRows.push(weapon);
+          return;
+        }
+        fallbackRows.push(weapon);
+      });
+      return upActiveRows.concat(fallbackRows);
+    };
+
+    const isWeaponUpActive = (name) => {
+      if (!name) return false;
+      const activeByWeapon = getCurrentWeaponUpActiveMap();
+      return Boolean(activeByWeapon[name]);
+    };
+
+    const weaponUpBadgeMemoKey = computed(() => {
+      const activeByWeapon = getCurrentWeaponUpActiveMap();
+      return Object.keys(activeByWeapon).sort().join("|");
+    });
+
     const filteredWeapons = computed(() => {
       const queryMeta = searchQueryMeta.value;
       const searchIndex = state.weaponSearchIndex.value;
       const config = state.recommendationConfig.value || {};
+      const activeByWeapon = getCurrentWeaponUpActiveMap();
       const matched = [];
       state.baseSortedWeapons.forEach((weapon, index) => {
         const entry = queryMeta.active ? getWeaponSearchEntry(weapon, searchIndex) : null;
@@ -450,12 +482,16 @@
         if (shouldHideInSelector(weapon, config)) return;
         matched.push({ weapon, score: matchScore, index });
       });
-      if (!queryMeta.active) return matched.map((item) => item.weapon);
+      if (!queryMeta.active) {
+        const orderedRows = matched.map((item) => item.weapon);
+        return partitionWeaponsByUpActive(orderedRows, activeByWeapon);
+      }
       matched.sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
         return a.index - b.index;
       });
-      return matched.map((item) => item.weapon);
+      const orderedRows = matched.map((item) => item.weapon);
+      return partitionWeaponsByUpActive(orderedRows, activeByWeapon);
     });
 
     const hiddenInSelectorSummary = computed(() => {
@@ -676,6 +712,7 @@
     state.isEssenceOwned = isEssenceOwned;
     state.isWeaponOwnedForRecommendation = isWeaponOwnedForRecommendation;
     state.isEssenceOwnedForRecommendation = isEssenceOwnedForRecommendation;
+    state.isWeaponUpActive = isWeaponUpActive;
     state.isExcluded = isExcluded;
     state.setWeaponOwned = setWeaponOwned;
     state.setEssenceOwned = setEssenceOwned;
@@ -701,6 +738,7 @@
     state.visibleFilteredWeapons = visibleFilteredWeapons;
     state.hiddenInSelectorSummary = hiddenInSelectorSummary;
     state.selectorHiddenMemoKey = selectorHiddenMemoKey;
+    state.weaponUpBadgeMemoKey = weaponUpBadgeMemoKey;
     state.getSelectorHiddenReason = getSelectorHiddenReason;
     state.allFilteredSelected = allFilteredSelected;
     state.selectAllWeapons = selectAllWeapons;

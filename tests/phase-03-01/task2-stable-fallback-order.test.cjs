@@ -146,14 +146,14 @@ const run = () => {
     },
   });
 
-  const actual = state.filteredWeapons.value.map((weapon) => weapon.name);
+  const actual = Array.from(state.filteredWeapons.value, (weapon) => weapon.name);
   assert.deepEqual(
     actual,
     ["UP-4", "UP-2", "非UP-1", "非UP-3", "非UP-5"],
     "search path should keep score ordering first, then apply stable UP-first partition"
   );
 
-  const nonUpInResult = actual.filter((name) => !name.startsWith("UP-"));
+  const nonUpInResult = Array.from(actual).filter((name) => !name.startsWith("UP-"));
   assert.deepEqual(
     nonUpInResult,
     ["非UP-1", "非UP-3", "非UP-5"],

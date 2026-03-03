@@ -139,7 +139,7 @@ const run = () => {
     searchQuery: "",
   });
 
-  const actual = state.filteredWeapons.value.map((weapon) => weapon.name);
+  const actual = Array.from(state.filteredWeapons.value, (weapon) => weapon.name);
   assert.deepEqual(
     actual,
     ["UP-2", "UP-4", "非UP-1", "非UP-3", "非UP-5"],
