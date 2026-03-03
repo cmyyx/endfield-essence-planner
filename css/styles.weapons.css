@@ -388,12 +388,12 @@
         }
       }
 
-      @media (max-width: 430px) and (orientation: portrait) {
+      @media (max-width: 430px) {
         .weapon-corner-stack {
           top: 3px;
           right: 3px;
           gap: 2px;
-          max-width: 52%;
+          max-width: 48%;
         }
 
         .weapon-up-chip {
@@ -1243,6 +1243,30 @@
       }
 
       @media (max-width: 360px) {
+        .weapon-corner-stack {
+          max-width: 46%;
+          gap: 1px;
+        }
+
+        .weapon-up-chip {
+          padding: 1px 2px;
+          gap: 2px;
+        }
+
+        .weapon-up-chip-icon {
+          width: 18px;
+          height: 8px;
+        }
+
+        .weapon-up-chip-fallback {
+          font-size: 6px;
+        }
+
+        .weapon-hidden-chip {
+          font-size: 6px;
+          padding: 1px 2px;
+        }
+
         .weapon-exclude-row {
           flex-wrap: nowrap;
           gap: 3px;
