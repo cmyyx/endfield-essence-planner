@@ -905,12 +905,12 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .weapon-up-chip {
-  border-color: rgba(36, 115, 148, 0.45);
-  background: rgba(231, 246, 255, 0.95);
   color: #22536a;
 }
 
 [data-theme="light"] .weapon-up-chip-fallback {
+  border-color: rgba(36, 115, 148, 0.45);
+  background: rgba(231, 246, 255, 0.95);
   color: #1e5068;
   text-shadow: none;
 }

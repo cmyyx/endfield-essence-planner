@@ -8,13 +8,13 @@ const cssSource = fs.readFileSync(cssFile, "utf8");
 
 assert.match(
   cssSource,
-  /\[data-theme="light"\]\s+\.weapon-up-chip\s*\{[\s\S]*?border-color:[\s\S]*?background:[\s\S]*?color:/,
+  /\[data-theme="light"\]\s+\.weapon-up-chip\s*\{[\s\S]*?color:/,
   "light theme should provide a scoped style override for the UP chip container"
 );
 
 assert.match(
   cssSource,
-  /\[data-theme="light"\]\s+\.weapon-up-chip-fallback\s*\{[\s\S]*?color:[\s\S]*?text-shadow:/,
+  /\[data-theme="light"\]\s+\.weapon-up-chip-fallback\s*\{[\s\S]*?border-color:[\s\S]*?background:[\s\S]*?color:[\s\S]*?text-shadow:/,
   "light theme should provide readable fallback text styling for UP chip text"
 );
 
