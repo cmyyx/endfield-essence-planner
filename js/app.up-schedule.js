@@ -151,6 +151,15 @@
     });
     return normalized;
   };
+  const resolveNowMs = (now) => {
+    if (typeof now === "number" && Number.isFinite(now)) return now;
+    if (now instanceof Date && Number.isFinite(now.getTime())) return now.getTime();
+    if (typeof now === "string" && now.trim()) {
+      const parsed = Date.parse(now);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return Date.now();
+  };
 
   modules.initUpSchedule = function initUpSchedule(ctx, state) {
     const { ref } = ctx;
@@ -250,7 +259,10 @@
       };
     });
 
-    state.upScheduleNormalized.value = { byWeapon };
+    state.upScheduleNormalized.value = {
+      byWeapon,
+      issues,
+    };
     state.upScheduleIssues.value = issues;
     state.weaponUpByWeapon.value = byWeapon;
     state.weaponUpIssues.value = issues;
@@ -260,6 +272,31 @@
     if (typeof state.validateUpSchedule !== "function") {
       state.validateUpSchedule = () => state.upScheduleIssues.value;
     }
+    state.getWeaponUpWindowAt = (now) => {
+      const nowMs = resolveNowMs(now);
+      const result = {};
+      const source = state.weaponUpByWeapon && state.weaponUpByWeapon.value
+        ? state.weaponUpByWeapon.value
+        : {};
+      Object.keys(source).forEach((weaponName) => {
+        const record = source[weaponName];
+        const windows = Array.isArray(record && record.windows) ? record.windows : [];
+        const activeWindow = windows.find((windowItem) => {
+          const startMs = Number(windowItem && windowItem.startMs);
+          const endMs = Number(windowItem && windowItem.endMs);
+          return Number.isFinite(startMs) && Number.isFinite(endMs) && nowMs >= startMs && nowMs < endMs;
+        });
+        if (!activeWindow) return;
+        result[weaponName] = {
+          weaponName,
+          characters: Array.isArray(record.characters) ? record.characters.slice() : [],
+          primaryCharacter: record.primaryCharacter || "",
+          avatarSrc: record.avatarSrc || "",
+          window: { ...activeWindow },
+        };
+      });
+      return result;
+    };
     state.reportUpScheduleIssue = reportIssue;
   };
 })();
