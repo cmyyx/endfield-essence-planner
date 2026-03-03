@@ -1,6 +1,8 @@
 # Development Guide
 # AGENTS Development Guide
 
+## 0. 遵循 gitignore ，如果已被忽略的内容就不要提交了
+
 ## 1. MCP 使用约定
 - `ace-tool.search_context`：优先用于语义级代码定位、跨文件流程理解、改动影响面分析。
 - `desktop-commander`：用于目录/文件读取、搜索、语法检查(请勿使用desktop-commander进行写入/编辑文件或本地命令执行)。
