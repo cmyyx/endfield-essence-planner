@@ -310,6 +310,7 @@
       init("initContent");
       init("initSearch");
       init("initUi");
+      init("initUpSchedule");
       init("initStorage");
       init("initMigration");
       init("initAnalytics");
