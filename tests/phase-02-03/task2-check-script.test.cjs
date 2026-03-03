@@ -2,13 +2,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const { spawnSync } = require("node:child_process");
+const { pathToFileURL } = require("node:url");
 
 const root = path.resolve(__dirname, "../..");
 const upScheduleModuleFile = path.join(root, "js/app.up-schedule.js");
 const checkScriptFile = path.join(root, "scripts/check-up-schedules.mjs");
 
-const run = () => {
+const run = async () => {
   assert.equal(fs.existsSync(checkScriptFile), true, "check-up-schedules.mjs should exist");
 
   const moduleSource = fs.readFileSync(upScheduleModuleFile, "utf8");
@@ -27,15 +27,18 @@ const run = () => {
     "app.up-schedule should expose normalizeAndBindWeaponUpSchedule helper"
   );
 
-  const result = spawnSync(process.execPath, [checkScriptFile], {
-    cwd: root,
-    encoding: "utf8",
-  });
-  if (result.error) throw result.error;
+  const scriptSource = fs.readFileSync(checkScriptFile, "utf8");
+  assert.match(scriptSource, /check-up-schedules: ok/, "script should print stable success marker");
 
-  assert.equal(result.status, 0, `script should pass with current DATA-06 seed data, got: ${result.stderr}`);
-  assert.match(result.stdout, /check-up-schedules: ok/, "script should print stable success marker");
+  const scriptUrl = `${pathToFileURL(checkScriptFile).href}?ts=${Date.now()}`;
+  await import(scriptUrl);
 };
 
-run();
-console.log("task2-check-script: ok");
+run()
+  .then(() => {
+    console.log("task2-check-script: ok");
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

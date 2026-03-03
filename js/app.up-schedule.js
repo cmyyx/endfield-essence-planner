@@ -160,31 +160,10 @@
     }
     return Date.now();
   };
-
-  modules.initUpSchedule = function initUpSchedule(ctx, state) {
-    const { ref } = ctx;
-    const runtimeRawSource =
-      state.upScheduleRawSource && typeof state.upScheduleRawSource === "object"
-        ? state.upScheduleRawSource
-        : weaponUpSchedules && typeof weaponUpSchedules === "object"
-        ? weaponUpSchedules
-        : {};
-
-    state.upScheduleRawSource = runtimeRawSource;
-    if (!state.upScheduleNormalized || typeof state.upScheduleNormalized.value === "undefined") {
-      state.upScheduleNormalized = ref({});
-    }
-    if (!state.upScheduleIssues || typeof state.upScheduleIssues.value === "undefined") {
-      state.upScheduleIssues = ref([]);
-    }
-    if (!state.weaponUpByWeapon || typeof state.weaponUpByWeapon.value === "undefined") {
-      state.weaponUpByWeapon = ref({});
-    }
-    if (!state.weaponUpIssues || typeof state.weaponUpIssues.value === "undefined") {
-      state.weaponUpIssues = ref([]);
-    }
-
-    const weaponMap = new Map((Array.isArray(weapons) ? weapons : []).map((weapon) => [weapon.name, weapon]));
+  const normalizeAndBindWeaponUpSchedule = (rawSource, weaponList, options) => {
+    const source = rawSource && typeof rawSource === "object" ? rawSource : {};
+    const onIssue = options && typeof options.onIssue === "function" ? options.onIssue : null;
+    const weaponMap = new Map((Array.isArray(weaponList) ? weaponList : []).map((weapon) => [weapon.name, weapon]));
     const byWeapon = {};
     const issues = [];
     const reportIssue = (issue) => {
@@ -196,23 +175,11 @@
         message: String(issue.message || ""),
       };
       issues.push(entry);
-      if (typeof state.reportRuntimeWarning === "function") {
-        const error = new Error(`[${entry.code}] ${entry.message || "invalid up schedule entry"}`);
-        error.name = entry.code;
-        state.reportRuntimeWarning(error, {
-          scope: "up-schedule.normalize",
-          operation: "up-schedule.validate",
-          key: `${entry.code}:${entry.weaponName || "unknown"}:${entry.path || "-"}`,
-          title: "武器 UP 数据异常",
-          summary: "部分武器 UP 记录已被拒绝，请检查数据格式。",
-          note: `weapon: ${entry.weaponName || "unknown"}\npath: ${entry.path || "-"}\nmessage: ${entry.message || "-"}`,
-          asToast: true,
-        });
-      }
+      if (onIssue) onIssue(entry);
     };
 
-    Object.keys(runtimeRawSource).forEach((weaponName) => {
-      const entry = runtimeRawSource[weaponName];
+    Object.keys(source).forEach((weaponName) => {
+      const entry = source[weaponName];
       const weapon = weaponMap.get(weaponName);
       if (!weapon) {
         reportIssue({
@@ -257,6 +224,55 @@
         primaryCharacter,
         avatarSrc: primaryCharacter ? encodeURI(`./image/characters/${primaryCharacter}.png`) : "",
       };
+    });
+
+    return {
+      byWeapon,
+      issues,
+      reportIssue,
+    };
+  };
+  modules.normalizeAndBindWeaponUpSchedule = normalizeAndBindWeaponUpSchedule;
+
+  modules.initUpSchedule = function initUpSchedule(ctx, state) {
+    const { ref } = ctx;
+    const runtimeRawSource =
+      state.upScheduleRawSource && typeof state.upScheduleRawSource === "object"
+        ? state.upScheduleRawSource
+        : weaponUpSchedules && typeof weaponUpSchedules === "object"
+        ? weaponUpSchedules
+        : {};
+
+    state.upScheduleRawSource = runtimeRawSource;
+    if (!state.upScheduleNormalized || typeof state.upScheduleNormalized.value === "undefined") {
+      state.upScheduleNormalized = ref({});
+    }
+    if (!state.upScheduleIssues || typeof state.upScheduleIssues.value === "undefined") {
+      state.upScheduleIssues = ref([]);
+    }
+    if (!state.weaponUpByWeapon || typeof state.weaponUpByWeapon.value === "undefined") {
+      state.weaponUpByWeapon = ref({});
+    }
+    if (!state.weaponUpIssues || typeof state.weaponUpIssues.value === "undefined") {
+      state.weaponUpIssues = ref([]);
+    }
+
+    const { byWeapon, issues, reportIssue } = normalizeAndBindWeaponUpSchedule(runtimeRawSource, weapons, {
+      onIssue: (entry) => {
+        if (typeof state.reportRuntimeWarning === "function") {
+          const error = new Error(`[${entry.code}] ${entry.message || "invalid up schedule entry"}`);
+          error.name = entry.code;
+          state.reportRuntimeWarning(error, {
+            scope: "up-schedule.normalize",
+            operation: "up-schedule.validate",
+            key: `${entry.code}:${entry.weaponName || "unknown"}:${entry.path || "-"}`,
+            title: "武器 UP 数据异常",
+            summary: "部分武器 UP 记录已被拒绝，请检查数据格式。",
+            note: `weapon: ${entry.weaponName || "unknown"}\npath: ${entry.path || "-"}\nmessage: ${entry.message || "-"}`,
+            asToast: true,
+          });
+        }
+      },
     });
 
     state.upScheduleNormalized.value = {
