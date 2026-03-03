@@ -3,7 +3,7 @@
 
 ## 1. MCP 使用约定
 - `ace-tool.search_context`：优先用于语义级代码定位、跨文件流程理解、改动影响面分析。
-- `desktop-commander`：用于目录/文件读取、搜索、语法检查(请勿使用desktop-commander进行编辑文件或本地命令执行)。
+- `desktop-commander`：用于目录/文件读取、搜索、语法检查(请勿使用desktop-commander进行写入/编辑文件或本地命令执行)。
 - `context7`：仅在使用第三方库且本地信息不足时，查询官方文档与示例。
 - `fetch`：仅在需要联网验证外部信息时使用。
 
