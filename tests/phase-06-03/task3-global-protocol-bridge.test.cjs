@@ -23,12 +23,12 @@ assert.match(
 );
 assert.match(
   protocolSource,
-  /throw new Error\(\`\[app-protocol\]/,
+  /throw new Error\(\s*`\[app-protocol\]/,
   "app.protocol should support strict fail mode for deprecated legacy access in dev/test"
 );
 assert.match(
   protocolSource,
-  /console\.warn\(\`\[app-protocol\]/,
+  /console\.warn\(\s*`\[app-protocol\]/,
   "app.protocol should warn when deprecated legacy protocol entry is accessed in production"
 );
 

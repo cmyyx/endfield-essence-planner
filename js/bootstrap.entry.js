@@ -11,6 +11,7 @@
     }
   };
   var bootstrapModuleScripts = [
+    "./js/app.protocol.js",
     "./js/bootstrap.resources.js",
     "./js/bootstrap.error.js",
     "./js/bootstrap.optional.js",
@@ -51,6 +52,26 @@
         return loadBootstrapModuleScript(src);
       })
     );
+  };
+  var resolveBootProtocolValue = function (protocolName, legacyName) {
+    var appBoot = window.__APP_BOOT__;
+    if (appBoot && typeof appBoot.readProtocol === "function") {
+      var value = appBoot.readProtocol(protocolName);
+      if (typeof value !== "undefined") {
+        return value;
+      }
+    }
+    return legacyName ? window[legacyName] : undefined;
+  };
+  var publishBootProtocolValue = function (protocolName, legacyName, value) {
+    var appBoot = window.__APP_BOOT__;
+    if (appBoot && typeof appBoot.publishProtocol === "function") {
+      appBoot.publishProtocol(protocolName, value);
+    }
+    if (legacyName) {
+      window[legacyName] = value;
+    }
+    return value;
   };
   var langStorageKey = "planner-lang";
   var fallbackBootLocale = "zh-CN";
@@ -740,9 +761,10 @@
     runSerial += 1;
     var runId = runSerial;
     window.__bootstrapEntryRunning = true;
+    var appScriptChainFromProtocol = resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN");
     var declaredAppScriptChain =
-      Array.isArray(window.__APP_SCRIPT_CHAIN) && window.__APP_SCRIPT_CHAIN.length
-        ? window.__APP_SCRIPT_CHAIN.slice()
+      Array.isArray(appScriptChainFromProtocol) && appScriptChainFromProtocol.length
+        ? appScriptChainFromProtocol.slice()
         : [];
     root.classList.add("preload");
     applyPreloadTheme();
@@ -971,10 +993,10 @@
       .then(function () {
         if (
           !declaredAppScriptChain.length &&
-          Array.isArray(window.__APP_SCRIPT_CHAIN) &&
-          window.__APP_SCRIPT_CHAIN.length
+          Array.isArray(resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN")) &&
+          resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN").length
         ) {
-          declaredAppScriptChain = window.__APP_SCRIPT_CHAIN.slice();
+          declaredAppScriptChain = resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN").slice();
           declaredAppScriptChain.forEach(function (src) {
             ensureResource(src, "script");
           });
@@ -1031,6 +1053,7 @@
       });
   };
 
+  publishBootProtocolValue("startBootstrapEntry", "__startBootstrapEntry", startBootstrap);
   window.__startBootstrapEntry = startBootstrap;
   startBootstrap({ fromRetry: false });
 })();
