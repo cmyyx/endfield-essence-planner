@@ -174,6 +174,27 @@
   };
 
   const modules = window.AppModules || {};
+  const readRuntimeEnv = () => {
+    if (typeof window !== "undefined" && typeof window.__APP_ENV__ === "string") {
+      const fromWindow = String(window.__APP_ENV__).trim().toLowerCase();
+      if (fromWindow) return fromWindow;
+    }
+    if (
+      typeof process !== "undefined" &&
+      process &&
+      process.env &&
+      typeof process.env.NODE_ENV === "string"
+    ) {
+      const fromProcess = String(process.env.NODE_ENV).trim().toLowerCase();
+      if (fromProcess) return fromProcess;
+    }
+    return "production";
+  };
+  const strictInitContractEnvs = new Set(["development", "test"]);
+  const parseInitContractList = (value) =>
+    Array.isArray(value)
+      ? Array.from(new Set(value.map((item) => String(item || "").trim()).filter(Boolean)))
+      : [];
   const appTemplates =
     typeof window !== "undefined" && window.__APP_TEMPLATES ? window.__APP_TEMPLATES : {};
   const templateMainParts =
@@ -298,36 +319,179 @@
       const state = {};
       state.loadScriptOnce = loadScriptOnce;
       state.createUiScheduler = createUiScheduler;
-      const init = (name) => {
-        const fn = modules[name];
-        if (typeof fn === "function") {
-          fn(ctx, state);
+      const runtimeEnv = readRuntimeEnv();
+      const initializedModules = new Set();
+      const providedCapabilities = new Set();
+      const pendingInitContractWarnings = [];
+      const markProvidedCapabilities = (fn) => {
+        parseInitContractList(fn && fn.provides).forEach((capability) => {
+          providedCapabilities.add(capability);
+        });
+      };
+      const flushPendingInitContractWarnings = () => {
+        if (
+          typeof state.reportRuntimeWarning !== "function" ||
+          !Array.isArray(pendingInitContractWarnings) ||
+          !pendingInitContractWarnings.length
+        ) {
+          return;
         }
+        const queue = pendingInitContractWarnings.splice(0, pendingInitContractWarnings.length);
+        queue.forEach((runReporter) => {
+          try {
+            runReporter();
+          } catch (error) {
+            if (typeof console !== "undefined" && typeof console.warn === "function") {
+              console.warn("[init-contract] failed to flush pending warning", error);
+            }
+          }
+        });
+      };
+      const resolveMissingContracts = (declaredList, seenSet) =>
+        declaredList.filter((item) => !seenSet.has(item));
+      const reportInitContractWarning = (name, kind, details) => {
+        const normalizedName = String(name || "unknown");
+        const missingRequired = Array.isArray(details && details.missingRequired)
+          ? details.missingRequired
+          : [];
+        const missingOptional = Array.isArray(details && details.missingOptional)
+          ? details.missingOptional
+          : [];
+        const missingRequiredProviders = Array.isArray(details && details.missingRequiredProviders)
+          ? details.missingRequiredProviders
+          : [];
+        const missingOptionalProviders = Array.isArray(details && details.missingOptionalProviders)
+          ? details.missingOptionalProviders
+          : [];
+        const detailLines = [
+          `env: ${runtimeEnv}`,
+          `module: ${normalizedName}`,
+        ];
+        if (missingRequired.length) {
+          detailLines.push(`missing required modules: ${missingRequired.join(", ")}`);
+        }
+        if (missingRequiredProviders.length) {
+          detailLines.push(`missing required providers: ${missingRequiredProviders.join(", ")}`);
+        }
+        if (missingOptional.length) {
+          detailLines.push(`missing optional modules: ${missingOptional.join(", ")}`);
+        }
+        if (missingOptionalProviders.length) {
+          detailLines.push(`missing optional providers: ${missingOptionalProviders.join(", ")}`);
+        }
+        const summaryText =
+          kind === "required"
+            ? "关键模块依赖缺失，当前模块已降级跳过。"
+            : "检测到可选依赖缺失，模块继续初始化。";
+        const warningKeyParts = [
+          kind,
+          normalizedName,
+          missingRequired.join("|"),
+          missingRequiredProviders.join("|"),
+          missingOptional.join("|"),
+          missingOptionalProviders.join("|"),
+        ];
+        const warningText = `[init-contract] ${warningKeyParts.filter(Boolean).join("::")}`;
+        const warnConsole = () => {
+          if (typeof console !== "undefined" && typeof console.warn === "function") {
+            console.warn(warningText, detailLines.join("\n"));
+          }
+        };
+        const sendReporter = () => {
+          const warningError = new Error(warningText);
+          warningError.name = "InitContractWarning";
+          state.reportRuntimeWarning(warningError, {
+            scope: "init.contract",
+            operation: "init.contract-check",
+            key: `${kind}:${normalizedName}`,
+            title: "模块初始化依赖检查告警",
+            summary: summaryText,
+            note: detailLines.join("\n"),
+            asToast: true,
+            optionalSignature: warningText,
+          });
+        };
+        if (typeof state.reportRuntimeWarning === "function") {
+          sendReporter();
+          return;
+        }
+        warnConsole();
+        pendingInitContractWarnings.push(sendReporter);
+      };
+      const runInitWithContract = (name) => {
+        const fn = modules[name];
+        if (typeof fn !== "function") {
+          return "missing";
+        }
+        const required = parseInitContractList(fn.required);
+        const optional = parseInitContractList(fn.optional);
+        const requiredProviders = parseInitContractList(fn.requiredProviders);
+        const optionalProviders = parseInitContractList(fn.optionalProviders);
+        const missingRequired = resolveMissingContracts(required, initializedModules);
+        const missingRequiredProviders = resolveMissingContracts(requiredProviders, providedCapabilities);
+        if (missingRequired.length || missingRequiredProviders.length) {
+          const messageParts = [`[init-contract] ${name} missing required dependencies`];
+          if (missingRequired.length) {
+            messageParts.push(`modules=${missingRequired.join(",")}`);
+          }
+          if (missingRequiredProviders.length) {
+            messageParts.push(`providers=${missingRequiredProviders.join(",")}`);
+          }
+          if (strictInitContractEnvs.has(runtimeEnv)) {
+            throw new Error(messageParts.join(" | "));
+          }
+          reportInitContractWarning(name, "required", {
+            missingRequired,
+            missingRequiredProviders,
+          });
+          return "degraded";
+        }
+
+        const missingOptional = resolveMissingContracts(optional, initializedModules);
+        const missingOptionalProviders = resolveMissingContracts(optionalProviders, providedCapabilities);
+        if (missingOptional.length || missingOptionalProviders.length) {
+          reportInitContractWarning(name, "optional", {
+            missingOptional,
+            missingOptionalProviders,
+          });
+        }
+
+        fn(ctx, state);
+        initializedModules.add(name);
+        markProvidedCapabilities(fn);
+        flushPendingInitContractWarnings();
+        return "ok";
       };
 
-      init("initState");
-      init("initI18n");
-      init("initContent");
-      init("initSearch");
-      init("initUi");
-      init("initUpSchedule");
-      init("initRerunRanking");
-      init("initStorage");
-      init("initMigration");
-      init("initAnalytics");
-      init("initEmbed");
-      init("initPerf");
-      init("initBackground");
-      init("initWeapons");
-      init("initWeaponMatch");
-      init("initRecommendations");
-      init("initTutorial");
-      init("initRecommendationDisplay");
-      init("initModals");
-      init("initUpdate");
-      init("initMedia");
-      init("initStrategy");
-      init("initGearRefining");
+      const initExecutionOrder = [
+        "initState",
+        "initI18n",
+        "initContent",
+        "initSearch",
+        "initUi",
+        "initUpSchedule",
+        "initRerunRanking",
+        "initStorage",
+        "initMigration",
+        "initAnalytics",
+        "initEmbed",
+        "initPerf",
+        "initBackground",
+        "initWeapons",
+        "initWeaponMatch",
+        "initRecommendations",
+        "initTutorial",
+        "initRecommendationDisplay",
+        "initModals",
+        "initUpdate",
+        "initMedia",
+        "initStrategy",
+        "initGearRefining",
+      ];
+
+      initExecutionOrder.forEach((name) => {
+        runInitWithContract(name);
+      });
 
       const weaponCatalog =
         typeof window !== "undefined" && Array.isArray(window.WEAPONS) ? window.WEAPONS : [];

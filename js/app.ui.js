@@ -1067,4 +1067,9 @@
     state.reloadBypassCache = reloadBypassCache;
     state.exportRuntimeDiagnosticBundle = exportRuntimeDiagnosticBundle;
   };
+  modules.initUi.required = ["initState"];
+  modules.initUi.optional = ["initI18n", "initSearch"];
+  modules.initUi.requiredProviders = [];
+  modules.initUi.optionalProviders = [];
+  modules.initUi.provides = ["reportRuntimeWarning"];
 })();

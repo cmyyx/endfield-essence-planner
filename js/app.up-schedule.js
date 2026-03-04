@@ -315,4 +315,8 @@
     };
     state.reportUpScheduleIssue = reportIssue;
   };
+  modules.initUpSchedule.required = ["initState", "initUi"];
+  modules.initUpSchedule.optional = [];
+  modules.initUpSchedule.requiredProviders = ["reportRuntimeWarning"];
+  modules.initUpSchedule.optionalProviders = [];
 })();

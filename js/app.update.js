@@ -484,4 +484,8 @@
       document.removeEventListener("visibilitychange", handleVisibilityRecovery);
     });
   };
+  modules.initUpdate.required = ["initState", "initI18n", "initContent"];
+  modules.initUpdate.optional = ["initUi"];
+  modules.initUpdate.requiredProviders = [];
+  modules.initUpdate.optionalProviders = ["reportRuntimeWarning"];
 })();
