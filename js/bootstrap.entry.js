@@ -52,124 +52,6 @@
       })
     );
   };
-  var cloneArray = function (value) {
-    return Array.isArray(value) ? value.slice() : [];
-  };
-  var cloneOptionalConfigMap = function (value) {
-    if (!value || typeof value !== "object") return {};
-    var map = {};
-    Object.keys(value).forEach(function (key) {
-      var entry = value[key];
-      map[key] = entry && typeof entry === "object" ? Object.assign({}, entry) : {};
-    });
-    return map;
-  };
-  var createLegacyBootManifest = function () {
-    return {
-      boot: {
-        css: [
-          "./css/styles.theme.css",
-          "./css/styles.layout.css",
-          "./css/styles.overlays.css",
-          "./css/styles.filters.css",
-          "./css/styles.weapons.css",
-          "./css/styles.recommendations.css",
-          "./css/styles.gear-refining.css",
-          "./css/styles.theme.modes.css",
-        ],
-        data: [
-          "./js/app.resource-manifest.js",
-          "./data/version.js",
-          "./data/dungeons.js",
-          "./data/weapons.js",
-          "./data/up-schedules.js",
-          "./data/gears.js",
-          "./data/weapon-images.js",
-          "./data/i18n/zh-CN.js",
-          "./data/i18n/zh-TW.js",
-          "./data/i18n/en.js",
-          "./data/i18n/ja.js",
-        ],
-        runtime: ["./vendor/vue.global.prod.js", "./js/app.script-chain.js", "./js/app.js"],
-        optional: {
-          "./vendor/pinyin-pro.min.js": {
-            featureKey: "pinyin",
-            retryDelayMs: 1200,
-            maxRetries: 1,
-          },
-        },
-      },
-    };
-  };
-  var resolveBootResourceConfig = function () {
-    var manifest =
-      typeof window !== "undefined" &&
-      window.__APP_RESOURCE_MANIFEST &&
-      typeof window.__APP_RESOURCE_MANIFEST === "object"
-        ? window.__APP_RESOURCE_MANIFEST
-        : null;
-    var legacyManifest = createLegacyBootManifest();
-    if (!manifest) {
-      warnOnce(
-        "resource-manifest-fallback",
-        "[bootstrap] window.__APP_RESOURCE_MANIFEST is missing, using legacy fallback resources."
-      );
-      manifest = legacyManifest;
-      if (typeof window !== "undefined") {
-        window.__APP_RESOURCE_MANIFEST = manifest;
-      }
-    }
-    var boot = manifest && manifest.boot && typeof manifest.boot === "object" ? manifest.boot : {};
-    var cssFiles = cloneArray(boot.css);
-    if (!cssFiles.length) {
-      warnOnce("resource-manifest-css-fallback", "[bootstrap] manifest boot.css is empty, using legacy fallback CSS.");
-      cssFiles = cloneArray(legacyManifest.boot.css);
-    }
-    var startupDataScripts = cloneArray(boot.data);
-    if (!startupDataScripts.length) {
-      warnOnce(
-        "resource-manifest-data-fallback",
-        "[bootstrap] manifest boot.data is empty, using legacy fallback startup data scripts."
-      );
-      startupDataScripts = cloneArray(legacyManifest.boot.data);
-    }
-    var startupRuntimeScripts = cloneArray(boot.runtime);
-    if (!startupRuntimeScripts.length) {
-      warnOnce(
-        "resource-manifest-runtime-fallback",
-        "[bootstrap] manifest boot.runtime is empty, using legacy fallback runtime scripts."
-      );
-      startupRuntimeScripts = cloneArray(legacyManifest.boot.runtime);
-    }
-    var optionalScriptConfigs = cloneOptionalConfigMap(boot.optional);
-    if (!Object.keys(optionalScriptConfigs).length) {
-      optionalScriptConfigs = cloneOptionalConfigMap(legacyManifest.boot.optional);
-    }
-    var appEntryScript = startupRuntimeScripts.includes("./js/app.js")
-      ? "./js/app.js"
-      : startupRuntimeScripts[startupRuntimeScripts.length - 1] || "./js/app.js";
-    var runtimePreludeScripts = startupRuntimeScripts.filter(function (src) {
-      return src !== appEntryScript;
-    });
-    var startupScripts = startupDataScripts.concat(startupRuntimeScripts);
-    return {
-      cssFiles: cssFiles,
-      startupDataScripts: startupDataScripts,
-      startupRuntimeScripts: startupRuntimeScripts,
-      runtimePreludeScripts: runtimePreludeScripts,
-      appEntryScript: appEntryScript,
-      startupScripts: startupScripts,
-      optionalScriptConfigs: optionalScriptConfigs,
-    };
-  };
-  var bootResourceConfig = resolveBootResourceConfig();
-  var cssFiles = bootResourceConfig.cssFiles;
-  var startupDataScripts = bootResourceConfig.startupDataScripts;
-  var startupRuntimeScripts = bootResourceConfig.startupRuntimeScripts;
-  var runtimePreludeScripts = bootResourceConfig.runtimePreludeScripts;
-  var appEntryScript = bootResourceConfig.appEntryScript;
-  var startupScripts = bootResourceConfig.startupScripts;
-  var optionalScriptConfigs = bootResourceConfig.optionalScriptConfigs;
   var langStorageKey = "planner-lang";
   var fallbackBootLocale = "zh-CN";
   var supportedBootLocales = ["zh-CN", "zh-TW", "en", "ja"];
@@ -866,26 +748,20 @@
     applyPreloadTheme();
     ensureErrorRenderer();
     ensureLoadErrorReporter();
-    var activeBootResourceConfig = bootResourceConfig;
     var resourcesApi = window.__BOOTSTRAP_RESOURCES__;
-    if (resourcesApi && typeof resourcesApi.resolveBootResourceConfig === "function") {
-      activeBootResourceConfig = resourcesApi.resolveBootResourceConfig({ warnOnce: warnOnce });
+    if (!resourcesApi || typeof resourcesApi.resolveBootResourceConfig !== "function") {
+      throw new Error("Bootstrap resource manifest resolver is unavailable.");
     }
+    var activeBootResourceConfig = resourcesApi.resolveBootResourceConfig({ warnOnce: warnOnce });
     var cssFiles = activeBootResourceConfig.cssFiles;
     var startupDataScripts = activeBootResourceConfig.startupDataScripts;
-    var startupRuntimeScripts = activeBootResourceConfig.startupRuntimeScripts;
     var runtimePreludeScripts = activeBootResourceConfig.runtimePreludeScripts;
     var appEntryScript = activeBootResourceConfig.appEntryScript;
     var startupScripts = activeBootResourceConfig.startupScripts;
     var optionalScriptConfigs = activeBootResourceConfig.optionalScriptConfigs;
-    var progressPulseTimer = null;
     var resourceRuntime = null;
 
     var finish = function () {
-      if (progressPulseTimer) {
-        clearInterval(progressPulseTimer);
-        progressPulseTimer = null;
-      }
       if (resourceRuntime && typeof resourceRuntime.cleanup === "function") {
         resourceRuntime.cleanup();
       }
@@ -1149,14 +1025,6 @@
             details: [message],
             suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
           });
-          return;
-        }
-        if (document && document.body) {
-          var fallback = document.createElement("pre");
-          fallback.style.cssText = "padding:16px;color:#ffd7d7;background:#0b0f14;white-space:pre-wrap;";
-          fallback.textContent = message;
-          document.body.innerHTML = "";
-          document.body.appendChild(fallback);
           return;
         }
         throw error;

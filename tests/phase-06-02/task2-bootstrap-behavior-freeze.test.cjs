@@ -91,7 +91,7 @@ assert.ok(
   `bootstrap.entry should stay within orchestrator complexity budget (<=1040 lines), got ${entryLineCount}`
 );
 
-const protocolMatches = Array.from(entrySource.matchAll(/window\.__([A-Za-z0-9_]+)\s*=/g)).map((match) => match[1]);
+const protocolMatches = Array.from(entrySource.matchAll(/window\.__([A-Za-z0-9_]+)\s*=(?!=)/g)).map((match) => match[1]);
 const uniqueProtocols = Array.from(new Set(protocolMatches));
 const allowedProtocols = new Set([
   "bootI18n",
