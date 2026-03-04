@@ -4,59 +4,48 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "../..");
 const bootstrapFile = path.join(root, "js/bootstrap.entry.js");
+const manifestFile = path.join(root, "js/app.resource-manifest.js");
 const i18nFile = path.join(root, "js/app.i18n.js");
 const zhCnFile = path.join(root, "data/i18n/zh-CN.js");
 
 assert.equal(fs.existsSync(bootstrapFile), true, "js/bootstrap.entry.js should exist");
+assert.equal(fs.existsSync(manifestFile), true, "js/app.resource-manifest.js should exist");
 assert.equal(fs.existsSync(i18nFile), true, "js/app.i18n.js should exist");
 
 const bootstrapSource = fs.readFileSync(bootstrapFile, "utf8");
 const appI18nSource = fs.readFileSync(i18nFile, "utf8");
+const manifest = require(manifestFile);
 
 const normalizeSet = (items) => Array.from(new Set(items)).sort();
 const expectedLocalePaths = normalizeSet(
   ["zh-CN", "zh-TW", "en", "ja"].map((locale) => `./data/i18n/${locale}.js`)
 );
-const parseQuotedStrings = (text) =>
-  Array.from(text.matchAll(/["']([^"']+)["']/g)).map((match) => match[1]);
 const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const startupScriptsBlockMatch = bootstrapSource.match(
-  /var\s+startupScripts\s*=\s*\[([\s\S]*?)\];/
+assert.equal(
+  Array.isArray(manifest.boot && manifest.boot.data),
+  true,
+  "manifest boot.data should be defined"
 );
-assert.ok(startupScriptsBlockMatch, "bootstrap startupScripts block should exist");
-const startupI18nPaths = normalizeSet(
-  parseQuotedStrings(startupScriptsBlockMatch[1]).filter((value) =>
-    /^\.\/data\/i18n\/[^"']+\.js$/.test(value)
-  )
+const manifestI18nPaths = normalizeSet(
+  manifest.boot.data.filter((value) => /^\.\/data\/i18n\/[^"']+\.js$/.test(value))
 );
 
-const dataPromiseBlockMatch = bootstrapSource.match(
-  /var\s+dataPromise\s*=\s*Promise\.all\(\[([\s\S]*?)\]\);/
+assert.match(
+  bootstrapSource,
+  /window\.__APP_RESOURCE_MANIFEST/,
+  "bootstrap should consume window.__APP_RESOURCE_MANIFEST as i18n startup source"
 );
-assert.ok(dataPromiseBlockMatch, "bootstrap dataPromise block should exist");
-const dataPromiseI18nPaths = normalizeSet(
-  Array.from(
-    dataPromiseBlockMatch[1].matchAll(/loadScript\(\s*["']([^"']+)["']\s*\)/g)
-  )
-    .map((match) => match[1])
-    .filter((value) => /^\.\/data\/i18n\/[^"']+\.js$/.test(value))
+assert.match(
+  bootstrapSource,
+  /startupDataScripts\.map\(\s*function\s*\(src\)\s*\{\s*return\s+loadScript\(src\);\s*\}\s*\)/,
+  "bootstrap should load startup data scripts from manifest-driven startupDataScripts"
 );
 
 assert.deepEqual(
-  startupI18nPaths,
+  manifestI18nPaths,
   expectedLocalePaths,
-  "startupScripts should preload the full new data/i18n/*.js locale set"
-);
-assert.deepEqual(
-  dataPromiseI18nPaths,
-  expectedLocalePaths,
-  "dataPromise should preload the same full new data/i18n/*.js locale set"
-);
-assert.deepEqual(
-  startupI18nPaths,
-  dataPromiseI18nPaths,
-  "startupScripts and dataPromise should use the same i18n path group"
+  "manifest boot.data should preload the full data/i18n/*.js locale set"
 );
 
 const localeScriptMapMatch = appI18nSource.match(
@@ -76,8 +65,8 @@ assert.deepEqual(
 );
 assert.deepEqual(
   localeScriptMapPaths,
-  startupI18nPaths,
-  "localeScriptMap and bootstrap i18n path sets should be fully aligned"
+  manifestI18nPaths,
+  "localeScriptMap and manifest i18n path sets should be fully aligned"
 );
 
 const requiredBootKeys = [

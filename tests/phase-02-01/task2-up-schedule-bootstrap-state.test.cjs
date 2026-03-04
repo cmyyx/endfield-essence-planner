@@ -5,20 +5,29 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "../..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
+const manifestPath = path.join(root, "js/app.resource-manifest.js");
 const bootstrapSource = read("js/bootstrap.entry.js");
 const appCoreSource = read("js/app.core.js");
 const appStateSource = read("js/app.state.js");
+const manifest = require(manifestPath);
 
-assert.match(
-  bootstrapSource,
-  /startupScripts\s*=\s*\[[\s\S]*"\.\/data\/up-schedules\.js"/,
-  "bootstrap startupScripts should include ./data/up-schedules.js"
+assert.equal(fs.existsSync(manifestPath), true, "js/app.resource-manifest.js should exist");
+assert.equal(Array.isArray(manifest.boot && manifest.boot.data), true, "manifest boot.data should exist");
+assert.equal(
+  manifest.boot.data.includes("./data/up-schedules.js"),
+  true,
+  "manifest boot.data should include ./data/up-schedules.js"
 );
 
 assert.match(
   bootstrapSource,
-  /dataPromise\s*=\s*Promise\.all\(\[[\s\S]*loadScript\("\.\/data\/up-schedules\.js"\)/,
-  "bootstrap dataPromise should include loadScript(\"./data/up-schedules.js\")"
+  /window\.__APP_RESOURCE_MANIFEST/,
+  "bootstrap should consume window.__APP_RESOURCE_MANIFEST as startup resource source"
+);
+assert.match(
+  bootstrapSource,
+  /startupDataScripts\.map\(\s*function\s*\(src\)\s*\{\s*return\s+loadScript\(src\);\s*\}\s*\)/,
+  "bootstrap data loading should consume startupDataScripts from manifest"
 );
 
 assert.match(

@@ -31,11 +31,11 @@
   - 广告关闭状态为单次会话内存态（`adDismissedSession`），刷新后恢复。
 
 ## 4. 启动链路（必须理解）
-- `index.html` 只保留最小壳：`#app-preload`、`#app`、`./js/app.script-chain.js`、`./js/bootstrap.entry.js`。
+- `index.html` 只保留最小壳：`#app-preload`、`#app`、`./js/app.resource-manifest.js`、`./js/app.script-chain.js`、`./js/bootstrap.entry.js`。
 - `js/bootstrap.entry.js` 是唯一前置入口，负责：
   - preload 主题预应用（`planner-theme-mode:v1` + `prefers-color-scheme`）。
   - preload 动态状态（当前加载项、计数、进度）。
-  - 关键资源加载：`cssFiles` 与 `startupScripts`（含 `./data/version.js`）。
+  - 关键资源加载：读取 `window.__APP_RESOURCE_MANIFEST.boot`（`css/data/runtime/optional`）。
   - 统一错误渲染：`window.__renderBootError(...)`。
   - 不刷新重试：`window.__startBootstrapEntry({ fromRetry: true })`。
 - `js/app.js` 继续加载模块链（`window.__APP_SCRIPT_CHAIN` 或默认清单）。
@@ -70,10 +70,12 @@
   - `刷新页面`（硬刷新兜底）。
 
 ## 6. 改动时必须同步维护的点
-- 新增/删除 `app.*.js` 模块：必须更新 `js/app.script-chain.js`（唯一脚本链来源）。
-- 新增首屏关键样式或关键启动资源：必须评估并更新 `js/bootstrap.entry.js` 中：
-  - `cssFiles`
-  - `startupScripts`
+- 新增/删除 `app.*.js` 模块：必须更新 `js/app.resource-manifest.js` 的 `app.scriptChain`（`js/app.script-chain.js` 仅保留兼容输出层）。
+- 新增首屏关键样式或关键启动资源：必须评估并更新 `js/app.resource-manifest.js` 中：
+  - `boot.css`
+  - `boot.data`
+  - `boot.runtime`
+  - `boot.optional`
 - 调整 preload 结构文案时：同步检查 `index.html` 与 `js/bootstrap.entry.js` 中的 preload DOM 构造逻辑。
 - 调整官方检测逻辑时：同步更新 `README.md` 对响应头行为的说明。
 - 若更新检测依赖字段有变更（`buildId` / `displayVersion` / `announcementVersion` / `fingerprint` / `publishedAt`）：
@@ -108,7 +110,8 @@
 
 ## 9. 快速导航
 - `index.html`：最小页面壳 + bootstrap 入口与兜底。
-- `js/app.script-chain.js`：应用脚本链单一来源（供 preload 计数与 `app.js` 共用）。
+- `js/app.resource-manifest.js`：启动链与应用链唯一资源清单来源。
+- `js/app.script-chain.js`：基于 manifest 输出 `window.__APP_SCRIPT_CHAIN` 的兼容层。
 - `css/styles.preload.css`：preload 样式与主题过渡。
 - `js/bootstrap.entry.js`：启动与错误恢复核心。
 - `js/app.js`：模块链加载器。
