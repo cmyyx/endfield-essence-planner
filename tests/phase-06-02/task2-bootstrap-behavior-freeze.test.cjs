@@ -85,4 +85,27 @@ assert.match(
   "bootstrap.error should keep boot error overlay behavior"
 );
 
+const entryLineCount = entrySource.split(/\r?\n/).length;
+assert.ok(
+  entryLineCount <= 1040,
+  `bootstrap.entry should stay within orchestrator complexity budget (<=1040 lines), got ${entryLineCount}`
+);
+
+const protocolMatches = Array.from(entrySource.matchAll(/window\.__([A-Za-z0-9_]+)\s*=/g)).map((match) => match[1]);
+const uniqueProtocols = Array.from(new Set(protocolMatches));
+const allowedProtocols = new Set([
+  "bootI18n",
+  "bootStorageProbe",
+  "bootCacheBustToken",
+  "bootstrapEntryRunning",
+  "finishPreload",
+  "startBootstrapEntry",
+]);
+const unexpectedProtocols = uniqueProtocols.filter((name) => !allowedProtocols.has(name));
+assert.deepEqual(
+  unexpectedProtocols,
+  [],
+  `bootstrap.entry should not introduce new top-level window protocol assignments: ${unexpectedProtocols.join(", ")}`
+);
+
 console.log("task2-bootstrap-behavior-freeze: ok");
