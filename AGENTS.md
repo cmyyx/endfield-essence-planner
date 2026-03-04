@@ -83,6 +83,12 @@
 - 调整 `data/content.js` 中 `announcement.version` 后：
   - 发布前必须重新执行 `node scripts/gen-version.mjs`，确保 `data/version.js/json` 同步。
 
+## 6.1 Phase 6 继承约束与 Phase 7 文档门禁
+- **Phase 6 legacy bridge 约束**：`window.__APP_BOOT__` 与 legacy `__*` bridge 仍处于兼容期，相关行为以 `js/app.protocol.js` 与 `tests/phase-06-03/task3-global-protocol-bridge.test.cjs` 为准，不得静默移除。
+- **Phase 6 红灯治理继承**：启动链事实源必须保持 `manifest -> script-chain -> bootstrap/app` 单源一致；若出现脚本链/文档漂移，视为发布阻断项。
+- **Phase 7 文档门禁**：文档清单以 `js/app.resource-manifest.js` + `js/app.script-chain.js` 反推并校验，统一执行 `scripts/verify-doc-manifest-consistency.mjs`；缺项或冗余必须非零退出。
+- **文档职责真源**：`AGENTS.md` 是执行清单主文档；`README.md` 仅保留摘要与引用，不再维护完整重复 checklist。
+
 ## 7. 安全与实现约束
 - 不把不可信输入直接写入 `innerHTML`/`outerHTML`/`document.write`。
 - 纯文本展示优先使用 `textContent` 或 DOM API 创建节点。
@@ -103,6 +109,11 @@
   - `node --check js/templates.main.02.js`
   - `node --check js/templates.main.03.js`
   - `node --check js/templates.main.04.js`
+  - `node --check scripts/verify-doc-manifest-consistency.mjs`
+- 文档门禁检查：
+  - `node scripts/verify-doc-manifest-consistency.mjs`
+  - `node tests/phase-07-01/task1-doc-manifest-sync.test.cjs`
+  - `node tests/phase-07-01/task2-phase6-guardrail-doc-coverage.test.cjs`
 - 手工验证：
   - 正常启动可进入应用，preload 文案与主题正常。
   - 断网或拦截关键资源时能进入错误页并可重试恢复。
