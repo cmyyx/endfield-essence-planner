@@ -5,10 +5,10 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "../..");
 const templateFile = path.join(root, "js/templates.main.01.js");
 const i18nFiles = [
-  path.join(root, "data/i18n.zh-CN.js"),
-  path.join(root, "data/i18n.zh-TW.js"),
-  path.join(root, "data/i18n.en.js"),
-  path.join(root, "data/i18n.ja.js"),
+  path.join(root, "data/i18n/zh-CN.js"),
+  path.join(root, "data/i18n/zh-TW.js"),
+  path.join(root, "data/i18n/en.js"),
+  path.join(root, "data/i18n/ja.js"),
 ];
 
 const templateSource = fs.readFileSync(templateFile, "utf8");

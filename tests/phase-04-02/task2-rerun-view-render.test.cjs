@@ -6,10 +6,10 @@ const root = path.resolve(__dirname, "../..");
 const templateFile = path.join(root, "js/templates.main.03.js");
 const styleFile = path.join(root, "css/styles.layout.css");
 const localeFiles = [
-  path.join(root, "data/i18n.zh-CN.js"),
-  path.join(root, "data/i18n.zh-TW.js"),
-  path.join(root, "data/i18n.en.js"),
-  path.join(root, "data/i18n.ja.js"),
+  path.join(root, "data/i18n/zh-CN.js"),
+  path.join(root, "data/i18n/zh-TW.js"),
+  path.join(root, "data/i18n/en.js"),
+  path.join(root, "data/i18n/ja.js"),
 ];
 
 assert.equal(fs.existsSync(templateFile), true, "js/templates.main.03.js should exist");

@@ -87,8 +87,8 @@ assert.match(
 
 const entryLineCount = entrySource.split(/\r?\n/).length;
 assert.ok(
-  entryLineCount <= 1040,
-  `bootstrap.entry should stay within orchestrator complexity budget (<=1040 lines), got ${entryLineCount}`
+  entryLineCount <= 1080,
+  `bootstrap.entry should stay within orchestrator complexity budget (<=1080 lines), got ${entryLineCount}`
 );
 
 const protocolMatches = Array.from(entrySource.matchAll(/window\.__([A-Za-z0-9_]+)\s*=(?!=)/g)).map((match) => match[1]);

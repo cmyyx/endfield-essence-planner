@@ -156,6 +156,16 @@
         about: { ...base.about, ...(localized.about || {}) },
       };
     };
+    const i18nKeyPattern = /^[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)+$/;
+    const resolveTitleValue = (rawTitle, fallbackKey) => {
+      const fallbackTitle = t(fallbackKey);
+      if (typeof rawTitle !== "string") return fallbackTitle;
+      const normalizedTitle = rawTitle.trim();
+      if (!normalizedTitle) return fallbackTitle;
+      if (!i18nKeyPattern.test(normalizedTitle)) return normalizedTitle;
+      const translated = t(normalizedTitle);
+      return translated === "文案缺失" ? fallbackTitle : translated;
+    };
 
     const localizedContent = computed(() => getContentForLocale(state.locale.value));
     const defaultAnnouncement = computed(() => ({
@@ -166,18 +176,26 @@
       qqNote: "",
       items: [],
     }));
-    const announcement = computed(() => ({
-      ...defaultAnnouncement.value,
-      ...(localizedContent.value.announcement || {}),
-    }));
+    const announcement = computed(() => {
+      const next = {
+        ...defaultAnnouncement.value,
+        ...(localizedContent.value.announcement || {}),
+      };
+      next.title = resolveTitleValue(next.title, "nav.announcement");
+      return next;
+    });
     const defaultChangelog = computed(() => ({
       title: t("nav.changelog"),
       entries: [],
     }));
-    const changelog = computed(() => ({
-      ...defaultChangelog.value,
-      ...(localizedContent.value.changelog || {}),
-    }));
+    const changelog = computed(() => {
+      const next = {
+        ...defaultChangelog.value,
+        ...(localizedContent.value.changelog || {}),
+      };
+      next.title = resolveTitleValue(next.title, "nav.changelog");
+      return next;
+    });
     const defaultAbout = computed(() => ({
       title: t("nav.about_this_tool"),
       paragraphs: [],
@@ -190,6 +208,7 @@
         ...defaultAbout.value,
         ...(localizedContent.value.about || {}),
       };
+      base.title = resolveTitleValue(base.title, "nav.about_this_tool");
       const list = normalizeSponsorList((base.sponsor && base.sponsor.list) || getSponsorEntries());
       const items =
         (base.sponsor && Array.isArray(base.sponsor.items) && base.sponsor.items) || [];

@@ -7,6 +7,7 @@ const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "u
 
 const manifestPath = path.join(root, "js/app.resource-manifest.js");
 const bootstrapSource = read("js/bootstrap.entry.js");
+const bootstrapResourcesSource = read("js/bootstrap.resources.js");
 const appCoreSource = read("js/app.core.js");
 const appStateSource = read("js/app.state.js");
 const manifest = require(manifestPath);
@@ -21,8 +22,13 @@ assert.equal(
 
 assert.match(
   bootstrapSource,
-  /window\.__APP_RESOURCE_MANIFEST/,
-  "bootstrap should consume window.__APP_RESOURCE_MANIFEST as startup resource source"
+  /__BOOTSTRAP_RESOURCES__/,
+  "bootstrap should consume bootstrap.resources as startup resource source boundary"
+);
+assert.match(
+  bootstrapResourcesSource,
+  /__APP_RESOURCE_MANIFEST/,
+  "bootstrap.resources should consume window.__APP_RESOURCE_MANIFEST as startup resource source"
 );
 assert.match(
   bootstrapSource,

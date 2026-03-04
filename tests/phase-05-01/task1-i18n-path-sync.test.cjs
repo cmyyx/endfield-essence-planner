@@ -13,6 +13,10 @@ assert.equal(fs.existsSync(manifestFile), true, "js/app.resource-manifest.js sho
 assert.equal(fs.existsSync(i18nFile), true, "js/app.i18n.js should exist");
 
 const bootstrapSource = fs.readFileSync(bootstrapFile, "utf8");
+const bootstrapResourcesSource = fs.readFileSync(
+  path.join(root, "js/bootstrap.resources.js"),
+  "utf8"
+);
 const appI18nSource = fs.readFileSync(i18nFile, "utf8");
 const manifest = require(manifestFile);
 
@@ -33,8 +37,13 @@ const manifestI18nPaths = normalizeSet(
 
 assert.match(
   bootstrapSource,
-  /window\.__APP_RESOURCE_MANIFEST/,
-  "bootstrap should consume window.__APP_RESOURCE_MANIFEST as i18n startup source"
+  /__BOOTSTRAP_RESOURCES__/,
+  "bootstrap should consume bootstrap.resources as i18n startup source boundary"
+);
+assert.match(
+  bootstrapResourcesSource,
+  /__APP_RESOURCE_MANIFEST/,
+  "bootstrap.resources should consume window.__APP_RESOURCE_MANIFEST as i18n startup source"
 );
 assert.match(
   bootstrapSource,

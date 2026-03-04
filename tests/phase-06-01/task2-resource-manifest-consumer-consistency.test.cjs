@@ -10,6 +10,7 @@ assert.equal(fs.existsSync(manifestPath), true, "resource manifest file should e
 
 const manifestSource = read("js/app.resource-manifest.js");
 const bootstrapSource = read("js/bootstrap.entry.js");
+const bootstrapResourcesSource = read("js/bootstrap.resources.js");
 const appScriptChainSource = read("js/app.script-chain.js");
 
 const expectedMarkers = [
@@ -31,23 +32,33 @@ expectedMarkers.forEach((marker) => {
 
 assert.match(
   bootstrapSource,
+  /__BOOTSTRAP_RESOURCES__/,
+  "bootstrap should consume bootstrap.resources as manifest access boundary"
+);
+assert.match(
+  bootstrapResourcesSource,
   /boot\s*\.\s*css|boot\.css/,
-  "bootstrap should read boot.css from manifest"
+  "bootstrap.resources should read boot.css from manifest"
 );
 assert.match(
-  bootstrapSource,
+  bootstrapResourcesSource,
   /boot\s*\.\s*data|boot\.data/,
-  "bootstrap should read boot.data from manifest"
+  "bootstrap.resources should read boot.data from manifest"
 );
 assert.match(
-  bootstrapSource,
+  bootstrapResourcesSource,
   /boot\s*\.\s*runtime|boot\.runtime/,
-  "bootstrap should read boot.runtime from manifest"
+  "bootstrap.resources should read boot.runtime from manifest"
 );
 assert.match(
-  bootstrapSource,
+  bootstrapResourcesSource,
   /boot\s*\.\s*optional|boot\.optional/,
-  "bootstrap should read boot.optional from manifest"
+  "bootstrap.resources should read boot.optional from manifest"
+);
+assert.match(
+  bootstrapResourcesSource,
+  /__APP_RESOURCE_MANIFEST/,
+  "bootstrap.resources should consume window.__APP_RESOURCE_MANIFEST"
 );
 
 assert.match(

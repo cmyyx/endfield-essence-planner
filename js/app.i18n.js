@@ -336,7 +336,7 @@
     state.localeRenderVersion = localeRenderVersion;
   };
   modules.initI18n.required = ["initState"];
-  modules.initI18n.optional = ["initUi"];
+  modules.initI18n.optional = [];
   modules.initI18n.requiredProviders = [];
   modules.initI18n.optionalProviders = [];
 })();
