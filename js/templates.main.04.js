@@ -5,7 +5,7 @@
           <div class="tutorial-card">
             <div class="tutorial-head-row">
               <div class="tutorial-step">
-                {{ t("新手教程 {current} / {total}", {
+                {{ t("tutorial.tutorial_current_total", {
                   current: tutorialStepIndex + 1,
                   total: tutorialTotalSteps,
                 }) }}
@@ -16,7 +16,7 @@
                 :class="{ 'tutorial-highlight': tutorialCollapseHighlight }"
                 @click="toggleTutorialBody"
               >
-                {{ tutorialBodyCollapsed ? t("展开说明") : t("收起说明") }}
+                {{ tutorialBodyCollapsed ? t("gear_refining.expand_details") : t("gear_refining.collapse_details") }}
               </button>
             </div>
             <h3>{{ tutorialStep.title }}</h3>
@@ -33,8 +33,8 @@
               {{ line }}
             </p>
             <div class="tutorial-status">
-              <span v-if="tutorialStepReady">{{ t("已完成，可继续。") }}</span>
-              <span v-else>{{ t("请按提示完成当前操作。") }}</span>
+              <span v-if="tutorialStepReady">{{ t("gear_refining.completed_you_can_continue") }}</span>
+              <span v-else>{{ t("gear_refining.follow_the_prompt_to_complete_this_step") }}</span>
             </div>
             <div class="tutorial-actions">
               <button
@@ -42,17 +42,17 @@
                 @click="prevTutorialStep"
                 :disabled="tutorialStepIndex === 0"
               >
-                {{ t("上一步") }}
+                {{ t("gear_refining.previous") }}
               </button>
               <button class="ghost-button" @click="openTutorialSkipConfirm">
-                {{ t("跳过全部") }}
+                {{ t("gear_refining.skip_all") }}
               </button>
               <button
                 v-if="tutorialStepKey === 'base-pick' && !tutorialStepReady"
                 class="ghost-button"
                 @click="skipTutorialStep"
               >
-                {{ t("跳过本步") }}
+                {{ t("gear_refining.skip_this_step") }}
               </button>
               <button
                 class="about-button"
@@ -61,8 +61,8 @@
               >
                 {{
                   tutorialStepIndex + 1 >= tutorialTotalSteps
-                    ? t("完成")
-                    : t("下一步")
+                    ? t("gear_refining.finish")
+                    : t("gear_refining.next")
                 }}
               </button>
             </div>
@@ -73,13 +73,13 @@
       <transition name="fade-scale">
         <div v-if="showTutorialSkipConfirm" class="about-overlay" @click.self="closeTutorialSkipConfirm">
           <div class="about-card tutorial-modal">
-            <h3>{{ t("跳过新手教程？") }}</h3>
-            <p>{{ t("确定跳过当前版本的新手教程吗？此操作仅对当前版本生效。") }}</p>
-            <p class="tutorial-note">{{ t("之后可在“更多设置”中再次体验。") }}</p>
+            <h3>{{ t("tutorial.skip_tutorial") }}</h3>
+            <p>{{ t("tutorial.are_you_sure_you_want_to_skip_this_version_s_tutorial_th") }}</p>
+            <p class="tutorial-note">{{ t("gear_refining.you_can_replay_it_later_in_more_settings") }}</p>
             <div class="about-actions">
-              <button class="ghost-button" @click="closeTutorialSkipConfirm">{{ t("取消") }}</button>
+              <button class="ghost-button" @click="closeTutorialSkipConfirm">{{ t("button.cancel") }}</button>
               <button class="about-button" @click="confirmTutorialSkipAll">
-                {{ t("跳过全部") }}
+                {{ t("gear_refining.skip_all") }}
               </button>
             </div>
           </div>
@@ -89,13 +89,13 @@
       <transition name="fade-scale">
         <div v-if="showTutorialComplete" class="tutorial-float">
           <div class="tutorial-card tutorial-complete-card">
-            <div class="tutorial-step">{{ t("新手教程完成") }}</div>
-            <h3>{{ t("恭喜完成新手教程") }}</h3>
-            <p>{{ t("你已完成当前版本的新手教程。") }}</p>
-            <p>{{ t("如果你认为新手教程需要改进欢迎提供建议。") }}</p>
-            <p class="tutorial-note">{{ t("可在“更多设置”中再次体验。") }}</p>
+            <div class="tutorial-step">{{ t("tutorial.tutorial_complete") }}</div>
+            <h3>{{ t("tutorial.congrats_on_finishing_the_tutorial") }}</h3>
+            <p>{{ t("tutorial.you_ve_completed_this_version_s_tutorial") }}</p>
+            <p>{{ t("tutorial.if_you_think_the_tutorial_needs_improvement_feedback_is_") }}</p>
+            <p class="tutorial-note">{{ t("gear_refining.you_can_replay_it_in_more_settings") }}</p>
             <div class="tutorial-actions">
-              <button class="about-button" @click="closeTutorialComplete">{{ t("知道了") }}</button>
+              <button class="about-button" @click="closeTutorialComplete">{{ t("button.got_it") }}</button>
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@
               {{
                 activeUnifiedExceptionKind === "runtime"
                   ? t((unifiedExceptionCurrent && unifiedExceptionCurrent.title) || "页面初始化异常")
-                  : t("本地存储异常")
+                  : t("storage.local_storage_error")
               }}
             </h3>
             <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
@@ -118,54 +118,54 @@
                     "页面初始化阶段发生异常，部分功能可能不可用。"
                 )
               }}
-              {{ t("请刷新页面后重试；如问题持续，请附控制台日志反馈。") }}
+              {{ t("update.refresh_and_try_again_if_it_persists_report_it_with_cons") }}
             </p>
             <p class="storage-error-warning" v-else>
-              {{ t("检测到浏览器本地数据读写异常，继续使用可能导致数据丢失。") }}
+              {{ t("storage.a_browser_local_data_read_write_error_was_detected_conti") }}
             </p>
             <p class="storage-error-warning">
               {{
-                t("失败操作：{operation}", {
-                  operation: (unifiedExceptionCurrent && unifiedExceptionCurrent.operation) || t("未知")
+                t("storage.failed_operation_operation", {
+                  operation: (unifiedExceptionCurrent && unifiedExceptionCurrent.operation) || t("gear_refining.unknown")
                 })
               }}
             </p>
             <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
               {{
-                t("异常来源：{scope}", {
-                  scope: (unifiedExceptionCurrent && unifiedExceptionCurrent.scope) || t("未知")
+                t("storage.source_scope", {
+                  scope: (unifiedExceptionCurrent && unifiedExceptionCurrent.scope) || t("gear_refining.unknown")
                 })
               }}
             </p>
             <p class="storage-error-warning">
               {{
-                t("失败键：{key}", {
-                  key: (unifiedExceptionCurrent && unifiedExceptionCurrent.key) || t("未知")
+                t("storage.failed_key_key", {
+                  key: (unifiedExceptionCurrent && unifiedExceptionCurrent.key) || t("gear_refining.unknown")
                 })
               }}
             </p>
 
             <div class="storage-error-meta" v-if="unifiedExceptionCurrent">
               <div class="storage-error-meta-line">
-                <span class="storage-error-label">{{ t("错误：") }}</span>
+                <span class="storage-error-label">{{ t("storage.error") }}</span>
                 <span class="storage-error-value">
                   {{ unifiedExceptionCurrent.errorName }}: {{ unifiedExceptionCurrent.errorMessage }}
                 </span>
               </div>
               <div class="storage-error-meta-line">
-                <span class="storage-error-label">{{ t("时间：") }}</span>
+                <span class="storage-error-label">{{ t("gear_refining.time") }}</span>
                 <span class="storage-error-value">{{ unifiedExceptionCurrent.occurredAt }}</span>
               </div>
             </div>
 
             <div class="storage-error-preview">
-              <div class="storage-error-preview-title">{{ t("诊断预览（截断）") }}</div>
-              <pre class="storage-error-preview-content">{{ unifiedExceptionPreviewText || t("暂无预览数据") }}</pre>
+              <div class="storage-error-preview-title">{{ t("storage.diagnostic_preview_truncated") }}</div>
+              <pre class="storage-error-preview-content">{{ unifiedExceptionPreviewText || t("storage.no_preview_data") }}</pre>
             </div>
 
             <div class="storage-error-log">
               <div class="storage-error-log-title">
-                {{ t("最近异常记录") }}（{{ unifiedExceptionLogs.length }}）
+                {{ t("storage.recent_error_logs") }}（{{ unifiedExceptionLogs.length }}）
               </div>
               <ul class="storage-error-log-list">
                 <li
@@ -187,16 +187,16 @@
 
             <div class="about-actions storage-error-actions">
               <button class="about-button storage-export-button" @click="exportUnifiedExceptionDiagnostic">
-                {{ t("导出数据与诊断") }}
+                {{ t("storage.export_data_and_diagnostics") }}
               </button>
               <button class="about-button migration-action migration-action-warn" @click="refreshUnifiedException">
-                {{ activeUnifiedExceptionKind === "runtime" ? t("刷新页面") : t("清理数据并刷新") }}
+                {{ activeUnifiedExceptionKind === "runtime" ? t("update.refresh_page") : t("storage.clear_data_and_refresh") }}
               </button>
               <a class="storage-feedback-button" :href="storageFeedbackUrl" target="_blank" rel="noreferrer">
-                {{ t("反馈问题") }}
+                {{ t("gear_refining.report_issue") }}
               </a>
               <button class="ghost-button" @click="ignoreUnifiedException">
-                {{ t("无视错误,继续使用") }}
+                {{ t("storage.ignore_error_continue") }}
               </button>
             </div>
           </div>
@@ -206,20 +206,20 @@
       <transition name="fade-scale">
         <div v-if="showRuntimeIgnoreConfirmModal" class="about-overlay storage-error-confirm-overlay">
           <div class="about-card storage-confirm-card">
-            <h3>{{ t("确认无视错误") }}</h3>
+            <h3>{{ t("storage.confirm_ignore_error") }}</h3>
             <p class="storage-clear-confirm-warning">
               {{
                 t(
-                  "确认后本次会话将不再弹出该异常提醒，继续使用可能导致数据丢失。"
+                  "storage.after_confirmation_this_warning_will_not_appear_again_in"
                 )
               }}
             </p>
             <div class="about-actions storage-error-actions storage-clear-actions">
               <button class="ghost-button" @click="cancelIgnoreRuntimeWarnings">
-                {{ t("取消") }}
+                {{ t("button.cancel") }}
               </button>
               <button class="about-button migration-action migration-action-warn" @click="confirmIgnoreRuntimeWarnings">
-                {{ t("确认无视错误,继续使用") }}
+                {{ t("storage.confirm_ignore_and_continue") }}
               </button>
             </div>
           </div>
@@ -229,17 +229,17 @@
       <transition name="fade-scale">
         <div v-if="showStorageClearConfirmModal" class="about-overlay storage-error-confirm-overlay">
           <div class="about-card storage-confirm-card">
-            <h3>{{ t("确认清理数据并刷新") }}</h3>
+            <h3>{{ t("storage.confirm_clear_data_and_refresh") }}</h3>
             <p class="storage-clear-confirm-warning">
               {{
                 t(
-                  "将仅清理检测到异常的本地数据键，并尝试绕过缓存刷新页面，不会清理全部站点数据。此操作仍不可恢复。"
+                  "storage.only_the_local_data_keys_detected_as_problematic_will_be"
                 )
               }}
             </p>
             <div class="storage-clear-targets" v-if="storageErrorClearTargetKeys.length">
               <div class="storage-clear-target-title">
-                {{ t("将清理以下键：") }}
+                {{ t("storage.the_following_keys_will_be_cleared") }}
               </div>
               <ul class="storage-clear-target-list">
                 <li v-for="key in storageErrorClearTargetKeys" :key="key" class="storage-clear-target-item">
@@ -248,18 +248,18 @@
               </ul>
             </div>
             <p v-else class="storage-clear-confirm-warning">
-              {{ t("未识别到明确异常键，本次仅执行刷新。") }}
+              {{ t("storage.no_explicit_problematic_key_was_identified_this_action_w") }}
             </p>
             <div class="about-actions storage-error-actions storage-clear-actions">
               <button class="ghost-button" @click="cancelStorageDataClear">
-                {{ t("取消") }}
+                {{ t("button.cancel") }}
               </button>
               <button
                 class="about-button migration-action migration-action-danger"
                 :disabled="storageErrorClearCountdown > 0"
                 @click="confirmStorageDataClearAndReload"
               >
-                {{ t("确认清理并刷新") }}
+                {{ t("storage.confirm_clear_and_refresh") }}
                 <span v-if="storageErrorClearCountdown > 0">
                   {{ t("（{count}s）", { count: storageErrorClearCountdown }) }}
                 </span>
@@ -272,20 +272,20 @@
       <transition name="fade-scale">
         <div v-if="showStorageIgnoreConfirmModal" class="about-overlay storage-error-confirm-overlay">
           <div class="about-card storage-confirm-card">
-            <h3>{{ t("确认无视错误") }}</h3>
+            <h3>{{ t("storage.confirm_ignore_error") }}</h3>
             <p class="storage-clear-confirm-warning">
               {{
                 t(
-                  "确认后本次会话将不再弹出该异常提醒，继续使用可能导致数据丢失。"
+                  "storage.after_confirmation_this_warning_will_not_appear_again_in"
                 )
               }}
             </p>
             <div class="about-actions storage-error-actions storage-clear-actions">
               <button class="ghost-button" @click="cancelIgnoreStorageErrors">
-                {{ t("取消") }}
+                {{ t("button.cancel") }}
               </button>
               <button class="about-button migration-action migration-action-warn" @click="confirmIgnoreStorageErrors">
-                {{ t("确认无视错误,继续使用") }}
+                {{ t("storage.confirm_ignore_and_continue") }}
               </button>
             </div>
           </div>
@@ -301,14 +301,14 @@
             aria-live="polite"
           >
             <p class="version-debug-badge-panel-title">
-              {{ t("网站当前适配版本为 {version}", { version: gameCompatSupportedVersion || t("未知") }) }}
+              {{ t("update.current_site_compatible_version_version", { version: gameCompatSupportedVersion || t("gear_refining.unknown") }) }}
             </p>
             <p class="version-debug-badge-panel-text">
-              {{ t("若游戏已更新至 {version}，请等待站点适配。", { version: gameCompatNextVersion || t("未知") }) }}
+              {{ t("update.if_the_game_has_been_updated_to_version_please_wait_for_", { version: gameCompatNextVersion || t("gear_refining.unknown") }) }}
             </p>
             <div class="version-debug-badge-panel-actions">
               <button type="button" class="ghost-button version-compat-ack" @click="dismissGameCompatWarning">
-                {{ t("我知道了") }}
+                {{ t("button.got_it_2") }}
               </button>
             </div>
           </div>
@@ -316,10 +316,10 @@
         <button
           type="button"
           class="version-debug-badge"
-          :title="versionCopyFeedbackText || t('点击复制完整版本信息')"
+          :title="versionCopyFeedbackText || t('update.click_to_copy_full_version_info')"
           @click="copyCurrentVersionInfo"
         >
-          {{ versionBadgeDisplayText || updateCurrentVersionText || t("当前版本获取失败") }}
+          {{ versionBadgeDisplayText || updateCurrentVersionText || t("storage.failed_to_load_current_version") }}
         </button>
       </div>
       <div
@@ -351,7 +351,7 @@
               class="update-toast-card optional-failure-toast-card"
               role="button"
               tabindex="0"
-              :aria-label="t('查看可选失败详情')"
+              :aria-label="t('error.view_optional_failure_details')"
               @click="openLatestOptionalFailureDetail"
               @keydown.enter.prevent="openLatestOptionalFailureDetail"
               @keydown.space.prevent="openLatestOptionalFailureDetail"
@@ -359,16 +359,16 @@
               <div class="optional-failure-toast-main">
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
                 <div class="optional-failure-toast-text">
-                  <strong>{{ t("可选功能加载失败") }}</strong>
-                  <span>{{ t("更多设置") }} · {{ t("点击通知查看详情") }}</span>
+                  <strong>{{ t("error.optional_feature_load_failed") }}</strong>
+                  <span>{{ t("nav.more_settings") }} · {{ t("gear_refining.tap_the_notification_to_view_details") }}</span>
                 </div>
               </div>
               <div class="optional-failure-toast-actions">
                 <button
                   type="button"
                   class="optional-failure-close-button"
-                  :aria-label="t('关闭')"
-                  :title="t('关闭')"
+                  :aria-label="t('plan_config.close')"
+                  :title="t('plan_config.close')"
                   @click.stop="dismissOptionalFailureNotice(notice.id)"
                 >
                   &times;
@@ -381,30 +381,30 @@
         <transition name="fade-scale">
           <div v-if="showUpdatePrompt" class="update-toast update-version-toast" role="status" aria-live="polite">
           <div class="update-toast-card">
-            <h3>{{ t("检测到新版本") }}</h3>
+            <h3>{{ t("update.new_version_detected") }}</h3>
             <p class="update-check-desc">
-              {{ t("检测到站点已有更新，刷新后可使用最新功能与修复。") }}
+              {{ t("update.a_newer_site_version_is_available_refresh_to_get_the_lat") }}
             </p>
             <div class="update-version-grid">
               <div class="update-version-row">
-                <span class="update-version-label">{{ t("当前版本") }}</span>
-                <span class="update-version-value">{{ updateCurrentVersionText || t("当前版本获取失败") }}</span>
+                <span class="update-version-label">{{ t("update.current_version") }}</span>
+                <span class="update-version-value">{{ updateCurrentVersionText || t("storage.failed_to_load_current_version") }}</span>
               </div>
               <div class="update-version-row">
-                <span class="update-version-label">{{ t("最新版本") }}</span>
-                <span class="update-version-value">{{ updateLatestVersionText || t("未知") }}</span>
+                <span class="update-version-label">{{ t("update.latest_version") }}</span>
+                <span class="update-version-value">{{ updateLatestVersionText || t("gear_refining.unknown") }}</span>
               </div>
               <div class="update-version-row" v-if="updateLatestPublishedAt">
-                <span class="update-version-label">{{ t("发布时间") }}</span>
+                <span class="update-version-label">{{ t("update.published_at") }}</span>
                 <span class="update-version-value">{{ updateLatestPublishedAt }}</span>
               </div>
             </div>
             <div class="about-actions update-check-actions">
               <button class="about-button update-action-primary" @click="reloadToLatestVersion">
-                {{ t("立即刷新") }}
+                {{ t("update.refresh_now") }}
               </button>
               <button class="about-button update-action-secondary" @click="dismissUpdatePrompt">
-                {{ t("稍后提醒") }}
+                {{ t("button.remind_me_later") }}
               </button>
             </div>
           </div>
@@ -414,20 +414,20 @@
 
       <div v-if="showDomainWarning" class="domain-overlay">
         <div class="domain-card">
-          <h3>{{ t("非官方域名提示") }}</h3>
+          <h3>{{ t("embed.unofficial_domain_warning") }}</h3>
           <p>
-            {{ t("当前访问域名并非") }}
+            {{ t("embed.the_current_domain_is_not") }}
             <a class="domain-link" href="https://end.canmoe.com" target="_blank" rel="noreferrer">
               end.canmoe.com
             </a>
-            {{ t("请确认是否为可信来源，谨防恶意映射或页面被内嵌篡改。") }}
+            {{ t("embed.please_ensure_this_source_is_trusted_to_avoid_malicious_") }}
           </p>
-          <p class="domain-chip">{{ t("当前页面域名：{host}", { host: currentHost }) }}</p>
+          <p class="domain-chip">{{ t("embed.current_domain_host", { host: currentHost }) }}</p>
           <p v-if="isEmbedded" class="domain-chip">
-            {{ t("上层页面域名：{host}", { host: embedHostLabel }) }}
+            {{ t("embed.parent_page_domain_host", { host: embedHostLabel }) }}
           </p>
-          <p v-if="isEmbedded && !isEmbedTrusted">{{ t("该域名未在内嵌白名单内。") }}</p>
-          <p v-if="isEmbedded">{{ t("检测到页面被内嵌（iframe）打开，此提示无法关闭。") }}</p>
+          <p v-if="isEmbedded && !isEmbedTrusted">{{ t("embed.this_domain_is_not_on_the_embed_allowlist") }}</p>
+          <p v-if="isEmbedded">{{ t("embed.this_page_is_opened_inside_an_iframe_this_warning_can_t_") }}</p>
           <div class="about-actions domain-actions">
             <a
               class="repo-link domain-primary"
@@ -435,8 +435,8 @@
               target="_blank"
               rel="noreferrer"
             >
-              <span class="repo-chip">{{ t("官方") }}</span>
-              <span>{{ t("访问官方域名") }}</span>
+              <span class="repo-chip">{{ t("embed.official") }}</span>
+              <span>{{ t("embed.visit_official_domain") }}</span>
               <span class="repo-arrow">↗</span>
             </a>
             <button
@@ -447,8 +447,8 @@
             >
               {{
                 warningCountdown > 0
-                  ? t("我已知晓（{count}s）", { count: warningCountdown })
-                  : t("我已知晓")
+                  ? t("gear_refining.i_understand_count_s", { count: warningCountdown })
+                  : t("gear_refining.i_understand")
               }}
             </button>
           </div>

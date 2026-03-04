@@ -101,7 +101,7 @@
           embedHost.value = "";
         }
       }
-      embedHostLabel.value = embedHost.value || state.t("未知来源");
+      embedHostLabel.value = embedHost.value || state.t("embed.unknown_source");
     }
 
     recomputeCurrentHostTrust();

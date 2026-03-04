@@ -407,20 +407,20 @@
         const detailLines = [];
         if (featureLabel && typeof state.t === "function") {
           detailLines.push(
-            state.t("失败功能：{features}", {
+            state.t("warning.affected_features_features", {
               features: featureLabel,
             })
           );
         }
         if (item.resourceLabel && typeof state.t === "function") {
           detailLines.push(
-            state.t("失败资源：{resources}", {
+            state.t("warning.failed_resources_resources", {
               resources: item.resourceLabel,
             })
           );
         }
         if (typeof state.t === "function") {
-          detailLines.push(state.t("影响说明：仅影响可选功能，不影响核心功能。"));
+          detailLines.push(state.t("optional.impact_optional_features_only_core_functionality_remains"));
         }
         const messageParts = [];
         if (featureLabel) {
@@ -437,11 +437,11 @@
           key: item.signature,
           title:
             typeof state.t === "function"
-              ? state.t("可选功能加载失败")
+              ? state.t("error.optional_feature_load_failed")
               : "可选功能加载失败",
           summary:
             typeof state.t === "function"
-              ? state.t("部分可选功能未能加载，页面主体仍可继续使用。")
+              ? state.t("warning.some_optional_features_could_not_be_loaded_core_page_usa")
               : "部分可选功能未能加载，页面主体仍可继续使用。",
           note: detailLines.join("\n"),
           asToast: true,

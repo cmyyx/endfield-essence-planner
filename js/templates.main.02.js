@@ -4,7 +4,7 @@
                 </div>
               </div>
               <div v-else class="empty">
-                {{ t("当前组合无可用方案") }}
+                {{ t("error.no_available_plan_for_current_selection") }}
               </div>
             </div>
           </div>
@@ -13,17 +13,17 @@
             <div v-if="coverageSummary && coverageSummary.hasGap" class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title">{{ t("当前组合需要分批刷取") }}</div>
+                  <div class="card-title">{{ t("plan.current_selection_needs_batch_farming") }}</div>
                   <div class="hint">
-                    {{ t("该组合无法在同一批次完成，已生成 {count} 套方案覆盖全部已选武器，并按效率优先排序。", {
+                    {{ t("guide.this_selection_can_t_be_completed_in_a_single_batch_gene", {
                       count: recommendations.length,
                     }) }}
                     <span class="hint-accent">
-                      {{ t("当前展示 {count} 套方案已满足全部已选武器刷取要求", {
+                      {{ t("guide.the_count_plans_shown_already_cover_all_selected_weapons", {
                         count: displayRecommendations.length,
                       }) }}
                     </span>
-                    {{ t("请在下方查看。如需查看更多方案请点击展开其他方案按钮。") }}
+                    {{ t("plan.see_details_below_to_view_more_plans_click_show_other_pl") }}
                   </div>
                 </div>
               </div>
@@ -36,7 +36,7 @@
             ></div>
             <template v-for="(card, index) in visibleDisplayRecommendations" :key="card.schemeKey">
               <div v-if="index + recommendationVirtualStartIndex === displayDividerIndex" class="scheme-divider">
-                <span>{{ t("其他方案") }}</span>
+                <span>{{ t("plan.other_plans") }}</span>
               </div>
               <div
                 class="card scheme-card"
@@ -60,11 +60,11 @@
                 <div>
                   <div class="card-title">{{ tTerm("dungeon", card.dungeon.name) }}</div>
                   <div class="hint" v-if="card.displaySelectedMatchCount === card.targetCount">
-                    {{ t("附加属性池 / 技能属性池 均已满足已选武器需求") }}
+                    {{ t("guide.extra_skill_pools_already_satisfy_selected_weapons") }}
                   </div>
                   <div class="hint" v-else>
                     {{
-                      t("已覆盖 {match} / {total} 把已选武器，剩余需拆分刷取。", {
+                      t("guide.covers_match_total_selected_weapons_the_rest_need_separa", {
                         match: card.displaySelectedMatchCount,
                         total: card.targetCount,
                       })
@@ -76,8 +76,8 @@
                     :open="card.targetCount > 1"
                   >
                     <summary>
-                      {{ t("未覆盖") }} {{ card.displaySelectedMissingNames.length }} {{ t("把") }}（{{
-                        t("基础属性")
+                      {{ t("plan.item") }} {{ card.displaySelectedMissingNames.length }} {{ t("nav.weapons_2") }}（{{
+                        t("nav.base_attributes")
                       }}）
                       </summary>
                       <div class="missing-tags">
@@ -94,36 +94,36 @@
                 <div class="strategy-row">
                   <span class="pill wide">
                     {{
-                      t("可同时刷武器：{count} 把（覆盖已选 {match} 把）", {
+                      t("guide.can_farm_together_count_weapons_covers_match_selected", {
                         count: card.displayWeaponCount,
                         match: card.displaySelectedMatchCount,
                       })
                     }}
                   </span>
                   <span class="pill" v-if="card.maxWeaponCount !== card.displayWeaponCount">
-                    {{ t("最多可刷：{count} 把", { count: card.maxWeaponCount }) }}
+                    {{ t("label.max_farmable_count", { count: card.maxWeaponCount }) }}
                   </span>
                   <span class="pill warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
                     {{
-                      t("未覆盖 {count}", { count: card.displaySelectedMissingNames.length })
+                      t("plan.uncovered_count", { count: card.displaySelectedMissingNames.length })
                     }}
                   </span>
                   <span
                     class="pill warn"
                     v-if="card.conflictSelected && card.conflictSelected.length"
                   >
-                    {{ t("冲突 {count}", { count: card.conflictSelected.length }) }}
+                    {{ t("plan.conflicts_count", { count: card.conflictSelected.length }) }}
                   </span>
                 </div>
               </div>
               <div class="lock-summary">
-                <div class="lock-title">{{ t("锁定方案") }}</div>
+                <div class="lock-title">{{ t("plan.locked_plan") }}</div>
                 <div class="lock-items">
                   <span
                     class="lock-chip"
                     :class="{ warn: card.manualPickNeeded || card.manualPickOverflow }"
                   >
-                    {{ t("基础属性") }}：{{
+                    {{ t("nav.base_attributes") }}：{{
                       card.basePickLabels
                         .map((label) =>
                           label === "请手动选择" || label === "任意属性" ? t(label) : formatS1(label)
@@ -132,7 +132,7 @@
                     }}
                   </span>
                   <span class="lock-chip attr">{{
-                    t("锁定{label}：{value}", {
+                    t("plan.lock_label_value", {
                       label: t(card.lockLabel),
                       value: tTerm(card.lockType, card.lockValue),
                     })
@@ -144,28 +144,28 @@
                   :class="{ 'status-warn': card.manualPickOverflow }"
                 >
                   <template v-if="card.manualPickOverflow">
-                    <span class="hint-line">{{ t("已选择超过三种基础属性，请放弃一种属性。") }}</span>
+                    <span class="hint-line">{{ t("label.more_than_three_base_attributes_selected_please_drop_one") }}</span>
                     <span class="hint-line hint-accent">
                       {{
-                        t("请在下方黄色高亮的武器中点击武器选择你想要放弃的基础属性（还需放弃 {count} 个）", {
+                        t("guide.click_a_yellow_highlighted_weapon_below_to_drop_the_base", {
                           count: card.manualPickOverflowCount,
                         })
                       }}
                     </span>
                   </template>
                   <template v-else-if="card.manualPickNeeded">
-                    <span class="hint-line">{{ t("基础属性超过三选。") }}</span>
+                    <span class="hint-line">{{ t("label.more_than_three_base_attributes") }}</span>
                     <span class="hint-line hint-accent">
                       {{
-                        t("请在下方黄色高亮的武器中点击武器选择你想要刷取的基础属性（还需选择 {count} 个）", {
+                        t("guide.item", {
                           count: card.manualPickNeeded,
                         })
                       }}
                     </span>
                   </template>
                   <template v-else>
-                    <span class="hint-line">{{ t("基础属性已锁定，可同时刷范围已更新。") }}</span>
-                    <span class="hint-line hint-accent">{{ t("可点击武器来选中/取消基础属性。") }}</span>
+                    <span class="hint-line">{{ t("label.base_attributes_locked_simultaneous_farming_range_update") }}</span>
+                    <span class="hint-line hint-accent">{{ t("guide.click_weapons_to_select_deselect_base_attributes") }}</span>
                   </template>
                 </div>
               </div>
@@ -174,8 +174,8 @@
                 <button class="ghost-button" @click="toggleConflictOpen(card.schemeKey)">
                   {{
                     isConflictOpen(card.schemeKey)
-                      ? t("点击收起冲突已选武器")
-                      : t("点击展开冲突已选武器（{count}）", { count: card.conflictSelected.length })
+                      ? t("guide.click_to_collapse_conflicted_selected_weapons")
+                      : t("guide.click_to_expand_conflicted_selected_weapons_count", { count: card.conflictSelected.length })
                   }}
                 </button>
                 <transition name="collapse">
@@ -231,24 +231,24 @@
                         <span class="rarity" :style="rarityTextStyle(weapon.rarity)">
                           {{ weapon.rarity }}★
                         </span>
-                        <span class="badge warn">{{ t("冲突") }}</span>
+                        <span class="badge warn">{{ t("plan.conflict") }}</span>
                         <span v-if="weapon.short" class="weapon-short">
                           {{ tTerm("short", weapon.short) }}
                         </span>
                       </div>
                       <div class="scheme-weapon-attrs">
                         <span class="attr-value">
-                          <span class="attr-label">{{ t("基础属性") }}：</span>{{ formatS1(weapon.s1) }}
+                          <span class="attr-label">{{ t("nav.base_attributes") }}：</span>{{ formatS1(weapon.s1) }}
                         </span>
                         <span class="attr-value" :class="{ conflict: weapon.conflictS2 }">
-                          <span class="attr-label">{{ t("附加属性") }}：</span>{{ tTerm("s2", weapon.s2) }}
+                          <span class="attr-label">{{ t("nav.extra_attributes") }}：</span>{{ tTerm("s2", weapon.s2) }}
                         </span>
                         <span class="attr-value" :class="{ conflict: weapon.conflictS3 }">
-                          <span class="attr-label">{{ t("技能属性") }}：</span>{{ tTerm("s3", weapon.s3) }}
+                          <span class="attr-label">{{ t("nav.skill_attributes") }}：</span>{{ tTerm("s3", weapon.s3) }}
                         </span>
                       </div>
                       <div class="conflict-reason">
-                        {{ t("冲突原因：{reason}", { reason: weapon.conflictReason }) }}
+                        {{ t("plan.conflict_reason_reason", { reason: weapon.conflictReason }) }}
                       </div>
                       <div class="weapon-exclude-row" @click.stop>
                         <button
@@ -256,21 +256,21 @@
                           :class="{ active: !weapon.isUnowned, 'intent-alert': weapon.isUnowned }"
                           @click.stop="toggleWeaponOwned(weapon)"
                         >
-                          {{ weapon.isUnowned ? t("标记武器拥有") : t("标记武器未有") }}
+                          {{ weapon.isUnowned ? t("button.mark_weapon_owned") : t("button.mark_weapon_not_owned") }}
                         </button>
                         <button
                           class="exclude-toggle small"
                           :class="{ active: weapon.isEssenceOwnedReal, 'intent-alert': !weapon.isEssenceOwnedReal }"
                           @click.stop="toggleEssenceOwned(weapon)"
                         >
-                          {{ weapon.isEssenceOwnedReal ? t("标记基质未有") : t("标记基质已有") }}
+                          {{ weapon.isEssenceOwnedReal ? t("button.mark_essence_not_owned") : t("button.mark_essence_owned") }}
                         </button>
                         <textarea
                           class="exclude-note-input"
                           :class="{ 'is-essence-owned': weapon.isEssenceOwnedReal, 'is-unowned': weapon.isUnowned }"
                           rows="1"
                           maxlength="30"
-                          :placeholder="t('备注（可选）')"
+                          :placeholder="t('warning.note_optional')"
                           :value="getWeaponNote(weapon.name)"
                           @focus="resizeNoteTextarea($event)"
                           @input="resizeNoteTextarea($event); updateWeaponNote(weapon, $event.target.value)"
@@ -323,7 +323,7 @@
                       card.schemeKey === tutorialTargetSchemeKey &&
                       isTutorialGuideWeapon(weapon.name),
                   }"
-                  :title="card.baseOverflow ? t('点击选择基础属性') : ''"
+                  :title="card.baseOverflow ? t('label.click_to_choose_base_attributes') : ''"
                   @click="toggleSchemeBasePick(card, weapon)"
                 >
                   <div class="scheme-weapon-title">
@@ -356,9 +356,9 @@
                     <span class="rarity" :style="rarityTextStyle(weapon.rarity)">
                       {{ weapon.rarity }}★
                     </span>
-                    <span v-if="weapon.isSelected" class="badge">{{ t("已选") }}</span>
-                    <span v-if="weapon.isUnowned" class="badge muted">{{ t("未拥有") }}</span>
-                    <span v-if="weapon.isEssenceOwnedReal" class="badge muted">{{ t("基质已有") }}</span>
+                    <span v-if="weapon.isSelected" class="badge">{{ t("nav.selected") }}</span>
+                    <span v-if="weapon.isUnowned" class="badge muted">{{ t("nav.not_owned") }}</span>
+                    <span v-if="weapon.isEssenceOwnedReal" class="badge muted">{{ t("nav.essence_owned") }}</span>
                     <span v-if="weapon.short" class="weapon-short">
                       {{ tTerm("short", weapon.short) }}
                     </span>
@@ -368,13 +368,13 @@
                       class="attr-value"
                       :class="{ 'base-lock': weapon.baseLocked, conflict: weapon.baseConflict }"
                     >
-                      <span class="attr-label">{{ t("基础属性") }}：</span>{{ formatS1(weapon.s1) }}
+                      <span class="attr-label">{{ t("nav.base_attributes") }}：</span>{{ formatS1(weapon.s1) }}
                     </span>
                     <span class="attr-value" :class="{ locked: card.lockType === 's2' }">
-                      <span class="attr-label">{{ t("附加属性") }}：</span>{{ tTerm("s2", weapon.s2) }}
+                      <span class="attr-label">{{ t("nav.extra_attributes") }}：</span>{{ tTerm("s2", weapon.s2) }}
                     </span>
                     <span class="attr-value" :class="{ locked: card.lockType === 's3' }">
-                      <span class="attr-label">{{ t("技能属性") }}：</span>{{ tTerm("s3", weapon.s3) }}
+                      <span class="attr-label">{{ t("nav.skill_attributes") }}：</span>{{ tTerm("s3", weapon.s3) }}
                     </span>
                   </div>
                   <div class="weapon-exclude-row" @click.stop>
@@ -383,21 +383,21 @@
                       :class="{ active: !weapon.isUnowned, 'intent-alert': weapon.isUnowned }"
                       @click.stop="toggleWeaponOwned(weapon)"
                     >
-                      {{ weapon.isUnowned ? t("标记武器拥有") : t("标记武器未有") }}
+                      {{ weapon.isUnowned ? t("button.mark_weapon_owned") : t("button.mark_weapon_not_owned") }}
                     </button>
                     <button
                       class="exclude-toggle small"
                       :class="{ active: weapon.isEssenceOwnedReal, 'intent-alert': !weapon.isEssenceOwnedReal }"
                       @click.stop="toggleEssenceOwned(weapon)"
                     >
-                      {{ weapon.isEssenceOwnedReal ? t("标记基质未有") : t("标记基质已有") }}
+                      {{ weapon.isEssenceOwnedReal ? t("button.mark_essence_not_owned") : t("button.mark_essence_owned") }}
                     </button>
                     <textarea
                       class="exclude-note-input"
                       :class="{ 'is-essence-owned': weapon.isEssenceOwnedReal, 'is-unowned': weapon.isUnowned }"
                       rows="1"
                       maxlength="30"
-                      :placeholder="t('备注（可选）')"
+                      :placeholder="t('warning.note_optional')"
                       :value="getWeaponNote(weapon.name)"
                       @focus="resizeNoteTextarea($event)"
                       @input="resizeNoteTextarea($event); updateWeaponNote(weapon, $event.target.value)"
@@ -417,8 +417,8 @@
               <button class="ghost-button" @click="showAllSchemes = !showAllSchemes">
                 {{
                   showAllSchemes
-                    ? t("收起其他方案")
-                    : t("展开其他方案（{count}）", { count: extraRecommendations.length })
+                    ? t("button.collapse_other_plans")
+                    : t("button.show_other_plans_count", { count: extraRecommendations.length })
                 }}
               </button>
             </div>
@@ -428,18 +428,18 @@
 
           <div v-else-if="currentView === 'strategy'" key="strategy" class="view-shell strategy-view">
             <div class="strategy-notice">
-              {{ t("攻略尚未完成，内容持续更新中。") }}
+              {{ t("guide.guide_is_not_finished_yet_content_is_still_being_updated") }}
             </div>
             <transition name="guide-switch" mode="out-in" @before-leave="guideBeforeLeave" @enter="guideEnter">
               <div v-if="!selectedCharacterId" key="guide-list" class="character-list">
              <div class="panel-title">
-               <h2>{{ t("角色列表") }}</h2>
+               <h2>{{ t("guide.item_2") }}</h2>
              </div>
              <div v-if="charactersLoading" class="strategy-loading">
-               {{ t("角色数据加载中...") }}
+               {{ t("guide.item_3") }}
              </div>
              <div v-else-if="!characters.length" class="strategy-empty">
-               {{ t("暂无角色数据") }}
+               {{ t("guide.item_4") }}
              </div>
              <div v-else class="character-grid">
                <div
@@ -476,7 +476,7 @@
               <div class="character-hero">
                 <div class="hero-left">
                   <button class="ghost-button back-button hero-back" @click="backToCharacterList">
-                    ← {{ t("返回列表") }}
+                    ← {{ t("plan.item_2") }}
                   </button>
                   <div class="hero-identity">
                     <img v-lazy-src="currentCharacter.avatar" :alt="currentCharacter.name" class="detail-avatar hero-avatar" />
@@ -492,23 +492,23 @@
 
                   <div class="hero-meta-row">
                     <div class="hero-meta-pair">
-                      <span class="meta-label">{{ t("武器") }}</span>
+                      <span class="meta-label">{{ t("guide.item_5") }}</span>
                       <span class="meta-value">{{ currentCharacter.weaponType || "-" }}</span>
                     </div>
                     <div class="hero-meta-pair">
-                      <span class="meta-label">{{ t("元素") }}</span>
+                      <span class="meta-label">{{ t("plan.item_3") }}</span>
                       <span class="meta-value">{{ currentCharacter.element || "-" }}</span>
                     </div>
                     <div class="hero-meta-pair">
-                      <span class="meta-label">{{ t("主能力") }}</span>
+                      <span class="meta-label">{{ t("plan.item_4") }}</span>
                       <span class="meta-value">{{ currentCharacter.mainAbility || "-" }}</span>
                     </div>
                     <div class="hero-meta-pair">
-                      <span class="meta-label">{{ t("副能力") }}</span>
+                      <span class="meta-label">{{ t("plan.item_5") }}</span>
                       <span class="meta-value">{{ currentCharacter.subAbility || "-" }}</span>
                     </div>
                     <div class="hero-meta-pair">
-                      <span class="meta-label">{{ t("职业") }}</span>
+                      <span class="meta-label">{{ t("plan.item_6") }}</span>
                       <span class="meta-value">{{ currentCharacter.profession || currentCharacter.role || "-" }}</span>
                     </div>
                   </div>
@@ -533,22 +533,22 @@
                   :class="{ active: strategyCategory === 'info' }"
                   @click="setStrategyCategory('info')"
                 >
-                  {{ t("干员信息") }}
+                  {{ t("guide.item_6") }}
                 </button>
                 <button
                   class="detail-tab"
                   :class="{ active: strategyCategory === 'guide' }"
                   @click="setStrategyCategory('guide')"
                 >
-                  {{ t("干员攻略") }}
+                  {{ t("guide.item_7") }}
                 </button>
               </div>
 
               <div class="detail-tabs detail-tabs-sub">
                 <div class="detail-sub-header">
-                  <span class="detail-sub-label">{{ t("当前栏目") }}</span>
+                  <span class="detail-sub-label">{{ t("plan.item_7") }}</span>
                   <span class="detail-sub-title">
-                    {{ strategyCategory === 'guide' ? t("干员攻略") : t("干员信息") }}
+                    {{ strategyCategory === 'guide' ? t("guide.item_7") : t("guide.item_6") }}
                   </span>
                 </div>
                 <div class="detail-sub-tabs">
@@ -558,7 +558,7 @@
                     :class="{ active: strategyTab === 'base' }"
                     @click="setStrategyTab('base')"
                   >
-                    {{ t("基础属性") }}
+                    {{ t("nav.base_attributes") }}
                   </button>
                   <button
                     v-if="strategyCategory === 'info'"
@@ -566,7 +566,7 @@
                     :class="{ active: strategyTab === 'skillsTalents' }"
                     @click="setStrategyTab('skillsTalents')"
                   >
-                    {{ t("技能天赋") }}
+                    {{ t("guide.item_8") }}
                   </button>
                   <button
                     v-if="strategyCategory === 'info'"
@@ -574,7 +574,7 @@
                     :class="{ active: strategyTab === 'potentials' }"
                     @click="setStrategyTab('potentials')"
                   >
-                    {{ t("干员潜能") }}
+                    {{ t("guide.item_9") }}
                   </button>
                   <button
                     v-if="strategyCategory === 'guide'"
@@ -582,7 +582,7 @@
                     :class="{ active: strategyTab === 'analysis' }"
                     @click="setStrategyTab('analysis')"
                   >
-                    {{ t("干员解析") }}
+                    {{ t("guide.item_10") }}
                   </button>
                   <button
                     v-if="strategyCategory === 'guide'"
@@ -590,7 +590,7 @@
                     :class="{ active: strategyTab === 'team' }"
                     @click="setStrategyTab('team')"
                   >
-                    {{ t("配队思路") }}
+                    {{ t("plan.item_8") }}
                   </button>
                   <button
                     v-if="strategyCategory === 'guide'"
@@ -598,7 +598,7 @@
                     :class="{ active: strategyTab === 'operation' }"
                     @click="setStrategyTab('operation')"
                   >
-                    {{ t("手法教学") }}
+                    {{ t("guide.item_11") }}
                   </button>
                 </div>
               </div>
@@ -606,44 +606,44 @@
               <div class="detail-tab-panels">
                 <div v-show="strategyCategory === 'info' && strategyTab === 'base'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("基础属性") }}</h3>
+                    <h3>{{ t("nav.base_attributes") }}</h3>
                     <div class="stat-grid">
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("力量") }}</div>
+                        <div class="stat-label">{{ t("plan.item_9") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.strength) || "-" }}</div>
                       </div>
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("敏捷") }}</div>
+                        <div class="stat-label">{{ t("plan.item_10") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.agility) || "-" }}</div>
                       </div>
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("智识") }}</div>
+                        <div class="stat-label">{{ t("plan.item_11") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.intellect) || "-" }}</div>
                       </div>
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("意志") }}</div>
+                        <div class="stat-label">{{ t("plan.item_12") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.will) || "-" }}</div>
                       </div>
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("攻击力") }}</div>
+                        <div class="stat-label">{{ t("plan.item_13") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.attack) || "-" }}</div>
                       </div>
                       <div class="stat-item">
-                        <div class="stat-label">{{ t("血量") }}</div>
+                        <div class="stat-label">{{ t("plan.item_14") }}</div>
                         <div class="stat-value">{{ (currentCharacter.stats && currentCharacter.stats.hp) || "-" }}</div>
                       </div>
                     </div>
                   </div>
 
                   <div class="detail-section">
-                    <h3>{{ t("精英化材料") }}</h3>
+                    <h3>{{ t("guide.item_12") }}</h3>
                     <div class="materials-list">
                       <div
                         v-for="level in ['elite1', 'elite2', 'elite3', 'elite4']"
                         :key="level"
                         class="material-row"
                       >
-                        <div class="material-level">{{ t("精英化") }} {{ level.replace('elite', '') }}</div>
+                        <div class="material-level">{{ t("guide.item_13") }} {{ level.replace('elite', '') }}</div>
                         <div class="material-items">
                           <template
                             v-if="currentCharacter.materials && currentCharacter.materials[level] && currentCharacter.materials[level].length"
@@ -665,7 +665,7 @@
 
                 <div v-show="strategyCategory === 'info' && strategyTab === 'skillsTalents'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("技能") }}</h3>
+                    <h3>{{ t("plan.item_15") }}</h3>
                     <div class="skills-list">
                       <div v-for="skill in currentCharacter.skills" :key="skill.name" class="skill-item">
                         <div class="skill-header">
@@ -675,14 +675,14 @@
                         <p>{{ skill.description }}</p>
                         <div v-if="getSkillTables(skill).length" class="skill-data">
                           <details>
-                            <summary class="skill-data-summary">{{ t("技能数据") }}</summary>
+                            <summary class="skill-data-summary">{{ t("plan.item_16") }}</summary>
                             <div class="skill-data-content">
                               <div v-for="(table, tIdx) in getSkillTables(skill)" :key="tIdx" class="skill-data-table">
                                 <div class="skill-data-scroll">
                                   <table class="skill-data-grid">
                                     <thead>
                                       <tr>
-                                        <th class="skill-data-name">{{ t("数据项") }}</th>
+                                        <th class="skill-data-name">{{ t("plan.item_17") }}</th>
                                         <th v-for="label in skillLevelLabels" :key="label" class="skill-data-level">
                                           {{ label }}
                                         </th>
@@ -722,7 +722,7 @@
                     </div>
                   </div>
                   <div class="detail-section" v-if="currentCharacter.baseSkills">
-                    <h3>{{ t("后勤技能") }}</h3>
+                    <h3>{{ t("guide.item_14") }}</h3>
                     <div class="base-skills-grid">
                       <div v-for="bs in currentCharacter.baseSkills" :key="bs.name" class="base-skill-card">
                         <div class="base-skill-name">{{ bs.name }}</div>
@@ -731,7 +731,7 @@
                     </div>
                   </div>
                   <div class="detail-section">
-                    <h3>{{ t("天赋") }}</h3>
+                    <h3>{{ t("guide.item_15") }}</h3>
                     <div class="talents-list">
                       <div v-for="talent in currentCharacter.talents" :key="talent.name" class="talent-item">
                         <div class="talent-header">
@@ -746,10 +746,10 @@
 
                 <div v-show="strategyCategory === 'info' && strategyTab === 'potentials'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("干员潜能") }}</h3>
+                    <h3>{{ t("guide.item_9") }}</h3>
                     <div class="potential-grid">
                       <div v-for="(p, i) in currentCharacter.potentials" :key="i" class="potential-card">
-                        <div class="potential-index">{{ t("潜能") }} {{ i + 1 }}</div>
+                        <div class="potential-index">{{ t("guide.item_16") }} {{ i + 1 }}</div>
                         <div class="potential-desc">{{ p }}</div>
                       </div>
                     </div>
@@ -758,20 +758,20 @@
 
                 <div v-show="strategyCategory === 'guide' && strategyTab === 'analysis'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("干员解析") }}</h3>
-                    <p class="strategy-text">{{ (currentGuide && currentGuide.analysis) || t("暂无解析") }}</p>
+                    <h3>{{ t("guide.item_10") }}</h3>
+                    <p class="strategy-text">{{ (currentGuide && currentGuide.analysis) || t("plan.item_18") }}</p>
                   </div>
                   <div class="detail-section" v-if="currentGuide">
-                    <h3>{{ t("配装推荐") }}</h3>
+                    <h3>{{ t("guide.item_17") }}</h3>
                     <div class="gear-table" v-if="guideRows.length">
                       <div class="gear-row gear-row-head">
                         <div class="gear-row-label"></div>
                         <div class="gear-row-main">
-                          <div class="gear-cell gear-weapon">{{ t("武器") }}</div>
-                          <div class="gear-cell">{{ t("护甲") }}</div>
-                          <div class="gear-cell">{{ t("手套") }}</div>
-                          <div class="gear-cell">{{ t("配件") }}</div>
-                          <div class="gear-cell">{{ t("配件") }}</div>
+                          <div class="gear-cell gear-weapon">{{ t("guide.item_5") }}</div>
+                          <div class="gear-cell">{{ t("plan.item_19") }}</div>
+                          <div class="gear-cell">{{ t("plan.item_20") }}</div>
+                          <div class="gear-cell">{{ t("plan.item_21") }}</div>
+                          <div class="gear-cell">{{ t("plan.item_21") }}</div>
                         </div>
                       </div>
                       <div v-for="(row, idx) in guideRows" :key="idx" class="gear-row">
@@ -781,7 +781,7 @@
                               class="gear-tag"
                               :class="idx === 0 ? 'gear-tag-primary' : 'gear-tag-secondary'"
                             >
-                              {{ idx === 0 ? t("主选") : t("备选") }}
+                              {{ idx === 0 ? t("plan.item_22") : t("plan.item_23") }}
                             </span>
                             <span class="gear-tag-desc">
 `);

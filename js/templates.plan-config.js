@@ -13,20 +13,20 @@
             class="plan-config-hint-dot"
             aria-hidden="true"
           ></span>
-          <span>{{ t("方案推荐设置") }}</span>
+          <span>{{ t("plan_config.plan_recommendation_settings") }}</span>
         </button>
         <div v-if="showPlanConfig" class="plan-config-panel">
           <div class="plan-config-item">
-            <div class="secondary-label">{{ t("方案显示") }}</div>
+            <div class="secondary-label">{{ t("plan_config.plan_display") }}</div>
             <button
               class="ghost-button toggle-button switch-toggle"
               :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeapons }"
-              :title="t('开启后，方案中将隐藏“基质已有武器”。')"
+              :title="t('plan_config.when_enabled_plans_hide_weapons_marked_as_essence_owned')"
               role="switch"
               :aria-checked="recommendationConfig.hideEssenceOwnedWeapons ? 'true' : 'false'"
               @click="recommendationConfig.hideEssenceOwnedWeapons = !recommendationConfig.hideEssenceOwnedWeapons"
             >
-              <span class="switch-label">{{ t("隐藏基质已有武器") }}</span>
+              <span class="switch-label">{{ t("plan_config.hide_essence_owned_weapons") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeapons }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -35,12 +35,12 @@
               v-if="recommendationConfig.hideEssenceOwnedWeapons"
               class="ghost-button toggle-button switch-toggle switch-sub-toggle"
               :class="{ 'is-active': recommendationConfig.hideEssenceOwnedOwnedOnly }"
-              :title="t('开启后，仅隐藏“已拥有且基质已有”的武器；未拥有但基质已有的武器仍会显示。')"
+              :title="t('plan_config.when_enabled_only_weapons_that_are_both_owned_and_essenc')"
               role="switch"
               :aria-checked="recommendationConfig.hideEssenceOwnedOwnedOnly ? 'true' : 'false'"
               @click="recommendationConfig.hideEssenceOwnedOwnedOnly = !recommendationConfig.hideEssenceOwnedOwnedOnly"
             >
-              <span class="switch-label">{{ t("仅隐藏已拥有且基质已有") }}</span>
+              <span class="switch-label">{{ t("plan_config.hide_only_owned_essence_owned") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedOwnedOnly }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -49,12 +49,12 @@
               v-if="recommendationConfig.hideEssenceOwnedWeapons"
               class="ghost-button toggle-button switch-toggle switch-sub-toggle"
               :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeaponsInSelector }"
-              :title="t('开启后，武器选择列表也会按“隐藏基质已有武器 / 仅隐藏已拥有且基质已有”的当前组合来隐藏。')"
+              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_by_the_curre')"
               role="switch"
               :aria-checked="recommendationConfig.hideEssenceOwnedWeaponsInSelector ? 'true' : 'false'"
               @click="recommendationConfig.hideEssenceOwnedWeaponsInSelector = !recommendationConfig.hideEssenceOwnedWeaponsInSelector"
             >
-              <span class="switch-label">{{ t("同时应用到武器列表") }}</span>
+              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeaponsInSelector }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -62,12 +62,12 @@
             <button
               class="ghost-button toggle-button switch-toggle"
               :class="{ 'is-active': recommendationConfig.hideUnownedWeapons }"
-              :title="t('开启后，方案中将隐藏“未拥有”武器。')"
+              :title="t('plan_config.when_enabled_plans_hide_weapons_marked_as_unowned')"
               role="switch"
               :aria-checked="recommendationConfig.hideUnownedWeapons ? 'true' : 'false'"
               @click="recommendationConfig.hideUnownedWeapons = !recommendationConfig.hideUnownedWeapons"
             >
-              <span class="switch-label">{{ t("隐藏未拥有武器") }}</span>
+              <span class="switch-label">{{ t("plan_config.hide_unowned_weapons") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeapons }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -76,12 +76,12 @@
               v-if="recommendationConfig.hideUnownedWeapons"
               class="ghost-button toggle-button switch-toggle switch-sub-toggle"
               :class="{ 'is-active': recommendationConfig.hideUnownedWeaponsInSelector }"
-              :title="t('开启后，武器选择列表也会隐藏未拥有武器。')"
+              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_unowned_weap')"
               role="switch"
               :aria-checked="recommendationConfig.hideUnownedWeaponsInSelector ? 'true' : 'false'"
               @click="recommendationConfig.hideUnownedWeaponsInSelector = !recommendationConfig.hideUnownedWeaponsInSelector"
             >
-              <span class="switch-label">{{ t("同时应用到武器列表") }}</span>
+              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeaponsInSelector }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -89,12 +89,12 @@
             <button
               class="ghost-button toggle-button switch-toggle"
               :class="{ 'is-active': recommendationConfig.hideFourStarWeapons }"
-              :title="t('开启后，四星武器将不会出现在方案推荐列表中。')"
+              :title="t('plan_config.when_enabled_4_weapons_will_not_appear_in_plan_recommend')"
               role="switch"
               :aria-checked="recommendationConfig.hideFourStarWeapons ? 'true' : 'false'"
               @click="recommendationConfig.hideFourStarWeapons = !recommendationConfig.hideFourStarWeapons"
             >
-              <span class="switch-label">{{ t("隐藏四星武器") }}</span>
+              <span class="switch-label">{{ t("plan_config.hide_4_star_weapons") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeapons }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -103,12 +103,12 @@
               v-if="recommendationConfig.hideFourStarWeapons"
               class="ghost-button toggle-button switch-toggle switch-sub-toggle"
               :class="{ 'is-active': recommendationConfig.hideFourStarWeaponsInSelector }"
-              :title="t('开启后，武器选择列表也会隐藏四星武器。')"
+              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_4_weapons')"
               role="switch"
               :aria-checked="recommendationConfig.hideFourStarWeaponsInSelector ? 'true' : 'false'"
               @click="recommendationConfig.hideFourStarWeaponsInSelector = !recommendationConfig.hideFourStarWeaponsInSelector"
             >
-              <span class="switch-label">{{ t("同时应用到武器列表") }}</span>
+              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeaponsInSelector }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
@@ -116,29 +116,29 @@
             <button
               class="ghost-button toggle-button switch-toggle"
               :class="{ 'is-active': recommendationConfig.attributeFilterAffectsHiddenWeapons }"
-              :title="t('开启后，属性筛选按武器列表实际显示结果计算（受“同时应用到武器列表”开关影响）；关闭后按真实匹配数计算。')"
+              :title="t('filter.when_enabled_attribute_filters_are_calculated_from_curre')"
               role="switch"
               :aria-checked="recommendationConfig.attributeFilterAffectsHiddenWeapons ? 'true' : 'false'"
               @click="recommendationConfig.attributeFilterAffectsHiddenWeapons = !recommendationConfig.attributeFilterAffectsHiddenWeapons"
             >
-              <span class="switch-label">{{ t("属性筛选受“同时应用到武器列表”影响") }}</span>
+              <span class="switch-label">{{ t("filter.attribute_filters_follow_also_apply_to_weapon_list") }}</span>
               <span class="switch-track" :class="{ on: recommendationConfig.attributeFilterAffectsHiddenWeapons }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
             </button>
           </div>
           <div class="plan-config-item">
-            <div class="secondary-label">{{ t("地区优先级") }}</div>
-            <div class="secondary-hint">{{ t("优先地区1（最高）") }}</div>
+            <div class="secondary-label">{{ t("filter.region_priority") }}</div>
+            <div class="secondary-hint">{{ t("filter.priority_region_1_highest") }}</div>
             <select class="secondary-select" v-model="recommendationConfig.preferredRegion1">
-              <option value="">{{ t("不设置") }}</option>
+              <option value="">{{ t("plan_config.not_set") }}</option>
               <option v-for="region in regionOptions" :key="'region-1-' + region" :value="region">
                 {{ tTerm("dungeon", region) }}
               </option>
             </select>
-            <div class="secondary-hint">{{ t("优先地区2（次高）") }}</div>
+            <div class="secondary-hint">{{ t("filter.priority_region_2_secondary") }}</div>
             <select class="secondary-select" v-model="recommendationConfig.preferredRegion2">
-              <option value="">{{ t("不设置") }}</option>
+              <option value="">{{ t("plan_config.not_set") }}</option>
               <option
                 v-for="region in regionOptions"
                 :key="'region-2-' + region"
@@ -150,7 +150,7 @@
             </select>
           </div>
           <div class="plan-config-item">
-            <div class="secondary-label">{{ t("地区优先策略") }}</div>
+            <div class="secondary-label">{{ t("filter.region_priority_strategy") }}</div>
             <select class="secondary-select" v-model="recommendationConfig.regionPriorityMode">
               <option
                 v-for="mode in tRegionPriorityModeOptions"
@@ -172,7 +172,7 @@
             </div>
           </div>
           <div class="plan-config-item">
-            <div class="secondary-label">{{ t("已拥有武器优先策略") }}</div>
+            <div class="secondary-label">{{ t("filter.owned_weapon_priority_strategy") }}</div>
             <select class="secondary-select" v-model="recommendationConfig.ownershipPriorityMode">
               <option
                 v-for="mode in tOwnershipPriorityModeOptions"
@@ -197,7 +197,7 @@
             class="plan-config-item"
             v-if="recommendationConfig.regionPriorityMode === 'strict' && recommendationConfig.ownershipPriorityMode === 'strict'"
           >
-            <div class="secondary-label">{{ t("严格优先顺序") }}</div>
+            <div class="secondary-label">{{ t("filter.strict_priority_order") }}</div>
             <select class="secondary-select" v-model="recommendationConfig.strictPriorityOrder">
               <option
                 v-for="option in tStrictPriorityOrderOptions"
@@ -219,9 +219,9 @@
             </div>
           </div>
           <div class="plan-config-panel-foot">
-            <span class="plan-config-close-hint">{{ t("可点击面板外区域关闭") }}</span>
+            <span class="plan-config-close-hint">{{ t("plan_config.click_outside_the_panel_to_close") }}</span>
             <button class="ghost-button plan-config-close" type="button" @click="$emit('toggle')">
-              {{ t("关闭") }}
+              {{ t("plan_config.close") }}
             </button>
           </div>
         </div>

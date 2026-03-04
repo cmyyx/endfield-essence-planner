@@ -31,7 +31,7 @@
 
     const safeText = (value) => String(value == null ? "" : value).trim();
     const getCurrentVersionLoadFailedText = () =>
-      (typeof state.t === "function" ? state.t("当前版本获取失败") : "current version load failed");
+      (typeof state.t === "function" ? state.t("storage.failed_to_load_current_version") : "current version load failed");
     const formatPublishedAtLocal = (value) => {
       const raw = safeText(value);
       if (!raw) return "";
@@ -161,7 +161,7 @@
       const text = safeText(version);
       if (!text) return "";
       if (typeof state.t === "function") {
-        return state.t("适配 {version}", { version: text });
+        return state.t("update.compat_version", { version: text });
       }
       return `Compat ${text}`;
     };
@@ -319,7 +319,7 @@
       latestVersionInfo = info;
       state.updateLatestVersionText.value =
         (latestVersionInfo && latestVersionInfo.display) ||
-        (typeof state.t === "function" ? state.t("未知") : "unknown");
+        (typeof state.t === "function" ? state.t("gear_refining.unknown") : "unknown");
       state.updateLatestPublishedAt.value = latestVersionInfo
         ? formatPublishedAtLocal(latestVersionInfo.publishedAt)
         : "";
@@ -409,7 +409,7 @@
       if (typeof window !== "undefined" && typeof window.prompt === "function") {
         const promptText =
           typeof state.t === "function"
-            ? state.t("当前环境不支持自动复制，请手动复制以下内容：")
+            ? state.t("update.auto_copy_is_not_available_in_this_environment_please_co")
             : "Auto copy is not available. Please copy the following content manually:";
         window.prompt(promptText, copyPayload);
       }

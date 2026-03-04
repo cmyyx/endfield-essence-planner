@@ -230,13 +230,13 @@
     class="match-status-chip"
     :class="{ 'is-owned': isWeaponOwned(weaponName), 'is-unowned': !isWeaponOwned(weaponName) }"
   >
-    {{ isWeaponOwned(weaponName) ? t("已拥有") : t("未拥有") }}
+    {{ isWeaponOwned(weaponName) ? t("badge.owned") : t("nav.not_owned") }}
   </span>
   <span
     class="match-status-chip"
     :class="{ 'is-essence-owned': isEssenceOwned(weaponName) }"
   >
-    {{ isEssenceOwned(weaponName) ? t("基质已有") : t("基质未有") }}
+    {{ isEssenceOwned(weaponName) ? t("nav.essence_owned") : t("badge.essence_not_owned") }}
   </span>
 </div>`,
   };

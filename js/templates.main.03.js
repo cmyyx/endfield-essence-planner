@@ -1,7 +1,7 @@
 (function () {
   window.__APP_TEMPLATE_MAIN_PARTS = window.__APP_TEMPLATE_MAIN_PARTS || [];
   window.__APP_TEMPLATE_MAIN_PARTS.push(`
-                              {{ idx === 0 ? t("优先推荐") : t("可替代") }}
+                              {{ idx === 0 ? t("badge.item") : t("badge.item_2") }}
                             </span>
                           </div>
                         </div>
@@ -40,18 +40,18 @@
                         </div>
                       </div>
                     </div>
-                    <div class="gear-empty" v-else>{{ t("暂无配装") }}</div>
+                    <div class="gear-empty" v-else>{{ t("badge.item_3") }}</div>
                   </div>
                 </div>
 
                 <div v-show="strategyCategory === 'guide' && strategyTab === 'team'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("配队思路") }}</h3>
-                    <p class="strategy-text">{{ (currentGuide && currentGuide.teamTips) || t("暂无建议") }}</p>
+                    <h3>{{ t("plan.item_8") }}</h3>
+                    <p class="strategy-text">{{ (currentGuide && currentGuide.teamTips) || t("badge.item_4") }}</p>
                   </div>
 
                   <div class="detail-section">
-                    <h3>{{ t("队伍推荐") }}</h3>
+                    <h3>{{ t("badge.item_5") }}</h3>
                     <div class="team-table" v-if="teamSlots.length">
                       <div v-for="(slot, sIdx) in teamSlots" :key="'team-slot-' + sIdx" class="team-cell">
                         <div v-if="slot" class="team-slot">
@@ -71,12 +71,12 @@
                                 v-if="currentCharacter && entry.name === currentCharacter.name"
                                 class="team-badge"
                               >
-                                {{ t("当前") }}
+                                {{ t("badge.item_6") }}
                               </span>
                               <span v-if="entry.tag" class="team-badge muted">{{ entry.tag }}</span>
                             </div>
                             <div class="team-section">
-                              <span class="team-label">{{ t("武器") }}</span>
+                              <span class="team-label">{{ t("guide.item_5") }}</span>
                               <div class="team-items">
                                 <div v-for="(weapon, wIdx) in (entry.weapons || [])" :key="wIdx" class="team-item">
                                   <div
@@ -93,7 +93,7 @@
                               </div>
                             </div>
                             <div class="team-section">
-                              <span class="team-label">{{ t("装备") }}</span>
+                              <span class="team-label">{{ t("badge.item_7") }}</span>
                               <div class="team-items">
                                 <div v-for="(equip, eIdx) in (entry.equipment || [])" :key="eIdx" class="team-item">
                                   <div
@@ -115,15 +115,15 @@
                       </div>
                     </div>
                     <div class="empty-guide" v-else>
-                      <p class="empty-guide-text">{{ t("暂无推荐") }}</p>
+                      <p class="empty-guide-text">{{ t("badge.item_8") }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div v-show="strategyCategory === 'guide' && strategyTab === 'operation'" class="detail-panel">
                   <div class="detail-section">
-                    <h3>{{ t("手法教学") }}</h3>
-                    <p class="strategy-text">{{ (currentGuide && (currentGuide.operationTips || currentGuide.skillTips)) || t("暂无建议") }}</p>
+                    <h3>{{ t("guide.item_11") }}</h3>
+                    <p class="strategy-text">{{ (currentGuide && (currentGuide.operationTips || currentGuide.skillTips)) || t("badge.item_4") }}</p>
                   </div>
                 </div>
               </div>
@@ -136,10 +136,10 @@
           <div v-else-if="currentView === 'rerun-ranking'" key="rerun-ranking" class="view-shell rerun-ranking-view">
             <section class="panel rerun-ranking-panel">
               <div class="panel-title">
-                <h2>{{ t("复刻排行") }}</h2>
+                <h2>{{ t("nav.rerun_ranking") }}</h2>
               </div>
               <div v-if="!hasRerunRankingRows" class="rerun-ranking-empty">
-                {{ t("暂无复刻排行数据") }}
+                {{ t("rerun.no_rerun_ranking_data") }}
               </div>
               <div v-else class="rerun-ranking-list">
                 <article
@@ -164,14 +164,14 @@
                   <div class="rerun-ranking-main">
                     <div class="rerun-ranking-name">{{ tTerm("character", row.characterName) }}</div>
                     <div class="rerun-ranking-meta">
-                      {{ t("间隔：{days} 天", { days: row.hasEndedHistory ? row.gapDays : "-" }) }}
+                      {{ t("badge.gap_days_days", { days: row.hasEndedHistory ? row.gapDays : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
-                      {{ t("次数：{count} 次", { count: row.hasEndedHistory ? row.rerunCount : "-" }) }}
+                      {{ t("badge.count_count", { count: row.hasEndedHistory ? row.rerunCount : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
                       {{
-                        t("上次：{date}", {
+                        t("badge.last_date", {
                           date: row.hasEndedHistory
                             ? new Date(row.lastEndMs).toLocaleDateString(locale || undefined)
                             : "-",
@@ -203,27 +203,27 @@
                 :class="{ active: matchMobilePanel === 'source' }"
                 @click="matchMobilePanel = 'source'"
               >
-                {{ t("武器选择") }} <span class="count">{{ matchSourceList.length }}</span>
+                {{ t("nav.weapons") }} <span class="count">{{ matchSourceList.length }}</span>
               </button>
               <button
                 class="mobile-tab"
                 :class="{ active: matchMobilePanel === 'result' }"
                 @click="matchMobilePanel = 'result'"
               >
-                {{ t("词条对照") }} <span class="count">{{ matchResults.length }}</span>
+                {{ t("nav.trait_match") }} <span class="count">{{ matchResults.length }}</span>
               </button>
             </div>
             <div class="mobile-hint">
-              {{ t("手机端可通过上方标签切换“武器选择 / 词条对照”，并可下滑继续浏览列表。") }}
+              {{ t("badge.on_mobile_switch_between_weapon_selection_trait_match_vi") }}
             </div>
             <div class="match-grid">
               <section class="panel match-panel" :class="{ 'panel-hidden': matchMobilePanel !== 'source' }">
                 <div class="panel-title">
-                  <h2>{{ t("武器选择") }}</h2>
+                  <h2>{{ t("nav.weapons") }}</h2>
                 </div>
                 <label class="search-box match-search">
                   <span>🔍</span>
-                  <input v-model="matchQuery" :placeholder="t('搜索武器（仅中文支持拼音/首字母）...')" />
+                  <input v-model="matchQuery" :placeholder="t('badge.search_weapons')" />
                 </label>
                 <div class="weapon-list match-weapon-grid match-source-grid">
                   <button
@@ -277,27 +277,27 @@
               </section>
               <section class="panel match-panel" :class="{ 'panel-hidden': matchMobilePanel !== 'result' }">
                 <div class="panel-title">
-                  <h2>{{ t("词条对照") }}</h2>
+                  <h2>{{ t("nav.trait_match") }}</h2>
                 </div>
                 <div class="match-info">
-                  <div class="match-info-title">{{ t("功能说明") }}</div>
+                  <div class="match-info-title">{{ t("badge.purpose") }}</div>
                   <p class="match-info-text">
                     {{
                       t(
-                        "用于查找与目标武器相同词条的其他武器，帮助完成“终极武器奖章”的镀层条件（RANK 需要达到 25），可借助低星同词条武器提升潜能并补足第三词条等级。"
+                        "badge.find_other_weapons_with_identical_traits_to_meet_the_ult"
                       )
                     }}
                   </p>
                   <p class="match-info-text">
-                    {{ t("此界面不支持修改武器/基质拥有状态；如需修改请前往“基质规划”。") }}
+                    {{ t("badge.this_page_does_not_support_editing_weapon_essence_owners") }}
                   </p>
                 </div>
                 <div v-if="!matchSourceWeapon" class="empty-state match-empty">
-                  <h2>{{ t("请选择一把武器") }}</h2>
+                  <h2>{{ t("badge.pick_a_weapon") }}</h2>
                 </div>
                 <div v-else class="match-result">
                   <div class="match-selection">
-                    <div class="match-selection-label">{{ t("已选武器") }}</div>
+                    <div class="match-selection-label">{{ t("badge.selected_weapon") }}</div>
                     <div class="match-selection-card">
                       <div
                         class="weapon-item match-weapon-item match-selected-card is-selected"
@@ -359,11 +359,11 @@
                     </div>
                   </div>
                   <div class="match-result-header">
-                    <div class="match-result-title">{{ t("相同词条的武器") }}</div>
+                    <div class="match-result-title">{{ t("badge.weapons_with_identical_traits") }}</div>
                     <div class="match-result-count">{{ matchResults.length }}</div>
                   </div>
                   <div v-if="!matchResults.length" class="match-empty">
-                    {{ t("暂无匹配的武器") }}
+                    {{ t("badge.no_matching_weapons") }}
                   </div>
                   <div v-else class="weapon-list match-weapon-grid match-result-grid">
                     <div
@@ -423,7 +423,7 @@
                 :class="{ active: gearRefiningMobilePanel === 'gears' }"
                 @click="setGearRefiningMobilePanel('gears')"
               >
-                {{ t("装备列表") }} <span class="count">{{ gearRefiningGearCount }}</span>
+                {{ t("badge.gear_list") }} <span class="count">{{ gearRefiningGearCount }}</span>
               </button>
               <button
                 class="mobile-tab"
@@ -431,7 +431,7 @@
                 :class="{ active: gearRefiningMobilePanel === 'recommend' }"
                 @click="setGearRefiningMobilePanel('recommend')"
               >
-                {{ t("精锻推荐") }}
+                {{ t("badge.refining_recommendations") }}
                 <span class="count">{{ selectedGearRefiningGear ? gearRefiningRecommendations.length : 0 }}</span>
               </button>
             </div>
@@ -466,15 +466,15 @@
         </transition>
       </main>
 
-      <footer class="site-footer" :aria-label="t('页脚')">
+      <footer class="site-footer" :aria-label="t('badge.footer')">
         <div class="site-footer-inner">
           <span class="footer-item">
-            <span class="footer-label">{{ t("版权所有") }}</span>
+            <span class="footer-label">{{ t("badge.copyright") }}</span>
             <span class="footer-value">© 2026 璨梦踏月</span>
           </span>
           <span class="footer-sep">·</span>
           <span class="footer-item">
-            <span class="footer-label">{{ t("许可证") }}</span>
+            <span class="footer-label">{{ t("badge.license") }}</span>
             <a
               class="footer-link"
               href="https://www.gnu.org/licenses/agpl-3.0.html"
@@ -486,7 +486,7 @@
           </span>
           <span class="footer-sep">·</span>
           <span class="footer-item">
-            <span class="footer-label">{{ t("源码") }}</span>
+            <span class="footer-label">{{ t("badge.source") }}</span>
             <a
               class="footer-link"
               href="https://github.com/cmyyx/endfield-essence-planner"
@@ -498,17 +498,17 @@
           </span>
           <span class="footer-sep">·</span>
           <span class="footer-item">
-            <span class="footer-label">{{ t("联系") }}</span>
+            <span class="footer-label">{{ t("badge.contact") }}</span>
             <a class="footer-link" href="mailto:contact@canmoe.com">
               contact@canmoe.com
             </a>
           </span>
           <span class="footer-item footer-item-disclaimer">
-            <span class="footer-label">{{ t("素材声明") }}</span>
+            <span class="footer-label">{{ t("badge.item_9") }}</span>
             <span class="footer-value footer-disclaimer-text">
               {{
                 t(
-                  "当前图片素材均来源于上海鹰角网络科技有限公司及其游戏《明日方舟：终末地》，相关版权归原权利方所有。本工具仅供玩家交流与辅助规划使用。"
+                  "badge.item_10"
                 )
               }}
             </span>
@@ -519,8 +519,8 @@
       <button
         class="back-to-top"
         :class="{ 'is-visible': showBackToTop }"
-        :title="t('回到顶部')"
-        :aria-label="t('回到顶部')"
+        :title="t('badge.item_11')"
+        :aria-label="t('badge.item_11')"
         @click="scrollToTop"
       >
         ↑
@@ -528,12 +528,12 @@
 
       <transition name="fade-scale">
         <div v-if="showNotice" class="about-overlay notice-overlay" @click.self="closeNotice">
-          <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+          <div v-if="contentLoading" class="about-card notice-card">{{ t("badge.item_12") }}</div>
           <div v-else class="about-card notice-card">
             <h3>{{ announcement.title }}</h3>
             <div class="notice-body">
               <p class="notice-meta">
-                {{ t("更新日期：{date}", { date: announcement.date }) }}
+                {{ t("badge.updated_date", { date: announcement.date }) }}
               </p>
               <ul class="notice-list">
                 <li
@@ -551,19 +551,19 @@
                   target="_blank"
                   rel="noopener"
                 >
-                  {{ t("加入 QQ 群") }}
+                  {{ t("badge.join_qq_group") }}
                 </a>
                 <div class="notice-qq-info">
-                  {{ t("QQ 群：{group}", { group: announcement.qqGroup }) }}
+                  {{ t("badge.qq_group_group", { group: announcement.qqGroup }) }}
                   <span v-if="announcement.qqNote">（{{ announcement.qqNote }}）</span>
                 </div>
               </div>
               <label class="notice-skip">
                 <input type="checkbox" v-model="skipNotice" />
-                {{ t("本次公告不再显示") }}
+                {{ t("badge.don_t_show_this_announcement_again") }}
               </label>
               <div class="about-actions">
-                <button class="ghost-button" @click="closeNotice">{{ t("关闭") }}</button>
+                <button class="ghost-button" @click="closeNotice">{{ t("plan_config.close") }}</button>
               </div>
             </div>
           </div>
@@ -574,33 +574,33 @@
         <div v-if="showMigrationModal" class="about-overlay migration-overlay">
           <div class="about-card migration-card">
             <div class="migration-content">
-              <h3>{{ t("检测到旧版武器标记数据") }}</h3>
+              <h3>{{ t("error.legacy_weapon_mark_data_detected") }}</h3>
             <p class="migration-warning-text">
-              {{ t("建议尽快完成迁移或放弃旧数据，以免后续编辑时造成冲突或未来不再兼容该数据结构。") }}
+              {{ t("error.complete_migration_or_discard_legacy_data_soon_to_avoid_") }}
             </p>
             <p class="migration-warning-text">
-              {{ t("警告：该迁移功能尚未经过充分测试，可能存在异常或结果偏差。") }}
+              {{ t("error.warning_this_migration_is_not_fully_tested_and_may_produ") }}
             </p>
 
             <div class="migration-preview">
               <div class="migration-preview-item">
-                <span class="migration-preview-label">{{ t("旧数据条目") }}</span>
+                <span class="migration-preview-label">{{ t("badge.legacy_entries") }}</span>
                 <span class="migration-preview-value">{{ migrationPreview.totalLegacyCount }}</span>
               </div>
               <div class="migration-preview-item">
-                <span class="migration-preview-label">{{ t("将影响条目") }}</span>
+                <span class="migration-preview-label">{{ t("badge.affected_entries") }}</span>
                 <span class="migration-preview-value">{{ migrationPreview.effectCount }}</span>
               </div>
               <div class="migration-preview-item">
-                <span class="migration-preview-label">{{ t("状态变更") }}</span>
+                <span class="migration-preview-label">{{ t("badge.status_changes") }}</span>
                 <span class="migration-preview-value">{{ migrationPreview.statusChangeCount }}</span>
               </div>
               <div class="migration-preview-item">
-                <span class="migration-preview-label">{{ t("备注变更") }}</span>
+                <span class="migration-preview-label">{{ t("badge.note_changes") }}</span>
                 <span class="migration-preview-value">{{ migrationPreview.noteChangeCount }}</span>
               </div>
               <div class="migration-preview-item warn">
-                <span class="migration-preview-label">{{ t("冲突条目") }}</span>
+                <span class="migration-preview-label">{{ t("error.conflict_entries") }}</span>
                 <span class="migration-preview-value">{{ migrationPreview.conflictCount }}</span>
               </div>
             </div>
@@ -608,20 +608,20 @@
             <div class="migration-block migration-detail-block">
               <div class="migration-detail-head">
                 <div class="migration-block-title">
-                  {{ t("迁移预览详情") }}
+                  {{ t("error.migration_preview_details") }}
                 </div>
                 <button class="ghost-button migration-detail-toggle" @click="toggleMigrationPreviewDetails">
-                  {{ migrationPreviewExpanded ? t("收起详情") : t("展开详情") }}
+                  {{ migrationPreviewExpanded ? t("button.collapse_details") : t("button.expand_details") }}
                 </button>
               </div>
               <p v-if="migrationModalScrollable" class="migration-scroll-tip">
-                {{ t("提示：当前弹窗内容较多，可上下滑动查看。") }}
+                {{ t("badge.tip_this_dialog_is_long_scroll_vertically_to_view") }}
               </p>
               <div v-if="migrationPreviewExpanded" class="migration-detail-columns">
                 <div class="migration-detail-column">
-                  <div class="migration-detail-title">{{ t("冲突条目预览") }}</div>
+                  <div class="migration-detail-title">{{ t("error.conflict_preview") }}</div>
                   <div v-if="!migrationPreview.conflictItems.length" class="migration-detail-empty">
-                    {{ t("暂无冲突条目") }}
+                    {{ t("error.no_conflict_entries") }}
                   </div>
                   <ul v-else class="migration-detail-list">
                     <li
@@ -639,10 +639,10 @@
                           >
                             {{
                               field === 'weaponOwned'
-                                ? t("武器状态")
+                                ? t("badge.weapon_status")
                                 : field === 'essenceOwned'
-                                ? t("基质状态")
-                                : t("备注")
+                                ? t("badge.essence_status")
+                                : t("badge.note")
                             }}
                           </span>
                         </span>
@@ -656,45 +656,45 @@
                           <span class="migration-detail-change-field">
                             {{
                               change.field === 'weaponOwned'
-                                ? t("武器状态")
+                                ? t("badge.weapon_status")
                                 : change.field === 'essenceOwned'
-                                ? t("基质状态")
-                                : t("备注")
+                                ? t("badge.essence_status")
+                                : t("badge.note")
                             }}
                           </span>
                           <span class="migration-detail-change-arrow">:</span>
                           <span class="migration-detail-change-value is-from">
                             {{
                               change.field === 'note'
-                                ? (change.from || t("空"))
+                                ? (change.from || t("badge.empty"))
                                 : change.field === 'essenceOwned'
-                                ? (change.from ? t("基质已有") : t("基质未有"))
-                                : (change.from ? t("已拥有") : t("未拥有"))
+                                ? (change.from ? t("nav.essence_owned") : t("badge.essence_not_owned"))
+                                : (change.from ? t("badge.owned") : t("nav.not_owned"))
                             }}
                           </span>
                           <span class="migration-detail-change-arrow">→</span>
                           <span class="migration-detail-change-value is-to">
                             {{
                               change.field === 'note'
-                                ? (change.to || t("空"))
+                                ? (change.to || t("badge.empty"))
                                 : change.field === 'essenceOwned'
-                                ? (change.to ? t("基质已有") : t("基质未有"))
-                                : (change.to ? t("已拥有") : t("未拥有"))
+                                ? (change.to ? t("nav.essence_owned") : t("badge.essence_not_owned"))
+                                : (change.to ? t("badge.owned") : t("nav.not_owned"))
                             }}
                           </span>
                         </div>
                       </div>
                       <div v-else class="migration-detail-meta-text">
-                        {{ t("当前字段已存在，按冲突策略处理。") }}
+                        {{ t("error.field_already_exists_handled_by_conflict_strategy") }}
                       </div>
                     </li>
                   </ul>
                 </div>
 
                 <div class="migration-detail-column">
-                  <div class="migration-detail-title">{{ t("变更条目预览") }}</div>
+                  <div class="migration-detail-title">{{ t("badge.change_preview") }}</div>
                   <div v-if="!migrationPreview.effectItems.length" class="migration-detail-empty">
-                    {{ t("暂无变更条目") }}
+                    {{ t("badge.no_changed_entries") }}
                   </div>
                   <ul v-else class="migration-detail-list">
                     <li
@@ -705,7 +705,7 @@
                       <div class="migration-detail-item-head">
                         <span class="migration-detail-name">{{ tTerm("weapon", item.name) }}</span>
                         <span v-if="item.conflict" class="migration-detail-chip warn">
-                          {{ t("冲突") }}
+                          {{ t("plan.conflict") }}
                         </span>
                       </div>
                       <div class="migration-detail-changes">
@@ -717,30 +717,30 @@
                           <span class="migration-detail-change-field">
                             {{
                               change.field === 'weaponOwned'
-                                ? t("武器状态")
+                                ? t("badge.weapon_status")
                                 : change.field === 'essenceOwned'
-                                ? t("基质状态")
-                                : t("备注")
+                                ? t("badge.essence_status")
+                                : t("badge.note")
                             }}
                           </span>
                           <span class="migration-detail-change-arrow">:</span>
                           <span class="migration-detail-change-value is-from">
                             {{
                               change.field === 'note'
-                                ? (change.from || t("空"))
+                                ? (change.from || t("badge.empty"))
                                 : change.field === 'essenceOwned'
-                                ? (change.from ? t("基质已有") : t("基质未有"))
-                                : (change.from ? t("已拥有") : t("未拥有"))
+                                ? (change.from ? t("nav.essence_owned") : t("badge.essence_not_owned"))
+                                : (change.from ? t("badge.owned") : t("nav.not_owned"))
                             }}
                           </span>
                           <span class="migration-detail-change-arrow">→</span>
                           <span class="migration-detail-change-value is-to">
                             {{
                               change.field === 'note'
-                                ? (change.to || t("空"))
+                                ? (change.to || t("badge.empty"))
                                 : change.field === 'essenceOwned'
-                                ? (change.to ? t("基质已有") : t("基质未有"))
-                                : (change.to ? t("已拥有") : t("未拥有"))
+                                ? (change.to ? t("nav.essence_owned") : t("badge.essence_not_owned"))
+                                : (change.to ? t("badge.owned") : t("nav.not_owned"))
                             }}
                           </span>
                         </div>
@@ -752,30 +752,30 @@
             </div>
 
             <div class="migration-block">
-              <div class="migration-block-title">{{ t("迁移映射方案") }}</div>
+              <div class="migration-block-title">{{ t("error.migration_mapping") }}</div>
               <div class="migration-option-grid">
                 <button
                   class="ghost-button migration-option"
                   :class="{ 'is-active': migrationMappingMode === 'essenceOwned' }"
                   @click="migrationMappingMode = 'essenceOwned'"
                 >
-                  <span class="migration-option-title">{{ t("旧版“排除”标记 → 基质已拥有") }}</span>
-                  <span class="migration-option-desc">{{ t("将旧版“排除”标记理解为“基质已有，不再需要刷基质”。") }}</span>
+                  <span class="migration-option-title">{{ t("badge.legacy_excluded_mark_essence_already_owned") }}</span>
+                  <span class="migration-option-desc">{{ t("badge.interpret_legacy_excluded_marks_as_essence_already_owned") }}</span>
                 </button>
                 <button
                   class="ghost-button migration-option"
                   :class="{ 'is-active': migrationMappingMode === 'weaponUnowned' }"
                   @click="migrationMappingMode = 'weaponUnowned'"
                 >
-                  <span class="migration-option-title">{{ t("旧版“排除”标记 → 武器未拥有") }}</span>
-                  <span class="migration-option-desc">{{ t("将旧版“排除”标记理解为“武器未拥有”，其余武器视为“武器已拥有”。") }}</span>
+                  <span class="migration-option-title">{{ t("badge.legacy_excluded_mark_weapon_not_owned") }}</span>
+                  <span class="migration-option-desc">{{ t("badge.interpret_legacy_excluded_as_weapon_not_owned_all_others") }}</span>
                 </button>
               </div>
             </div>
 
             <div v-if="shouldShowConflictStrategy" class="migration-block">
               <div class="migration-block-title">
-                {{ t("检测到冲突，请先选择冲突处理策略") }}
+                {{ t("error.conflicts_detected_choose_a_conflict_strategy_first") }}
               </div>
               <div class="migration-option-grid">
                 <button
@@ -798,19 +798,19 @@
                 class="about-button migration-action migration-action-warn"
                 @click="openMigrationConfirm('apply')"
               >
-                {{ t("开始迁移") }}
+                {{ t("error.start_migration") }}
               </button>
               <button
                 class="about-button migration-action migration-action-danger"
                 @click="openMigrationConfirm('discard')"
               >
-                {{ t("放弃旧数据") }}
+                {{ t("button.discard_legacy_data") }}
               </button>
               <button
                 class="ghost-button migration-action migration-action-secondary"
                 @click="openMigrationConfirm('defer')"
               >
-                {{ t("稍后再说") }}
+                {{ t("button.later") }}
               </button>
             </div>
           </div>
@@ -824,37 +824,37 @@
               <h3>
                 {{
                   migrationConfirmAction === 'apply'
-                    ? t("确认开始迁移？")
+                    ? t("error.start_migration_2")
                     : migrationConfirmAction === 'discard'
-                    ? t("确认放弃旧数据？")
-                    : t("确认稍后再说？")
+                    ? t("button.discard_legacy_data_2")
+                    : t("button.do_this_later")
                 }}
               </h3>
 
               <p class="migration-warning-text">
-                {{ t("警告：该迁移功能尚未经过充分测试，可能存在异常或结果偏差。但仍建议尽快完成迁移或放弃旧数据。") }}
+                {{ t("error.warning_this_migration_is_not_fully_tested_and_may_be_in") }}
               </p>
 
               <div v-if="migrationConfirmAction === 'apply'" class="migration-confirm-summary">
                 <div class="migration-confirm-row">
-                  <span class="migration-confirm-label">{{ t("迁移映射方案") }}</span>
+                  <span class="migration-confirm-label">{{ t("error.migration_mapping") }}</span>
                   <span class="migration-confirm-value migration-confirm-highlight">
                     {{
                       migrationMappingMode === 'weaponUnowned'
-                        ? t("旧版“排除”标记 → 武器未拥有")
-                        : t("旧版“排除”标记 → 基质已拥有")
+                        ? t("badge.legacy_excluded_mark_weapon_not_owned")
+                        : t("badge.legacy_excluded_mark_essence_already_owned")
                     }}
                   </span>
                 </div>
                 <div v-if="shouldShowConflictStrategy" class="migration-confirm-row">
-                  <span class="migration-confirm-label">{{ t("冲突处理策略") }}</span>
+                  <span class="migration-confirm-label">{{ t("error.conflict_strategy") }}</span>
                   <span class="migration-confirm-value migration-confirm-highlight">
                     {{
                       migrationConflictStrategy === 'overwriteLegacy'
-                        ? t("旧数据覆盖新数据")
+                        ? t("badge.legacy_overwrites_current")
                         : migrationConflictStrategy === 'keepCurrent'
-                        ? t("保留新数据，跳过冲突")
-                        : t("优先补全（推荐）")
+                        ? t("error.keep_current_skip_conflicts")
+                        : t("badge.item_13")
                     }}
                   </span>
                 </div>
@@ -864,7 +864,7 @@
 
             <div class="about-actions migration-actions">
               <button class="ghost-button migration-action migration-action-secondary" @click="closeMigrationConfirm">
-                {{ t("取消") }}
+                {{ t("button.cancel") }}
               </button>
               <button
                 class="about-button migration-action migration-action-danger"
@@ -873,10 +873,10 @@
               >
                 {{
                   migrationConfirmAction === 'apply'
-                    ? t("确认迁移")
+                    ? t("error.confirm_migration")
                     : migrationConfirmAction === 'discard'
-                    ? t("确认放弃")
-                    : t("确认稍后")
+                    ? t("button.confirm_discard")
+                    : t("button.confirm_later")
                 }}
                 <span v-if="migrationConfirmCountdown > 0">（{{ migrationConfirmCountdown }}s）</span>
               </button>
@@ -891,12 +891,12 @@
           class="about-overlay changelog-overlay"
           @click.self="showChangelog = false"
         >
-          <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+          <div v-if="contentLoading" class="about-card notice-card">{{ t("badge.item_12") }}</div>
           <div v-else class="about-card changelog-card">
             <h3>{{ changelog.title }}</h3>
             <div class="changelog-body">
               <div v-if="!changelog.entries || !changelog.entries.length" class="empty">
-                {{ t("暂无更新日志。") }}
+                {{ t("badge.no_changelog_yet") }}
               </div>
               <div
                 v-else
@@ -911,7 +911,7 @@
               </div>
             </div>
             <div class="about-actions">
-              <button class="ghost-button" @click="showChangelog = false">{{ t("关闭") }}</button>
+              <button class="ghost-button" @click="showChangelog = false">{{ t("plan_config.close") }}</button>
             </div>
           </div>
         </div>
@@ -919,7 +919,7 @@
 
       <transition name="fade-scale">
                 <div v-if="showAbout" class="about-overlay about-overlay-main" @click.self="showAbout = false">
-                  <div v-if="contentLoading" class="about-card notice-card">{{ t("内容加载中...") }}</div>
+                  <div v-if="contentLoading" class="about-card notice-card">{{ t("badge.item_12") }}</div>
                   <div v-else class="about-card about-main">
                     <h3>{{ aboutContent.title }}</h3>
                     <div class="about-body">
@@ -927,13 +927,13 @@
                 {{ line }}
               </p>
                       <p v-if="aboutContent.author">
-                        {{ t("作者：{name}", { name: aboutContent.author }) }}
+                        {{ t("badge.author_name", { name: aboutContent.author }) }}
                       </p>
                       <div
                         class="about-material-note"
                         v-if="aboutContent.materialNotice || aboutContent.materialDisclaimer"
                       >
-                        <h4>{{ t("素材说明与免责声明") }}</h4>
+                        <h4>{{ t("badge.item_14") }}</h4>
                         <p v-if="aboutContent.materialNotice">{{ t(aboutContent.materialNotice) }}</p>
                         <p v-if="aboutContent.materialDisclaimer" class="about-material-disclaimer">
                           {{ t(aboutContent.materialDisclaimer) }}
@@ -954,7 +954,7 @@
                 </a>
               </div>
               <div class="about-thanks" v-if="aboutContent.thanks && aboutContent.thanks.length">
-                <h4>{{ t("感谢") }}</h4>
+                <h4>{{ t("badge.thanks") }}</h4>
                 <ul class="about-thanks-list">
                   <li
                     v-for="(entry, index) in aboutContent.thanks"
@@ -1001,7 +1001,7 @@
                 v-if="aboutContent.sponsor.list && aboutContent.sponsor.list.length"
                 class="about-sponsor-list"
               >
-                <h5>{{ t("赞助列表") }}</h5>
+                <h5>{{ t("badge.sponsors") }}</h5>
                 <ul class="about-sponsor-list-items">
                   <li
                     v-for="(entry, index) in aboutContent.sponsor.list"
@@ -1030,7 +1030,7 @@
             </div>
 
             <div class="about-actions">
-              <button class="ghost-button" @click="showAbout = false">{{ t("关闭") }}</button>
+              <button class="ghost-button" @click="showAbout = false">{{ t("plan_config.close") }}</button>
             </div>
           </div>
         </div>
