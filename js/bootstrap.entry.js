@@ -10,6 +10,48 @@
       console.warn(message);
     }
   };
+  var bootstrapModuleScripts = [
+    "./js/bootstrap.resources.js",
+    "./js/bootstrap.error.js",
+    "./js/bootstrap.optional.js",
+  ];
+  var bootstrapModulePromises = Object.create(null);
+  var loadBootstrapModuleScript = function (src) {
+    if (bootstrapModulePromises[src]) {
+      return bootstrapModulePromises[src];
+    }
+    bootstrapModulePromises[src] = new Promise(function (resolve, reject) {
+      var existing = Array.from(document.scripts || []).find(function (script) {
+        var loaded = script && script.dataset && script.dataset.loaded === "true";
+        if (!loaded) return false;
+        var scriptSrc = String(script.getAttribute("src") || script.src || "");
+        return scriptSrc.indexOf(src) !== -1;
+      });
+      if (existing) {
+        resolve();
+        return;
+      }
+      var script = document.createElement("script");
+      script.src = src;
+      script.onload = function () {
+        script.dataset.loaded = "true";
+        resolve();
+      };
+      script.onerror = function () {
+        reject(new Error("Failed to load bootstrap helper: " + src));
+      };
+      var target = document.head || document.documentElement || document.body;
+      target.appendChild(script);
+    });
+    return bootstrapModulePromises[src];
+  };
+  var ensureBootstrapModulesReady = function () {
+    return Promise.all(
+      bootstrapModuleScripts.map(function (src) {
+        return loadBootstrapModuleScript(src);
+      })
+    );
+  };
   var cloneArray = function (value) {
     return Array.isArray(value) ? value.slice() : [];
   };
@@ -790,188 +832,25 @@
   };
 
   var ensureErrorRenderer = function () {
-    if (typeof window.__renderBootError === "function") return;
-    var teardownPreloadOverlay = function () {
-      root.classList.remove("preload");
-      var overlay = document.getElementById("app-preload");
-      if (!overlay) return;
-      overlay.classList.add("preload-hide");
-      overlay.style.pointerEvents = "none";
-      if (overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
-      }
-    };
-    window.__renderBootError = function renderBootError(payload) {
-      if (!document.body) {
-        document.addEventListener(
-          "DOMContentLoaded",
-          function () {
-            window.__renderBootError(payload);
-          },
-          { once: true }
-        );
-        return;
-      }
-      var title = String((payload && payload.title) || bt("error_title_page_load"));
-      var summary = String((payload && payload.summary) || bt("error_summary_unknown"));
-      var details = Array.isArray(payload && payload.details)
-        ? payload.details.filter(Boolean).map(String)
-        : [];
-      var suggestions = Array.isArray(payload && payload.suggestions)
-        ? payload.suggestions.filter(Boolean).map(String)
-        : [];
-
-      teardownPreloadOverlay();
-      var existing = document.getElementById("boot-error-overlay");
-      if (existing && existing.parentNode) {
-        existing.parentNode.removeChild(existing);
-      }
-      var page = document.createElement("div");
-      page.id = "boot-error-overlay";
-      page.style.cssText =
-        "position:fixed;inset:0;z-index:2147483647;overflow:auto;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0f14;color:#e6e9ef;font-family:'Microsoft YaHei UI','PingFang SC',sans-serif;";
-      var card = document.createElement("div");
-      card.style.cssText =
-        "width:min(680px,92vw);border:1px solid rgba(243,108,108,0.42);border-radius:14px;padding:18px 18px 16px;background:rgba(26,14,18,0.84);box-shadow:0 14px 34px rgba(0,0,0,0.38);";
-
-      var titleEl = document.createElement("div");
-      titleEl.style.cssText = "font-size:16px;font-weight:700;letter-spacing:0.03em;color:#ff9e9e;";
-      titleEl.textContent = title;
-      card.appendChild(titleEl);
-
-      var summaryEl = document.createElement("div");
-      summaryEl.style.cssText = "margin-top:8px;line-height:1.7;color:#ffd7d7;";
-      summaryEl.textContent = summary;
-      card.appendChild(summaryEl);
-
-      if (details.length) {
-        var detailWrap = document.createElement("div");
-        detailWrap.style.cssText =
-          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);";
-        var detailTitle = document.createElement("div");
-        detailTitle.style.cssText = "font-weight:600;color:#ffd1d1;";
-        detailTitle.textContent = bt("error_details_title");
-        detailWrap.appendChild(detailTitle);
-        var detailUl = document.createElement("ul");
-        detailUl.style.cssText = "margin:8px 0 0 18px;padding:0;line-height:1.65;";
-        details.forEach(function (item) {
-          var li = document.createElement("li");
-          li.textContent = item;
-          detailUl.appendChild(li);
-        });
-        detailWrap.appendChild(detailUl);
-        card.appendChild(detailWrap);
-      }
-
-      if (suggestions.length) {
-        var suggestWrap = document.createElement("div");
-        suggestWrap.style.cssText =
-          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);";
-        var suggestTitle = document.createElement("div");
-        suggestTitle.style.cssText = "font-weight:600;color:#f2e5c9;";
-        suggestTitle.textContent = bt("error_suggestions_title");
-        suggestWrap.appendChild(suggestTitle);
-        var suggestOl = document.createElement("ol");
-        suggestOl.style.cssText = "margin:8px 0 0 18px;padding:0;line-height:1.65;";
-        suggestions.forEach(function (item) {
-          var li = document.createElement("li");
-          li.textContent = item;
-          suggestOl.appendChild(li);
-        });
-        suggestWrap.appendChild(suggestOl);
-        card.appendChild(suggestWrap);
-      }
-
-      var actionRow = document.createElement("div");
-      actionRow.style.cssText = "margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;";
-
-      var retryButton = document.createElement("button");
-      retryButton.type = "button";
-      retryButton.style.cssText =
-        "cursor:pointer;border:1px solid rgba(77,214,201,0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#c9fff7;";
-      retryButton.textContent = bt("action_retry");
-      retryButton.addEventListener("click", function () {
-        var current = document.getElementById("boot-error-overlay");
-        if (current && current.parentNode) {
-          current.parentNode.removeChild(current);
-        }
-        if (typeof window.__startBootstrapEntry === "function") {
-          window.__startBootstrapEntry({ fromRetry: true });
-          return;
-        }
-        window.location.reload();
-      });
-      actionRow.appendChild(retryButton);
-
-      var refreshButton = document.createElement("button");
-      refreshButton.type = "button";
-      refreshButton.style.cssText =
-        "cursor:pointer;border:1px solid rgba(255,255,255,0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#fff;";
-      refreshButton.textContent = bt("action_refresh");
-      refreshButton.addEventListener("click", function () {
-        window.location.reload();
-      });
-      actionRow.appendChild(refreshButton);
-
-      var feedbackLink = document.createElement("a");
-      feedbackLink.href = "https://github.com/cmyyx/endfield-essence-planner/issues";
-      feedbackLink.target = "_blank";
-      feedbackLink.rel = "noreferrer";
-      feedbackLink.style.cssText =
-        "display:inline-flex;align-items:center;text-decoration:none;border:1px solid rgba(77,214,201,0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.85);color:#c9fff7;";
-      feedbackLink.textContent = bt("action_feedback");
-      actionRow.appendChild(feedbackLink);
-
-      card.appendChild(actionRow);
-      page.appendChild(card);
-      document.body.appendChild(page);
-    };
+    var api = window.__BOOTSTRAP_ERROR__;
+    if (!api || typeof api.ensureErrorRenderer !== "function") return;
+    api.ensureErrorRenderer({
+      root: root,
+      bt: bt,
+    });
   };
 
   var ensureLoadErrorReporter = function () {
-    if (typeof window.__reportScriptChainMissing !== "function") {
-      window.__reportScriptChainMissing = function reportScriptChainMissing() {
-        window.__renderBootError({
-          title: bt("error_title_resource"),
-          summary: bt("error_summary_script_chain_missing"),
-          details: [
-            bt("error_detail_missing_chain"),
-            bt("error_detail_confirm_chain"),
-          ],
-          suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
-        });
-      };
-    }
-    if (typeof window.__reportScriptLoadFailure !== "function") {
-      window.__reportScriptLoadFailure = function reportScriptLoadFailure(failedScript, diagnostics) {
-        var failed = String(failedScript || "").trim();
-        var status = diagnostics && diagnostics.status ? Number(diagnostics.status) : 0;
-        var onlineState = navigator.onLine ? bt("error_network_online") : bt("error_network_offline");
-        var details = [
-          bt("error_detail_failed_resource", { name: failed || bt("unknown_item") }),
-          bt("error_detail_network_state", { state: onlineState }),
-        ];
-        if (status) {
-          var hint = explainHttpStatus(status);
-          details.push(
-            bt("error_detail_http_status", {
-              status: status,
-              hint: hint ? " (" + hint + ")" : "",
-            })
-          );
-        }
-        details.push(bt("error_hint_flaky"));
-        window.__renderBootError({
-          title: bt("error_title_resource"),
-          summary: resolveResourceSummary(status, "error_summary_core_script"),
-          details: details,
-          suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh"), bt("suggestion_issue_screenshot")],
-        });
-      };
-    }
+    var api = window.__BOOTSTRAP_ERROR__;
+    if (!api || typeof api.ensureLoadErrorReporter !== "function") return;
+    api.ensureLoadErrorReporter({
+      bt: bt,
+      resolveResourceSummary: resolveResourceSummary,
+      explainHttpStatus: explainHttpStatus,
+    });
   };
 
-  var startBootstrap = function (options) {
+  var runBootstrap = function (options) {
     options = options || {};
     if (options.fromRetry && document.body) {
       document.body.textContent = "";
@@ -987,12 +866,28 @@
     applyPreloadTheme();
     ensureErrorRenderer();
     ensureLoadErrorReporter();
+    var activeBootResourceConfig = bootResourceConfig;
+    var resourcesApi = window.__BOOTSTRAP_RESOURCES__;
+    if (resourcesApi && typeof resourcesApi.resolveBootResourceConfig === "function") {
+      activeBootResourceConfig = resourcesApi.resolveBootResourceConfig({ warnOnce: warnOnce });
+    }
+    var cssFiles = activeBootResourceConfig.cssFiles;
+    var startupDataScripts = activeBootResourceConfig.startupDataScripts;
+    var startupRuntimeScripts = activeBootResourceConfig.startupRuntimeScripts;
+    var runtimePreludeScripts = activeBootResourceConfig.runtimePreludeScripts;
+    var appEntryScript = activeBootResourceConfig.appEntryScript;
+    var startupScripts = activeBootResourceConfig.startupScripts;
+    var optionalScriptConfigs = activeBootResourceConfig.optionalScriptConfigs;
     var progressPulseTimer = null;
+    var resourceRuntime = null;
 
     var finish = function () {
       if (progressPulseTimer) {
         clearInterval(progressPulseTimer);
         progressPulseTimer = null;
+      }
+      if (resourceRuntime && typeof resourceRuntime.cleanup === "function") {
+        resourceRuntime.cleanup();
       }
       root.classList.remove("preload");
       var overlay = document.getElementById("app-preload");
@@ -1073,620 +968,58 @@
     };
     ensurePreloadAssist();
 
-    var optionalFailureEventName = "planner:optional-resource-failed";
-    var optionalFailureQueueKey = "__bootOptionalLoadFailures";
-    var optionalFailureQueueLimit = 20;
-    var optionalFailureIdSeed = 0;
-    var resolveOptionalFeatureKey = function (entry) {
-      if (entry && entry.featureKey) return String(entry.featureKey);
-      return "";
-    };
-    var resolveOptionalFeatureLabel = function (featureKey) {
-      if (!featureKey) return "";
-      var key = "optional_feature_" + featureKey;
-      var translated = bt(key);
-      if (!translated || translated === key) return "";
-      return translated;
-    };
-    var toOptionalFailureIsoTime = function (value) {
-      var parsed = Date.parse(String(value || ""));
-      if (!isNaN(parsed)) {
-        return new Date(parsed).toISOString();
-      }
-      return new Date().toISOString();
-    };
-    var buildOptionalFailureSignature = function (featureKey, resourceLabel) {
-      return String(featureKey || "").trim() + "|" + String(resourceLabel || "").trim();
-    };
-    var buildOptionalFailurePayload = function (entry) {
-      var featureKey = resolveOptionalFeatureKey(entry);
-      var featureLabel = resolveOptionalFeatureLabel(featureKey);
-      if (!featureLabel && entry && entry.featureLabel) {
-        featureLabel = String(entry.featureLabel);
-      }
-      var resourceLabel = String(
-        (entry && entry.resource) ||
-          (entry && entry.resourceLabel) ||
-          (entry && entry.label) ||
-          (entry && entry.src) ||
-          ""
-      ).trim();
-      if (!resourceLabel) {
-        var fallbackResource = bt("unknown_resource");
-        resourceLabel =
-          fallbackResource && fallbackResource !== "unknown_resource"
-            ? fallbackResource
-            : "optional-resource";
-      }
-      var signature = buildOptionalFailureSignature(featureKey, resourceLabel);
-      optionalFailureIdSeed += 1;
-      return {
-        id:
-          "bootopt-" +
-          Date.now() +
-          "-" +
-          optionalFailureIdSeed +
-          "-" +
-          Math.random().toString(16).slice(2, 6),
-        occurredAt: toOptionalFailureIsoTime(entry && entry.occurredAt),
-        feature: featureKey,
-        featureKey: featureKey,
-        featureLabel: featureLabel,
-        resource: resourceLabel,
-        resourceLabel: resourceLabel,
-        signature: signature,
-        source: String((entry && (entry.source || entry.scope || entry.stage)) || "bootstrap.optional"),
-        src: String((entry && entry.src) || resourceLabel),
-        label: resourceLabel,
-      };
-    };
-    var enqueueOptionalFailure = function (payload) {
-      if (typeof window === "undefined") return;
-      var queue = Array.isArray(window[optionalFailureQueueKey]) ? window[optionalFailureQueueKey] : [];
-      queue.push(payload);
-      window[optionalFailureQueueKey] = queue.slice(-optionalFailureQueueLimit);
-      if (typeof window.dispatchEvent === "function") {
-        try {
-          var event = new CustomEvent(optionalFailureEventName, { detail: payload });
-          window.dispatchEvent(event);
-        } catch (error) {
-          // ignore event dispatch failures
-        }
-      }
-    };
-    var reportOptionalResourceFailure = function (entry, options) {
-      if (!entry || typeof entry !== "object") return null;
-      var allowUnsafe = Boolean(options && options.allowUnsafe);
-      if (!allowUnsafe && !entry.optional) return null;
-      var payload = buildOptionalFailurePayload(entry);
-      enqueueOptionalFailure(payload);
-      return payload;
-    };
-    if (typeof window !== "undefined") {
-      window.__reportOptionalResourceFailure = function (entry) {
-        return reportOptionalResourceFailure(entry, { allowUnsafe: true });
-      };
+    var optionalApi = window.__BOOTSTRAP_OPTIONAL__;
+    var resourcesApiRuntime = window.__BOOTSTRAP_RESOURCES__;
+    if (
+      !optionalApi ||
+      typeof optionalApi.createOptionalFailureReporter !== "function" ||
+      typeof optionalApi.createOptionalScriptLoader !== "function" ||
+      !resourcesApiRuntime ||
+      typeof resourcesApiRuntime.createResourceRuntime !== "function"
+    ) {
+      throw new Error("Bootstrap helper module APIs are unavailable.");
     }
 
-    var toResourceLabel = function (src) {
-      var value = String(src || "");
-      if (!value) return bt("unknown_resource");
-      if (/^https?:\/\//i.test(value)) return value;
-      return value;
-    };
-    var resourceState = new Map();
-    var progressMeta = {
-      startedAt: Date.now(),
-      lastCompleted: -1,
-      lastCompletedAt: Date.now(),
-    };
-    var preloadAssistStallMs = 30000;
-    var preloadFailStallMs = 60000;
-    var preloadLongHelpStallMs = 45000;
-    var triggerStallTimeout = null;
-    var ensureResource = function (src, kind, options) {
-      var normalizedOptions = options && typeof options === "object" ? options : {};
-      var optionalConfig = optionalScriptConfigs[src] || null;
-      var key = normalizeResourceKey(src);
-      if (!resourceState.has(key)) {
-        resourceState.set(key, {
-          key: key,
-          src: src,
-          kind: kind || "resource",
-          label: toResourceLabel(src),
-          status: "pending",
-          statusAt: 0,
-          optional: Boolean(normalizedOptions.optional || optionalConfig),
-          featureKey: normalizedOptions.featureKey || (optionalConfig ? optionalConfig.featureKey : ""),
-        });
-      } else if (normalizedOptions.optional || optionalConfig) {
-        var existing = resourceState.get(key);
-        if (existing) {
-          existing.optional = true;
-          if (!existing.featureKey) {
-            existing.featureKey = normalizedOptions.featureKey || (optionalConfig ? optionalConfig.featureKey : "");
-          }
-        }
-      }
-      return key;
-    };
-    var renderProgress = function () {
-      if (runId !== runSerial) return;
-      ensurePreloadAssist();
-      var refs = getPreloadRefs();
-      if (!refs.overlay) return;
-      var entries = Array.from(resourceState.values());
-      var total = entries.length;
-      var loaded = entries.filter(function (entry) {
-        return entry.status === "loaded";
-      }).length;
-      var criticalFailedItem = entries.find(function (entry) {
-        return entry.status === "failed" && !entry.optional;
-      });
-      var optionalFailedItems = entries.filter(function (entry) {
-        return entry.status === "failed" && entry.optional;
-      });
-      var completedCount = loaded + optionalFailedItems.length;
-      var loadingItems = entries.filter(function (entry) {
-        return entry.status === "loading";
-      });
-      var loadingItem = loadingItems.length ? loadingItems[0] : null;
-      var loadingCount = loadingItems.length;
-      var loadingPreview =
-        loadingCount > 0
-          ? loadingItems
-              .slice(0, 3)
-              .map(function (entry) {
-                return entry.label;
-              })
-              .join(bt("list_sep"))
-          : "";
-      var recentLoadedPreview = entries
-        .filter(function (entry) {
-          return entry.status === "loaded" && entry.statusAt > 0;
-        })
-        .sort(function (a, b) {
-          return b.statusAt - a.statusAt;
-        })
-        .slice(0, 2)
-        .map(function (entry) {
-          return entry.label;
-        })
-        .join(bt("list_sep"));
-      if (completedCount !== progressMeta.lastCompleted) {
-        progressMeta.lastCompleted = completedCount;
-        progressMeta.lastCompletedAt = Date.now();
-      }
-      var stagnantMs = Date.now() - progressMeta.lastCompletedAt;
-      var shouldShowAssist =
-        !criticalFailedItem && completedCount < total && stagnantMs >= preloadAssistStallMs;
-      var shouldForceTimeout =
-        !criticalFailedItem && completedCount < total && stagnantMs >= preloadFailStallMs;
-      var hasStagingGap = !criticalFailedItem && !loadingItem && completedCount < total;
-      if (refs.count) {
-        refs.count.textContent = completedCount + "/" + total;
-      }
-      if (refs.progressFill) {
-        var percent = total > 0 ? Math.min(100, Math.round((completedCount / total) * 100)) : 0;
-        refs.progressFill.style.width = percent + "%";
-        refs.progressFill.setAttribute("aria-valuenow", String(percent));
-      }
-      if (refs.status) {
-        if (criticalFailedItem) {
-          refs.status.textContent = bt("preload_status_failed");
-        } else if (total === 0) {
-          refs.status.textContent = bt("preload_status_prepare");
-        } else if (completedCount >= total) {
-          refs.status.textContent = bt("preload_status_ready");
-        } else if (hasStagingGap) {
-          refs.status.textContent = bt("preload_status_staging");
-        } else if (loadingCount > 1) {
-          refs.status.textContent = bt("preload_status_parallel");
-        } else {
-          refs.status.textContent = bt("preload_status_loading");
-        }
-      }
-      if (refs.current) {
-        var currentText = "";
-        if (criticalFailedItem) {
-          currentText = bt("preload_current_failed", { label: criticalFailedItem.label });
-        } else if (loadingCount > 1) {
-          var parallelText = bt("preload_current_parallel", {
-            labels: loadingPreview,
-            more:
-              loadingCount > 3
-                ? bt("preload_current_parallel_more", { count: loadingCount })
-                : "",
-          });
-          currentText = recentLoadedPreview
-            ? parallelText + " | " + bt("preload_current_done", { labels: recentLoadedPreview })
-            : parallelText;
-        } else if (loadingItem) {
-          currentText = bt("preload_current_now", { label: loadingItem.label });
-        } else if (hasStagingGap) {
-          currentText = recentLoadedPreview
-            ? bt("preload_current_wait_stage", { labels: recentLoadedPreview })
-            : bt("preload_current_wait_core");
-        } else if (completedCount >= total && total > 0) {
-          currentText = bt("preload_current_wait_mount");
-        }
-        if (!criticalFailedItem && optionalFailedItems.length) {
-          var optionalFailedPreview = optionalFailedItems
-            .slice(0, 2)
-            .map(function (entry) {
-              return entry.label;
-            })
-            .join(bt("list_sep"));
-          var optionalFailedText = bt("preload_current_optional_failed", {
-            label: optionalFailedPreview,
-          });
-          currentText = currentText ? currentText + " | " + optionalFailedText : optionalFailedText;
-        }
-        refs.current.textContent = currentText;
-      }
-      if (refs.help) {
-        if (criticalFailedItem) {
-          refs.help.textContent = "";
-        } else if (completedCount < total && stagnantMs >= preloadLongHelpStallMs) {
-          refs.help.textContent = bt("preload_help_long");
-        } else if (shouldShowAssist) {
-          refs.help.textContent = bt("preload_help_short");
-        } else {
-          refs.help.textContent = "";
-        }
-      }
-      if (refs.actions) {
-        refs.actions.style.display = shouldShowAssist ? "flex" : "none";
-      }
-      if (shouldForceTimeout && typeof triggerStallTimeout === "function") {
-        triggerStallTimeout();
-      }
-    };
-    var setResourceStatus = function (key, status) {
-      var item = resourceState.get(key);
-      if (!item) return;
-      item.status = status;
-      item.statusAt = Date.now();
-      renderProgress();
-    };
-
-    cssFiles.forEach(function (href) {
-      ensureResource(href, "style");
+    var optionalReporter = optionalApi.createOptionalFailureReporter({ bt: bt });
+    var reportOptionalResourceFailure = optionalReporter.reportOptionalResourceFailure;
+    resourceRuntime = resourcesApiRuntime.createResourceRuntime({
+      bt: bt,
+      cssFiles: cssFiles,
+      startupScripts: startupScripts,
+      declaredAppScriptChain: declaredAppScriptChain,
+      optionalScriptConfigs: optionalScriptConfigs,
+      runId: runId,
+      getRunSerial: function () {
+        return runSerial;
+      },
+      ensurePreloadAssist: ensurePreloadAssist,
+      getPreloadRefs: getPreloadRefs,
+      normalizeResourceKey: normalizeResourceKey,
+      applyBootCacheBust: applyBootCacheBust,
+      probeResourceStatus: probeResourceStatus,
+      isFatalHttpStatus: isFatalHttpStatus,
+      createLoadError: createLoadError,
+      reportOptionalResourceFailure: reportOptionalResourceFailure,
+      bootCacheBustToken: bootCacheBustToken,
     });
-    startupScripts.forEach(function (src) {
-      ensureResource(src, "script");
+    resourceRuntime.initialize();
+
+    var ensureResource = resourceRuntime.ensureResource;
+    var renderProgress = resourceRuntime.renderProgress;
+    var loadScript = resourceRuntime.loadScript;
+    var loadStyle = resourceRuntime.loadStyle;
+    var setStallTimeoutTrigger = resourceRuntime.setStallTimeoutTrigger;
+    var loadOptionalScriptWithRetry = optionalApi.createOptionalScriptLoader({
+      loadScript: loadScript,
+      optionalScriptConfigs: optionalScriptConfigs,
+      resourceState: resourceRuntime.resourceState,
+      normalizeResourceKey: normalizeResourceKey,
+      warnOnce: warnOnce,
+      getRunSerial: function () {
+        return runSerial;
+      },
+      reportOptionalResourceFailure: reportOptionalResourceFailure,
     });
-    declaredAppScriptChain.forEach(function (src) {
-      ensureResource(src, "script");
-    });
-    renderProgress();
-
-    if (document.readyState === "loading") {
-      document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-          ensurePreloadAssist();
-          renderProgress();
-        },
-        { once: true }
-      );
-    }
-    progressPulseTimer = setInterval(function () {
-      if (runId !== runSerial) {
-        clearInterval(progressPulseTimer);
-        progressPulseTimer = null;
-        return;
-      }
-      renderProgress();
-    }, 1000);
-
-    var scriptLoadRegistry = new Map();
-    var loadScript = function (src, options) {
-      var requestSrc = applyBootCacheBust(src);
-      var key = ensureResource(src, "script", options);
-      if (scriptLoadRegistry.has(key)) {
-        return scriptLoadRegistry.get(key);
-      }
-      var task = new Promise(function (resolve, reject) {
-        var existingLoaded = false;
-        if (!bootCacheBustToken) {
-          existingLoaded = Array.from(document.scripts || []).some(function (script) {
-            var s = script.getAttribute("src") || script.src || "";
-            var same = normalizeResourceKey(s) === key;
-            return same && script.dataset && script.dataset.loaded === "true";
-          });
-        }
-        if (existingLoaded) {
-          setResourceStatus(key, "loaded");
-          resolve();
-          return;
-        }
-        var script = document.createElement("script");
-        script.src = requestSrc;
-        setResourceStatus(key, "loading");
-        script.onload = function () {
-          script.dataset.loaded = "true";
-          setResourceStatus(key, "loaded");
-          resolve();
-        };
-        script.onerror = function () {
-          setResourceStatus(key, "failed");
-          var failedEntry = resourceState.get(key);
-          if (failedEntry && failedEntry.optional) {
-            reportOptionalResourceFailure(failedEntry);
-          }
-          scriptLoadRegistry.delete(key);
-          probeResourceStatus(requestSrc).then(function (probe) {
-            reject(createLoadError("script", src, "error", probe));
-          });
-        };
-        var target = document.body || document.head || document.documentElement;
-        target.appendChild(script);
-      });
-      scriptLoadRegistry.set(key, task);
-      return task;
-    };
-    window.__loadScript = loadScript;
-
-    var resolveOptionalRetryDelayMs = function (config) {
-      var parsed = Number(config && config.retryDelayMs);
-      if (!Number.isFinite(parsed) || parsed < 0) return 1200;
-      return Math.floor(parsed);
-    };
-    var resolveOptionalMaxRetries = function (config) {
-      var parsed = Number(config && config.maxRetries);
-      if (!Number.isFinite(parsed) || parsed < 0) return 1;
-      return Math.floor(parsed);
-    };
-    var reportOptionalResourceFailureByConfig = function (src, config) {
-      var entry = resourceState.get(normalizeResourceKey(src));
-      if (entry && entry.optional) {
-        reportOptionalResourceFailure(entry);
-        return;
-      }
-      reportOptionalResourceFailure({
-        optional: true,
-        label: src,
-        src: src,
-        featureKey: config && config.featureKey ? String(config.featureKey) : "",
-      });
-    };
-    var runOptionalScriptValidation = function (src, config) {
-      if (!config || typeof config.validate !== "function") return true;
-      try {
-        return config.validate(window, src) !== false;
-      } catch (error) {
-        warnOnce(
-          "optional-validate-error:" + src,
-          "[bootstrap] optional script validation threw for " + src + ", treating as failed validation."
-        );
-        return false;
-      }
-    };
-    var loadOptionalScriptWithRetry = function (src, config, expectedRunId) {
-      var retries = resolveOptionalMaxRetries(config);
-      var retryDelayMs = resolveOptionalRetryDelayMs(config);
-      var loadOptions = {
-        optional: true,
-        featureKey: config && config.featureKey ? String(config.featureKey) : "",
-      };
-      return new Promise(function (resolve) {
-        var attempts = 0;
-        var execute = function () {
-          if (runSerial !== expectedRunId) {
-            resolve();
-            return;
-          }
-          loadScript(src, loadOptions)
-            .then(function () {
-              if (runOptionalScriptValidation(src, config)) {
-                resolve();
-                return;
-              }
-              attempts += 1;
-              if (attempts <= retries) {
-                setTimeout(execute, retryDelayMs);
-                return;
-              }
-              reportOptionalResourceFailureByConfig(src, config);
-              resolve();
-            })
-            .catch(function () {
-              attempts += 1;
-              if (attempts <= retries) {
-                setTimeout(execute, retryDelayMs);
-                return;
-              }
-              reportOptionalResourceFailureByConfig(src, config);
-              resolve();
-            });
-        };
-        execute();
-      });
-    };
-
-    var styleLoadRegistry = new Map();
-    var resolveCssStallLimitMs = function () {
-      var base = 60000;
-      try {
-        var conn =
-          navigator && (navigator.connection || navigator.mozConnection || navigator.webkitConnection);
-        if (conn) {
-          if (conn.saveData) return 75000;
-          var type = String(conn.effectiveType || "").toLowerCase();
-          if (type === "slow-2g" || type === "2g") return 75000;
-          if (type === "3g") return 65000;
-        }
-      } catch (error) {
-        // ignore
-      }
-      return base;
-    };
-    var cssStallLimitMs = resolveCssStallLimitMs();
-    var cssStatePollIntervalMs = 900;
-    var cssProbeIntervalMs = 5000;
-    var isStylesheetReady = function (key, link) {
-      if (!link) return false;
-      try {
-        if (link.sheet && !link.disabled) {
-          return true;
-        }
-      } catch (error) {
-        // ignore cross-origin/parse errors and continue with fallback scan
-      }
-      try {
-        var sheets = Array.from(document.styleSheets || []);
-        return sheets.some(function (sheet) {
-          var href = "";
-          try {
-            href = sheet && sheet.href ? normalizeResourceKey(sheet.href) : "";
-          } catch (error) {
-            href = "";
-          }
-          return href === key;
-        });
-      } catch (error) {
-        return false;
-      }
-    };
-    var loadStyle = function (href) {
-      var requestHref = applyBootCacheBust(href);
-      var key = ensureResource(href, "style");
-      if (styleLoadRegistry.has(key)) {
-        return styleLoadRegistry.get(key);
-      }
-      var task = new Promise(function (resolve, reject) {
-        var settled = false;
-        var probeInFlight = false;
-        var lastProbe = null;
-        var errorSettleTimer = null;
-        var nextProbeAt = Date.now();
-        var link =
-          bootCacheBustToken
-            ? null
-            : document.querySelector('link[rel="stylesheet"][href="' + href + '"]');
-        if (!link) {
-          link = document.createElement("link");
-          link.rel = "stylesheet";
-          link.href = requestHref;
-          document.head.appendChild(link);
-        }
-        setResourceStatus(key, "loading");
-        var pollTimer = null;
-        var stallTimer = null;
-        var cleanup = function () {
-          clearInterval(pollTimer);
-          clearTimeout(stallTimer);
-          clearTimeout(errorSettleTimer);
-          link.removeEventListener("load", onLoad);
-          link.removeEventListener("error", onError);
-        };
-        var onLoad = function () {
-          if (settled) return;
-          settled = true;
-          if (link.dataset) {
-            link.dataset.loaded = "true";
-          }
-          cleanup();
-          setResourceStatus(key, "loaded");
-          resolve();
-        };
-        var onFailure = function (reason, probe) {
-          if (settled) return;
-          settled = true;
-          cleanup();
-          setResourceStatus(key, "failed");
-          styleLoadRegistry.delete(key);
-          reject(createLoadError("style", href, reason, probe));
-        };
-        var runProbe = function (source) {
-          if (settled || probeInFlight) return;
-          probeInFlight = true;
-          probeResourceStatus(requestHref)
-            .then(function (probe) {
-              if (settled) return;
-              lastProbe = probe || null;
-              if (isStylesheetReady(key, link)) {
-                onLoad();
-                return;
-              }
-              var status = probe && probe.status ? Number(probe.status) : 0;
-              if (status && isFatalHttpStatus(status)) {
-                onFailure("http", probe);
-                return;
-              }
-            })
-            .finally(function () {
-              probeInFlight = false;
-            });
-        };
-        var schedulePoll = function () {
-          clearInterval(pollTimer);
-          pollTimer = setInterval(function () {
-            if (settled) return;
-            if (isStylesheetReady(key, link)) {
-              onLoad();
-              return;
-            }
-            if (Date.now() >= nextProbeAt) {
-              nextProbeAt = Date.now() + cssProbeIntervalMs;
-              runProbe("poll");
-            }
-          }, cssStatePollIntervalMs);
-        };
-        var scheduleStallWatchdog = function () {
-          clearTimeout(stallTimer);
-          stallTimer = setTimeout(function () {
-            if (settled) return;
-            if (isStylesheetReady(key, link)) {
-              onLoad();
-              return;
-            }
-            probeResourceStatus(requestHref).then(function (probe) {
-              if (settled) return;
-              if (isStylesheetReady(key, link)) {
-                onLoad();
-                return;
-              }
-              var status = probe && probe.status ? Number(probe.status) : 0;
-              if (status && isFatalHttpStatus(status)) {
-                onFailure("http", probe);
-                return;
-              }
-              onFailure("stalled", probe);
-            });
-          }, cssStallLimitMs);
-        };
-        schedulePoll();
-        scheduleStallWatchdog();
-        link.addEventListener("load", onLoad);
-        var onError = function () {
-          if (settled) return;
-          runProbe("error");
-          clearTimeout(errorSettleTimer);
-          errorSettleTimer = setTimeout(function () {
-            if (settled) return;
-            if (isStylesheetReady(key, link)) {
-              onLoad();
-              return;
-            }
-            onFailure("error", lastProbe);
-          }, 1600);
-        };
-        link.addEventListener("error", onError);
-        try {
-          if (isStylesheetReady(key, link)) {
-            onLoad();
-            return;
-          }
-          runProbe("init");
-        } catch (error) {
-          // ignore and wait load/error
-        }
-      });
-      styleLoadRegistry.set(key, task);
-      return task;
-    };
 
     var cssPromise = Promise.all(cssFiles.map(loadStyle));
     var dataPromise = Promise.all(
@@ -1734,6 +1067,7 @@
       check();
     });
     var stallTimeoutTriggered = false;
+    var triggerStallTimeout = null;
     var stallTimeoutReject = null;
     var stallTimeoutPromise = new Promise(function (resolve, reject) {
       stallTimeoutReject = reject;
@@ -1750,6 +1084,9 @@
       };
       stallTimeoutReject(stallError);
     };
+    if (typeof setStallTimeoutTrigger === "function") {
+      setStallTimeoutTrigger(triggerStallTimeout);
+    }
     var bootLoadPromise = Promise.all([
       shellReadyPromise,
       cssPromise,
@@ -1776,88 +1113,53 @@
       .catch(function (error) {
         if (runId !== runSerial) return;
         finish();
-        var failedMessage = String((error && error.message) || "");
-        var resourceMeta = error && error.resource ? error.resource : null;
-        var probe = resourceMeta && resourceMeta.probe ? resourceMeta.probe : null;
-        var status = probe && probe.status ? Number(probe.status) : 0;
-        var statusHint = explainHttpStatus(status);
-        var failedScript = failedMessage.replace(/^Failed to load:\s*/i, "");
-        if (resourceMeta && resourceMeta.kind === "script" && resourceMeta.src) {
-          failedScript = resourceMeta.src;
-        }
-        if (resourceMeta && resourceMeta.kind === "startup-stall") {
-          window.__renderBootError({
-            title: bt("error_title_resource"),
-            summary: bt("error_summary_core_resource"),
-            details: [
-              bt("error_detail_failed_reason", { reason: bt("error_reason_stalled") }),
-              bt("error_hint_flaky"),
-            ],
-            suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh"), bt("suggestion_issue_screenshot")],
+        var errorApi = window.__BOOTSTRAP_ERROR__;
+        if (errorApi && typeof errorApi.handleBootFailure === "function") {
+          errorApi.handleBootFailure({
+            error: error,
+            bt: bt,
+            resolveResourceSummary: resolveResourceSummary,
+            explainHttpStatus: explainHttpStatus,
+            describeStyleFailureReason: describeStyleFailureReason,
           });
           return;
         }
-        var failedStyle = failedMessage
-          .replace(/^Failed to load stylesheet(?: \([^)]+\))?:\s*/i, "")
-          .trim();
-        if (resourceMeta && resourceMeta.kind === "style" && resourceMeta.src) {
-          failedStyle = resourceMeta.src;
-        }
-        var failureReason = resourceMeta && resourceMeta.reason ? String(resourceMeta.reason) : "";
-        var isCssFailure =
-          (resourceMeta && resourceMeta.kind === "style") || failedMessage.indexOf("stylesheet") !== -1;
-        if (isCssFailure) {
-          var cssDetails = [bt("error_detail_failed_style", { name: failedStyle || bt("unknown_item") })];
-          if (status) {
-            cssDetails.push(
-              bt("error_detail_http_status", {
-                status: status,
-                hint: statusHint ? " (" + statusHint + ")" : "",
-              })
-            );
-          }
-          if (failureReason) {
-            cssDetails.push(
-              bt("error_detail_failed_reason", {
-                reason: describeStyleFailureReason(failureReason, status),
-              })
-            );
-          }
-          window.__renderBootError({
-            title: bt("error_title_style"),
-            summary: resolveResourceSummary(status, "error_summary_style"),
-            details: cssDetails,
-            suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
-          });
-        } else if (typeof window.__reportScriptLoadFailure === "function") {
-          window.__reportScriptLoadFailure(failedScript, {
-            status: status,
-          });
-        } else {
-          var scriptDetails = [
-            bt("error_detail_failed_resource", { name: failedScript || bt("unknown_item") }),
-          ];
-          if (status) {
-            scriptDetails.push(
-              bt("error_detail_http_status", {
-                status: status,
-                hint: statusHint ? " (" + statusHint + ")" : "",
-              })
-            );
-          }
-          window.__renderBootError({
-            title: bt("error_title_resource"),
-            summary: resolveResourceSummary(status, "error_summary_core_resource"),
-            details: scriptDetails,
-            suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
-          });
-        }
+        throw error;
       })
       .finally(function () {
         stallTimeoutTriggered = true;
         if (runId === runSerial) {
           window.__bootstrapEntryRunning = false;
         }
+      });
+  };
+
+  var startBootstrap = function (options) {
+    ensureBootstrapModulesReady()
+      .then(function () {
+        runBootstrap(options || {});
+      })
+      .catch(function (error) {
+        var message = String((error && error.message) || "Failed to load bootstrap helper modules.");
+        warnOnce("bootstrap-module-load-failed", "[bootstrap] " + message);
+        if (typeof window.__renderBootError === "function") {
+          window.__renderBootError({
+            title: bt("error_title_resource"),
+            summary: bt("error_summary_core_resource"),
+            details: [message],
+            suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
+          });
+          return;
+        }
+        if (document && document.body) {
+          var fallback = document.createElement("pre");
+          fallback.style.cssText = "padding:16px;color:#ffd7d7;background:#0b0f14;white-space:pre-wrap;";
+          fallback.textContent = message;
+          document.body.innerHTML = "";
+          document.body.appendChild(fallback);
+          return;
+        }
+        throw error;
       });
   };
 
