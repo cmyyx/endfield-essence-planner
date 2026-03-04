@@ -12,20 +12,19 @@ const manifestSource = read("js/app.resource-manifest.js");
 const bootstrapSource = read("js/bootstrap.entry.js");
 const appScriptChainSource = read("js/app.script-chain.js");
 
-const requiredManifestPaths = [
-  "boot.css",
-  "boot.data",
-  "boot.runtime",
-  "boot.optional",
-  "app.scriptChain",
+const requiredManifestContracts = [
+  /boot\s*:\s*\{[\s\S]*?\bcss\s*:/,
+  /boot\s*:\s*\{[\s\S]*?\bdata\s*:/,
+  /boot\s*:\s*\{[\s\S]*?\bruntime\s*:/,
+  /boot\s*:\s*\{[\s\S]*?\boptional\s*:/,
+  /app\s*:\s*\{[\s\S]*?\bscriptChain\s*:/,
 ];
 
-requiredManifestPaths.forEach((pathKey) => {
-  const escaped = pathKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+requiredManifestContracts.forEach((contractPattern) => {
   assert.match(
     manifestSource,
-    new RegExp("\\b" + escaped + "\\b"),
-    `resource manifest should define ${pathKey}`
+    contractPattern,
+    `resource manifest should define ${contractPattern}`
   );
 });
 

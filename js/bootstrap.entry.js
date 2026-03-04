@@ -2,36 +2,132 @@
   var root = document.documentElement;
   var themeStorageKey = "planner-theme-mode:v1";
   var runSerial = 0;
-  var cssFiles = [
-    "./css/styles.theme.css",
-    "./css/styles.layout.css",
-    "./css/styles.overlays.css",
-    "./css/styles.filters.css",
-    "./css/styles.weapons.css",
-    "./css/styles.recommendations.css",
-    "./css/styles.gear-refining.css",
-    "./css/styles.theme.modes.css",
-  ];
-  var startupScripts = [
-    "./vendor/vue.global.prod.js",
-    "./data/version.js",
-    "./data/dungeons.js",
-    "./data/weapons.js",
-    "./data/up-schedules.js",
-    "./data/gears.js",
-    "./data/weapon-images.js",
-    "./data/i18n/zh-CN.js",
-    "./data/i18n/zh-TW.js",
-    "./data/i18n/en.js",
-    "./data/i18n/ja.js",
-    "./js/app.script-chain.js",
-    "./js/app.js",
-  ];
-  var optionalScriptConfigs = {
-    "./vendor/pinyin-pro.min.js": {
-      featureKey: "pinyin",
-    },
+  var warnFlags = Object.create(null);
+  var warnOnce = function (key, message) {
+    if (warnFlags[key]) return;
+    warnFlags[key] = true;
+    if (typeof console !== "undefined" && typeof console.warn === "function") {
+      console.warn(message);
+    }
   };
+  var cloneArray = function (value) {
+    return Array.isArray(value) ? value.slice() : [];
+  };
+  var cloneOptionalConfigMap = function (value) {
+    if (!value || typeof value !== "object") return {};
+    var map = {};
+    Object.keys(value).forEach(function (key) {
+      var entry = value[key];
+      map[key] = entry && typeof entry === "object" ? Object.assign({}, entry) : {};
+    });
+    return map;
+  };
+  var createLegacyBootManifest = function () {
+    return {
+      boot: {
+        css: [
+          "./css/styles.theme.css",
+          "./css/styles.layout.css",
+          "./css/styles.overlays.css",
+          "./css/styles.filters.css",
+          "./css/styles.weapons.css",
+          "./css/styles.recommendations.css",
+          "./css/styles.gear-refining.css",
+          "./css/styles.theme.modes.css",
+        ],
+        data: [
+          "./js/app.resource-manifest.js",
+          "./data/version.js",
+          "./data/dungeons.js",
+          "./data/weapons.js",
+          "./data/up-schedules.js",
+          "./data/gears.js",
+          "./data/weapon-images.js",
+          "./data/i18n/zh-CN.js",
+          "./data/i18n/zh-TW.js",
+          "./data/i18n/en.js",
+          "./data/i18n/ja.js",
+        ],
+        runtime: ["./vendor/vue.global.prod.js", "./js/app.script-chain.js", "./js/app.js"],
+        optional: {
+          "./vendor/pinyin-pro.min.js": {
+            featureKey: "pinyin",
+            retryDelayMs: 1200,
+            maxRetries: 1,
+          },
+        },
+      },
+    };
+  };
+  var resolveBootResourceConfig = function () {
+    var manifest =
+      typeof window !== "undefined" &&
+      window.__APP_RESOURCE_MANIFEST &&
+      typeof window.__APP_RESOURCE_MANIFEST === "object"
+        ? window.__APP_RESOURCE_MANIFEST
+        : null;
+    var legacyManifest = createLegacyBootManifest();
+    if (!manifest) {
+      warnOnce(
+        "resource-manifest-fallback",
+        "[bootstrap] window.__APP_RESOURCE_MANIFEST is missing, using legacy fallback resources."
+      );
+      manifest = legacyManifest;
+      if (typeof window !== "undefined") {
+        window.__APP_RESOURCE_MANIFEST = manifest;
+      }
+    }
+    var boot = manifest && manifest.boot && typeof manifest.boot === "object" ? manifest.boot : {};
+    var cssFiles = cloneArray(boot.css);
+    if (!cssFiles.length) {
+      warnOnce("resource-manifest-css-fallback", "[bootstrap] manifest boot.css is empty, using legacy fallback CSS.");
+      cssFiles = cloneArray(legacyManifest.boot.css);
+    }
+    var startupDataScripts = cloneArray(boot.data);
+    if (!startupDataScripts.length) {
+      warnOnce(
+        "resource-manifest-data-fallback",
+        "[bootstrap] manifest boot.data is empty, using legacy fallback startup data scripts."
+      );
+      startupDataScripts = cloneArray(legacyManifest.boot.data);
+    }
+    var startupRuntimeScripts = cloneArray(boot.runtime);
+    if (!startupRuntimeScripts.length) {
+      warnOnce(
+        "resource-manifest-runtime-fallback",
+        "[bootstrap] manifest boot.runtime is empty, using legacy fallback runtime scripts."
+      );
+      startupRuntimeScripts = cloneArray(legacyManifest.boot.runtime);
+    }
+    var optionalScriptConfigs = cloneOptionalConfigMap(boot.optional);
+    if (!Object.keys(optionalScriptConfigs).length) {
+      optionalScriptConfigs = cloneOptionalConfigMap(legacyManifest.boot.optional);
+    }
+    var appEntryScript = startupRuntimeScripts.includes("./js/app.js")
+      ? "./js/app.js"
+      : startupRuntimeScripts[startupRuntimeScripts.length - 1] || "./js/app.js";
+    var runtimePreludeScripts = startupRuntimeScripts.filter(function (src) {
+      return src !== appEntryScript;
+    });
+    var startupScripts = startupDataScripts.concat(startupRuntimeScripts);
+    return {
+      cssFiles: cssFiles,
+      startupDataScripts: startupDataScripts,
+      startupRuntimeScripts: startupRuntimeScripts,
+      runtimePreludeScripts: runtimePreludeScripts,
+      appEntryScript: appEntryScript,
+      startupScripts: startupScripts,
+      optionalScriptConfigs: optionalScriptConfigs,
+    };
+  };
+  var bootResourceConfig = resolveBootResourceConfig();
+  var cssFiles = bootResourceConfig.cssFiles;
+  var startupDataScripts = bootResourceConfig.startupDataScripts;
+  var startupRuntimeScripts = bootResourceConfig.startupRuntimeScripts;
+  var runtimePreludeScripts = bootResourceConfig.runtimePreludeScripts;
+  var appEntryScript = bootResourceConfig.appEntryScript;
+  var startupScripts = bootResourceConfig.startupScripts;
+  var optionalScriptConfigs = bootResourceConfig.optionalScriptConfigs;
   var langStorageKey = "planner-lang";
   var fallbackBootLocale = "zh-CN";
   var supportedBootLocales = ["zh-CN", "zh-TW", "en", "ja"];
@@ -1332,6 +1428,83 @@
     };
     window.__loadScript = loadScript;
 
+    var resolveOptionalRetryDelayMs = function (config) {
+      var parsed = Number(config && config.retryDelayMs);
+      if (!Number.isFinite(parsed) || parsed < 0) return 1200;
+      return Math.floor(parsed);
+    };
+    var resolveOptionalMaxRetries = function (config) {
+      var parsed = Number(config && config.maxRetries);
+      if (!Number.isFinite(parsed) || parsed < 0) return 1;
+      return Math.floor(parsed);
+    };
+    var reportOptionalResourceFailureByConfig = function (src, config) {
+      var entry = resourceState.get(normalizeResourceKey(src));
+      if (entry && entry.optional) {
+        reportOptionalResourceFailure(entry);
+        return;
+      }
+      reportOptionalResourceFailure({
+        optional: true,
+        label: src,
+        src: src,
+        featureKey: config && config.featureKey ? String(config.featureKey) : "",
+      });
+    };
+    var runOptionalScriptValidation = function (src, config) {
+      if (!config || typeof config.validate !== "function") return true;
+      try {
+        return config.validate(window, src) !== false;
+      } catch (error) {
+        warnOnce(
+          "optional-validate-error:" + src,
+          "[bootstrap] optional script validation threw for " + src + ", treating as failed validation."
+        );
+        return false;
+      }
+    };
+    var loadOptionalScriptWithRetry = function (src, config, expectedRunId) {
+      var retries = resolveOptionalMaxRetries(config);
+      var retryDelayMs = resolveOptionalRetryDelayMs(config);
+      var loadOptions = {
+        optional: true,
+        featureKey: config && config.featureKey ? String(config.featureKey) : "",
+      };
+      return new Promise(function (resolve) {
+        var attempts = 0;
+        var execute = function () {
+          if (runSerial !== expectedRunId) {
+            resolve();
+            return;
+          }
+          loadScript(src, loadOptions)
+            .then(function () {
+              if (runOptionalScriptValidation(src, config)) {
+                resolve();
+                return;
+              }
+              attempts += 1;
+              if (attempts <= retries) {
+                setTimeout(execute, retryDelayMs);
+                return;
+              }
+              reportOptionalResourceFailureByConfig(src, config);
+              resolve();
+            })
+            .catch(function () {
+              attempts += 1;
+              if (attempts <= retries) {
+                setTimeout(execute, retryDelayMs);
+                return;
+              }
+              reportOptionalResourceFailureByConfig(src, config);
+              resolve();
+            });
+        };
+        execute();
+      });
+    };
+
     var styleLoadRegistry = new Map();
     var resolveCssStallLimitMs = function () {
       var base = 60000;
@@ -1516,51 +1689,26 @@
     };
 
     var cssPromise = Promise.all(cssFiles.map(loadStyle));
-    var vuePromise = loadScript("./vendor/vue.global.prod.js");
-    var pinyinOptionalOptions = { optional: true, featureKey: "pinyin" };
-    var pinyinOptionalPromise = loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions).catch(function () {
-      var capturedRunId = runId;
-      return new Promise(function (resolve) {
-        setTimeout(function () {
-          if (runSerial !== capturedRunId) {
-            resolve();
-            return;
-          }
-          loadScript("./vendor/pinyin-pro.min.js", pinyinOptionalOptions)
-            .catch(function () {
-              if (runSerial !== capturedRunId) return;
-              var entry = resourceState.get(normalizeResourceKey("./vendor/pinyin-pro.min.js"));
-              if (runSerial !== capturedRunId) return;
-              if (entry) {
-                if (runSerial !== capturedRunId) return;
-                reportOptionalResourceFailure(entry);
-              } else {
-                if (runSerial !== capturedRunId) return;
-                reportOptionalResourceFailure({
-                  optional: true,
-                  label: "./vendor/pinyin-pro.min.js",
-                  featureKey: "pinyin",
-                  src: "./vendor/pinyin-pro.min.js",
-                });
-              }
-            })
-            .finally(resolve);
-        }, 1200);
-      });
+    var dataPromise = Promise.all(
+      startupDataScripts.map(function (src) {
+        return loadScript(src);
+      })
+    );
+    var runtimePreludePromise = dataPromise.then(function () {
+      return Promise.all(
+        runtimePreludeScripts.map(function (src) {
+          return loadScript(src);
+        })
+      );
     });
-    var dataPromise = Promise.all([
-      loadScript("./data/version.js"),
-      loadScript("./data/dungeons.js"),
-      loadScript("./data/weapons.js"),
-      loadScript("./data/up-schedules.js"),
-      loadScript("./data/gears.js"),
-      loadScript("./data/weapon-images.js"),
-      loadScript("./data/i18n/zh-CN.js"),
-      loadScript("./data/i18n/zh-TW.js"),
-      loadScript("./data/i18n/en.js"),
-      loadScript("./data/i18n/ja.js"),
-    ]);
-    var scriptChainPromise = loadScript("./js/app.script-chain.js");
+    var optionalScripts = Object.keys(optionalScriptConfigs);
+    var optionalScriptPromise = runtimePreludePromise.then(function () {
+      return Promise.all(
+        optionalScripts.map(function (src) {
+          return loadOptionalScriptWithRetry(src, optionalScriptConfigs[src], runId);
+        })
+      );
+    });
     if (typeof window.__loadAnalyticsNow === "function") {
       try {
         // Intentionally eager: capture real startup timing under first-screen contention.
@@ -1605,9 +1753,7 @@
     var bootLoadPromise = Promise.all([
       shellReadyPromise,
       cssPromise,
-      vuePromise,
-      dataPromise,
-      scriptChainPromise,
+      runtimePreludePromise,
     ])
       .then(function () {
         if (
@@ -1621,10 +1767,10 @@
           });
           renderProgress();
         }
-        pinyinOptionalPromise.catch(function () {
+        optionalScriptPromise.catch(function () {
           // non-blocking optional dependency
         });
-        return loadScript("./js/app.js");
+        return loadScript(appEntryScript);
       });
     Promise.race([bootLoadPromise, stallTimeoutPromise])
       .catch(function (error) {
