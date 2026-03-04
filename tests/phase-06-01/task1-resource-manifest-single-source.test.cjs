@@ -10,6 +10,7 @@ assert.equal(fs.existsSync(manifestPath), true, "js/app.resource-manifest.js sho
 
 const manifestSource = read("js/app.resource-manifest.js");
 const bootstrapSource = read("js/bootstrap.entry.js");
+const bootstrapResourcesSource = read("js/bootstrap.resources.js");
 const appScriptChainSource = read("js/app.script-chain.js");
 
 const requiredManifestContracts = [
@@ -30,8 +31,14 @@ requiredManifestContracts.forEach((contractPattern) => {
 
 assert.match(
   bootstrapSource,
+  /__BOOTSTRAP_RESOURCES__/,
+  "bootstrap entry should consume bootstrap.resources module as manifest access boundary"
+);
+
+assert.match(
+  bootstrapResourcesSource,
   /__APP_RESOURCE_MANIFEST/,
-  "bootstrap should consume window.__APP_RESOURCE_MANIFEST"
+  "bootstrap.resources should consume window.__APP_RESOURCE_MANIFEST"
 );
 
 assert.doesNotMatch(
