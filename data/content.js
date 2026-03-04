@@ -6,7 +6,7 @@ window.CONTENT = {
   },
   announcement: {
     version: "1.5.0",
-    title: "公告",
+    title: "nav.announcement",
     date: "2026-03-01",
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
@@ -17,7 +17,7 @@ window.CONTENT = {
     ],
   },
   changelog: {
-    title: "更新日志",
+    title: "nav.changelog",
     entries: [
       {
         date: "2026-03-02",
@@ -146,7 +146,7 @@ window.CONTENT = {
     ],
   },
   about: {
-    title: "关于本工具",
+    title: "nav.about_this_tool",
     paragraphs: [
       "本工具为《明日方舟：终末地》玩家自制作品，旨在提供可视化的基质刷取规划。",
       "感谢所有贡献者对本项目的贡献",
@@ -174,7 +174,7 @@ window.CONTENT = {
     ],
     sponsor: {
       title: "赞助支持",
-      text: "您的赞助将用于服务器维护,功能开发,内容创作;您在备注中填写的内容会显示在赞助列表中(手动更新),如不希望在赞助列表中被记录请注明; 您的鼓励与认可都是我维护的动力!!!",
+      text: "content.sponsor_support_text_long",
       items: [
         { label: "支付宝", src: "sponsors/alipay.jpg" },
         { label: "微信赞赏码", src: "sponsors/wechat.png" },

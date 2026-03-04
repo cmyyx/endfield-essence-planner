@@ -284,15 +284,15 @@
       const hiddenReasons = formatHiddenReasons(hiddenReasonKeys);
       const isHiddenOnly = affectsHidden && !isEmpty && effectiveCount === 0;
       const disabledHintLabel = isEmpty
-        ? translate("暂无")
+        ? translate("nav.none")
         : isHiddenOnly
-          ? translate("被隐藏")
-          : translate("暂无");
+          ? translate("nav.hidden")
+          : translate("nav.none");
       const disabledHintTitle = isEmpty
-        ? translate("当前筛选下暂无武器")
+        ? translate("nav.no_weapons_under_current_filters")
         : hiddenReasons
-          ? translate("当前筛选下有武器被隐藏：{reasons}", { reasons: hiddenReasons })
-          : translate("当前筛选下有武器被隐藏");
+          ? translate("nav.weapons_hidden_under_current_filters_reasons", { reasons: hiddenReasons })
+          : translate("nav.weapons_hidden_under_current_filters");
       return {
         value,
         count,

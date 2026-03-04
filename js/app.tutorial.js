@@ -59,57 +59,61 @@
       return [
         {
           key: "show-attrs",
-          title: state.t("查看属性 / 拥有状态 / 备注"),
+          title: state.t("tutorial.step_show_attrs_title"),
           body: [
-            state.t("点击“{label}”按钮，切换到属性视图。", {
-              label: state.t("显示属性/拥有/备注"),
+            state.t("tutorial.step_show_attrs_tip_toggle", {
+              label: state.t("nav.show_attributes_ownership_notes"),
             }),
-            state.t("切换后会出现一把教学示例武器，接下来按提示操作即可。"),
+            state.t("tutorial.step_show_attrs_tip_after_toggle"),
           ],
         },
         {
           key: "essence-owned",
-          title: state.t("标记基质已有"),
+          title: state.t("button.mark_essence_owned"),
           body: [
-            state.t("对教学示例武器点击“{label}”。", { label: state.t("标记基质已有") }),
-            state.t("标记后该武器会按“基质已有”处理，不再计入待刷数量。"),
+            state.t("tutorial.step_essence_owned_tip_click", {
+              label: state.t("button.mark_essence_owned"),
+            }),
+            state.t("tutorial.step_essence_owned_tip_effect"),
           ],
         },
         {
           key: "note",
-          title: state.t("添加备注"),
+          title: state.t("tutorial.step_note_title"),
           body: [
-            state.t("可为任意武器添加备注（不强制）"),
-            state.t("例如已毕业。"),
-            state.t("此步不会自动跳转，请手动点击{label}。", { label: state.t("下一步") }),
+            state.t("tutorial.step_note_tip_optional"),
+            state.t("tutorial.step_note_tip_example"),
+            state.t("tutorial.step_note_tip_manual_next", {
+              label: state.t("gear_refining.next"),
+            }),
           ],
         },
         {
           key: "base-pick",
-          title: state.t("基础属性选择"),
+          title: state.t("tutorial.step_base_pick_title"),
           body: [
-            state.t("已自动选中“{weapon}（{s1}）”，并定位到“{dungeon}”。", {
+            state.t("tutorial.step_base_pick_tip_auto_selected", {
               weapon: targetWeapon,
               s1: targetWeaponS1,
               dungeon: targetDungeon,
             }),
-            state.t("部分情况下会出现“最高可刷数量”大于“可同时刷数量”。"),
-            state.t("在该方案中最多可刷 {max} 把，但最多只能同时刷 {simul} 把。", {
+            state.t("tutorial.step_base_pick_tip_max_gt_simul"),
+            state.t("tutorial.step_base_pick_tip_max_simul", {
               max: 7,
               simul: 6,
             }),
-            state.t("由于基础属性有 {total} 种，但是只能锁定 {lock} 种。", {
+            state.t("tutorial.step_base_pick_tip_total_lock", {
               total: 4,
               lock: 3,
             }),
             state.t(
-              "因此需要手动选择两种属性(当前已选中“{weapon}（{s1}）”,所以会自动选择一个属性为 {s1} 且无法取消)。",
+              "tutorial.step_base_pick_tip_manual_pick_reason",
               {
                 weapon: targetWeapon,
                 s1: targetWeaponS1,
               }
             ),
-            state.t("请点击“{weaponA}（{s1A}）”与“{weaponB}（{s1B}）” 选择两种属性。", {
+            state.t("tutorial.step_base_pick_tip_select_two", {
               weaponA: guideWeaponA,
               s1A: guideWeaponAS1,
               weaponB: guideWeaponB,
@@ -130,8 +134,8 @@
       const lines = Array.isArray(step.body) ? step.body.slice() : [];
       if (step.key === "base-pick" && state.isPortrait.value) {
         lines.unshift(
-          state.t("竖屏时请先点击上方“{label}”标签进入方案列表。", {
-            label: state.t("方案推荐"),
+          state.t("tutorial.step_base_pick_tip_portrait_switch", {
+            label: state.t("nav.plans"),
           })
         );
       }

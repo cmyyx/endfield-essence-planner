@@ -107,16 +107,14 @@
             <h3>
               {{
                 activeUnifiedExceptionKind === "runtime"
-                  ? t((unifiedExceptionCurrent && unifiedExceptionCurrent.title) || "页面初始化异常")
+                  ? (unifiedExceptionCurrent && unifiedExceptionCurrent.title) || "页面初始化异常"
                   : t("storage.local_storage_error")
               }}
             </h3>
             <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
               {{
-                t(
-                  (unifiedExceptionCurrent && unifiedExceptionCurrent.summary) ||
-                    "页面初始化阶段发生异常，部分功能可能不可用。"
-                )
+                (unifiedExceptionCurrent && unifiedExceptionCurrent.summary) ||
+                  "页面初始化阶段发生异常，部分功能可能不可用。"
               }}
               {{ t("update.refresh_and_try_again_if_it_persists_report_it_with_cons") }}
             </p>
@@ -359,8 +357,8 @@
               <div class="optional-failure-toast-main">
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
                 <div class="optional-failure-toast-text">
-                  <strong>{{ t("error.optional_feature_load_failed") }}</strong>
-                  <span>{{ t("nav.more_settings") }} · {{ t("gear_refining.tap_the_notification_to_view_details") }}</span>
+                  <strong>{{ notice.title || t("error.optional_feature_load_failed") }}</strong>
+                  <span>{{ t("gear_refining.tap_the_notification_to_view_details") }}</span>
                 </div>
               </div>
               <div class="optional-failure-toast-actions">

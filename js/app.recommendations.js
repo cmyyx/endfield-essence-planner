@@ -256,14 +256,14 @@
           a.localeCompare(b, "zh-Hans-CN")
         ).map((value) => ({
           type: "s2",
-          label: "附加属性",
+          label: "nav.extra_attributes",
           value,
         })),
         ...uniqueSorted(targets.map((weapon) => weapon.s3), (a, b) =>
           a.localeCompare(b, "zh-Hans-CN")
         ).map((value) => ({
           type: "s3",
-          label: "技能属性",
+          label: "nav.skill_attributes",
           value,
         })),
       ];

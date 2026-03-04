@@ -10,9 +10,9 @@
       ["配件", 2],
     ]);
     const slotMeta = [
-      { key: "sub1", label: "副属性1" },
-      { key: "sub2", label: "副属性2" },
-      { key: "special", label: "特殊效果" },
+      { key: "sub1", label: "gear_refining.sub_attr_1" },
+      { key: "sub2", label: "gear_refining.sub_attr_2" },
+      { key: "special", label: "gear_refining.special_effect" },
     ];
     const slotLabelMap = slotMeta.reduce((acc, item) => {
       acc[item.key] = item.label;

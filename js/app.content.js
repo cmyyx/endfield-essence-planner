@@ -160,7 +160,7 @@
     const localizedContent = computed(() => getContentForLocale(state.locale.value));
     const defaultAnnouncement = computed(() => ({
       version: "",
-      title: t("公告"),
+      title: t("nav.announcement"),
       date: "",
       qqGroup: "",
       qqNote: "",
@@ -171,7 +171,7 @@
       ...(localizedContent.value.announcement || {}),
     }));
     const defaultChangelog = computed(() => ({
-      title: t("更新日志"),
+      title: t("nav.changelog"),
       entries: [],
     }));
     const changelog = computed(() => ({
@@ -179,7 +179,7 @@
       ...(localizedContent.value.changelog || {}),
     }));
     const defaultAbout = computed(() => ({
-      title: t("关于本工具"),
+      title: t("nav.about_this_tool"),
       paragraphs: [],
       author: "",
       links: [],

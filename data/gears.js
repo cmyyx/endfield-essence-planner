@@ -69,7 +69,7 @@ window.GEARS = [
   { name: "点剑战术手甲", set: "点剑", rarity: 5, type: "护手", sub1: "敏捷+65", sub2: "力量+43", special: "终结技伤害加成+43.1%" },
   { name: "点剑战术手套", set: "点剑", rarity: 5, type: "护手", sub1: "力量+65", sub2: "意志+43", special: "物理伤害加成+19.2%" },
   { name: "点剑重装甲", set: "点剑", rarity: 5, type: "护甲", sub1: "敏捷+87", sub2: "力量+58", special: "源石技艺强度+20" },
-  { name: "纾难印章·壹型", set: "纾难", rarity: 5, type: "配件", sub1: "意志+43", sub2: "", special: "暴击率+10.6%" },
+  { name: "纾难印章·壹型", set: "纾难", rarity: 5, type: "配件", sub1: "意志+43", sub2: "", special: "暴击率+10.8%" },
   { name: "纾难印章", set: "纾难", rarity: 5, type: "配件", sub1: "智识+43", sub2: "", special: "终结技充能效率+25.7%" },
   { name: "纾难识别牌·壹型", set: "纾难", rarity: 5, type: "配件", sub1: "敏捷+43", sub2: "", special: "连携技伤害加成+43.2%" },
   { name: "纾难识别牌", set: "纾难", rarity: 5, type: "配件", sub1: "力量+43", sub2: "", special: "全伤害减免 17.8%" },

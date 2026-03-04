@@ -7,7 +7,7 @@
   :class="{ 'panel-hidden': mobilePanel !== 'gears' }"
 >
   <div class="panel-title">
-    <h2>{{ t("装备列表") }}</h2>
+    <h2>{{ t("gear_refining.list_title") }}</h2>
   </div>
   <label class="search-box">
     <span>🔍</span>
@@ -74,7 +74,7 @@
     </section>
   </div>
   <div v-else class="empty-state match-empty">
-    <h2>{{ t("未找到匹配装备") }}</h2>
+    <h2>{{ t("gear_refining.no_matching_gear") }}</h2>
   </div>
 </section>`;
 
@@ -87,14 +87,14 @@
     </div>
   </header>
   <div v-if="!recommendation.targetAttr" class="gear-refining-recommend-empty">
-    {{ t("该装备没有这一条属性") }}
+    {{ t("gear_refining.missing_target_attr") }}
   </div>
   <template v-else>
     <p class="gear-refining-recommend-tip" v-if="recommendation.recommendSelf">
-      {{ t("没有更高属性，推荐使用自身进行精锻") }}
+      {{ t("gear_refining.recommend_self") }}
     </p>
     <p class="gear-refining-recommend-tip" v-else>
-      {{ t("推荐同部位中可提供更高数值的装备") }}（<span class="gear-refining-tip-value">{{ recommendation.topValueDisplay }}</span>）
+      {{ t("gear_refining.recommend_other_gear") }}（<span class="gear-refining-tip-value">{{ recommendation.topValueDisplay }}</span>）
     </p>
     <div class="weapon-list gear-refining-candidate-list">
       <div
@@ -129,8 +129,8 @@
     >
       {{
         expanded
-          ? t("收起其余候选")
-          : t("展开其余候选")
+          ? t("gear_refining.collapse_other_candidates")
+          : t("gear_refining.expand_other_candidates")
       }}
     </button>
   </template>
@@ -142,10 +142,10 @@
   :class="{ 'panel-hidden': mobilePanel !== 'recommend' }"
 >
   <div class="panel-title">
-    <h2>{{ t("精锻推荐") }}</h2>
+    <h2>{{ t("gear_refining.recommendation_title") }}</h2>
   </div>
   <div v-if="!selectedGear" class="empty-state match-empty">
-    <h2>{{ t("请选择一件装备") }}</h2>
+    <h2>{{ t("gear_refining.select_one_gear") }}</h2>
   </div>
   <div v-else class="gear-refining-detail">
     <div class="gear-refining-selected">
@@ -170,21 +170,21 @@
       </div>
       <div class="gear-refining-attrs">
         <div class="gear-refining-attr-row">
-          <span class="gear-refining-attr-label">{{ t("副属性1") }}</span>
+          <span class="gear-refining-attr-label">{{ t("gear_refining.sub_attr_1") }}</span>
           <span class="gear-refining-attr-value">
-            {{ selectedGear.sub1 ? selectedGear.sub1.display : t("无") }}
+            {{ selectedGear.sub1 ? selectedGear.sub1.display : t("gear_refining.none") }}
           </span>
         </div>
         <div class="gear-refining-attr-row">
-          <span class="gear-refining-attr-label">{{ t("副属性2") }}</span>
+          <span class="gear-refining-attr-label">{{ t("gear_refining.sub_attr_2") }}</span>
           <span class="gear-refining-attr-value">
-            {{ selectedGear.sub2 ? selectedGear.sub2.display : t("无") }}
+            {{ selectedGear.sub2 ? selectedGear.sub2.display : t("gear_refining.none") }}
           </span>
         </div>
         <div class="gear-refining-attr-row">
-          <span class="gear-refining-attr-label">{{ t("特殊效果") }}</span>
+          <span class="gear-refining-attr-label">{{ t("gear_refining.special_effect") }}</span>
           <span class="gear-refining-attr-value">
-            {{ selectedGear.special ? selectedGear.special.display : t("无") }}
+            {{ selectedGear.special ? selectedGear.special.display : t("gear_refining.none") }}
           </span>
         </div>
       </div>

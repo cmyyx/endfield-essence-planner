@@ -353,8 +353,8 @@
                       </div>
                       <div class="scheme-weapon-attrs match-selection-attrs">
                         <span class="attr-value">{{ formatS1(matchSourceWeapon.s1) }}</span>
-                        <span class="attr-value">{{ t(matchSourceWeapon.s2) }}</span>
-                        <span class="attr-value">{{ t(matchSourceWeapon.s3) }}</span>
+                        <span class="attr-value">{{ tTerm("s2", matchSourceWeapon.s2) }}</span>
+                        <span class="attr-value">{{ tTerm("s3", matchSourceWeapon.s3) }}</span>
                       </div>
                     </div>
                   </div>

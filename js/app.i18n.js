@@ -13,7 +13,7 @@
       en: "./data/i18n/en.js",
       ja: "./data/i18n/ja.js",
     };
-    const missingI18nPlaceholder = "（文案缺失）";
+    const missingI18nPlaceholder = "文案缺失";
     const missingI18nWarningDedupWindowMs = 10000;
     const missingI18nWarningLastSeenAt = new Map();
     const reportStorageIssue = (operation, key, error, meta) => {
@@ -151,6 +151,17 @@
       (i18n[targetLocale] && i18n[targetLocale].strings) || {};
     const getTerms = (targetLocale) =>
       (i18n[targetLocale] && i18n[targetLocale].terms) || {};
+    const resolveLocalizedString = (targetLocale, key, fallbackText) => {
+      const localeStrings = getStrings(targetLocale);
+      if (Object.prototype.hasOwnProperty.call(localeStrings, key)) {
+        return localeStrings[key];
+      }
+      const fallbackStrings = getStrings(fallbackLocale);
+      if (Object.prototype.hasOwnProperty.call(fallbackStrings, key)) {
+        return fallbackStrings[key];
+      }
+      return fallbackText;
+    };
     const interpolate = (text, params) => {
       if (!params) return text;
       return String(text).replace(/\{(\w+)\}/g, (match, name) =>
@@ -169,12 +180,28 @@
       missingI18nWarningLastSeenAt.set(optionalSignature, now);
       const warning = new Error(`Missing i18n key: ${warningKey}`);
       warning.name = "I18nMissingKeyError";
+      const localizedTitle = interpolate(
+        resolveLocalizedString(
+          normalizedLocale,
+          "warning.i18n_missing_key_title",
+          "文案缺失提醒（{locale}）"
+        ),
+        { locale: normalizedLocale }
+      );
+      const localizedSummary = interpolate(
+        resolveLocalizedString(
+          normalizedLocale,
+          "warning.i18n_missing_key_summary",
+          "检测到文案缺失，已回退到占位文案。"
+        ),
+        { locale: normalizedLocale }
+      );
       state.reportRuntimeWarning(warning, {
         scope: "i18n.missing-key",
         operation: "i18n.lookup",
         key: warningKey,
-        title: "文案缺失提醒",
-        summary: "检测到文案缺失，已回退到占位文案。",
+        title: localizedTitle,
+        summary: localizedSummary,
         note: `locale=${normalizedLocale}\nkey=${normalizedKey}`,
         asToast: true,
         optionalSignature,
@@ -252,8 +279,8 @@
       if (!overlay) return;
       const title = overlay.querySelector(".preload-title");
       const sub = overlay.querySelector(".preload-note") || overlay.querySelector(".preload-sub");
-      if (title) title.textContent = t("少女祈祷中");
-      if (sub) sub.textContent = t("首次打开或强制刷新可能稍慢");
+      if (title) title.textContent = t("preload_title");
+      if (sub) sub.textContent = t("preload_note");
     };
 
     let localeWatchSeq = 0;

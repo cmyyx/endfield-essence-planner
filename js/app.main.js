@@ -599,7 +599,13 @@
         if (!current || current.__kind !== "runtime") return false;
         const operation = String(current.operation || "");
         const scope = String(current.scope || "");
-        return operation === "optional.load" || scope === "boot.optional-resource";
+        const errorName = String(current.errorName || "");
+        return (
+          operation === "optional.load" ||
+          scope === "boot.optional-resource" ||
+          scope === "i18n.missing-key" ||
+          errorName === "I18nMissingKeyError"
+        );
       });
       const unifiedExceptionLogs = computed(() => {
         const runtimeLogs =

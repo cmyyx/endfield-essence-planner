@@ -1183,7 +1183,7 @@
         --overlay-update-base: calc(
           236px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
         );
-        --optional-toast-stack-gap: 78px;
+        --optional-toast-stack-gap: 64px;
       }
 
       .update-toast {
@@ -1443,7 +1443,7 @@
           --overlay-update-base: calc(
             220px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
-          --optional-toast-stack-gap: 72px;
+          --optional-toast-stack-gap: 60px;
         }
 
         .version-debug-badge-wrap {
