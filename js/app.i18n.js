@@ -13,6 +13,9 @@
       en: "./data/i18n/en.js",
       ja: "./data/i18n/ja.js",
     };
+    const missingI18nPlaceholder = "（文案缺失）";
+    const missingI18nWarningDedupWindowMs = 10000;
+    const missingI18nWarningLastSeenAt = new Map();
     const reportStorageIssue = (operation, key, error, meta) => {
       if (typeof state.reportStorageIssue === "function") {
         state.reportStorageIssue(operation, key, error, meta);
@@ -154,16 +157,43 @@
         Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : match
       );
     };
+    const reportMissingI18nKey = (targetLocale, messageKey) => {
+      if (typeof state.reportRuntimeWarning !== "function") return;
+      const normalizedLocale = normalizeLocale(targetLocale);
+      const normalizedKey = String(messageKey || "").trim() || "unknown";
+      const warningKey = `${normalizedLocale}:${normalizedKey}`;
+      const optionalSignature = `i18n-missing-key:${warningKey}`;
+      const now = Date.now();
+      const lastSeenAt = missingI18nWarningLastSeenAt.get(optionalSignature) || 0;
+      if (now - lastSeenAt <= missingI18nWarningDedupWindowMs) return;
+      missingI18nWarningLastSeenAt.set(optionalSignature, now);
+      const warning = new Error(`Missing i18n key: ${warningKey}`);
+      warning.name = "I18nMissingKeyError";
+      state.reportRuntimeWarning(warning, {
+        scope: "i18n.missing-key",
+        operation: "i18n.lookup",
+        key: warningKey,
+        title: "文案缺失提醒",
+        summary: "检测到文案缺失，已回退到占位文案。",
+        note: `locale=${normalizedLocale}\nkey=${normalizedKey}`,
+        asToast: true,
+        optionalSignature,
+      });
+    };
     const t = (key, params) => {
       void localeRenderVersion.value;
       const strings = getStrings(locale.value);
       const fallbackStrings = getStrings(fallbackLocale);
-      const raw =
-        Object.prototype.hasOwnProperty.call(strings, key)
-          ? strings[key]
-          : Object.prototype.hasOwnProperty.call(fallbackStrings, key)
-          ? fallbackStrings[key]
-          : key;
+      const hasLocaleValue = Object.prototype.hasOwnProperty.call(strings, key);
+      const hasFallbackValue = Object.prototype.hasOwnProperty.call(fallbackStrings, key);
+      const raw = hasLocaleValue
+        ? strings[key]
+        : hasFallbackValue
+        ? fallbackStrings[key]
+        : missingI18nPlaceholder;
+      if (!hasLocaleValue && !hasFallbackValue) {
+        reportMissingI18nKey(locale.value, key);
+      }
       return interpolate(raw, params);
     };
 

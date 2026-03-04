@@ -13,13 +13,13 @@ assert.equal(fs.existsSync(i18nFile), true, "js/app.i18n.js should exist");
 const bootstrapSource = fs.readFileSync(bootstrapFile, "utf8");
 const appI18nSource = fs.readFileSync(i18nFile, "utf8");
 
-const expectedLocalePaths = ["zh-CN", "zh-TW", "en", "ja"].map(
-  (locale) => `./data/i18n/${locale}.js`
-);
-
 const normalizeSet = (items) => Array.from(new Set(items)).sort();
+const expectedLocalePaths = normalizeSet(
+  ["zh-CN", "zh-TW", "en", "ja"].map((locale) => `./data/i18n/${locale}.js`)
+);
 const parseQuotedStrings = (text) =>
   Array.from(text.matchAll(/["']([^"']+)["']/g)).map((match) => match[1]);
+const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const startupScriptsBlockMatch = bootstrapSource.match(
   /var\s+startupScripts\s*=\s*\[([\s\S]*?)\];/
@@ -92,7 +92,7 @@ const requiredBootKeys = [
 requiredBootKeys.forEach((key) => {
   assert.match(
     bootstrapSource,
-    new RegExp(`"${key}"\\s*:`),
+    new RegExp(`["']?${escapeRegExp(key)}["']?\\s*:`),
     `boot i18n table should define key: ${key}`
   );
 });
@@ -102,7 +102,7 @@ const zhCnSource = fs.readFileSync(zhCnFile, "utf8");
 requiredBootKeys.forEach((key) => {
   assert.match(
     zhCnSource,
-    new RegExp(`"${key}"\\s*:`),
+    new RegExp(`["']?${escapeRegExp(key)}["']?\\s*:`),
     `data/i18n/zh-CN.js strings should define boot key: ${key}`
   );
 });

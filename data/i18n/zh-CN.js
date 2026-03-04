@@ -1,6 +1,12 @@
 window.I18N = window.I18N || {};
 window.I18N["zh-CN"] = {
     "strings": {
+      "preload_title": "少女祈祷中",
+      "preload_note": "首次打开或强制刷新可能稍慢",
+      "preload_status_prepare": "正在准备资源…",
+      "action_retry": "重试加载",
+      "action_refresh": "刷新页面",
+      "action_feedback": "反馈问题",
       "搜索武器 / 属性 / 角色...": "搜索武器 / 属性 / 角色...",
       "搜索武器 / 属性 / 角色（仅中文支持拼音/首字母）...": "搜索武器 / 属性 / 角色（支持拼音/首字母）...",
       "搜索武器...": "搜索武器...",

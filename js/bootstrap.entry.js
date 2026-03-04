@@ -20,7 +20,10 @@
     "./data/up-schedules.js",
     "./data/gears.js",
     "./data/weapon-images.js",
-    "./data/i18n.zh-CN.js",
+    "./data/i18n/zh-CN.js",
+    "./data/i18n/zh-TW.js",
+    "./data/i18n/en.js",
+    "./data/i18n/ja.js",
     "./js/app.script-chain.js",
     "./js/app.js",
   ];
@@ -1552,7 +1555,10 @@
       loadScript("./data/up-schedules.js"),
       loadScript("./data/gears.js"),
       loadScript("./data/weapon-images.js"),
-      loadScript("./data/i18n.zh-CN.js"),
+      loadScript("./data/i18n/zh-CN.js"),
+      loadScript("./data/i18n/zh-TW.js"),
+      loadScript("./data/i18n/en.js"),
+      loadScript("./data/i18n/ja.js"),
     ]);
     var scriptChainPromise = loadScript("./js/app.script-chain.js");
     if (typeof window.__loadAnalyticsNow === "function") {
