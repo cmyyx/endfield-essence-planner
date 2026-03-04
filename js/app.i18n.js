@@ -8,10 +8,10 @@
     const fallbackLocale = "zh-CN";
     const allLocales = ["zh-CN", "zh-TW", "en", "ja"];
     const localeScriptMap = {
-      "zh-CN": "./data/i18n.zh-CN.js",
-      "zh-TW": "./data/i18n.zh-TW.js",
-      en: "./data/i18n.en.js",
-      ja: "./data/i18n.ja.js",
+      "zh-CN": "./data/i18n/zh-CN.js",
+      "zh-TW": "./data/i18n/zh-TW.js",
+      en: "./data/i18n/en.js",
+      ja: "./data/i18n/ja.js",
     };
     const reportStorageIssue = (operation, key, error, meta) => {
       if (typeof state.reportStorageIssue === "function") {
