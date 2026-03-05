@@ -28,6 +28,13 @@
     let lastCheckAt = 0;
     let copyFeedbackTimer = null;
     let gameCompatWarningDismissedSession = false;
+    const versionCoreFields = [
+      "buildId",
+      "displayVersion",
+      "announcementVersion",
+      "fingerprint",
+      "publishedAt",
+    ];
 
     const safeText = (value) => String(value == null ? "" : value).trim();
     const getCurrentVersionLoadFailedText = () =>
@@ -90,15 +97,61 @@
       return "";
     };
 
-    const normalizeVersionInfo = (raw) => {
-      if (!raw || typeof raw !== "object") return null;
+    const reportInvalidVersionPayload = (source, reason, raw, missingFields) => {
+      if (typeof state.reportRuntimeWarning !== "function") return;
+      const error = new Error(`invalid version payload from ${source}: ${reason}`);
+      error.name = "VersionPayloadContractError";
+      let payloadPreview = "";
+      try {
+        payloadPreview = JSON.stringify(raw);
+      } catch (serializeError) {
+        payloadPreview = "[unserializable payload]";
+      }
+      const details = [
+        `source: ${safeText(source) || "unknown"}`,
+        `reason: ${safeText(reason) || "invalid payload"}`,
+      ];
+      if (Array.isArray(missingFields) && missingFields.length) {
+        details.push(`missing: ${missingFields.join(", ")}`);
+      }
+      if (payloadPreview) {
+        details.push(`payload: ${payloadPreview.slice(0, 500)}`);
+      }
+      state.reportRuntimeWarning(error, {
+        scope: "update.version",
+        operation: "update.payload-validate",
+        key: `${safeText(source) || "unknown"}:${safeText(reason) || "invalid"}`,
+        title: "版本载荷契约异常",
+        summary: "已拒绝不合规版本载荷，更新提示已跳过。",
+        note: details.join("\n"),
+        asToast: true,
+      });
+    };
+
+    const normalizeVersionInfo = (raw, options) => {
+      const resolved = options && typeof options === "object" ? options : {};
+      const source = safeText(resolved.source || "unknown");
+      const reportInvalid = Boolean(resolved.reportInvalid);
+      if (!raw || typeof raw !== "object") {
+        if (reportInvalid) {
+          reportInvalidVersionPayload(source, "payload-not-object", raw, versionCoreFields);
+        }
+        return null;
+      }
       const info = {
-        buildId: safeText(raw.buildId || raw.build || raw.version || ""),
-        displayVersion: safeText(raw.displayVersion || raw.label || ""),
+        buildId: safeText(raw.buildId || ""),
+        displayVersion: safeText(raw.displayVersion || ""),
         announcementVersion: safeText(raw.announcementVersion || ""),
         fingerprint: safeText(raw.fingerprint || ""),
-        publishedAt: safeText(raw.publishedAt || raw.builtAt || ""),
+        publishedAt: safeText(raw.publishedAt || ""),
       };
+      const missingFields = versionCoreFields.filter((field) => !info[field]);
+      if (missingFields.length) {
+        if (reportInvalid) {
+          reportInvalidVersionPayload(source, "missing-core-fields", raw, missingFields);
+        }
+        return null;
+      }
       info.buildTimeToken = extractBuildTimeToken(info.buildId);
       const signature =
         info.buildTimeToken ||
@@ -112,7 +165,13 @@
           .join("|");
       info.signature = safeText(signature);
       info.display = buildDisplayText(info) || info.signature;
-      return info.signature ? info : null;
+      if (!info.signature) {
+        if (reportInvalid) {
+          reportInvalidVersionPayload(source, "empty-signature", raw, versionCoreFields);
+        }
+        return null;
+      }
+      return info;
     };
 
     const getContentRoot = () => {
@@ -226,6 +285,9 @@
         announcementVersion,
         fingerprint,
         publishedAt,
+      }, {
+        source: "local",
+        reportInvalid: false,
       });
     };
 
@@ -336,7 +398,10 @@
       });
       if (!response.ok) return null;
       const data = await response.json();
-      return normalizeVersionInfo(data);
+      return normalizeVersionInfo(data, {
+        source: "remote",
+        reportInvalid: true,
+      });
     };
 
     const shouldShowPrompt = (remoteInfo) => {

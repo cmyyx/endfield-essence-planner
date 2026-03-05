@@ -7,7 +7,8 @@ const root = path.resolve(__dirname, "../..");
 const updateFile = path.join(root, "js/app.update.js");
 const updateSource = fs.readFileSync(updateFile, "utf8");
 
-const flushMicrotasks = async (times = 3) => {
+const flushAsync = async (times = 8) => {
+  await new Promise((resolve) => setImmediate(resolve));
   for (let i = 0; i < times; i += 1) {
     await Promise.resolve();
   }
@@ -94,7 +95,7 @@ const flushMicrotasks = async (times = 3) => {
   for (const handler of mountedHandlers) {
     handler();
   }
-  await flushMicrotasks();
+  await flushAsync();
 
   assert.equal(
     state.showUpdatePrompt.value,
