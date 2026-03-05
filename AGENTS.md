@@ -121,6 +121,22 @@
   - 官方 header=1 与非官方部署两种场景行为符合预期。
   - 保持页面不刷新，更新 `data/version.json` 后可出现右下角“检测到新版本”提示。
 
+## 8.1 常规检测流程（推荐）
+- 开发中（最小闭环）：
+  - 仅对改动文件执行 `node --check <file>`。
+  - 仅执行受影响模块对应的 `tests/phase-**/**.test.cjs`。
+- 提交前（功能完成）：
+  - 执行本节“语法检查”与“文档门禁检查”。
+  - 至少执行一次 `node scripts/phase-08-gate.mjs`，确保硬门禁全绿。
+- 发版前（发布门禁）：
+  - 执行 `node scripts/phase-08-gate.mjs`。
+  - 执行 E2E：`npm run test:phase-08-03:e2e`（Playwright 启动/兜底双路径）。
+
+## 8.2 E2E 覆盖说明
+- 项目已包含 E2E：`tests/phase-08-03/e2e/startup-and-fallback.spec.cjs`。
+- 当前 `phase-08-gate` 直接执行的是 `task1-browser-smoke-gate`，用于校验 E2E 资源与命令接线存在性。
+- `phase-08-gate` 不直接执行 Playwright 用例本体；需要通过 `npm run test:phase-08-03:e2e` 单独跑完整 E2E。
+
 ## 9. 快速导航
 - `index.html`：最小页面壳 + bootstrap 入口与兜底。
 - `js/app.resource-manifest.js`：启动链与应用链唯一资源清单来源。
