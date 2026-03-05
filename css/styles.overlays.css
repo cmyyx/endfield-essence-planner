@@ -1115,6 +1115,16 @@
         color: #e2c9ab;
       }
 
+      .weapon-attr-item-preview-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ffe7c7;
+        border: 1px solid rgba(255, 182, 122, 0.45);
+        border-radius: 999px;
+        padding: 2px 8px;
+        background: rgba(255, 173, 97, 0.12);
+      }
+
       .weapon-attr-item-status {
         font-size: 11px;
         font-weight: 700;
@@ -1539,6 +1549,12 @@
 
 [data-theme="light"] .weapon-attr-item-missing {
   color: #7a511d;
+}
+
+[data-theme="light"] .weapon-attr-item-preview-badge {
+  color: #8a4f12;
+  border-color: rgba(227, 142, 45, 0.46);
+  background: rgba(255, 171, 86, 0.16);
 }
 
 [data-theme="light"] .weapon-attr-item-status {

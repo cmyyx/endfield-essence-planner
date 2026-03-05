@@ -303,16 +303,18 @@
               {{ t("button.clear_attribute_filters") }}
             </button>
           </div>
-          <transition name="fade-scale">
-            <div v-if="hasWeaponAttrIssues" class="weapon-attr-warning">
-              <div class="weapon-attr-warning-text">
-                {{ t("error.weapon_attribute_data_missing_count", { count: weaponAttrIssueRows.length }) }}
-              </div>
-              <button class="about-button weapon-attr-warning-action" @click="openWeaponAttrDataModal">
-                {{ t("button.manage_weapon_attribute_data") }}
-              </button>
+          <div class="weapon-attr-warning">
+            <div class="weapon-attr-warning-text">
+              {{
+                hasPreviewWeapons
+                  ? t("error.weapon_attribute_data_preview_count", { count: previewWeaponRows.length })
+                  : t("error.weapon_attribute_data_manage_hint")
+              }}
             </div>
-          </transition>
+            <button class="about-button weapon-attr-warning-action" @click="openWeaponAttrDataModal">
+              {{ t("button.manage_weapon_attribute_data") }}
+            </button>
+          </div>
           <transition name="fade-scale">
             <div v-if="showAttrHint" class="attr-hint">
               <span class="attr-hint-text">
@@ -769,7 +771,7 @@
                   </div>
                 </div>
               </div>
-              <div class="about-actions" v-if="hasWeaponAttrIssues">
+              <div class="about-actions">
                 <button class="about-button" @click="openWeaponAttrDataModal">
                   {{ t("button.manage_weapon_attribute_data") }}
                 </button>

@@ -306,6 +306,9 @@
                     <div class="weapon-attr-item-title">{{ tTerm("weapon", row.name) }}</div>
                     <div class="weapon-attr-item-sub">{{ row.rarity }}★ · {{ tTerm("type", row.type) }}</div>
                   </div>
+                  <span v-if="row.isPreview" class="weapon-attr-item-preview-badge">
+                    {{ t("modal.weapon_attribute_data_fix_preview_badge") }}
+                  </span>
                   <span class="weapon-attr-item-status" :class="{ 'is-resolved': !row.hasUnresolvedFields }">
                     {{
                       row.hasUnresolvedFields

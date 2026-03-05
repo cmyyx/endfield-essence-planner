@@ -5,7 +5,7 @@
     const { ref, watch, onMounted, onBeforeUnmount } = ctx;
 
     const versionEndpoint = "./data/version.json";
-    const checkIntervalMs = 5 * 60 * 1000;
+    const checkIntervalMs = 30 * 60 * 1000;
     const checkCooldownMs = 60 * 1000;
     const firstCheckDelayMs = 12 * 1000;
 

@@ -981,6 +981,8 @@
         closeWeaponAttrDataModal: state.closeWeaponAttrDataModal,
         hasWeaponAttrIssues: state.hasWeaponAttrIssues,
         weaponAttrIssueRows: state.weaponAttrIssueRows,
+        previewWeaponRows: state.previewWeaponRows,
+        hasPreviewWeapons: state.hasPreviewWeapons,
         weaponAttrS1Options: state.weaponAttrS1Options,
         weaponAttrS2Options: state.weaponAttrS2Options,
         weaponAttrS3Options: state.weaponAttrS3Options,

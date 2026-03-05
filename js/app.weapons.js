@@ -98,6 +98,7 @@
       resolved.__rawMissingAttrFields = rawMissingFields;
       resolved.__missingAttrFields = unresolvedFields;
       resolved.__hasAttrIssue = unresolvedFields.length > 0;
+      resolved.__isPreview = Boolean(weapon && weapon.isPreview);
       return resolved;
     };
 
@@ -217,6 +218,7 @@
           name: weapon.name,
           rarity: weapon.rarity,
           type: weapon.type,
+          isPreview: Boolean(weapon.__isPreview),
           rawMissingFields: weapon.__rawMissingAttrFields.slice(),
           unresolvedFields: (weapon.__missingAttrFields || []).slice(),
           hasUnresolvedFields: Boolean(weapon.__hasAttrIssue),
@@ -225,6 +227,11 @@
           s3: weapon.s3,
         }))
     );
+
+    const previewWeaponRows = computed(() =>
+      weaponAttrIssueRows.value.filter((row) => Boolean(row && row.isPreview))
+    );
+    const hasPreviewWeapons = computed(() => previewWeaponRows.value.length > 0);
 
     const hasWeaponAttrIssues = computed(() =>
       weaponAttrIssueRows.value.some((row) => row.hasUnresolvedFields)
@@ -251,6 +258,7 @@
         .filter((weapon) => weapon && weapon.__hasAttrIssue)
         .map((weapon) => ({
           name: weapon.name,
+          isPreview: Boolean(weapon.__isPreview),
           missingFields: Array.isArray(weapon.__missingAttrFields)
             ? weapon.__missingAttrFields.slice()
             : [],
@@ -890,15 +898,25 @@
       { deep: true }
     );
 
-    let autoOpenedWeaponAttrIssueModal = false;
+    let autoOpenedWeaponAttrIssueModalBySelection = false;
+    let previousSelectedNameSet = new Set(
+      Array.isArray(state.selectedNames.value) ? state.selectedNames.value : []
+    );
     watch(
-      hasWeaponAttrIssues,
-      (hasIssues) => {
-        if (!hasIssues || autoOpenedWeaponAttrIssueModal) return;
-        autoOpenedWeaponAttrIssueModal = true;
+      () => (Array.isArray(state.selectedNames.value) ? state.selectedNames.value.slice() : []),
+      (selectedNames) => {
+        const nextSet = new Set(selectedNames);
+        const newlySelectedNames = selectedNames.filter((name) => !previousSelectedNameSet.has(name));
+        previousSelectedNameSet = nextSet;
+        if (autoOpenedWeaponAttrIssueModalBySelection || !newlySelectedNames.length) return;
+        const shouldAutoOpen = newlySelectedNames.some((name) => {
+          const row = getWeaponAttrIssueRow(name);
+          return Boolean(row && row.hasUnresolvedFields);
+        });
+        if (!shouldAutoOpen) return;
+        autoOpenedWeaponAttrIssueModalBySelection = true;
         openWeaponAttrDataModal();
-      },
-      { immediate: true }
+      }
     );
 
     watch(
@@ -928,6 +946,8 @@
     state.getCatalogWeapons = () => catalogWeapons.value.slice();
     state.getCatalogWeaponByName = getCatalogWeaponByName;
     state.weaponAttrIssueRows = weaponAttrIssueRows;
+    state.previewWeaponRows = previewWeaponRows;
+    state.hasPreviewWeapons = hasPreviewWeapons;
     state.hasWeaponAttrIssues = hasWeaponAttrIssues;
     state.getWeaponAttrIssueRow = getWeaponAttrIssueRow;
     state.getSelectedWeaponAttrIssues = getSelectedWeaponAttrIssues;
