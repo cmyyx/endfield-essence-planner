@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test:phase-08-03:e2e": "playwright test tests/phase-08-03/e2e/startup-and-fallback.spec.cjs --config playwright.config.cjs",
-    "test:phase-08-03:task1": "node tests/phase-08-03/task1-browser-smoke-gate.test.cjs"
+    "test:phase-08-03:task1": "node tests/phase-08-03/task1-browser-smoke-gate.test.cjs",
+    "test:phase-08-03:task3": "node tests/phase-08-03/task3-up-rerun-critical-path.test.cjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.53.0"
