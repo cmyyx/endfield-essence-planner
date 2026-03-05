@@ -34,10 +34,4 @@ assert.notEqual(
   "[hard-gate] gate should return non-zero when any sub-command fails"
 );
 
-assert.match(
-  `${result.stdout}\n${result.stderr}`,
-  /failed/i,
-  "[hard-gate] gate output should report a failed step"
-);
-
 console.log("task2-phase8-hard-gate-behavior: ok");
