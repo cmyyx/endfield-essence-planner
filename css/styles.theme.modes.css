@@ -935,19 +935,10 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   background: rgba(255, 185, 78, 0.13);
 }
 
-[data-theme="light"] .slot-inline-card {
-  border-color: rgba(120, 150, 185, 0.35);
-  background: rgba(247, 251, 255, 0.65);
-}
-
-[data-theme="light"] .slot-hero-shell {
-  border-color: rgba(120, 150, 185, 0.35);
-  background: rgba(247, 251, 255, 0.65);
-}
-
 [data-theme="light"] .nav-item:not(.active) {
   border-color: rgba(22, 44, 72, 0.24);
   background: rgba(255, 255, 255, 0.42);
   color: #2b4663;
 }
+
 
