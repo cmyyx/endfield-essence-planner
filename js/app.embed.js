@@ -184,11 +184,13 @@
         let response = await fetch(window.location.href, {
           method: "HEAD",
           cache: "no-store",
+          credentials: "same-origin",
         });
         if (!response || !response.headers || response.status === 405) {
           response = await fetch(window.location.href, {
             method: "GET",
             cache: "no-store",
+            credentials: "same-origin",
           });
         }
         const marker = (response.headers.get(officialSignalHeader) || "").trim();
