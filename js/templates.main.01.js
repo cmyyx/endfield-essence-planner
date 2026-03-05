@@ -303,16 +303,20 @@
               {{ t("button.clear_attribute_filters") }}
             </button>
           </div>
-          <div class="weapon-attr-warning">
-            <div class="weapon-attr-warning-text">
-              {{
-                hasPreviewWeapons
-                  ? t("error.weapon_attribute_data_preview_count", { count: previewWeaponRows.length })
-                  : t("error.weapon_attribute_data_manage_hint")
-              }}
-            </div>
-            <button class="about-button weapon-attr-warning-action" @click="openWeaponAttrDataModal">
+          <div v-if="hasPreviewWeapons" class="attr-hint weapon-attr-warning">
+            <span class="attr-hint-text weapon-attr-warning-text">
+              {{ t("error.weapon_attribute_data_preview_detected") }}
+            </span>
+            <button class="ghost-button attr-hint-dismiss weapon-attr-warning-action" @click="openWeaponAttrDataModal">
               {{ t("button.manage_weapon_attribute_data") }}
+            </button>
+          </div>
+          <div v-if="hasDataIntegrityWeaponAttrs" class="attr-hint weapon-attr-warning">
+            <span class="attr-hint-text weapon-attr-warning-text">
+              {{ t("error.weapon_data_integrity_detected_count", { count: dataIntegrityWeaponAttrRows.length }) }}
+            </span>
+            <button class="ghost-button attr-hint-dismiss weapon-attr-warning-action" @click="openWeaponDataIntegrityDetails">
+              {{ t("button.view_data_exception_details") }}
             </button>
           </div>
           <transition name="fade-scale">
@@ -760,20 +764,42 @@
             <div class="card">
               <div class="card-header">
                 <div>
-                  <div class="card-title">{{ t("error.no_available_plan_for_current_selection") }}</div>
+                  <div class="card-title">
+                    {{
+                      recommendationDataIssue && recommendationDataIssue.kind === "dataIntegrityMissingAttr"
+                        ? t("error.no_available_plan_for_data_integrity")
+                        : t("error.no_available_plan_for_current_selection")
+                    }}
+                  </div>
                   <div class="hint">{{ t("nav.extra_skill_attributes_cannot_be_unified_or_no_dungeon_p") }}</div>
                   <div class="hint" v-if="recommendationDataIssue && recommendationDataIssue.weaponNames && recommendationDataIssue.weaponNames.length">
                     {{
-                      t("error.recommendation_data_issue_weapons", {
-                        weapons: recommendationDataIssue.weaponNames.map((name) => tTerm("weapon", name)).join(" / "),
-                      })
+                      t(
+                        recommendationDataIssue.kind === "dataIntegrityMissingAttr"
+                          ? "error.recommendation_data_integrity_issue_weapons"
+                          : "error.recommendation_data_issue_weapons",
+                        {
+                          weapons: recommendationDataIssue.weaponNames.map((name) => tTerm("weapon", name)).join(" / "),
+                        }
+                      )
                     }}
                   </div>
                 </div>
               </div>
               <div class="about-actions">
-                <button class="about-button" @click="openWeaponAttrDataModal">
+                <button
+                  v-if="recommendationDataIssue && recommendationDataIssue.kind === 'previewMissingAttr'"
+                  class="about-button"
+                  @click="openWeaponAttrDataModal"
+                >
                   {{ t("button.manage_weapon_attribute_data") }}
+                </button>
+                <button
+                  v-else-if="recommendationDataIssue && recommendationDataIssue.kind === 'dataIntegrityMissingAttr'"
+                  class="about-button"
+                  @click="openWeaponDataIntegrityDetails"
+                >
+                  {{ t("button.view_data_exception_details") }}
                 </button>
               </div>
 

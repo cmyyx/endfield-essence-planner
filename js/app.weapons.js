@@ -15,11 +15,18 @@
 
     const weaponMap = new Map(weapons.map((weapon) => [weapon.name, weapon]));
     const ATTR_KEYS = ["s1", "s2", "s3"];
+    const WEAPON_DATA_INTEGRITY_WARNING_SCOPE = "weapons.catalog-validate";
+    const WEAPON_DATA_INTEGRITY_WARNING_OPERATION = "weapons.catalog-validate";
+    const WEAPON_DATA_INTEGRITY_WARNING_KEY = "weapon-attr-integrity";
     const hasOwn = (target, key) =>
       target && typeof target === "object" && Object.prototype.hasOwnProperty.call(target, key);
+    const isStateRefLike = (candidate) =>
+      candidate &&
+      typeof candidate === "object" &&
+      (candidate.__v_isRef === true || "value" in candidate);
     const ensureStateRef = (key, fallback) => {
       const candidate = state[key];
-      if (candidate && typeof candidate === "object" && hasOwn(candidate, "value")) {
+      if (isStateRefLike(candidate)) {
         return candidate;
       }
       const next = typeof ref === "function" ? ref(fallback) : { value: fallback };
@@ -58,16 +65,20 @@
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
       const cleaned = {};
       Object.keys(raw).forEach((weaponName) => {
-        if (!weaponMap.has(weaponName)) return;
+        const rawWeapon = weaponMap.get(weaponName);
+        if (!rawWeapon || !rawWeapon.isPreview) return;
         const entry = raw[weaponName];
         if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
         const normalized = {};
         const s1 = normalizeAttrValue(entry.s1);
         const s2 = normalizeAttrValue(entry.s2);
         const s3 = normalizeAttrValue(entry.s3);
-        if (s1AllowedSet.has(s1)) normalized.s1 = s1;
-        if (s2AllowedSet.has(s2)) normalized.s2 = s2;
-        if (s3AllowedSet.has(s3)) normalized.s3 = s3;
+        const rawS1 = normalizeAttrValue(rawWeapon.s1);
+        const rawS2 = normalizeAttrValue(rawWeapon.s2);
+        const rawS3 = normalizeAttrValue(rawWeapon.s3);
+        if (!rawS1 && s1AllowedSet.has(s1)) normalized.s1 = s1;
+        if (!rawS2 && s2AllowedSet.has(s2)) normalized.s2 = s2;
+        if (!rawS3 && s3AllowedSet.has(s3)) normalized.s3 = s3;
         if (Object.keys(normalized).length) cleaned[weaponName] = normalized;
       });
       return cleaned;
@@ -92,7 +103,8 @@
       ATTR_KEYS.forEach((field) => {
         const rawValue = normalizeAttrValue(weapon[field]);
         const overrideValue = normalizeAttrValue(overrideEntry && overrideEntry[field]);
-        resolved[field] = overrideValue || rawValue || "";
+        const canUseOverride = Boolean(weapon.isPreview) && !rawValue;
+        resolved[field] = canUseOverride ? overrideValue || rawValue || "" : rawValue || "";
       });
       const unresolvedFields = ATTR_KEYS.filter((field) => !normalizeAttrValue(resolved[field]));
       resolved.__rawMissingAttrFields = rawMissingFields;
@@ -132,6 +144,10 @@
       const rawWeapon = weaponMap.get(weaponName);
       if (!rawWeapon) return;
       const rawValue = normalizeAttrValue(rawWeapon[field]);
+      if (!rawWeapon.isPreview || rawValue) {
+        clearWeaponAttrOverride(weaponName);
+        return;
+      }
       const sanitizedValue = normalizeAttrValue(nextValue);
       const allowedSet = field === "s1" ? s1AllowedSet : field === "s2" ? s2AllowedSet : s3AllowedSet;
       const validValue = allowedSet.has(sanitizedValue) ? sanitizedValue : "";
@@ -231,14 +247,18 @@
     const previewWeaponRows = computed(() =>
       weaponAttrIssueRows.value.filter((row) => Boolean(row && row.isPreview))
     );
+    const dataIntegrityWeaponAttrRows = computed(() =>
+      weaponAttrIssueRows.value.filter((row) => Boolean(row && !row.isPreview))
+    );
     const hasPreviewWeapons = computed(() => previewWeaponRows.value.length > 0);
+    const hasDataIntegrityWeaponAttrs = computed(() => dataIntegrityWeaponAttrRows.value.length > 0);
 
     const hasWeaponAttrIssues = computed(() =>
       weaponAttrIssueRows.value.some((row) => row.hasUnresolvedFields)
     );
 
     const getWeaponAttrIssueRow = (weaponName) =>
-      weaponAttrIssueRows.value.find((row) => row.name === weaponName) || null;
+      previewWeaponRows.value.find((row) => row.name === weaponName) || null;
 
     const getWeaponAttrEditorValue = (weaponName, field) => {
       if (!weaponName || ATTR_KEYS.indexOf(field) === -1) return "";
@@ -263,6 +283,100 @@
             ? weapon.__missingAttrFields.slice()
             : [],
         }));
+
+    const weaponAttrFieldLabel = (field) => {
+      if (field === "s1") return "base";
+      if (field === "s2") return "extra";
+      if (field === "s3") return "skill";
+      return String(field || "");
+    };
+    const buildWeaponDataIntegritySignature = (rows) =>
+      rows
+        .map((row) => `${row.name}:${(row.rawMissingFields || []).slice().sort().join(",")}`)
+        .sort()
+        .join("|");
+    const buildWeaponDataIntegrityNote = (rows) =>
+      rows
+        .map((row) => {
+          const missing = (row.rawMissingFields || []).map((field) => weaponAttrFieldLabel(field));
+          return `${row.name} -> missing: ${missing.join("/") || "unknown"}`;
+        })
+        .join("\n");
+    const buildRuntimeWarningPreviewFromEntry = (entry) => {
+      if (!entry) return "";
+      const lines = [
+        `scope: ${entry.scope || "unknown"}`,
+        `operation: ${entry.operation || "unknown"}`,
+        `key: ${entry.key || "unknown"}`,
+        `error: ${entry.errorName || "Error"}: ${entry.errorMessage || "unknown"}`,
+      ];
+      if (entry.note) {
+        lines.push(`note: ${entry.note}`);
+      }
+      if (entry.errorStack) {
+        lines.push("", "stack:", String(entry.errorStack));
+      }
+      return lines.join("\n");
+    };
+    let lastWeaponDataIntegritySignature = "";
+    const reportWeaponDataIntegrityWarning = (rows, options) => {
+      const normalizedRows = Array.isArray(rows) ? rows.filter(Boolean) : [];
+      if (!normalizedRows.length || typeof state.reportRuntimeWarning !== "function") return false;
+      const signature = buildWeaponDataIntegritySignature(normalizedRows);
+      const force = Boolean(options && options.force);
+      if (!force && signature && signature === lastWeaponDataIntegritySignature) return false;
+      const warningError = new Error(`weapon data integrity issue detected (${normalizedRows.length})`);
+      warningError.name = "WeaponDataIntegrityError";
+      state.reportRuntimeWarning(warningError, {
+        scope: WEAPON_DATA_INTEGRITY_WARNING_SCOPE,
+        operation: WEAPON_DATA_INTEGRITY_WARNING_OPERATION,
+        key: WEAPON_DATA_INTEGRITY_WARNING_KEY,
+        title: "武器数据异常",
+        summary: "检测到武器数据缺失属性，相关推荐已停用，请查看异常详情。",
+        note: buildWeaponDataIntegrityNote(normalizedRows),
+        forceShow: true,
+        asToast: false,
+      });
+      lastWeaponDataIntegritySignature = signature;
+      return true;
+    };
+    const resolveLatestWeaponDataIntegrityWarning = () => {
+      const matchesWarning = (entry) =>
+        Boolean(entry) &&
+        (String(entry.scope || "") === WEAPON_DATA_INTEGRITY_WARNING_SCOPE ||
+          String(entry.operation || "") === WEAPON_DATA_INTEGRITY_WARNING_OPERATION);
+      const current = state.runtimeWarningCurrent ? state.runtimeWarningCurrent.value : null;
+      if (matchesWarning(current)) return current;
+      const logs =
+        state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)
+          ? state.runtimeWarningLogs.value
+          : [];
+      return logs.find((entry) => matchesWarning(entry)) || null;
+    };
+    const openWeaponDataIntegrityDetails = () => {
+      let target = resolveLatestWeaponDataIntegrityWarning();
+      if (!target && hasDataIntegrityWeaponAttrs.value) {
+        reportWeaponDataIntegrityWarning(dataIntegrityWeaponAttrRows.value, { force: true });
+        target = resolveLatestWeaponDataIntegrityWarning();
+      }
+      if (target && typeof state.openUnifiedExceptionFromLog === "function") {
+        state.openUnifiedExceptionFromLog({ ...target, __kind: "runtime" });
+        return;
+      }
+      if (target && state.runtimeWarningCurrent) {
+        state.runtimeWarningCurrent.value = target;
+      }
+      if (target && state.runtimeWarningPreviewText) {
+        state.runtimeWarningPreviewText.value = buildRuntimeWarningPreviewFromEntry(target);
+      }
+      if (state.showStorageErrorModal) {
+        state.showStorageErrorModal.value = false;
+      }
+      if (state.showRuntimeWarningModal) {
+        state.showRuntimeWarningModal.value = true;
+      }
+    };
+    reportWeaponDataIntegrityWarning(dataIntegrityWeaponAttrRows.value);
 
     const defaultTrackEvent = (name, data) => {
       if (typeof window === "undefined") return;
@@ -898,7 +1012,6 @@
       { deep: true }
     );
 
-    let autoOpenedWeaponAttrIssueModalBySelection = false;
     let previousSelectedNameSet = new Set(
       Array.isArray(state.selectedNames.value) ? state.selectedNames.value : []
     );
@@ -908,13 +1021,12 @@
         const nextSet = new Set(selectedNames);
         const newlySelectedNames = selectedNames.filter((name) => !previousSelectedNameSet.has(name));
         previousSelectedNameSet = nextSet;
-        if (autoOpenedWeaponAttrIssueModalBySelection || !newlySelectedNames.length) return;
+        if (!newlySelectedNames.length) return;
         const shouldAutoOpen = newlySelectedNames.some((name) => {
           const row = getWeaponAttrIssueRow(name);
-          return Boolean(row && row.hasUnresolvedFields);
+          return Boolean(row && row.isPreview && row.hasUnresolvedFields);
         });
         if (!shouldAutoOpen) return;
-        autoOpenedWeaponAttrIssueModalBySelection = true;
         openWeaponAttrDataModal();
       }
     );
@@ -945,13 +1057,16 @@
     state.weaponAttrS3Options = weaponAttrS3Options;
     state.getCatalogWeapons = () => catalogWeapons.value.slice();
     state.getCatalogWeaponByName = getCatalogWeaponByName;
-    state.weaponAttrIssueRows = weaponAttrIssueRows;
+    state.weaponAttrIssueRows = previewWeaponRows;
     state.previewWeaponRows = previewWeaponRows;
+    state.dataIntegrityWeaponAttrRows = dataIntegrityWeaponAttrRows;
     state.hasPreviewWeapons = hasPreviewWeapons;
+    state.hasDataIntegrityWeaponAttrs = hasDataIntegrityWeaponAttrs;
     state.hasWeaponAttrIssues = hasWeaponAttrIssues;
     state.getWeaponAttrIssueRow = getWeaponAttrIssueRow;
     state.getSelectedWeaponAttrIssues = getSelectedWeaponAttrIssues;
     state.openWeaponAttrDataModal = openWeaponAttrDataModal;
+    state.openWeaponDataIntegrityDetails = openWeaponDataIntegrityDetails;
     state.closeWeaponAttrDataModal = closeWeaponAttrDataModal;
     state.setWeaponAttrOverride = setWeaponAttrOverride;
     state.clearWeaponAttrOverride = clearWeaponAttrOverride;

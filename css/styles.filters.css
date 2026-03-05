@@ -19,25 +19,21 @@
 
       .weapon-attr-warning {
         width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px 10px;
-        padding: 8px 10px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 171, 86, 0.45);
-        background: rgba(48, 30, 10, 0.46);
+        margin: 4px 0 12px;
+        border-style: dashed;
+        border-color: rgba(255, 171, 86, 0.42);
+        background: rgba(48, 30, 10, 0.3);
       }
 
       .weapon-attr-warning-text {
-        flex: 1;
-        min-width: 180px;
+        min-width: 0;
         color: #ffe4be;
-        font-size: 12px;
-        line-height: 1.45;
+        line-height: 1.4;
       }
 
       .weapon-attr-warning-action {
+        margin-left: auto;
+        flex-shrink: 0;
         white-space: nowrap;
       }
 
@@ -105,7 +101,7 @@
         }
 
         .weapon-attr-warning {
-          grid-column: 1 / -1;
+          width: 100%;
         }
       }
 

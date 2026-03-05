@@ -445,12 +445,12 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .weapon-attr-warning {
-  border-color: rgba(227, 142, 45, 0.4);
-  background: rgba(255, 181, 95, 0.14);
+  border-color: rgba(227, 142, 45, 0.42);
+  background: rgba(255, 181, 95, 0.12);
 }
 
 [data-theme="light"] .weapon-attr-warning-text {
-  color: #6e4513;
+  color: #6c4210;
 }
 
 [data-theme="light"] .filter-panel {

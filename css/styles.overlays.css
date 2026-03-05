@@ -1081,6 +1081,28 @@
         color: #f2dfc6;
       }
 
+      .weapon-attr-disclaimer {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 108, 108, 0.48);
+        background: rgba(128, 20, 20, 0.22);
+        color: #ffe1e1;
+      }
+
+      .weapon-attr-disclaimer-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: #ffd7d7;
+        margin-bottom: 4px;
+      }
+
+      .weapon-attr-disclaimer p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
       .weapon-attr-list {
         margin-top: 12px;
         display: grid;
@@ -1536,6 +1558,16 @@
 [data-theme="light"] .weapon-attr-item {
   border-color: rgba(22, 44, 72, 0.14);
   background: rgba(244, 248, 255, 0.86);
+}
+
+[data-theme="light"] .weapon-attr-disclaimer {
+  border-color: rgba(220, 84, 84, 0.44);
+  background: rgba(255, 226, 226, 0.88);
+  color: #6f1f1f;
+}
+
+[data-theme="light"] .weapon-attr-disclaimer-title {
+  color: #862525;
 }
 
 [data-theme="light"] .weapon-attr-item-title {

@@ -296,6 +296,10 @@
             <h3>{{ t("modal.weapon_attribute_data_fix_title") }}</h3>
             <p>{{ t("modal.weapon_attribute_data_fix_desc") }}</p>
             <p class="storage-clear-confirm-warning">{{ t("modal.weapon_attribute_data_fix_tip") }}</p>
+            <div class="weapon-attr-disclaimer">
+              <div class="weapon-attr-disclaimer-title">{{ t("modal.weapon_attribute_data_fix_disclaimer_title") }}</div>
+              <p>{{ t("modal.weapon_attribute_data_fix_disclaimer") }}</p>
+            </div>
             <div v-if="!weaponAttrIssueRows.length" class="weapon-attr-empty">
               {{ t("modal.weapon_attribute_data_fix_empty") }}
             </div>

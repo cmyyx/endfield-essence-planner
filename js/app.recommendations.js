@@ -516,6 +516,26 @@
       }
       const attrIssues = getSelectedWeaponAttrIssues();
       if (attrIssues.length) {
+        const previewWeaponNames = attrIssues
+          .filter((item) => item && item.isPreview)
+          .map((item) => item.name)
+          .filter(Boolean);
+        const dataIntegrityWeaponNames = attrIssues
+          .filter((item) => item && !item.isPreview)
+          .map((item) => item.name)
+          .filter(Boolean);
+        if (dataIntegrityWeaponNames.length) {
+          return {
+            kind: "dataIntegrityMissingAttr",
+            weaponNames: dataIntegrityWeaponNames,
+          };
+        }
+        if (previewWeaponNames.length) {
+          return {
+            kind: "previewMissingAttr",
+            weaponNames: previewWeaponNames,
+          };
+        }
         return {
           kind: "missingAttr",
           weaponNames: attrIssues.map((item) => item.name).filter(Boolean),

@@ -4,6 +4,11 @@
   modules.createStorageSchemaApi = function createStorageSchemaApi(state) {
     const sanitizeArray = (value) => (Array.isArray(value) ? value : []);
     const catalog = Array.isArray(weapons) ? weapons : [];
+    const weaponByName = new Map(
+      catalog
+        .filter((weapon) => weapon && typeof weapon === "object" && typeof weapon.name === "string")
+        .map((weapon) => [weapon.name, weapon])
+    );
     const weaponNameSet = new Set(catalog.map((weapon) => weapon.name));
     const s1Set = new Set(catalog.map((weapon) => weapon.s1).filter(Boolean));
     const dungeonsCatalog = Array.isArray(dungeons) ? dungeons : [];
@@ -234,12 +239,17 @@
         const cleaned = {};
         Object.keys(raw.weaponAttrOverrides).forEach((name) => {
           if (!name || !weaponNameSet.has(name)) return;
+          const weapon = weaponByName.get(name);
+          if (!weapon || !weapon.isPreview) return;
           const entry = raw.weaponAttrOverrides[name];
           if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
           const normalized = {};
-          if (typeof entry.s1 === "string" && s1Set.has(entry.s1)) normalized.s1 = entry.s1;
-          if (typeof entry.s2 === "string" && s2Set.has(entry.s2)) normalized.s2 = entry.s2;
-          if (typeof entry.s3 === "string" && s3Set.has(entry.s3)) normalized.s3 = entry.s3;
+          const rawS1 = typeof weapon.s1 === "string" ? weapon.s1.trim() : "";
+          const rawS2 = typeof weapon.s2 === "string" ? weapon.s2.trim() : "";
+          const rawS3 = typeof weapon.s3 === "string" ? weapon.s3.trim() : "";
+          if (!rawS1 && typeof entry.s1 === "string" && s1Set.has(entry.s1)) normalized.s1 = entry.s1;
+          if (!rawS2 && typeof entry.s2 === "string" && s2Set.has(entry.s2)) normalized.s2 = entry.s2;
+          if (!rawS3 && typeof entry.s3 === "string" && s3Set.has(entry.s3)) normalized.s3 = entry.s3;
           if (Object.keys(normalized).length) cleaned[name] = normalized;
         });
         next.weaponAttrOverrides = cleaned;
