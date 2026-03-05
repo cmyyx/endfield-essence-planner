@@ -26,6 +26,7 @@ const scriptChainSource = read("js/app.script-chain.js");
 const storageSource = read("js/app.storage.js");
 const mainSource = read("js/app.main.js");
 const stateSource = read("js/app.state.js");
+const modalsSource = read("js/app.modals.js");
 const mainTemplate03Source = read("js/templates.main.03.js");
 
 const assertOrderedModules = (source, label) => {
@@ -133,6 +134,17 @@ assert.doesNotMatch(
     mainTemplate03Source,
     pattern,
     "[cleanup] templates.main.03 should not retain migration modal/template bindings after migration-chain removal"
+  );
+});
+
+[
+  /\bshowMigrationModal\b/,
+  /\bshowMigrationConfirmModal\b/,
+].forEach((pattern) => {
+  assert.doesNotMatch(
+    modalsSource,
+    pattern,
+    "[cleanup] app.modals should not access removed migration modal refs after migration-chain removal"
   );
 });
 

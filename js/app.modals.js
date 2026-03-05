@@ -148,8 +148,6 @@
           state.showChangelog.value ||
         state.showAbout.value ||
           state.showTutorialSkipConfirm.value ||
-          state.showMigrationModal.value ||
-          state.showMigrationConfirmModal.value ||
           state.showStorageErrorModal.value ||
           state.showStorageClearConfirmModal.value ||
           state.showStorageIgnoreConfirmModal.value
@@ -229,8 +227,6 @@
         state.showChangelog,
         state.showAbout,
         state.showTutorialSkipConfirm,
-        state.showMigrationModal,
-        state.showMigrationConfirmModal,
         state.showStorageErrorModal,
         state.showStorageClearConfirmModal,
         state.showStorageIgnoreConfirmModal,
@@ -240,8 +236,6 @@
         changelogOpen,
         aboutOpen,
         skipOpen,
-        migrationOpen,
-        migrationConfirmOpen,
         storageErrorOpen,
         storageClearConfirmOpen,
         storageIgnoreConfirmOpen,
@@ -251,8 +245,6 @@
             changelogOpen ||
             aboutOpen ||
             skipOpen ||
-            migrationOpen ||
-            migrationConfirmOpen ||
             storageErrorOpen ||
             storageClearConfirmOpen ||
             storageIgnoreConfirmOpen
@@ -280,8 +272,6 @@
         state.showChangelog,
         state.showAbout,
         state.showDomainWarning,
-        state.showMigrationModal,
-        state.showMigrationConfirmModal,
         state.showStorageErrorModal,
         state.showStorageClearConfirmModal,
         state.showStorageIgnoreConfirmModal,
