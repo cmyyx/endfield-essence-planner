@@ -687,23 +687,48 @@
     if (!preload) {
       preload = document.createElement("div");
       preload.id = "app-preload";
-      preload.innerHTML =
-        '<div class="preload-card">' +
-        '<div class="preload-title">' +
-        bt("preload_title") +
-        "</div>" +
-        '<div class="preload-sub preload-note">' +
-        bt("preload_note") +
-        "</div>" +
-        '<div class="preload-status" aria-live="polite">' +
-        bt("preload_status_prepare") +
-        "</div>" +
-        '<div class="preload-current" aria-live="polite"></div>' +
-        '<div class="preload-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100">' +
-        '<span class="preload-progress-fill" aria-valuenow="0"></span>' +
-        "</div>" +
-        '<div class="preload-count" aria-live="polite">0/0</div>' +
-        "</div>";
+      var card = document.createElement("div");
+      card.className = "preload-card";
+
+      var title = document.createElement("div");
+      title.className = "preload-title";
+      title.textContent = bt("preload_title");
+      card.appendChild(title);
+
+      var note = document.createElement("div");
+      note.className = "preload-sub preload-note";
+      note.textContent = bt("preload_note");
+      card.appendChild(note);
+
+      var status = document.createElement("div");
+      status.className = "preload-status";
+      status.setAttribute("aria-live", "polite");
+      status.textContent = bt("preload_status_prepare");
+      card.appendChild(status);
+
+      var current = document.createElement("div");
+      current.className = "preload-current";
+      current.setAttribute("aria-live", "polite");
+      card.appendChild(current);
+
+      var progress = document.createElement("div");
+      progress.className = "preload-progress";
+      progress.setAttribute("role", "progressbar");
+      progress.setAttribute("aria-valuemin", "0");
+      progress.setAttribute("aria-valuemax", "100");
+      var progressFill = document.createElement("span");
+      progressFill.className = "preload-progress-fill";
+      progressFill.setAttribute("aria-valuenow", "0");
+      progress.appendChild(progressFill);
+      card.appendChild(progress);
+
+      var count = document.createElement("div");
+      count.className = "preload-count";
+      count.setAttribute("aria-live", "polite");
+      count.textContent = "0/0";
+      card.appendChild(count);
+
+      preload.appendChild(card);
       document.body.insertBefore(preload, document.body.firstChild || null);
     } else {
       syncPreloadStaticText(preload);
