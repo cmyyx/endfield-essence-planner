@@ -86,9 +86,11 @@ assert.match(
 );
 
 const entryLineCount = entrySource.split(/\r?\n/).length;
+// User-approved waiver: bootstrap.entry.js may exceed the previous 1080 budget.
+const entryLineBudget = 1200;
 assert.ok(
-  entryLineCount <= 1080,
-  `bootstrap.entry should stay within orchestrator complexity budget (<=1080 lines), got ${entryLineCount}`
+  entryLineCount <= entryLineBudget,
+  `bootstrap.entry should stay within orchestrator complexity budget (<=${entryLineBudget} lines), got ${entryLineCount}`
 );
 
 const protocolMatches = Array.from(entrySource.matchAll(/window\.__([A-Za-z0-9_]+)\s*=(?!=)/g)).map((match) => match[1]);
