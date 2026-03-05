@@ -543,6 +543,39 @@
       }
     };
 
+    const readNonFatalDiagnosticsHistory = () => {
+      if (typeof window === "undefined") return [];
+      const diagnosticsApi =
+        window.__APP_DIAGNOSTICS__ && typeof window.__APP_DIAGNOSTICS__ === "object"
+          ? window.__APP_DIAGNOSTICS__
+          : null;
+      if (!diagnosticsApi || typeof diagnosticsApi.readDiagnosticsHistory !== "function") {
+        return [];
+      }
+      try {
+        const history = diagnosticsApi.readDiagnosticsHistory();
+        return Array.isArray(history) ? history : [];
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const readNonFatalDiagnosticsConfig = () => {
+      if (typeof window === "undefined") return null;
+      const config =
+        window.__APP_DIAGNOSTICS_CONFIG__ && typeof window.__APP_DIAGNOSTICS_CONFIG__ === "object"
+          ? window.__APP_DIAGNOSTICS_CONFIG__
+          : null;
+      if (!config) return null;
+      return {
+        enabled: typeof config.enabled === "boolean" ? config.enabled : null,
+        sampleRate: Number.isFinite(Number(config.sampleRate)) ? Number(config.sampleRate) : null,
+        dedupWindowMs: Number.isFinite(Number(config.dedupWindowMs)) ? Number(config.dedupWindowMs) : null,
+        historyLimit: Number.isFinite(Number(config.historyLimit)) ? Number(config.historyLimit) : null,
+        storageKey: typeof config.storageKey === "string" ? config.storageKey : null,
+      };
+    };
+
     const buildDiagnosticBundle = async () => {
       const estimate = await readStorageEstimate();
       const currentIssue = state.storageErrorCurrent.value || null;
@@ -564,6 +597,8 @@
         bootStorageProbe,
         storageSummary: readManagedStorageSummary(),
         storageRaw: readManagedStorageRaw(),
+        nonFatalDiagnostics: readNonFatalDiagnosticsHistory(),
+        nonFatalDiagnosticsConfig: readNonFatalDiagnosticsConfig(),
       };
     };
 
