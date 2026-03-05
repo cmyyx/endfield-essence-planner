@@ -539,8 +539,26 @@
                 <li
                   v-for="(item, index) in announcement.items"
                   :key="\`\${item}-\${index}\`"
-                  v-html="formatNoticeItem(item)"
-                ></li>
+                >
+                  <template
+                    v-for="(token, tokenIndex) in formatNoticeItem(item)"
+                    :key="\`\${index}-\${tokenIndex}-\${token.type}\`"
+                  >
+                    <a
+                      v-if="token.type === 'link'"
+                      class="notice-link"
+                      :href="token.href"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {{ token.text }}
+                    </a>
+                    <mark v-else-if="token.type === 'mark'" class="notice-highlight">
+                      {{ token.text }}
+                    </mark>
+                    <span v-else>{{ token.text }}</span>
+                  </template>
+                </li>
               </ul>
             </div>
             <div class="notice-footer">

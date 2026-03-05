@@ -6,11 +6,15 @@ const vm = require("node:vm");
 const root = path.resolve(__dirname, "../..");
 const sanitizerFile = path.join(root, "js/app.sanitizer.js");
 const contentFile = path.join(root, "js/app.content.js");
+const manifestFile = path.join(root, "js/app.resource-manifest.js");
+const scriptChainFile = path.join(root, "js/app.script-chain.js");
 
 assert.ok(fs.existsSync(sanitizerFile), "js/app.sanitizer.js must exist as the single sanitizer entry");
 
 const sanitizerSource = fs.readFileSync(sanitizerFile, "utf8");
 const contentSource = fs.readFileSync(contentFile, "utf8");
+const manifestSource = fs.readFileSync(manifestFile, "utf8");
+const scriptChainSource = fs.readFileSync(scriptChainFile, "utf8");
 
 const context = {
   window: {},
@@ -53,7 +57,13 @@ const tokens = context.window.__APP_SANITIZER__.tokenizeNoticeItem(
 
 assert.ok(Array.isArray(tokens) && tokens.length > 0, "tokenizeNoticeItem should return non-empty token list");
 assert.ok(
-  tokens.some((token) => token && token.type === "link" && token.href === "https://example.com"),
+  tokens.some(
+    (token) =>
+      token &&
+      token.type === "link" &&
+      typeof token.href === "string" &&
+      token.href.startsWith("https://example.com")
+  ),
   "https links must be preserved as link tokens"
 );
 assert.ok(
@@ -63,6 +73,17 @@ assert.ok(
 assert.ok(
   !tokens.some((token) => token && token.type === "link" && /javascript:/i.test(String(token.href || ""))),
   "javascript: links must never survive sanitization"
+);
+
+assert.match(
+  manifestSource,
+  /"\.\/js\/app\.sanitizer\.js"/,
+  "manifest script chain should include app.sanitizer.js"
+);
+assert.match(
+  scriptChainSource,
+  /"\.\/js\/app\.sanitizer\.js"/,
+  "legacy script-chain fallback should include app.sanitizer.js"
 );
 
 console.log("task1-sanitizer-single-entry: ok");

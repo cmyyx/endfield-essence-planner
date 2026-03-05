@@ -89,57 +89,14 @@
         .filter(Boolean);
     };
 
-    const escapeHtml = (value) =>
-      String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/\"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-
-    const sanitizeUrl = (value) => {
-      const trimmed = String(value || "").trim();
-      if (!/^https?:\/\//i.test(trimmed)) return "";
-      return escapeHtml(trimmed);
-    };
-
-    const formatNoticeItem = (value) => {
-      const raw = String(value || "");
-      const linkTokens = [];
-      const tokenized = raw.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, text, url) => {
-        const safeUrl = sanitizeUrl(url);
-        const safeText = escapeHtml(text);
-        const html = safeUrl
-          ? '<a class="notice-link" href="' +
-            safeUrl +
-            '" target="_blank" rel="noreferrer">' +
-            safeText +
-            "</a>"
-          : safeText;
-        const token = `__NOTICE_LINK_${linkTokens.length}__`;
-        linkTokens.push({ token, html });
-        return token;
-      });
-
-      const escaped = escapeHtml(tokenized);
-      const highlighted = escaped.replace(/==(.+?)==/g, '<mark class="notice-highlight">$1</mark>');
-      const urlPattern = /https?:\/\/[^\s<]+/g;
-      const linked = highlighted.replace(urlPattern, (match) => {
-        const trimmed = match.replace(/[),.;!?，。！？、]+$/g, "");
-        const tail = match.slice(trimmed.length);
-        if (!trimmed) return match;
-        return (
-          '<a class="notice-link" href="' +
-          trimmed +
-          '" target="_blank" rel="noreferrer">' +
-          trimmed +
-          "</a>" +
-          tail
-        );
-      });
-
-      return linkTokens.reduce((result, entry) => result.replace(entry.token, entry.html), linked);
-    };
+    const noticeSanitizer =
+      typeof window !== "undefined" &&
+      window.__APP_SANITIZER__ &&
+      typeof window.__APP_SANITIZER__.tokenizeNoticeItem === "function"
+        ? window.__APP_SANITIZER__
+        : {
+            tokenizeNoticeItem: (value) => [{ type: "text", text: String(value || "") }],
+          };
 
     const getContentForLocale = (targetLocale) => {
       const content = getContentRoot();
@@ -222,7 +179,7 @@
     state.content = computed(() => getContentRoot());
     state.ensureContentLoaded = ensureContentLoaded;
     state.announcement = announcement;
-    state.formatNoticeItem = formatNoticeItem;
+    state.formatNoticeItem = (value) => noticeSanitizer.tokenizeNoticeItem(value);
     state.changelog = changelog;
     state.aboutContent = aboutContent;
   };

@@ -39,6 +39,7 @@
         "./js/app.utils.js",
         "./js/app.state.js",
         "./js/app.i18n.js",
+        "./js/app.sanitizer.js",
         "./js/app.content.js",
         "./js/app.search.js",
         "./js/app.ui.js",
