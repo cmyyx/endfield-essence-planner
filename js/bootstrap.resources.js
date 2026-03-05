@@ -13,6 +13,33 @@
     return map;
   };
 
+  var reportNonFatalDiagnostic = function (payload) {
+    var source = payload && typeof payload === "object" ? payload : {};
+    var reporter =
+      typeof globalObject.__reportNonFatalDiagnostic === "function"
+        ? globalObject.__reportNonFatalDiagnostic
+        : globalObject.__APP_DIAGNOSTICS__ &&
+          typeof globalObject.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic === "function"
+          ? globalObject.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic
+          : null;
+    if (typeof reporter !== "function") return;
+    try {
+      reporter({
+        module: "bootstrap.resources",
+        operation: String(source.operation || "resource.unknown"),
+        kind: String(source.kind || "non-fatal"),
+        resource: String(source.resource || "bootstrap.resources"),
+        timestamp: source.timestamp,
+        errorName: String(source.errorName || ""),
+        errorMessage: String(source.errorMessage || ""),
+        note: String(source.note || ""),
+        optionalSignature: String(source.optionalSignature || ""),
+      });
+    } catch (error) {
+      // diagnostic reporter must stay non-blocking
+    }
+  };
+
   var createLegacyBootManifest = function () {
     return {
       boot: {
@@ -385,6 +412,14 @@
         script.onerror = function () {
           setResourceStatus(key, "failed");
           var failedEntry = resourceState.get(key);
+          reportNonFatalDiagnostic({
+            operation: "resource.load-script",
+            kind: "script-load-failed",
+            resource: src,
+            errorName: "ScriptLoadError",
+            errorMessage: "Failed to load script resource",
+            optionalSignature: "resource.load-script:" + key,
+          });
           if (failedEntry && failedEntry.optional) {
             reportOptionalResourceFailure(failedEntry);
           }
@@ -491,6 +526,15 @@
           settled = true;
           cleanupLoad();
           setResourceStatus(key, "failed");
+          reportNonFatalDiagnostic({
+            operation: "resource.load-style",
+            kind: "style-load-failed",
+            resource: href,
+            errorName: "StyleLoadError",
+            errorMessage: String(reason || "style load failed"),
+            note: probe && probe.status ? "status=" + probe.status : "",
+            optionalSignature: "resource.load-style:" + key + ":" + String(reason || "unknown"),
+          });
           styleLoadRegistry.delete(key);
           reject(createLoadError("style", href, reason, probe));
         };

@@ -26,6 +26,7 @@
     "./js/app.core.js",
     "./js/app.utils.js",
     "./js/app.state.js",
+    "./js/app.diagnostics.js",
     "./js/app.i18n.js",
     "./js/app.sanitizer.js",
     "./js/app.content.js",

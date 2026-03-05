@@ -35,6 +35,35 @@
       "fingerprint",
       "publishedAt",
     ];
+    const reportNonFatalDiagnostic = (payload) => {
+      const source = payload && typeof payload === "object" ? payload : {};
+      const reporter =
+        (typeof state.reportNonFatalDiagnostic === "function" && state.reportNonFatalDiagnostic) ||
+        (typeof window !== "undefined" && typeof window.__reportNonFatalDiagnostic === "function"
+          ? window.__reportNonFatalDiagnostic
+          : null) ||
+        (typeof window !== "undefined" &&
+        window.__APP_DIAGNOSTICS__ &&
+        typeof window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic === "function"
+          ? window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic
+          : null);
+      if (typeof reporter !== "function") return;
+      try {
+        reporter({
+          module: "app.update",
+          operation: safeText(source.operation) || "update.unknown",
+          kind: safeText(source.kind) || "non-fatal",
+          resource: safeText(source.resource) || versionEndpoint,
+          timestamp: source.timestamp,
+          errorName: safeText(source.errorName) || "",
+          errorMessage: safeText(source.errorMessage) || "",
+          note: safeText(source.note) || "",
+          optionalSignature: safeText(source.optionalSignature) || "",
+        });
+      } catch (error) {
+        // diagnostic reporter must stay non-blocking
+      }
+    };
 
     const safeText = (value) => String(value == null ? "" : value).trim();
     const getCurrentVersionLoadFailedText = () =>
@@ -98,6 +127,18 @@
     };
 
     const reportInvalidVersionPayload = (source, reason, raw, missingFields) => {
+      reportNonFatalDiagnostic({
+        operation: "update.payload-validate",
+        kind: "invalid-version-payload",
+        resource: source || versionEndpoint,
+        errorName: "VersionPayloadContractError",
+        errorMessage: reason || "invalid-payload",
+        note:
+          Array.isArray(missingFields) && missingFields.length
+            ? `missing=${missingFields.join(",")}`
+            : "",
+        optionalSignature: `update.payload-validate:${safeText(source) || "unknown"}:${safeText(reason) || "invalid"}`,
+      });
       if (typeof state.reportRuntimeWarning !== "function") return;
       const error = new Error(`invalid version payload from ${source}: ${reason}`);
       error.name = "VersionPayloadContractError";
@@ -396,7 +437,17 @@
         cache: "no-store",
         credentials: "same-origin",
       });
-      if (!response.ok) return null;
+      if (!response.ok) {
+        reportNonFatalDiagnostic({
+          operation: "update.fetch-latest-version",
+          kind: "http-not-ok",
+          resource: versionEndpoint,
+          errorName: "VersionFetchHttpError",
+          errorMessage: `status=${response.status}`,
+          optionalSignature: `update.fetch-http:${response.status || 0}`,
+        });
+        return null;
+      }
       const data = await response.json();
       return normalizeVersionInfo(data, {
         source: "remote",
@@ -429,7 +480,14 @@
           state.showUpdatePrompt.value = true;
         }
       } catch (error) {
-        // ignore update check errors to avoid user disruption
+        reportNonFatalDiagnostic({
+          operation: "update.check",
+          kind: "check-failed",
+          resource: versionEndpoint,
+          errorName: safeText(error && error.name) || "Error",
+          errorMessage: safeText(error && error.message) || "update-check-failed",
+          optionalSignature: "update.check:failed",
+        });
       } finally {
         checking = false;
       }

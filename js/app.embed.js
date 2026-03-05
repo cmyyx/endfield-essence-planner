@@ -17,7 +17,14 @@
           return hostname ? (wildcard ? `*.${hostname}` : hostname) : "";
         }
       } catch (error) {
-        // ignore parse errors and fallback to raw host token
+        reportNonFatalDiagnostic({
+          operation: "embed.host-pattern-parse",
+          kind: "invalid-host-pattern",
+          resource: base,
+          errorName: String(error && error.name ? error.name : "Error"),
+          errorMessage: String(error && error.message ? error.message : "invalid host pattern"),
+          optionalSignature: "embed.host-pattern-parse",
+        });
       }
       const hostToken = normalizeHost(base);
       return hostToken ? (wildcard ? `*.${hostToken}` : hostToken) : "";
@@ -64,6 +71,35 @@
     const embedHostLabel = ref("");
     const isEmbedTrusted = ref(false);
     const isCurrentHostTrusted = ref(false);
+    const reportNonFatalDiagnostic = (payload) => {
+      const source = payload && typeof payload === "object" ? payload : {};
+      const reporter =
+        (typeof state.reportNonFatalDiagnostic === "function" && state.reportNonFatalDiagnostic) ||
+        (typeof window !== "undefined" && typeof window.__reportNonFatalDiagnostic === "function"
+          ? window.__reportNonFatalDiagnostic
+          : null) ||
+        (typeof window !== "undefined" &&
+        window.__APP_DIAGNOSTICS__ &&
+        typeof window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic === "function"
+          ? window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic
+          : null);
+      if (typeof reporter !== "function") return;
+      try {
+        reporter({
+          module: "app.embed",
+          operation: String(source.operation || "embed.unknown"),
+          kind: String(source.kind || "non-fatal"),
+          resource: String(source.resource || window.location.href),
+          timestamp: source.timestamp,
+          errorName: String(source.errorName || ""),
+          errorMessage: String(source.errorMessage || ""),
+          note: String(source.note || ""),
+          optionalSignature: String(source.optionalSignature || ""),
+        });
+      } catch (error) {
+        // diagnostic reporter must stay non-blocking
+      }
+    };
 
     const recomputeCurrentHostTrust = () => {
       const patterns = readOfficialHostPatterns();
@@ -98,6 +134,14 @@
         try {
           embedHost.value = normalizeHost(new URL(embedOrigin).hostname);
         } catch (error) {
+          reportNonFatalDiagnostic({
+            operation: "embed.origin-parse",
+            kind: "invalid-embed-origin",
+            resource: String(embedOrigin),
+            errorName: String(error && error.name ? error.name : "Error"),
+            errorMessage: String(error && error.message ? error.message : "invalid embed origin"),
+            optionalSignature: "embed.origin-parse",
+          });
           embedHost.value = "";
         }
       }
@@ -150,6 +194,14 @@
         const marker = (response.headers.get(officialSignalHeader) || "").trim();
         return marker === "1";
       } catch (error) {
+        reportNonFatalDiagnostic({
+          operation: "embed.detect-official-deployment",
+          kind: "detect-official-failed",
+          resource: window.location.href,
+          errorName: String(error && error.name ? error.name : "Error"),
+          errorMessage: String(error && error.message ? error.message : "detect official failed"),
+          optionalSignature: "embed.detect-official-deployment",
+        });
         return false;
       }
     };
@@ -181,7 +233,14 @@
         try {
           await state.ensureContentLoaded({ withSponsors: false });
         } catch (error) {
-          // ignore content prefetch errors and keep fallback behavior
+          reportNonFatalDiagnostic({
+            operation: "embed.ensure-content-loaded",
+            kind: "content-prefetch-failed",
+            resource: "content",
+            errorName: String(error && error.name ? error.name : "Error"),
+            errorMessage: String(error && error.message ? error.message : "content prefetch failed"),
+            optionalSignature: "embed.ensure-content-loaded",
+          });
         }
       }
       recomputeCurrentHostTrust();

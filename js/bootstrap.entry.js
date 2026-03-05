@@ -10,6 +10,34 @@
       console.warn(message);
     }
   };
+  var reportNonFatalDiagnostic = function (payload) {
+    var source = payload && typeof payload === "object" ? payload : {};
+    var reporter =
+      typeof window !== "undefined" && typeof window.__reportNonFatalDiagnostic === "function"
+        ? window.__reportNonFatalDiagnostic
+        : typeof window !== "undefined" &&
+          window &&
+          window.__APP_DIAGNOSTICS__ &&
+          typeof window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic === "function"
+          ? window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic
+          : null;
+    if (typeof reporter !== "function") return;
+    try {
+      reporter({
+        module: "bootstrap.entry",
+        operation: String(source.operation || "bootstrap.unknown"),
+        kind: String(source.kind || "non-fatal"),
+        resource: String(source.resource || "bootstrap.entry"),
+        timestamp: source.timestamp,
+        errorName: String(source.errorName || ""),
+        errorMessage: String(source.errorMessage || ""),
+        note: String(source.note || ""),
+        optionalSignature: String(source.optionalSignature || ""),
+      });
+    } catch (error) {
+      // diagnostic reporter must stay non-blocking
+    }
+  };
   var bootstrapModuleScripts = [
     "./js/app.protocol.js",
     "./js/bootstrap.resources.js",
@@ -970,7 +998,14 @@
         // Intentionally eager: capture real startup timing under first-screen contention.
         window.__loadAnalyticsNow();
       } catch (error) {
-        // ignore analytics bootstrap errors
+        reportNonFatalDiagnostic({
+          operation: "bootstrap.analytics-preload",
+          kind: "analytics-load-failed",
+          resource: "window.__loadAnalyticsNow",
+          errorName: String((error && error.name) || "Error"),
+          errorMessage: String((error && error.message) || "analytics preload failed"),
+          optionalSignature: "bootstrap.analytics-preload",
+        });
       }
     }
     var shellReadyPromise = new Promise(function (resolve) {
@@ -1027,8 +1062,15 @@
           });
           renderProgress();
         }
-        optionalScriptPromise.catch(function () {
-          // non-blocking optional dependency
+        optionalScriptPromise.catch(function (error) {
+          reportNonFatalDiagnostic({
+            operation: "bootstrap.optional-preload",
+            kind: "optional-preload-failed",
+            resource: "bootstrap.optional",
+            errorName: String((error && error.name) || "Error"),
+            errorMessage: String((error && error.message) || "optional preload failed"),
+            optionalSignature: "bootstrap.optional-preload",
+          });
         });
         return loadScript(appEntryScript);
       });
@@ -1065,6 +1107,14 @@
       .catch(function (error) {
         var message = String((error && error.message) || "Failed to load bootstrap helper modules.");
         warnOnce("bootstrap-module-load-failed", "[bootstrap] " + message);
+        reportNonFatalDiagnostic({
+          operation: "bootstrap.load-helper-modules",
+          kind: "helper-module-load-failed",
+          resource: "bootstrap-module-scripts",
+          errorName: String((error && error.name) || "Error"),
+          errorMessage: message,
+          optionalSignature: "bootstrap.load-helper-modules",
+        });
         if (typeof window.__renderBootError === "function") {
           window.__renderBootError({
             title: bt("error_title_resource"),

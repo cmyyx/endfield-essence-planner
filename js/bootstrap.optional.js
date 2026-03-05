@@ -1,4 +1,31 @@
 (function (globalObject) {
+  var reportNonFatalDiagnostic = function (payload) {
+    var source = payload && typeof payload === "object" ? payload : {};
+    var reporter =
+      typeof globalObject.__reportNonFatalDiagnostic === "function"
+        ? globalObject.__reportNonFatalDiagnostic
+        : globalObject.__APP_DIAGNOSTICS__ &&
+          typeof globalObject.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic === "function"
+          ? globalObject.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic
+          : null;
+    if (typeof reporter !== "function") return;
+    try {
+      reporter({
+        module: "bootstrap.optional",
+        operation: String(source.operation || "optional.unknown"),
+        kind: String(source.kind || "non-fatal"),
+        resource: String(source.resource || "bootstrap.optional"),
+        timestamp: source.timestamp,
+        errorName: String(source.errorName || ""),
+        errorMessage: String(source.errorMessage || ""),
+        note: String(source.note || ""),
+        optionalSignature: String(source.optionalSignature || ""),
+      });
+    } catch (error) {
+      // diagnostic reporter must stay non-blocking
+    }
+  };
+
   var createOptionalFailureReporter = function (options) {
     var bt = options && typeof options.bt === "function" ? options.bt : function (key) { return key; };
 
@@ -90,6 +117,14 @@
       if (!allowUnsafe && !entry.optional) return null;
       var payload = buildOptionalFailurePayload(entry);
       enqueueOptionalFailure(payload);
+      reportNonFatalDiagnostic({
+        operation: "optional.report-failure",
+        kind: "optional-resource-failed",
+        resource: payload && payload.src ? payload.src : "optional-resource",
+        errorName: "OptionalResourceFailure",
+        errorMessage: payload && payload.signature ? payload.signature : "optional resource failed",
+        optionalSignature: "optional.report-failure:" + String((payload && payload.signature) || "unknown"),
+      });
       return payload;
     };
     if (typeof window !== "undefined") {
@@ -150,6 +185,14 @@
           "optional-validate-error:" + src,
           "[bootstrap] optional script validation threw for " + src + ", treating as failed validation."
         );
+        reportNonFatalDiagnostic({
+          operation: "optional.validate-script",
+          kind: "optional-validation-error",
+          resource: src,
+          errorName: String((error && error.name) || "Error"),
+          errorMessage: String((error && error.message) || "optional validation error"),
+          optionalSignature: "optional.validate-script:" + src,
+        });
         return false;
       }
     };
@@ -181,12 +224,20 @@
               reportOptionalResourceFailureByConfig(src, config);
               resolve();
             })
-            .catch(function () {
+            .catch(function (error) {
               attempts += 1;
               if (attempts <= retries) {
                 setTimeout(execute, retryDelayMs);
                 return;
               }
+              reportNonFatalDiagnostic({
+                operation: "optional.load-script",
+                kind: "optional-script-load-failed",
+                resource: src,
+                errorName: String((error && error.name) || "Error"),
+                errorMessage: String((error && error.message) || "optional script load failed"),
+                optionalSignature: "optional.load-script:" + src,
+              });
               reportOptionalResourceFailureByConfig(src, config);
               resolve();
             });
