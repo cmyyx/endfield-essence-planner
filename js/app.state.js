@@ -161,7 +161,6 @@
     ];
     state.conflictOpenMap = ref({});
     state.showBackToTop = ref(false);
-    state.canShowAds = ref(false);
 
     state.legacyMigrationMarks = ref({});
     state.showMigrationModal = ref(false);
@@ -222,7 +221,6 @@
     state.tutorialCollapseHighlightSeen = ref(false);
     state.tutorialManualAdvanceHoldIndex = ref(-1);
     state.isPortrait = ref(false);
-    state.isAdPortrait = ref(false);
 
     state.tutorialTargetWeaponName = "沧溟星梦";
     state.tutorialTargetDungeonId = "energy";

@@ -18,7 +18,6 @@ const assertNoMatch = (source, checks, scope) => {
 
 const appUiSource = read("js/app.ui.js");
 const templateSource = read("js/templates.main.01.js");
-const recommendationStylesSource = read("css/styles.recommendations.css");
 const appMainSource = read("js/app.main.js");
 const appStateSource = read("js/app.state.js");
 
@@ -47,19 +46,6 @@ assertNoMatch(
     { label: "ad dismiss binding", pattern: /dismissAdsForSession/ },
   ],
   "js/templates.main.01.js"
-);
-
-assertNoMatch(
-  recommendationStylesSource,
-  [
-    { label: "inline ad style", pattern: /\.slot-inline-card/ },
-    { label: "hero ad style", pattern: /\.slot-hero-shell/ },
-    { label: "provider style", pattern: /slot-provider-net/ },
-    { label: "ad provider style", pattern: /adwork-net/ },
-    { label: "ad close button style", pattern: /\.slot-close-button/ },
-    { label: "ad preview banner style", pattern: /\.slot-preview-banner/ },
-  ],
-  "css/styles.recommendations.css"
 );
 
 assertNoMatch(

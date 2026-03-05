@@ -158,27 +158,6 @@
           </div>
         </div>
         <div class="hero-nav-stack">
-          <div v-if="canShowAds && isAdPortrait" class="slot-hero-shell" :aria-label="t('warning.ad_slot_mobile')">
-            <div class="slot-ad-tip">{{ t("warning.item") }}</div>
-            <button
-              class="slot-close-button"
-              type="button"
-              :title="t('warning.close_ad')"
-              :aria-label="t('warning.close_ad')"
-              @click.stop="dismissAdsForSession"
-            >
-              &times;
-            </button>
-            <div v-if="adPreviewMode" class="slot-preview-banner">
-              {{ t("warning.ad_preview_mode_local") }}
-            </div>
-            <div
-              v-else
-              class="adwork-net adwork-auto slot-provider-net slot-provider-auto"
-              data-id="1050"
-              data-placeholder="none"
-            ></div>
-          </div>
           <nav class="main-nav hero-nav" :aria-label="t('nav.main_navigation')">
           <button 
             class="nav-item" 
@@ -755,28 +734,6 @@
                 }}
               </button>
             </div>
-          </div>
-
-          <div v-if="canShowAds && !isAdPortrait" class="card slot-inline-card slot-inline-top" :aria-label="t('warning.ad_slot_desktop')">
-            <div class="slot-ad-tip">{{ t("warning.item") }}</div>
-            <button
-              class="slot-close-button"
-              type="button"
-              :title="t('warning.close_ad')"
-              :aria-label="t('warning.close_ad')"
-              @click.stop="dismissAdsForSession"
-            >
-              &times;
-            </button>
-            <div v-if="adPreviewMode" class="slot-preview-banner">
-              {{ t("warning.ad_preview_mode_local") }}
-            </div>
-            <div
-              v-else
-              class="adwork-net adwork-auto slot-provider-net slot-provider-auto"
-              data-id="1050"
-              data-placeholder="none"
-            ></div>
           </div>
 
           <div v-if="!selectedCount" class="empty">

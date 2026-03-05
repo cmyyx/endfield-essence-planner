@@ -2,7 +2,7 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initUi = function initUi(ctx, state) {
-    const { ref, onMounted, onBeforeUnmount, nextTick, watch } = ctx;
+    const { ref, onMounted, onBeforeUnmount, nextTick } = ctx;
 
     const showBackToTop = state.showBackToTop;
     const showLangMenu = state.showLangMenu;
@@ -11,10 +11,7 @@
     const showPlanConfigHintDot = state.showPlanConfigHintDot;
     const showGearRefiningNavHintDot = state.showGearRefiningNavHintDot;
     const isPortrait = state.isPortrait;
-    const isAdPortrait = state.isAdPortrait;
-    const canShowAds = state.canShowAds;
     const updateLangMenuPlacement = state.updateLangMenuPlacement;
-    const loadScriptOnce = state.loadScriptOnce;
     const reportStorageIssue = (operation, key, error, meta) => {
       if (typeof state.reportStorageIssue === "function") {
         state.reportStorageIssue(operation, key, error, meta);
@@ -31,49 +28,7 @@
     const preloadBackgroundTimeoutMs = 850;
     const preloadBackgroundFadeMs = 720;
     let preloadBackgroundFadeTimer = null;
-
-    const allowedAdHosts = new Set([
-    //  "end.canmoe.com",
-    //  "127.0.0.1",
-    //  "localhost",
-    ]);
-    const providerScriptSrc = "https://cdn.adwork.net/js/makemoney.js";
     const mobileLayoutBreakpoint = 1024;
-    const adMobileBreakpoint = mobileLayoutBreakpoint;
-    const adPreviewParamKey = "adPreview";
-    const adPreviewMode = state.adPreviewMode || ref(false);
-    const adDismissedSession = state.adDismissedSession || ref(false);
-    let adScriptLoadingPromise = null;
-    let adScriptRetryTimer = null;
-    let adScriptRetryCount = 0;
-    const adScriptRetryDelaysMs = [1800, 5000];
-
-    state.adPreviewMode = adPreviewMode;
-    state.adDismissedSession = adDismissedSession;
-
-    const isLocalPreviewHost = (host) => host === "127.0.0.1" || host === "localhost" || host === "::1";
-    const resolveCurrentHost = () =>
-      (window.location && window.location.hostname ? window.location.hostname : "").toLowerCase();
-    const isAllowedAdHost = (host) => {
-      if (!host) return false;
-      return allowedAdHosts.has(host);
-    };
-    const isAdPreviewEnabledByQuery = () => {
-      if (typeof window === "undefined") return false;
-      try {
-        const params = new URLSearchParams(window.location.search || "");
-        const value = (params.get(adPreviewParamKey) || "").trim().toLowerCase();
-        return value === "1" || value === "true" || value === "yes" || value === "on";
-      } catch (error) {
-        return false;
-      }
-    };
-    const syncAdPreviewFlags = () => {
-      if (typeof window === "undefined") return;
-      const host = resolveCurrentHost();
-      const local = isLocalPreviewHost(host);
-      adPreviewMode.value = local && isAdPreviewEnabledByQuery();
-    };
 
     const readStorageValue = (key) => {
       if (!key) return "";
@@ -597,106 +552,6 @@
       });
     };
 
-    const evaluateAdVisibility = () => {
-      if (typeof window === "undefined") {
-        canShowAds.value = false;
-        return;
-      }
-      if (adDismissedSession.value) {
-        canShowAds.value = false;
-        return;
-      }
-      if (adPreviewMode.value) {
-        canShowAds.value = true;
-        return;
-      }
-      const host = resolveCurrentHost();
-      canShowAds.value = isAllowedAdHost(host);
-    };
-
-    const handleAdFailed = () => {
-      canShowAds.value = false;
-    };
-
-    const hasRenderedAdSlotContainer = () => {
-      if (typeof document === "undefined") return false;
-      return Boolean(document.querySelector(".slot-provider-net, .adwork-net"));
-    };
-
-    const clearAdScriptRetry = () => {
-      if (!adScriptRetryTimer) return;
-      clearTimeout(adScriptRetryTimer);
-      adScriptRetryTimer = null;
-    };
-
-    const scheduleAdScriptRetry = () => {
-      if (adPreviewMode.value) return;
-      if (adScriptRetryTimer) return;
-      if (adScriptRetryCount >= adScriptRetryDelaysMs.length) return;
-      const host = resolveCurrentHost();
-      if (!isAllowedAdHost(host)) return;
-      const delay = adScriptRetryDelaysMs[adScriptRetryCount];
-      adScriptRetryCount += 1;
-      adScriptRetryTimer = setTimeout(() => {
-        adScriptRetryTimer = null;
-        window.__slotProviderScriptError = false;
-        evaluateAdVisibility();
-        if (canShowAds.value) {
-          ensureAdScriptLoaded();
-        }
-      }, delay);
-    };
-
-    const ensureAdScriptLoaded = () => {
-      if (typeof window === "undefined" || typeof document === "undefined") {
-        return Promise.resolve(false);
-      }
-      if (adPreviewMode.value) {
-        return Promise.resolve(false);
-      }
-      if (!canShowAds.value) {
-        return Promise.resolve(false);
-      }
-      if (!hasRenderedAdSlotContainer()) {
-        return Promise.resolve(false);
-      }
-      if (window.__slotProviderScriptReady) {
-        return Promise.resolve(true);
-      }
-      if (adScriptLoadingPromise) {
-        return adScriptLoadingPromise;
-      }
-      const loadTask =
-        typeof loadScriptOnce === "function"
-          ? loadScriptOnce(providerScriptSrc)
-          : new Promise((resolve, reject) => {
-              const script = document.createElement("script");
-              script.src = providerScriptSrc;
-              script.async = true;
-              script.onload = resolve;
-              script.onerror = reject;
-              document.body.appendChild(script);
-            });
-      adScriptLoadingPromise = loadTask
-        .then(() => {
-          window.__slotProviderScriptReady = true;
-          window.__slotProviderScriptError = false;
-          adScriptRetryCount = 0;
-          clearAdScriptRetry();
-          return true;
-        })
-        .catch(() => {
-          window.__slotProviderScriptError = true;
-          scheduleAdScriptRetry();
-          window.dispatchEvent(new Event("slotfeed:failed"));
-          return false;
-        })
-        .finally(() => {
-          adScriptLoadingPromise = null;
-        });
-      return adScriptLoadingPromise;
-    };
-
     const resolveTheme = (mode) => {
       if (mode === "light" || mode === "dark") return mode;
       if (typeof window === "undefined" || !window.matchMedia) return "dark";
@@ -757,7 +612,6 @@
       } else {
         isPortrait.value = window.innerHeight >= window.innerWidth;
       }
-      isAdPortrait.value = window.innerWidth <= adMobileBreakpoint;
       if (showLangMenu.value && updateLangMenuPlacement) {
         if (typeof nextTick === "function") {
           nextTick(updateLangMenuPlacement);
@@ -873,11 +727,6 @@
       }
     };
 
-    const dismissAdsForSession = () => {
-      adDismissedSession.value = true;
-      canShowAds.value = false;
-    };
-
     const handleDocClick = (event) => {
       if (!event || !event.target || !event.target.closest) {
         showSecondaryMenu.value = false;
@@ -952,7 +801,6 @@
         }, 1200);
         bindSystemThemeListener();
         applyTheme(state.themePreference.value || "auto");
-        syncAdPreviewFlags();
         updateViewportOrientation();
         window.addEventListener("resize", updateViewportOrientation);
         updateViewportSafeBottom();
@@ -962,17 +810,9 @@
           window.visualViewport.addEventListener("scroll", scheduleViewportSafeBottom);
         }
         if (typeof window !== "undefined") {
-          if (!window.__slotProviderScriptReady) {
-            window.__slotProviderScriptError = false;
-          }
           backToTopLastScroll = window.scrollY || window.pageYOffset || 0;
           updateBackToTopVisibility();
           window.addEventListener("scroll", handleBackToTopScroll, { passive: true });
-          evaluateAdVisibility();
-          window.addEventListener("slotfeed:failed", handleAdFailed);
-          if (canShowAds.value) {
-            runAfterLayout(ensureAdScriptLoaded);
-          }
         }
         document.addEventListener("click", handleDocClick);
         document.addEventListener("keydown", handleDocKeydown);
@@ -986,25 +826,6 @@
         runAfterLayout(finalizePreload);
       }
     });
-
-    watch([canShowAds, isAdPortrait], () => {
-      if (canShowAds.value) {
-        runAfterLayout(ensureAdScriptLoaded);
-      }
-    });
-
-    watch(
-      () => (state.currentView ? state.currentView.value : ""),
-      (view) => {
-        if (view !== "planner") return;
-        const refreshAdSlotAfterViewSwitch = () => {
-          if (canShowAds.value) {
-            ensureAdScriptLoaded();
-          }
-        };
-        runAfterLayout(refreshAdSlotAfterViewSwitch);
-      }
-    );
 
     onBeforeUnmount(() => {
       if (removeMediaThemeListener) {
@@ -1024,10 +845,8 @@
       }
       if (typeof window !== "undefined") {
         window.removeEventListener("scroll", handleBackToTopScroll);
-        window.removeEventListener("slotfeed:failed", handleAdFailed);
         window.removeEventListener(optionalFailureEventName, handleOptionalFailureEvent);
       }
-      clearAdScriptRetry();
       clearBackToTopTimer();
       if (optionalFailurePollTimer) {
         clearInterval(optionalFailurePollTimer);
@@ -1051,7 +870,6 @@
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
     state.markGearRefiningNavHintSeen = markGearRefiningNavHintSeen;
-    state.dismissAdsForSession = dismissAdsForSession;
     state.dismissRuntimeWarning = dismissRuntimeWarning;
     state.ignoreRuntimeWarnings = ignoreRuntimeWarnings;
     state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
