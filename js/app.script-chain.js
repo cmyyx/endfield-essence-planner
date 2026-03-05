@@ -39,7 +39,6 @@
     "./js/app.storage.recovery.js",
     "./js/app.storage.diagnostic.js",
     "./js/app.storage.js",
-    "./js/app.migration.js",
     "./js/app.analytics.js",
     "./js/app.embed.js",
     "./js/app.perf.js",

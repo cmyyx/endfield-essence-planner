@@ -163,14 +163,6 @@
     state.showBackToTop = ref(false);
 
     state.legacyMigrationMarks = ref({});
-    state.showMigrationModal = ref(false);
-    state.migrationMappingMode = ref("essenceOwned");
-    state.migrationConflictStrategy = ref("fillMissing");
-    state.showMigrationConfirmModal = ref(false);
-    state.migrationConfirmAction = ref("");
-    state.migrationConfirmCountdown = ref(0);
-    state.migrationPreviewExpanded = ref(false);
-    state.migrationModalScrollable = ref(false);
     state.showStorageErrorModal = ref(false);
     state.storageErrorIgnored = ref(false);
     state.storageErrorCurrent = ref(null);
