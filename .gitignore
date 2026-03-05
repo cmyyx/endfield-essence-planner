@@ -4,3 +4,5 @@ error
 .codex
 .planning
 .claude
+node_modules
+test-results
