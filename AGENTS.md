@@ -26,9 +26,6 @@
 - 官方部署信号由响应头控制：`x-endfield-essence-planner-official: 1`。
 - 仅当响应头值为 `1` 时，才启用“非官方域名提示 / iframe 内嵌提示”（见 `js/app.embed.js`）。
 - 开源二次部署默认不加该响应头，不应触发官方域名提示。
-- 本地广告位调试规则（见 `js/app.ui.js`）：
-  - 仅 `127.0.0.1` / `localhost` / `::1` 可用 `?adPreview=1`。
-  - 广告关闭状态为单次会话内存态（`adDismissedSession`），刷新后恢复。
 
 ## 4. 启动链路（必须理解）
 - `index.html` 只保留最小壳：`#app-preload`、`#app`、`./js/app.resource-manifest.js`、`./js/app.script-chain.js`、`./js/bootstrap.entry.js`。
@@ -114,10 +111,13 @@
   - `node scripts/verify-doc-manifest-consistency.mjs`
   - `node tests/phase-07-01/task1-doc-manifest-sync.test.cjs`
   - `node tests/phase-07-01/task2-phase6-guardrail-doc-coverage.test.cjs`
+- Phase 8 硬门禁（失败即阻断）：
+  - `node tests/phase-08-04/task1-phase8-gate-manifest.test.cjs`
+  - `node tests/phase-08-04/task2-phase8-hard-gate-behavior.test.cjs`
+  - `node scripts/phase-08-gate.mjs`
 - 手工验证：
   - 正常启动可进入应用，preload 文案与主题正常。
   - 断网或拦截关键资源时能进入错误页并可重试恢复。
-  - 本地 `?adPreview=1` 有效。
   - 官方 header=1 与非官方部署两种场景行为符合预期。
   - 保持页面不刷新，更新 `data/version.json` 后可出现右下角“检测到新版本”提示。
 
