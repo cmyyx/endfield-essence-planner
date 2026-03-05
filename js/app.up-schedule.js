@@ -34,7 +34,7 @@
     if (hour > 23 || minute > 59) return null;
     return sign * (hour * 60 + minute);
   };
-  const parseScheduleTime = (value) => {
+  const parseScheduleTime = (value, boundary) => {
     const source = typeof value === "string" ? value.trim() : "";
     if (!source) return null;
 
@@ -43,8 +43,9 @@
       const year = toInt(dateOnly[1]);
       const month = toInt(dateOnly[2]);
       const day = toInt(dateOnly[3]);
-      const hour = 12;
-      const minute = 0;
+      const isEndBoundary = boundary === "end";
+      const hour = isEndBoundary ? 11 : 12;
+      const minute = isEndBoundary ? 59 : 0;
       const second = 0;
       if (!isValidDateTime(year, month, day, hour, minute, second)) return null;
       const utcMs =
@@ -114,8 +115,8 @@
         });
         return;
       }
-      const startParsed = parseScheduleTime(windowItem.start);
-      const endParsed = parseScheduleTime(windowItem.end);
+      const startParsed = parseScheduleTime(windowItem.start, "start");
+      const endParsed = parseScheduleTime(windowItem.end, "end");
       if (!startParsed || !endParsed) {
         reportIssue({
           code: ISSUE_CODES.INVALID_TIME,

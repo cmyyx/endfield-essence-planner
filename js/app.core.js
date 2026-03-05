@@ -474,7 +474,8 @@
         }, {});
 
       const formatS1 = (value) => {
-        if (!value || value === "任意") return i18nState.t("任意");
+        if (value === "任意") return i18nState.t("任意");
+        if (!value) return i18nState.t("error.attribute_missing");
         return i18nState.tTerm("s1", value);
       };
 

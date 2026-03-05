@@ -293,8 +293,10 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .plan-config-hint-dot {
-  background: #e14e4e;
-  box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+  border-color: rgba(225, 78, 78, 0.68);
+  background: linear-gradient(135deg, #ff866d, #e14e4e);
+  color: #fff7f7;
+  box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.28), 0 0 9px rgba(225, 78, 78, 0.3);
 }
 
 [data-theme="light"] .plan-config-hint-dot {
@@ -302,34 +304,36 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .nav-hint-dot {
-  background: #e14e4e;
-  box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+  border-color: rgba(225, 78, 78, 0.68);
+  background: linear-gradient(135deg, #ff866d, #e14e4e);
+  color: #fff7f7;
+  box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.28), 0 0 9px rgba(225, 78, 78, 0.3);
   animation: nav-hint-dot-pulse-light 1.6s ease-in-out infinite;
 }
 
 @keyframes plan-config-hint-dot-pulse-light {
   0%,
   100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+    transform: translateY(0);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.28), 0 0 9px rgba(225, 78, 78, 0.3);
   }
 
   50% {
-    transform: scale(1.22);
-    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.42), 0 0 12px rgba(225, 78, 78, 0.48);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.42), 0 0 12px rgba(225, 78, 78, 0.44);
   }
 }
 
 @keyframes nav-hint-dot-pulse-light {
   0%,
   100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.3), 0 0 8px rgba(225, 78, 78, 0.32);
+    transform: translateY(0);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.28), 0 0 9px rgba(225, 78, 78, 0.3);
   }
 
   50% {
-    transform: scale(1.22);
-    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.42), 0 0 12px rgba(225, 78, 78, 0.48);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 1px rgba(225, 78, 78, 0.42), 0 0 12px rgba(225, 78, 78, 0.44);
   }
 }
 
@@ -438,6 +442,15 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .attr-hint {
   border-color: rgba(31, 200, 183, 0.45);
   background: rgba(31, 200, 183, 0.08);
+}
+
+[data-theme="light"] .weapon-attr-warning {
+  border-color: rgba(227, 142, 45, 0.4);
+  background: rgba(255, 181, 95, 0.14);
+}
+
+[data-theme="light"] .weapon-attr-warning-text {
+  color: #6e4513;
 }
 
 [data-theme="light"] .filter-panel {
@@ -913,6 +926,12 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   background: rgba(231, 246, 255, 0.95);
   color: #1e5068;
   text-shadow: none;
+}
+
+[data-theme="light"] .rerun-ranking-upcoming-chip .weapon-up-chip-fallback {
+  border-color: rgba(227, 142, 45, 0.48);
+  background: rgba(255, 244, 224, 0.96);
+  color: #7d4b11;
 }
 
 [data-theme="light"] .weapon-hidden-chip {

@@ -10,6 +10,7 @@
     state.matchSourceName = ref("");
     state.schemeBaseSelections = ref({});
     state.weaponMarks = ref({});
+    state.weaponAttrOverrides = ref({});
     state.showAbout = ref(false);
     state.showSecondaryMenu = ref(false);
 
@@ -40,6 +41,7 @@
     state.tutorialStorageKey = "planner-tutorial:v1";
     state.uiStateStorageKey = "planner-ui-state:v1";
     state.attrHintStorageKey = "planner-attr-hint:v1";
+    state.weaponAttrOverridesStorageKey = "weapon-attr-overrides:v1";
     state.noticeSkipKey = "announcement:skip";
     state.legacyNoticePrefix = "announcement:skip:";
     state.perfModeStorageKey = "planner-perf-mode:v1";
@@ -82,6 +84,7 @@
     state.filterPanelManuallySet = ref(false);
     state.showAllSchemes = ref(false);
     state.showPlanConfig = ref(false);
+    state.showWeaponAttrDataModal = ref(false);
     state.showPlanConfigHintDot = ref(false);
     state.showGearRefiningNavHintDot = ref(false);
     state.recommendationConfig = ref({

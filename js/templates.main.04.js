@@ -290,6 +290,100 @@
         </div>
       </transition>
 
+      <transition name="fade-scale">
+        <div v-if="showWeaponAttrDataModal" class="about-overlay weapon-attr-overlay" @click.self="closeWeaponAttrDataModal">
+          <div class="about-card weapon-attr-card">
+            <h3>{{ t("modal.weapon_attribute_data_fix_title") }}</h3>
+            <p>{{ t("modal.weapon_attribute_data_fix_desc") }}</p>
+            <p class="storage-clear-confirm-warning">{{ t("modal.weapon_attribute_data_fix_tip") }}</p>
+            <div v-if="!weaponAttrIssueRows.length" class="weapon-attr-empty">
+              {{ t("modal.weapon_attribute_data_fix_empty") }}
+            </div>
+            <div v-else class="weapon-attr-list">
+              <article v-for="row in weaponAttrIssueRows" :key="row.name" class="weapon-attr-item">
+                <div class="weapon-attr-item-head">
+                  <div>
+                    <div class="weapon-attr-item-title">{{ tTerm("weapon", row.name) }}</div>
+                    <div class="weapon-attr-item-sub">{{ row.rarity }}★ · {{ tTerm("type", row.type) }}</div>
+                  </div>
+                  <span class="weapon-attr-item-status" :class="{ 'is-resolved': !row.hasUnresolvedFields }">
+                    {{
+                      row.hasUnresolvedFields
+                        ? t("modal.weapon_attribute_data_fix_status_pending")
+                        : t("modal.weapon_attribute_data_fix_status_done")
+                    }}
+                  </span>
+                </div>
+                <div class="weapon-attr-item-missing">
+                  {{
+                    t("modal.weapon_attribute_data_fix_raw_missing", {
+                      fields: row.rawMissingFields
+                        .map((field) =>
+                          field === "s1"
+                            ? t("nav.base_attributes")
+                            : field === "s2"
+                            ? t("nav.extra_attributes")
+                            : t("nav.skill_attributes")
+                        )
+                        .join(" / "),
+                    })
+                  }}
+                </div>
+                <div class="weapon-attr-editor-grid">
+                  <label class="weapon-attr-editor-field">
+                    <span>{{ t("nav.base_attributes") }}</span>
+                    <select
+                      :value="getWeaponAttrEditorValue(row.name, 's1')"
+                      :disabled="!isWeaponRawAttrMissingField(row.name, 's1')"
+                      @change="setWeaponAttrOverride(row.name, 's1', $event.target.value)"
+                    >
+                      <option value="">{{ t("modal.weapon_attribute_data_fix_unset") }}</option>
+                      <option v-for="value in weaponAttrS1Options" :key="['s1', value].join('|')" :value="value">
+                        {{ formatS1(value) }}
+                      </option>
+                    </select>
+                  </label>
+                  <label class="weapon-attr-editor-field">
+                    <span>{{ t("nav.extra_attributes") }}</span>
+                    <select
+                      :value="getWeaponAttrEditorValue(row.name, 's2')"
+                      :disabled="!isWeaponRawAttrMissingField(row.name, 's2')"
+                      @change="setWeaponAttrOverride(row.name, 's2', $event.target.value)"
+                    >
+                      <option value="">{{ t("modal.weapon_attribute_data_fix_unset") }}</option>
+                      <option v-for="value in weaponAttrS2Options" :key="['s2', value].join('|')" :value="value">
+                        {{ tTerm("s2", value) }}
+                      </option>
+                    </select>
+                  </label>
+                  <label class="weapon-attr-editor-field">
+                    <span>{{ t("nav.skill_attributes") }}</span>
+                    <select
+                      :value="getWeaponAttrEditorValue(row.name, 's3')"
+                      :disabled="!isWeaponRawAttrMissingField(row.name, 's3')"
+                      @change="setWeaponAttrOverride(row.name, 's3', $event.target.value)"
+                    >
+                      <option value="">{{ t("modal.weapon_attribute_data_fix_unset") }}</option>
+                      <option v-for="value in weaponAttrS3Options" :key="['s3', value].join('|')" :value="value">
+                        {{ tTerm("s3", value) }}
+                      </option>
+                    </select>
+                  </label>
+                </div>
+                <div class="weapon-attr-item-actions">
+                  <button class="ghost-button" @click="clearWeaponAttrOverride(row.name)">
+                    {{ t("button.clear_manual_fill") }}
+                  </button>
+                </div>
+              </article>
+            </div>
+            <div class="about-actions">
+              <button class="about-button" @click="closeWeaponAttrDataModal">{{ t("button.got_it") }}</button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <div class="version-debug-badge-wrap" :class="{ 'is-update-toast-active': showUpdatePrompt }">
         <transition name="version-badge-expand">
           <div

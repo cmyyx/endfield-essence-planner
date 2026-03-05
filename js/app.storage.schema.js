@@ -6,14 +6,21 @@
     const catalog = Array.isArray(weapons) ? weapons : [];
     const weaponNameSet = new Set(catalog.map((weapon) => weapon.name));
     const s1Set = new Set(catalog.map((weapon) => weapon.s1).filter(Boolean));
+    const dungeonsCatalog = Array.isArray(dungeons) ? dungeons : [];
     const s2Set = new Set(catalog.map((weapon) => weapon.s2).filter(Boolean));
     const s3Set = new Set(catalog.map((weapon) => weapon.s3).filter(Boolean));
+    dungeonsCatalog.forEach((dungeon) => {
+      const s2Pool = Array.isArray(dungeon && dungeon.s2_pool) ? dungeon.s2_pool : [];
+      const s3Pool = Array.isArray(dungeon && dungeon.s3_pool) ? dungeon.s3_pool : [];
+      s2Pool.filter(Boolean).forEach((value) => s2Set.add(value));
+      s3Pool.filter(Boolean).forEach((value) => s3Set.add(value));
+    });
     const mobilePanels = new Set(["weapons", "plans"]);
     const priorityModes = new Set(["ignore", "strict", "sameCoverage", "sameEfficiency"]);
     const strictPriorityOrders = new Set(["ownershipFirst", "regionFirst"]);
     const themeModes = new Set(["auto", "light", "dark"]);
     const regionSet = new Set(
-      (Array.isArray(dungeons) ? dungeons : [])
+      dungeonsCatalog
         .map((dungeon) => getDungeonRegion(dungeon && dungeon.name))
         .filter((name) => typeof name === "string" && name)
     );
@@ -221,6 +228,21 @@
           }
         });
         next.schemeBaseSelections = cleaned;
+      }
+
+      if (raw.weaponAttrOverrides && typeof raw.weaponAttrOverrides === "object") {
+        const cleaned = {};
+        Object.keys(raw.weaponAttrOverrides).forEach((name) => {
+          if (!name || !weaponNameSet.has(name)) return;
+          const entry = raw.weaponAttrOverrides[name];
+          if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
+          const normalized = {};
+          if (typeof entry.s1 === "string" && s1Set.has(entry.s1)) normalized.s1 = entry.s1;
+          if (typeof entry.s2 === "string" && s2Set.has(entry.s2)) normalized.s2 = entry.s2;
+          if (typeof entry.s3 === "string" && s3Set.has(entry.s3)) normalized.s3 = entry.s3;
+          if (Object.keys(normalized).length) cleaned[name] = normalized;
+        });
+        next.weaponAttrOverrides = cleaned;
       }
 
       if (typeof raw.showWeaponAttrs === "boolean") {

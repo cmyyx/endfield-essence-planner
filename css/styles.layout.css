@@ -728,26 +728,34 @@
 
       .nav-hint-dot {
         position: absolute;
-        right: -3px;
-        top: -3px;
-        width: 8px;
-        height: 8px;
+        right: -10px;
+        top: -9px;
+        min-width: 28px;
+        height: 16px;
+        padding: 0 6px;
         border-radius: 999px;
-        background: #ff6b6b;
-        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.38), 0 0 10px rgba(255, 107, 107, 0.5);
+        border: 1px solid rgba(255, 130, 130, 0.72);
+        background: linear-gradient(135deg, #ff8a74, #ff5f6d);
+        color: #fff8f8;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 14px;
+        letter-spacing: 0.08em;
+        text-align: center;
+        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.3), 0 0 12px rgba(255, 107, 107, 0.45);
         animation: nav-hint-dot-pulse 1.6s ease-in-out infinite;
       }
 
       @keyframes nav-hint-dot-pulse {
         0%,
         100% {
-          transform: scale(1);
-          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.38), 0 0 10px rgba(255, 107, 107, 0.5);
+          transform: translateY(0);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.3), 0 0 12px rgba(255, 107, 107, 0.45);
         }
 
         50% {
-          transform: scale(1.25);
-          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.48), 0 0 14px rgba(255, 107, 107, 0.65);
+          transform: translateY(-1px);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.48), 0 0 16px rgba(255, 107, 107, 0.62);
         }
       }
 
@@ -1016,6 +1024,12 @@
       .rerun-ranking-up-chip {
         margin-left: auto;
         align-self: flex-start;
+      }
+
+      .rerun-ranking-upcoming-chip .weapon-up-chip-fallback {
+        border-color: rgba(255, 182, 122, 0.55);
+        background: rgba(62, 38, 14, 0.86);
+        color: #ffe8cb;
       }
 
       .rerun-ranking-empty {

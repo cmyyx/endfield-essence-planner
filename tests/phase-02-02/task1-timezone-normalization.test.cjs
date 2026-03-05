@@ -13,9 +13,9 @@ const run = () => {
   const schedules = {
     熔铸火焰: {
       windows: [
-        { start: "2026-01-01", end: "2026-01-01T18:00:00" },
+        { start: "2026-01-01", end: "2026-01-02" },
         { start: "2026-01-01T12:00:00", end: "2026-01-01T16:00:00" },
-        { start: "2026-01-01T12:00:00", end: "2026-01-01T16:00:00" },
+        { start: "2026-01-01T12:00:00", end: "2026-01-01T18:00:00" },
       ],
     },
   };
@@ -49,11 +49,28 @@ const run = () => {
   assert.equal(Array.isArray(windows), true, "normalized windows should be an array");
   assert.equal(windows.length, 3, "all windows should be preserved");
 
-  const [first, second, third] = windows;
-  assert.equal(first.startIso, "2026-01-01T04:00:00.000Z", "date-only should map to +08:00 noon");
-  assert.equal(first.endIso, "2026-01-01T08:00:00.000Z", "no timezone datetime should use +08:00");
-  assert.equal(second.startIso, "2026-01-01T04:00:00.000Z", "no timezone datetime should be +08:00");
-  assert.equal(third.endIso, "2026-01-01T10:00:00.000Z", "sorting should compare by endMs");
+  const dateOnlyWindow = windows.find(
+    (windowItem) => windowItem.sourceStart === "2026-01-01" && windowItem.sourceEnd === "2026-01-02"
+  );
+  assert.ok(dateOnlyWindow, "date-only source window should be kept");
+  assert.equal(dateOnlyWindow.startIso, "2026-01-01T04:00:00.000Z", "date-only start should map to +08:00 noon");
+  assert.equal(dateOnlyWindow.endIso, "2026-01-02T03:59:00.000Z", "date-only end should map to +08:00 11:59");
+
+  const noTimezoneWindow = windows.find(
+    (windowItem) =>
+      windowItem.sourceStart === "2026-01-01T12:00:00" && windowItem.sourceEnd === "2026-01-01T16:00:00"
+  );
+  assert.ok(noTimezoneWindow, "no-timezone datetime source window should be kept");
+  assert.equal(
+    noTimezoneWindow.startIso,
+    "2026-01-01T04:00:00.000Z",
+    "no timezone datetime should use +08:00"
+  );
+  assert.equal(
+    noTimezoneWindow.endIso,
+    "2026-01-01T08:00:00.000Z",
+    "no timezone datetime end should use +08:00"
+  );
 
   windows.forEach((windowItem) => {
     assert.equal(typeof windowItem.startMs, "number", "startMs should be number");

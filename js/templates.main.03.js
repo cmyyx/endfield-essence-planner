@@ -178,6 +178,13 @@
                         })
                       }}
                     </div>
+                    <div class="rerun-ranking-meta" v-if="row.isUpcoming && row.nextStartMs">
+                      {{
+                        t("rerun.expected_start_date", {
+                          date: new Date(row.nextStartMs).toLocaleDateString(locale || undefined),
+                        })
+                      }}
+                    </div>
                   </div>
                   <span v-if="row.isActive" class="weapon-up-chip rerun-ranking-up-chip">
                     <img
@@ -190,6 +197,9 @@
                       @error="$event.target.style.display = 'none'; $event.target.closest('.weapon-up-chip')?.classList.add('is-fallback')"
                     />
                     <span class="weapon-up-chip-fallback">{{ t("up_badge_text") }}</span>
+                  </span>
+                  <span v-else-if="row.isUpcoming" class="weapon-up-chip rerun-ranking-up-chip rerun-ranking-upcoming-chip is-fallback">
+                    <span class="weapon-up-chip-fallback">{{ t("rerun.upcoming_badge") }}</span>
                   </span>
                 </article>
               </div>

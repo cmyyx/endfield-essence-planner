@@ -219,6 +219,12 @@
       const targets = state.selectedWeapons.value;
       if (!targets.length) return null;
       if (state.recommendations.value.length) return null;
+      const selectedAttrIssues =
+        typeof state.getSelectedWeaponAttrIssues === "function"
+          ? state.getSelectedWeaponAttrIssues()
+          : [];
+      if (selectedAttrIssues.length) return null;
+      if (state.recommendationDataIssue && state.recommendationDataIssue.value) return null;
 
       const baseCounts = countBy(targets.map((weapon) => weapon.s1));
       const baseKeys = Object.keys(baseCounts);

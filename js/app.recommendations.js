@@ -26,6 +26,14 @@
             strictPriorityOrder: "ownershipFirst",
           };
 
+    const getCatalogWeapons = () =>
+      typeof state.getCatalogWeapons === "function" ? state.getCatalogWeapons() : weapons;
+
+    const getSelectedWeaponAttrIssues = () =>
+      typeof state.getSelectedWeaponAttrIssues === "function"
+        ? state.getSelectedWeaponAttrIssues()
+        : [];
+
     const resolveRecommendationContext = () => {
       const isWeaponOwnedForRecommendation =
         typeof state.isWeaponOwnedForRecommendation === "function"
@@ -222,23 +230,11 @@
       dungeons.map((dungeon) => getDungeonRegion(dungeon && dungeon.name)),
       (a, b) => a.localeCompare(b, "zh-Hans-CN")
     );
-    const isWeaponFarmableInCurrentVersion = (weapon) => {
-      if (!weapon || !weapon.s2 || !weapon.s3) return false;
-      return dungeons.some((dungeon) => {
-        const s2Pool = Array.isArray(dungeon && dungeon.s2_pool) ? dungeon.s2_pool : [];
-        const s3Pool = Array.isArray(dungeon && dungeon.s3_pool) ? dungeon.s3_pool : [];
-        return s2Pool.includes(weapon.s2) && s3Pool.includes(weapon.s3);
-      });
-    };
-    const farmableS1Pool = uniqueSorted(
-      weapons
-        .filter((weapon) => isWeaponFarmableInCurrentVersion(weapon))
-        .map((weapon) => weapon.s1),
-      (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
-    );
 
     const recommendations = computed(() => {
       const selectedSet = new Set(state.selectedNames.value);
+      const selectedAttrIssues = getSelectedWeaponAttrIssues();
+      if (selectedAttrIssues.length) return [];
       const recommendationContext = resolveRecommendationContext();
       const {
         isWeaponOwnedForRecommendation,
@@ -249,7 +245,23 @@
         shouldHideWeaponInPlan,
         targets,
       } = recommendationContext;
+      const catalogWeapons = getCatalogWeapons();
       if (!targets.length) return [];
+
+      const isWeaponFarmableInCurrentVersion = (weapon) => {
+        if (!weapon || !weapon.s2 || !weapon.s3) return false;
+        return dungeons.some((dungeon) => {
+          const s2Pool = Array.isArray(dungeon && dungeon.s2_pool) ? dungeon.s2_pool : [];
+          const s3Pool = Array.isArray(dungeon && dungeon.s3_pool) ? dungeon.s3_pool : [];
+          return s2Pool.includes(weapon.s2) && s3Pool.includes(weapon.s3);
+        });
+      };
+      const farmableS1Pool = uniqueSorted(
+        catalogWeapons
+          .filter((weapon) => isWeaponFarmableInCurrentVersion(weapon))
+          .map((weapon) => weapon.s1),
+        (a, b) => getS1OrderIndex(a) - getS1OrderIndex(b)
+      );
 
       const lockOptions = [
         ...uniqueSorted(targets.map((weapon) => weapon.s2), (a, b) =>
@@ -283,7 +295,7 @@
           if (!matchedSelected.length) return;
 
           const schemeKey = `${dungeon.id}-${option.type}-${option.value}`;
-          const schemeWeapons = weapons.filter((weapon) => {
+          const schemeWeapons = catalogWeapons.filter((weapon) => {
             if (hideFourStarWeapons && weapon.rarity === 4) return false;
             return isWeaponCompatible(weapon, dungeon, option);
           });
@@ -497,11 +509,32 @@
       return schemes.sort((a, b) => compareWithPriorityMode(a, b, recommendationConfig));
     });
 
+    const recommendationDataIssue = computed(() => {
+      const recommendationContext = resolveRecommendationContext();
+      if (!recommendationContext.selectedWeapons.length || !recommendationContext.targets.length) {
+        return null;
+      }
+      const attrIssues = getSelectedWeaponAttrIssues();
+      if (attrIssues.length) {
+        return {
+          kind: "missingAttr",
+          weaponNames: attrIssues.map((item) => item.name).filter(Boolean),
+        };
+      }
+      if (!recommendations.value.length) {
+        return {
+          kind: "inconsistentData",
+          weaponNames: recommendationContext.targets.map((weapon) => weapon.name).filter(Boolean),
+        };
+      }
+      return null;
+    });
+
     const recommendationEmptyReason = computed(() => {
       const recommendationContext = resolveRecommendationContext();
       if (!recommendationContext.selectedWeapons.length) return "";
       if (!recommendationContext.targets.length) return "filteredOut";
-      if (!recommendations.value.length) return "noScheme";
+      if (recommendationDataIssue.value) return "noScheme";
       return "";
     });
 
@@ -612,6 +645,7 @@
     state.isConflictOpen = isConflictOpen;
     state.toggleConflictOpen = toggleConflictOpen;
     state.recommendations = recommendations;
+    state.recommendationDataIssue = recommendationDataIssue;
     state.recommendationEmptyReason = recommendationEmptyReason;
     state.coverageSummary = coverageSummary;
     state.primaryRecommendations = primaryRecommendations;

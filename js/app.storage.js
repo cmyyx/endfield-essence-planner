@@ -73,6 +73,9 @@
           if (restored.schemeBaseSelections) {
             state.schemeBaseSelections.value = restored.schemeBaseSelections;
           }
+          if (restored.weaponAttrOverrides) {
+            state.weaponAttrOverrides.value = restored.weaponAttrOverrides;
+          }
           if (typeof restored.showWeaponAttrs === "boolean") {
             state.showWeaponAttrs.value = restored.showWeaponAttrs;
           }
@@ -272,6 +275,7 @@
         searchQuery: state.searchQuery.value,
         selectedNames: state.selectedNames.value,
         schemeBaseSelections: state.schemeBaseSelections.value,
+        weaponAttrOverrides: state.weaponAttrOverrides.value,
         showWeaponAttrs: state.showWeaponAttrs.value,
         showAllSchemes: state.showAllSchemes.value,
         backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,

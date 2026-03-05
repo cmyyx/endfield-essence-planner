@@ -1061,6 +1061,117 @@
         color: #d9fffb;
       }
 
+      .about-overlay.weapon-attr-overlay {
+        z-index: 46;
+      }
+
+      .weapon-attr-card {
+        width: min(860px, calc(100vw - 24px));
+        max-height: min(84vh, 760px);
+        overflow: auto;
+        border-color: rgba(255, 171, 86, 0.45);
+        background: rgba(26, 18, 12, 0.92);
+      }
+
+      .weapon-attr-empty {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px dashed rgba(255, 255, 255, 0.16);
+        color: #f2dfc6;
+      }
+
+      .weapon-attr-list {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .weapon-attr-item {
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.04);
+        padding: 10px 12px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .weapon-attr-item-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px 10px;
+      }
+
+      .weapon-attr-item-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff4e6;
+      }
+
+      .weapon-attr-item-sub {
+        font-size: 11px;
+        color: #e2c9ab;
+      }
+
+      .weapon-attr-item-status {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ffd7ad;
+        border: 1px solid rgba(255, 182, 122, 0.45);
+        border-radius: 999px;
+        padding: 2px 8px;
+        background: rgba(255, 173, 97, 0.14);
+      }
+
+      .weapon-attr-item-status.is-resolved {
+        color: #cffff1;
+        border-color: rgba(77, 214, 201, 0.42);
+        background: rgba(77, 214, 201, 0.13);
+      }
+
+      .weapon-attr-item-missing {
+        font-size: 12px;
+        color: #f7debf;
+      }
+
+      .weapon-attr-editor-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .weapon-attr-editor-field {
+        display: grid;
+        gap: 4px;
+      }
+
+      .weapon-attr-editor-field > span {
+        font-size: 11px;
+        color: #dac1a5;
+      }
+
+      .weapon-attr-editor-field > select {
+        width: 100%;
+        min-height: 30px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(12, 18, 28, 0.74);
+        color: #eff7ff;
+        padding: 4px 8px;
+      }
+
+      .weapon-attr-editor-field > select:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .weapon-attr-item-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
       .version-debug-badge-wrap {
         position: fixed;
         top: calc(8px + env(safe-area-inset-top, 0px));
@@ -1400,11 +1511,53 @@
         color: #e6e9ef;
       }
 
-      [data-theme="light"] .about-card.storage-confirm-card {
-        border-color: rgba(243, 108, 108, 0.42);
-        background: rgba(26, 14, 18, 0.92);
-        color: #e6e9ef;
-      }
+[data-theme="light"] .about-card.storage-confirm-card {
+  border-color: rgba(243, 108, 108, 0.42);
+  background: rgba(26, 14, 18, 0.92);
+  color: #e6e9ef;
+}
+
+[data-theme="light"] .about-card.weapon-attr-card {
+  border-color: rgba(227, 142, 45, 0.42);
+  background: rgba(255, 248, 237, 0.98);
+  color: #1f2f43;
+}
+
+[data-theme="light"] .weapon-attr-item {
+  border-color: rgba(22, 44, 72, 0.14);
+  background: rgba(244, 248, 255, 0.86);
+}
+
+[data-theme="light"] .weapon-attr-item-title {
+  color: #2b3e56;
+}
+
+[data-theme="light"] .weapon-attr-item-sub,
+[data-theme="light"] .weapon-attr-editor-field > span {
+  color: #6c7f97;
+}
+
+[data-theme="light"] .weapon-attr-item-missing {
+  color: #7a511d;
+}
+
+[data-theme="light"] .weapon-attr-item-status {
+  color: #8a4f12;
+  border-color: rgba(227, 142, 45, 0.48);
+  background: rgba(255, 171, 86, 0.2);
+}
+
+[data-theme="light"] .weapon-attr-item-status.is-resolved {
+  color: #0f6a62;
+  border-color: rgba(31, 200, 183, 0.45);
+  background: rgba(31, 200, 183, 0.14);
+}
+
+[data-theme="light"] .weapon-attr-editor-field > select {
+  border-color: rgba(22, 44, 72, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f3a56;
+}
 
       [data-theme="light"] .version-debug-badge {
         border-color: rgba(22, 44, 72, 0.18);
@@ -1532,6 +1685,16 @@
           width: 26px;
           height: 26px;
           min-height: 26px;
+        }
+
+        .weapon-attr-card {
+          width: min(96vw, 860px);
+          max-height: min(86vh, 760px);
+          padding: 16px 14px;
+        }
+
+        .weapon-attr-editor-grid {
+          grid-template-columns: 1fr;
         }
       }
 

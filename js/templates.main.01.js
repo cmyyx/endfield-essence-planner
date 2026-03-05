@@ -189,7 +189,7 @@
               v-if="showGearRefiningNavHintDot"
               class="nav-hint-dot"
               aria-hidden="true"
-            ></span>
+            >NEW</span>
             {{ t("nav.gear_refining") }}
           </button>
           <button
@@ -303,6 +303,16 @@
               {{ t("button.clear_attribute_filters") }}
             </button>
           </div>
+          <transition name="fade-scale">
+            <div v-if="hasWeaponAttrIssues" class="weapon-attr-warning">
+              <div class="weapon-attr-warning-text">
+                {{ t("error.weapon_attribute_data_missing_count", { count: weaponAttrIssueRows.length }) }}
+              </div>
+              <button class="about-button weapon-attr-warning-action" @click="openWeaponAttrDataModal">
+                {{ t("button.manage_weapon_attribute_data") }}
+              </button>
+            </div>
+          </transition>
           <transition name="fade-scale">
             <div v-if="showAttrHint" class="attr-hint">
               <span class="attr-hint-text">
@@ -750,7 +760,19 @@
                 <div>
                   <div class="card-title">{{ t("error.no_available_plan_for_current_selection") }}</div>
                   <div class="hint">{{ t("nav.extra_skill_attributes_cannot_be_unified_or_no_dungeon_p") }}</div>
+                  <div class="hint" v-if="recommendationDataIssue && recommendationDataIssue.weaponNames && recommendationDataIssue.weaponNames.length">
+                    {{
+                      t("error.recommendation_data_issue_weapons", {
+                        weapons: recommendationDataIssue.weaponNames.map((name) => tTerm("weapon", name)).join(" / "),
+                      })
+                    }}
+                  </div>
                 </div>
+              </div>
+              <div class="about-actions" v-if="hasWeaponAttrIssues">
+                <button class="about-button" @click="openWeaponAttrDataModal">
+                  {{ t("button.manage_weapon_attribute_data") }}
+                </button>
               </div>
 
               <div class="lock-summary" v-if="fallbackPlan">

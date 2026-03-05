@@ -67,6 +67,16 @@ const run = () => {
           },
         ],
       },
+      FutureOnly: {
+        weaponName: "FutureOnly",
+        primaryCharacter: "CharF",
+        windows: [
+          {
+            startMs: nowMs + 2 * oneDayMs,
+            endMs: nowMs + 6 * oneDayMs,
+          },
+        ],
+      },
     }),
     getWeaponUpWindowAt: () => ({
       ActiveOnly: { weaponName: "ActiveOnly" },
@@ -79,8 +89,8 @@ const run = () => {
   assert.equal(Array.isArray(state.rerunRankingRows.value), true, "should expose rerun rows array");
   assert.equal(
     state.rerunRankingRows.value.length,
-    3,
-    "valid historical rows and current active rows should be included"
+    4,
+    "historical rows, active rows and future rows should be included"
   );
 
   const byWeapon = new Map(
@@ -92,6 +102,7 @@ const run = () => {
   assert.equal(byWeapon.has("MissingWindows"), false, "record without windows should be filtered");
   assert.equal(byWeapon.has("InvalidWindowShape"), false, "invalid window record should be filtered");
   assert.equal(byWeapon.has("ActiveOnly"), true, "active-only row should be retained");
+  assert.equal(byWeapon.has("FutureOnly"), true, "future-only row should be retained");
 
   const rowOne = byWeapon.get("ValidOne");
   const rowTwo = byWeapon.get("ValidTwo");
@@ -110,6 +121,16 @@ const run = () => {
   assert.equal(activeOnlyRow.gapDays, null, "active-only row should keep gapDays empty when no ended history");
   assert.equal(activeOnlyRow.lastEndMs, null, "active-only row should not fake lastEndMs");
   assert.equal(activeOnlyRow.rerunCount, 0, "active-only row should expose zero ended reruns");
+
+  const futureOnlyRow = byWeapon.get("FutureOnly");
+  assert.equal(futureOnlyRow.isActive, false, "future-only row should not be marked active");
+  assert.equal(futureOnlyRow.isUpcoming, true, "future-only row should be marked upcoming");
+  assert.equal(futureOnlyRow.hasEndedHistory, false, "future-only row should have no ended history");
+  assert.equal(
+    futureOnlyRow.nextStartMs,
+    nowMs + 2 * oneDayMs,
+    "future-only row should expose nearest upcoming start time"
+  );
 
   assert.equal(
     Number.isFinite(state.rerunRankingGeneratedAt.value),

@@ -61,6 +61,11 @@ const runModuleLevelChecks = () => {
         primaryCharacter: "ToggleChar",
         windows: [{ startMs: nowMs - oneDayMs, endMs: nowMs + oneDayMs }],
       },
+      WeaponFuture: {
+        weaponName: "WeaponFuture",
+        primaryCharacter: "FutureChar",
+        windows: [{ startMs: nowMs + 3 * oneDayMs, endMs: nowMs + 7 * oneDayMs }],
+      },
     }),
     getWeaponUpWindowAt: () => ({
       WeaponActiveHugeGap: { weaponName: "WeaponActiveHugeGap" },
@@ -71,7 +76,7 @@ const runModuleLevelChecks = () => {
   initRerunRanking({ ref }, state, { nowMs });
 
   const rows = state.rerunRankingRows.value;
-  assert.equal(rows.length, 4, "rows should be deduped to one row per character");
+  assert.equal(rows.length, 5, "rows should be deduped to one row per character");
 
   const sharedRows = rows.filter((row) => row.characterName === "SharedChar");
   assert.equal(sharedRows.length, 1, "same character should appear only once");
@@ -92,8 +97,8 @@ const runModuleLevelChecks = () => {
   const order = Array.from(rows, (row) => row.weaponName);
   assert.deepEqual(
     order,
-    ["WeaponDupOld", "WeaponInactive", "WeaponActiveHugeGap", "WeaponToggleActive"],
-    "active rows should always be moved to list bottom while keeping bottom-zone stable"
+    ["WeaponDupOld", "WeaponInactive", "WeaponActiveHugeGap", "WeaponToggleActive", "WeaponFuture"],
+    "active rows should be near bottom and upcoming rows should always be placed at absolute tail"
   );
 };
 
@@ -108,8 +113,8 @@ assert.match(
 const appMainSource = fs.readFileSync(appMainFile, "utf8");
 assert.match(
   appMainSource,
-  /init\(\"initRerunRanking\"\)/,
-  "app.main.js should initialize initRerunRanking"
+  /initExecutionOrder\s*=\s*\[[\s\S]*"initRerunRanking"/,
+  "app.main.js initExecutionOrder should include initRerunRanking"
 );
 assert.match(
   appMainSource,

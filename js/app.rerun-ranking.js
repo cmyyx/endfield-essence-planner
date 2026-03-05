@@ -29,6 +29,19 @@
     return candidate;
   };
 
+  const pickNextUpcomingWindow = (windows, nowMs) => {
+    if (!Array.isArray(windows)) return null;
+    let candidate = null;
+    windows.forEach((item) => {
+      const startMs = Number(item && item.startMs);
+      if (!Number.isFinite(startMs) || startMs <= nowMs) return;
+      if (!candidate || startMs < candidate.startMs) {
+        candidate = item;
+      }
+    });
+    return candidate;
+  };
+
   const countEndedWindows = (windows, nowMs) => {
     if (!Array.isArray(windows)) return 0;
     let count = 0;
@@ -67,9 +80,12 @@
       const weaponLabel = String(record.weaponName || weaponName);
       const isActive = Boolean(activeByWeapon[weaponName] || activeByWeapon[weaponLabel]);
       const lastWindow = pickLastEndedWindow(record.windows, nowMs);
+      const nextWindow = pickNextUpcomingWindow(record.windows, nowMs);
       const lastEndMs = lastWindow ? Number(lastWindow.endMs) : Number.NaN;
+      const nextStartMs = nextWindow ? Number(nextWindow.startMs) : Number.NaN;
       const hasEndedHistory = Number.isFinite(lastEndMs);
-      if (!hasEndedHistory && !isActive) return;
+      const hasUpcomingWindow = Number.isFinite(nextStartMs);
+      if (!hasEndedHistory && !isActive && !hasUpcomingWindow) return;
       const gapMs = hasEndedHistory ? nowMs - lastEndMs : null;
       if (hasEndedHistory && (!Number.isFinite(gapMs) || gapMs < 0)) return;
 
@@ -79,10 +95,12 @@
         avatarSrc: String(record.avatarSrc || ""),
         hasEndedHistory,
         lastEndMs: hasEndedHistory ? lastEndMs : null,
+        nextStartMs: hasUpcomingWindow ? nextStartMs : null,
         gapMs,
         gapDays: hasEndedHistory ? Math.floor(gapMs / DAY_MS) : null,
         rerunCount: countEndedWindows(record.windows, nowMs),
         isActive,
+        isUpcoming: !isActive && hasUpcomingWindow && !hasEndedHistory,
       });
     });
 
@@ -115,6 +133,10 @@
         dedupedByCharacter.set(key, row.isActive ? row : existing);
         return;
       }
+      if (row.isUpcoming !== existing.isUpcoming) {
+        dedupedByCharacter.set(key, row.isUpcoming ? row : existing);
+        return;
+      }
       if (compareRankingRow(row, existing) < 0) {
         dedupedByCharacter.set(key, row);
       }
@@ -123,7 +145,12 @@
 
     const inactive = [];
     const active = [];
+    const upcoming = [];
     deduped.forEach((row) => {
+      if (row.isUpcoming) {
+        upcoming.push(row);
+        return;
+      }
       if (row.isActive) {
         active.push(row);
       } else {
@@ -131,7 +158,7 @@
       }
     });
 
-    return inactive.concat(active);
+    return inactive.concat(active, upcoming);
   };
 
   modules.deriveRerunRankingRows = deriveRerunRankingRows;
