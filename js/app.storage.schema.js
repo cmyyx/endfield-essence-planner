@@ -1,0 +1,301 @@
+(function () {
+  const modules = (window.AppModules = window.AppModules || {});
+
+  modules.createStorageSchemaApi = function createStorageSchemaApi(state) {
+    const sanitizeArray = (value) => (Array.isArray(value) ? value : []);
+    const catalog = Array.isArray(weapons) ? weapons : [];
+    const weaponNameSet = new Set(catalog.map((weapon) => weapon.name));
+    const s1Set = new Set(catalog.map((weapon) => weapon.s1).filter(Boolean));
+    const s2Set = new Set(catalog.map((weapon) => weapon.s2).filter(Boolean));
+    const s3Set = new Set(catalog.map((weapon) => weapon.s3).filter(Boolean));
+    const mobilePanels = new Set(["weapons", "plans"]);
+    const priorityModes = new Set(["ignore", "strict", "sameCoverage", "sameEfficiency"]);
+    const strictPriorityOrders = new Set(["ownershipFirst", "regionFirst"]);
+    const themeModes = new Set(["auto", "light", "dark"]);
+    const regionSet = new Set(
+      (Array.isArray(dungeons) ? dungeons : [])
+        .map((dungeon) => getDungeonRegion(dungeon && dungeon.name))
+        .filter((name) => typeof name === "string" && name)
+    );
+
+    const normalizeRecommendationConfig = (raw, legacyHideExcluded) => {
+      const defaults = state.recommendationConfig.value || {};
+      const source = raw && typeof raw === "object" ? raw : {};
+
+      const hideEssenceOwnedWeapons =
+        typeof source.hideEssenceOwnedWeapons === "boolean"
+          ? source.hideEssenceOwnedWeapons
+          : typeof source.hideExcluded === "boolean"
+            ? source.hideExcluded
+            : typeof legacyHideExcluded === "boolean"
+              ? legacyHideExcluded
+              : Boolean(defaults.hideEssenceOwnedWeapons);
+
+      const hideEssenceOwnedOwnedOnly =
+        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedOwnedOnly === "boolean"
+          ? source.hideEssenceOwnedOwnedOnly
+          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedOwnedOnly);
+
+      const hideEssenceOwnedWeaponsInSelector =
+        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedWeaponsInSelector === "boolean"
+          ? source.hideEssenceOwnedWeaponsInSelector
+          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedWeaponsInSelector);
+
+      const hideUnownedWeapons =
+        typeof source.hideUnownedWeapons === "boolean"
+          ? source.hideUnownedWeapons
+          : Boolean(defaults.hideUnownedWeapons);
+
+      const hideUnownedWeaponsInSelector =
+        hideUnownedWeapons && typeof source.hideUnownedWeaponsInSelector === "boolean"
+          ? source.hideUnownedWeaponsInSelector
+          : hideUnownedWeapons && Boolean(defaults.hideUnownedWeaponsInSelector);
+
+      const hideFourStarWeapons =
+        typeof source.hideFourStarWeapons === "boolean"
+          ? source.hideFourStarWeapons
+          : Boolean(defaults.hideFourStarWeapons);
+
+      const hideFourStarWeaponsInSelector =
+        hideFourStarWeapons && typeof source.hideFourStarWeaponsInSelector === "boolean"
+          ? source.hideFourStarWeaponsInSelector
+          : hideFourStarWeapons && Boolean(defaults.hideFourStarWeaponsInSelector);
+
+      const attributeFilterAffectsHiddenWeapons =
+        typeof source.attributeFilterAffectsHiddenWeapons === "boolean"
+          ? source.attributeFilterAffectsHiddenWeapons
+          : Boolean(defaults.attributeFilterAffectsHiddenWeapons);
+
+      const regionPriorityMode = priorityModes.has(source.regionPriorityMode)
+        ? source.regionPriorityMode
+        : priorityModes.has(source.priorityMode)
+          ? source.priorityMode
+          : defaults.regionPriorityMode || "ignore";
+
+      const ownershipPriorityMode = priorityModes.has(source.ownershipPriorityMode)
+        ? source.ownershipPriorityMode
+        : defaults.ownershipPriorityMode || "ignore";
+
+      const strictPriorityOrder = strictPriorityOrders.has(source.strictPriorityOrder)
+        ? source.strictPriorityOrder
+        : defaults.strictPriorityOrder || "ownershipFirst";
+
+      const normalized = {
+        hideEssenceOwnedWeapons,
+        hideEssenceOwnedOwnedOnly,
+        hideEssenceOwnedWeaponsInSelector,
+        hideUnownedWeapons,
+        hideUnownedWeaponsInSelector,
+        hideFourStarWeapons,
+        hideFourStarWeaponsInSelector,
+        attributeFilterAffectsHiddenWeapons,
+        preferredRegion1: "",
+        preferredRegion2: "",
+        regionPriorityMode,
+        ownershipPriorityMode,
+        strictPriorityOrder,
+      };
+
+      if (typeof source.preferredRegion1 === "string" && regionSet.has(source.preferredRegion1)) {
+        normalized.preferredRegion1 = source.preferredRegion1;
+      }
+      if (typeof source.preferredRegion2 === "string" && regionSet.has(source.preferredRegion2)) {
+        normalized.preferredRegion2 = source.preferredRegion2;
+      }
+      if (
+        normalized.preferredRegion1 &&
+        normalized.preferredRegion2 &&
+        normalized.preferredRegion1 === normalized.preferredRegion2
+      ) {
+        normalized.preferredRegion2 = "";
+      }
+
+      if (!normalized.hideEssenceOwnedWeapons) {
+        normalized.hideEssenceOwnedOwnedOnly = false;
+        normalized.hideEssenceOwnedWeaponsInSelector = false;
+      }
+      if (!normalized.hideUnownedWeapons) {
+        normalized.hideUnownedWeaponsInSelector = false;
+      }
+      if (!normalized.hideFourStarWeapons) {
+        normalized.hideFourStarWeaponsInSelector = false;
+      }
+
+      return normalized;
+    };
+
+    const normalizeWeaponMarks = (raw) => normalizeWeaponMarksMap(raw, weaponNameSet);
+
+    const inspectWeaponMarksSchemaIssues = (raw) => {
+      const issues = [];
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        issues.push("顶层结构不是对象");
+        return issues;
+      }
+      const allowedKeys = new Set(["weaponOwned", "essenceOwned", "excluded", "note"]);
+      Object.keys(raw).forEach((name) => {
+        if (!name || !weaponNameSet.has(name)) return;
+        const entry = raw[name];
+        if (entry == null) return;
+        if (typeof entry === "string") return;
+        if (typeof entry !== "object" || Array.isArray(entry)) {
+          issues.push(`${name}: 数据结构不是对象或字符串`);
+          return;
+        }
+        Object.keys(entry).forEach((key) => {
+          if (!allowedKeys.has(key)) {
+            issues.push(`${name}: 存在未知字段 ${key}`);
+          }
+        });
+        if (Object.prototype.hasOwnProperty.call(entry, "weaponOwned") && typeof entry.weaponOwned !== "boolean") {
+          issues.push(`${name}: weaponOwned 不是布尔值`);
+        }
+        if (Object.prototype.hasOwnProperty.call(entry, "essenceOwned") && typeof entry.essenceOwned !== "boolean") {
+          issues.push(`${name}: essenceOwned 不是布尔值`);
+        }
+        if (Object.prototype.hasOwnProperty.call(entry, "excluded") && typeof entry.excluded !== "boolean") {
+          issues.push(`${name}: excluded 不是布尔值`);
+        }
+        if (Object.prototype.hasOwnProperty.call(entry, "note") && typeof entry.note !== "string") {
+          issues.push(`${name}: note 不是字符串`);
+        }
+      });
+      return issues;
+    };
+
+    const escapeJsonString = (value) => {
+      const text = String(value == null ? "" : value);
+      return text.replace(/[\u0000-\u001f"\\]/g, (char) => {
+        if (char === '"') return '\\"';
+        if (char === "\\") return "\\\\";
+        if (char === "\b") return "\\b";
+        if (char === "\f") return "\\f";
+        if (char === "\n") return "\\n";
+        if (char === "\r") return "\\r";
+        if (char === "\t") return "\\t";
+        const code = char.charCodeAt(0).toString(16).padStart(4, "0");
+        return `\\u${code}`;
+      });
+    };
+
+    const serializeWeaponMarksNormalized = (normalizedMap) => {
+      const source = normalizedMap && typeof normalizedMap === "object" ? normalizedMap : {};
+      const names = Object.keys(source);
+      if (!names.length) return "{}";
+      const items = [];
+      names.forEach((name) => {
+        if (!name) return;
+        const entry = source[name];
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
+        const fields = [];
+        if (entry.weaponOwned === true) fields.push('"weaponOwned":true');
+        if (entry.essenceOwned === true) fields.push('"essenceOwned":true');
+        if (typeof entry.note === "string" && entry.note) {
+          fields.push(`"note":"${escapeJsonString(entry.note)}"`);
+        }
+        if (!fields.length) return;
+        items.push(`"${escapeJsonString(name)}":{${fields.join(",")}}`);
+      });
+      return `{${items.join(",")}}`;
+    };
+
+    const sanitizeState = (raw) => {
+      if (!raw || typeof raw !== "object") return null;
+      const next = {};
+
+      if (typeof raw.searchQuery === "string") {
+        next.searchQuery = raw.searchQuery;
+      }
+
+      if (Array.isArray(raw.selectedNames)) {
+        const unique = Array.from(new Set(raw.selectedNames));
+        next.selectedNames = unique.filter((name) => weaponNameSet.has(name));
+      }
+
+      if (raw.schemeBaseSelections && typeof raw.schemeBaseSelections === "object") {
+        const cleaned = {};
+        Object.keys(raw.schemeBaseSelections).forEach((key) => {
+          const values = sanitizeArray(raw.schemeBaseSelections[key]).filter((value) => s1Set.has(value));
+          if (values.length) {
+            cleaned[key] = Array.from(new Set(values));
+          }
+        });
+        next.schemeBaseSelections = cleaned;
+      }
+
+      if (typeof raw.showWeaponAttrs === "boolean") {
+        next.showWeaponAttrs = raw.showWeaponAttrs;
+      }
+      if (typeof raw.filterPanelManuallySet === "boolean") {
+        next.filterPanelManuallySet = raw.filterPanelManuallySet;
+      }
+      if (next.filterPanelManuallySet && typeof raw.showFilterPanel === "boolean") {
+        next.showFilterPanel = raw.showFilterPanel;
+      }
+      if (typeof raw.showAllSchemes === "boolean") {
+        next.showAllSchemes = raw.showAllSchemes;
+      }
+      if (typeof raw.backgroundDisplayEnabled === "boolean") {
+        next.backgroundDisplayEnabled = raw.backgroundDisplayEnabled;
+      }
+
+      next.recommendationConfig = normalizeRecommendationConfig(
+        raw.recommendationConfig,
+        raw.hideExcludedInPlans
+      );
+
+      if (mobilePanels.has(raw.mobilePanel)) {
+        next.mobilePanel = raw.mobilePanel;
+      }
+
+      const s1Filter = Array.from(new Set(sanitizeArray(raw.filterS1).filter((value) => s1Set.has(value))));
+      const s2Filter = Array.from(new Set(sanitizeArray(raw.filterS2).filter((value) => s2Set.has(value))));
+      const s3Filter = Array.from(new Set(sanitizeArray(raw.filterS3).filter((value) => s3Set.has(value))));
+      if (s1Filter.length) next.filterS1 = s1Filter;
+      if (s2Filter.length) next.filterS2 = s2Filter;
+      if (s3Filter.length) next.filterS3 = s3Filter;
+
+      return next;
+    };
+
+    const getUrlSelectedWeaponNames = () => {
+      if (typeof window === "undefined") return [];
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        if (!params.has("weapons") && !params.has("weapon")) return [];
+        const names = [];
+        const packed = params.get("weapons");
+        if (packed) {
+          names.push(...packed.split(","));
+        }
+        const repeated = params.getAll("weapon");
+        if (repeated.length) {
+          names.push(...repeated);
+        }
+        if (!names.length) return [];
+        const unique = Array.from(new Set(names.map((name) => String(name || "").trim()).filter(Boolean)));
+        return unique.filter((name) => weaponNameSet.has(name));
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const isThemeMode = (value) => themeModes.has(value);
+
+    const shouldCollapseFilterPanelByDefault = () => {
+      if (typeof window === "undefined") return false;
+      return state.isPortrait.value || window.innerWidth <= 640;
+    };
+
+    return {
+      normalizeRecommendationConfig,
+      normalizeWeaponMarks,
+      inspectWeaponMarksSchemaIssues,
+      serializeWeaponMarksNormalized,
+      sanitizeState,
+      getUrlSelectedWeaponNames,
+      isThemeMode,
+      shouldCollapseFilterPanelByDefault,
+    };
+  };
+})();
