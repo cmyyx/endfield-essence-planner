@@ -24,6 +24,9 @@ expectedModules.forEach((relativePath) => {
 const manifestSource = read("js/app.resource-manifest.js");
 const scriptChainSource = read("js/app.script-chain.js");
 const storageSource = read("js/app.storage.js");
+const mainSource = read("js/app.main.js");
+const stateSource = read("js/app.state.js");
+const mainTemplate03Source = read("js/templates.main.03.js");
 
 const assertOrderedModules = (source, label) => {
   const ordered = [
@@ -51,6 +54,14 @@ assertOrderedModules(
   "[schema] app.script-chain fallback output"
 );
 
+const initOrderMatch = mainSource.match(/const initExecutionOrder = \[([\s\S]*?)\];/);
+assert.ok(initOrderMatch, "[cleanup] app.main should define initExecutionOrder for startup contract checks");
+const initOrder = Array.from(initOrderMatch[1].matchAll(/"([^"]+)"/g)).map((match) => match[1]);
+assert.ok(
+  !initOrder.includes("initMigration"),
+  "[cleanup] initExecutionOrder should not include initMigration after migration-chain removal"
+);
+
 [
   "createStorageSchemaApi",
   "createStoragePersistenceApi",
@@ -75,6 +86,53 @@ assertOrderedModules(
     storageSource,
     pattern,
     `[schema] app.storage should be v2-only and must not read legacy v1 marks as migration input`
+  );
+});
+
+assert.doesNotMatch(
+  manifestSource,
+  /["']\.\/js\/app\.migration\.js["']/,
+  "[cleanup] app.resource-manifest should not load app.migration.js after migration-chain removal"
+);
+assert.doesNotMatch(
+  scriptChainSource,
+  /["']\.\/js\/app\.migration\.js["']/,
+  "[cleanup] app.script-chain fallback output should not include app.migration.js after migration-chain removal"
+);
+
+[
+  /\bstate\.showMigrationModal\b/,
+  /\bstate\.migrationMappingMode\b/,
+  /\bstate\.migrationConflictStrategy\b/,
+  /\bstate\.showMigrationConfirmModal\b/,
+  /\bstate\.migrationConfirmAction\b/,
+  /\bstate\.migrationConfirmCountdown\b/,
+  /\bstate\.migrationPreviewExpanded\b/,
+  /\bstate\.migrationModalScrollable\b/,
+].forEach((pattern) => {
+  assert.doesNotMatch(
+    stateSource,
+    pattern,
+    "[cleanup] app.state should not expose migration modal state after migration-chain removal"
+  );
+});
+
+[
+  /\bshowMigrationModal\b/,
+  /\bshowMigrationConfirmModal\b/,
+  /\bmigrationMappingMode\b/,
+  /\bmigrationConflictStrategy\b/,
+  /\bmigrationConfirmAction\b/,
+  /\bmigrationConfirmCountdown\b/,
+  /\bmigrationPreviewExpanded\b/,
+  /\bmigrationModalScrollable\b/,
+  /\bmigrationPreview\b/,
+  /\bmigration-overlay\b/,
+].forEach((pattern) => {
+  assert.doesNotMatch(
+    mainTemplate03Source,
+    pattern,
+    "[cleanup] templates.main.03 should not retain migration modal/template bindings after migration-chain removal"
   );
 });
 
