@@ -521,6 +521,15 @@
                   {{ t("nav.hidden") }}
                 </div>
               </div>
+              <span
+                class="weapon-ownership-badge"
+                :class="{
+                  'is-owned': isWeaponOwned(weapon.name),
+                  'is-unowned': isUnowned(weapon.name),
+                }"
+              >
+                {{ isWeaponOwned(weapon.name) ? t("badge.owned") : t("nav.not_owned") }}
+              </span>
               <div class="weapon-name">
                 <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
               </div>

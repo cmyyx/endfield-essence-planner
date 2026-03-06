@@ -212,6 +212,35 @@
           font-size: 11px;
         }
 
+        .weapon-ownership-badge {
+          position: absolute;
+          right: 4px;
+          bottom: 30px;
+          z-index: 5;
+          padding: 1px 5px;
+          border-radius: 999px;
+          font-size: 9px;
+          line-height: 1.2;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 70%;
+          pointer-events: none;
+        }
+
+        .weapon-ownership-badge.is-owned {
+          border: 1px solid rgba(77, 214, 201, 0.5);
+          background: rgba(13, 58, 55, 0.88);
+          color: #b8f5f0;
+        }
+
+        .weapon-ownership-badge.is-unowned {
+          border: 1px solid rgba(255, 196, 83, 0.5);
+          background: rgba(45, 35, 18, 0.78);
+          color: #ffe8b4;
+        }
+
         .weapon-corner-stack {
           top: 4px;
           right: 0;
@@ -1009,6 +1038,35 @@
         overflow: hidden;
         text-overflow: ellipsis;
         text-align: center;
+      }
+
+      .weapon-ownership-badge {
+        position: absolute;
+        right: 6px;
+        bottom: 36px;
+        z-index: 5;
+        padding: 2px 6px;
+        border-radius: 999px;
+        font-size: 10px;
+        line-height: 1.2;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
+        pointer-events: none;
+      }
+
+      .weapon-ownership-badge.is-owned {
+        border: 1px solid rgba(77, 214, 201, 0.5);
+        background: rgba(13, 58, 55, 0.88);
+        color: #b8f5f0;
+      }
+
+      .weapon-ownership-badge.is-unowned {
+        border: 1px solid rgba(255, 196, 83, 0.5);
+        background: rgba(45, 35, 18, 0.78);
+        color: #ffe8b4;
       }
 
       .weapon-item.rarity-6 .weapon-band {
