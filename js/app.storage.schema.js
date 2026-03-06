@@ -4,21 +4,26 @@
   modules.createStorageSchemaApi = function createStorageSchemaApi(state) {
     const sanitizeArray = (value) => (Array.isArray(value) ? value : []);
     const catalog = Array.isArray(weapons) ? weapons : [];
-    const weaponByName = new Map(
-      catalog
-        .filter((weapon) => weapon && typeof weapon === "object" && typeof weapon.name === "string")
-        .map((weapon) => [weapon.name, weapon])
+    const validCatalog = catalog.filter(
+      (weapon) => weapon && typeof weapon === "object" && typeof weapon.name === "string"
     );
-    const weaponNameSet = new Set(catalog.map((weapon) => weapon.name));
-    const s1Set = new Set(catalog.map((weapon) => weapon.s1).filter(Boolean));
+    const weaponByName = new Map(
+      validCatalog.map((weapon) => [weapon.name, weapon])
+    );
+    const weaponNameSet = new Set(validCatalog.map((weapon) => weapon.name));
+    const s1Set = new Set(validCatalog.map((weapon) => weapon.s1).filter(Boolean));
     const dungeonsCatalog = Array.isArray(dungeons) ? dungeons : [];
-    const s2Set = new Set(catalog.map((weapon) => weapon.s2).filter(Boolean));
-    const s3Set = new Set(catalog.map((weapon) => weapon.s3).filter(Boolean));
+    const s2Set = new Set(validCatalog.map((weapon) => weapon.s2).filter(Boolean));
+    const s3Set = new Set(validCatalog.map((weapon) => weapon.s3).filter(Boolean));
     dungeonsCatalog.forEach((dungeon) => {
       const s2Pool = Array.isArray(dungeon && dungeon.s2_pool) ? dungeon.s2_pool : [];
       const s3Pool = Array.isArray(dungeon && dungeon.s3_pool) ? dungeon.s3_pool : [];
-      s2Pool.filter(Boolean).forEach((value) => s2Set.add(value));
-      s3Pool.filter(Boolean).forEach((value) => s3Set.add(value));
+      s2Pool.filter(Boolean).forEach((value) => {
+        s2Set.add(value);
+      });
+      s3Pool.filter(Boolean).forEach((value) => {
+        s3Set.add(value);
+      });
     });
     const mobilePanels = new Set(["weapons", "plans"]);
     const priorityModes = new Set(["ignore", "strict", "sameCoverage", "sameEfficiency"]);

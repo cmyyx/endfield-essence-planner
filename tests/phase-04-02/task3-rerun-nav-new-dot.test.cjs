@@ -96,7 +96,7 @@ assert.match(
 
 assert.match(
   appMainSource,
-  /if\s*\(\s*view\s*===\s*"rerun-ranking"\s*&&\s*typeof state\.markRerunRankingNavHintSeen === "function"\s*\)\s*\{\s*state\.markRerunRankingNavHintSeen\(\);\s*\}/,
+  /if\s*\(\s*view\s*===\s*['"]rerun-ranking['"]\s*&&\s*typeof\s+state\.markRerunRankingNavHintSeen\s*===\s*['"]function['"]\s*\)\s*\{\s*state\.markRerunRankingNavHintSeen\s*\(\s*\)\s*;?\s*\}/,
   "setView should mark rerun-ranking nav hint seen when entering rerun-ranking view"
 );
 assert.match(

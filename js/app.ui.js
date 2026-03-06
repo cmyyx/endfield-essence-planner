@@ -258,7 +258,7 @@
     const resolveRuntimeWarningLogById = (logId) => {
       if (!state.runtimeWarningLogs || !Array.isArray(state.runtimeWarningLogs.value)) return null;
       const idText = String(logId || "");
-      return state.runtimeWarningLogs.value.find((item) => String(item && item.id || "") === idText) || null;
+      return state.runtimeWarningLogs.value.find((item) => String((item && item.id) || "") === idText) || null;
     };
     const openOptionalFailureDetailByLogId = (logId) => {
       const target = resolveRuntimeWarningLogById(logId);

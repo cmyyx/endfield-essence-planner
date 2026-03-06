@@ -7,7 +7,7 @@ window.CONTENT = {
   announcement: {
     version: "1.6.0",
     title: "nav.announcement",
-    date: "2026-03-01",
+    date: "2026-03-06",
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
     items: [

@@ -1132,7 +1132,29 @@
           });
           return;
         }
-        throw error;
+        var fallbackContainerId = "bootstrap-minimal-error";
+        var fallbackRoot =
+          typeof document !== "undefined" ? document.getElementById(fallbackContainerId) : null;
+        if (!fallbackRoot && typeof document !== "undefined" && document.body) {
+          fallbackRoot = document.createElement("div");
+          fallbackRoot.id = fallbackContainerId;
+          fallbackRoot.style.cssText =
+            "position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,102,102,0.55);background:rgba(18,10,14,0.94);color:#ffd4d4;box-shadow:0 8px 24px rgba(0,0,0,0.35);font:13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;";
+          document.body.appendChild(fallbackRoot);
+        }
+        if (fallbackRoot) {
+          fallbackRoot.innerHTML = "";
+          var titleNode = document.createElement("div");
+          titleNode.textContent = bt("error_title_resource");
+          titleNode.style.cssText = "font-weight:700;margin-bottom:4px;";
+          var messageNode = document.createElement("div");
+          messageNode.textContent = message;
+          fallbackRoot.appendChild(titleNode);
+          fallbackRoot.appendChild(messageNode);
+        }
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error(error);
+        }
       });
   };
 

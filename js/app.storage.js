@@ -23,6 +23,91 @@
           resource: "app.storage.*",
         });
       }
+      const noopAsync = async () => {};
+      const queueStorageIssue = (operation, key, issueError, meta) => {
+        const currentQueue = Array.isArray(state.pendingStorageIssues) ? state.pendingStorageIssues : [];
+        currentQueue.push({
+          operation: String(operation || ""),
+          key: String(key || ""),
+          error: issueError || null,
+          meta: meta && typeof meta === "object" ? meta : {},
+          occurredAt: new Date().toISOString(),
+        });
+        state.pendingStorageIssues = currentQueue.slice(-20);
+      };
+      if (typeof state.normalizeWeaponMarks !== "function") {
+        state.normalizeWeaponMarks = (raw) => {
+          if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+          return raw;
+        };
+      }
+      if (typeof state.normalizeLegacyMarks !== "function") {
+        state.normalizeLegacyMarks = () => ({});
+      }
+      if (typeof state.normalizeRecommendationConfig !== "function") {
+        state.normalizeRecommendationConfig = (raw) =>
+          raw && typeof raw === "object" && !Array.isArray(raw) ? { ...raw } : {};
+      }
+      if (typeof state.reportStorageIssue !== "function") {
+        state.reportStorageIssue = queueStorageIssue;
+      }
+      if (typeof state.ignoreStorageErrors !== "function") {
+        state.ignoreStorageErrors = () => {
+          if (state.storageErrorIgnored && typeof state.storageErrorIgnored === "object") {
+            state.storageErrorIgnored.value = true;
+          }
+        };
+      }
+      if (typeof state.requestIgnoreStorageErrors !== "function") {
+        state.requestIgnoreStorageErrors = () => {
+          if (state.showStorageIgnoreConfirmModal && typeof state.showStorageIgnoreConfirmModal === "object") {
+            state.showStorageIgnoreConfirmModal.value = true;
+          }
+        };
+      }
+      if (typeof state.cancelIgnoreStorageErrors !== "function") {
+        state.cancelIgnoreStorageErrors = () => {
+          if (state.showStorageIgnoreConfirmModal && typeof state.showStorageIgnoreConfirmModal === "object") {
+            state.showStorageIgnoreConfirmModal.value = false;
+          }
+        };
+      }
+      if (typeof state.confirmIgnoreStorageErrors !== "function") {
+        state.confirmIgnoreStorageErrors = () => {
+          if (state.showStorageIgnoreConfirmModal && typeof state.showStorageIgnoreConfirmModal === "object") {
+            state.showStorageIgnoreConfirmModal.value = false;
+          }
+          if (typeof state.ignoreStorageErrors === "function") {
+            state.ignoreStorageErrors();
+          }
+        };
+      }
+      if (typeof state.exportStorageDiagnosticBundle !== "function") {
+        state.exportStorageDiagnosticBundle = noopAsync;
+      }
+      if (typeof state.requestStorageDataClear !== "function") {
+        state.requestStorageDataClear = () => {
+          if (state.showStorageClearConfirmModal && typeof state.showStorageClearConfirmModal === "object") {
+            state.showStorageClearConfirmModal.value = true;
+          }
+        };
+      }
+      if (typeof state.cancelStorageDataClear !== "function") {
+        state.cancelStorageDataClear = () => {
+          if (state.showStorageClearConfirmModal && typeof state.showStorageClearConfirmModal === "object") {
+            state.showStorageClearConfirmModal.value = false;
+          }
+        };
+      }
+      if (typeof state.confirmStorageDataClearAndReload !== "function") {
+        state.confirmStorageDataClearAndReload = noopAsync;
+      }
+      if (typeof state.storageFeedbackUrl !== "string" || !state.storageFeedbackUrl.trim()) {
+        state.storageFeedbackUrl = "https://github.com/cmyyx/endfield-essence-planner/issues";
+      }
+      if (!Array.isArray(state.pendingStorageIssues)) {
+        state.pendingStorageIssues = [];
+      }
       return;
     }
 

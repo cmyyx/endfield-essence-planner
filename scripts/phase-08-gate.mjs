@@ -69,6 +69,13 @@ const runPhase08Gate = () => {
       },
     });
 
+    if (result.error) {
+      const statusFromResult = typeof result.status === "number" ? result.status : 1;
+      console.error(`phase-08-gate: failed to spawn step ${step}`);
+      console.error(result.error);
+      process.exitCode = statusFromResult;
+      return;
+    }
     const status = typeof result.status === "number" ? result.status : 1;
     if (status !== 0) {
       console.error(`phase-08-gate: failed at step ${step} with exit code ${status}`);

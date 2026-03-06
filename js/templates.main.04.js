@@ -259,7 +259,7 @@
               >
                 {{ t("storage.confirm_clear_and_refresh") }}
                 <span v-if="storageErrorClearCountdown > 0">
-                  {{ t("（{count}s）", { count: storageErrorClearCountdown }) }}
+                  {{ t("storage.countdown_seconds", { count: storageErrorClearCountdown }) }}
                 </span>
               </button>
             </div>

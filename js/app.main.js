@@ -175,8 +175,26 @@
 
   const modules = window.AppModules || {};
   const readRuntimeEnv = () => {
+    const normalizeEnv = (value) => String(value || "").trim().toLowerCase();
+    if (typeof window !== "undefined" && window.location && typeof window.location.search === "string") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = normalizeEnv(params.get("app_env"));
+        if (fromQuery) return fromQuery;
+      } catch (error) {
+        // ignore malformed query
+      }
+    }
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      try {
+        const fromStorage = normalizeEnv(localStorage.getItem("planner-app-env:v1"));
+        if (fromStorage) return fromStorage;
+      } catch (error) {
+        // ignore storage read failures
+      }
+    }
     if (typeof window !== "undefined" && typeof window.__APP_ENV__ === "string") {
-      const fromWindow = String(window.__APP_ENV__).trim().toLowerCase();
+      const fromWindow = normalizeEnv(window.__APP_ENV__);
       if (fromWindow) return fromWindow;
     }
     if (
@@ -185,12 +203,55 @@
       process.env &&
       typeof process.env.NODE_ENV === "string"
     ) {
-      const fromProcess = String(process.env.NODE_ENV).trim().toLowerCase();
+      const fromProcess = normalizeEnv(process.env.NODE_ENV);
       if (fromProcess) return fromProcess;
+    }
+    if (typeof window !== "undefined" && window.location && typeof window.location.hostname === "string") {
+      const host = normalizeEnv(window.location.hostname);
+      if (host === "localhost" || host === "127.0.0.1" || host === "::1") {
+        return "development";
+      }
     }
     return "production";
   };
   const strictInitContractEnvs = new Set(["development", "test"]);
+  const announceStrictRuntimeEnv = (runtimeEnv) => {
+    const normalized = String(runtimeEnv || "").trim().toLowerCase();
+    if (!strictInitContractEnvs.has(normalized)) return;
+    if (typeof console === "undefined" || typeof console.info !== "function") return;
+    const envText = normalized.toUpperCase();
+    const titleText =
+      normalized === "test"
+        ? "████████████████\nTEST MODE\n████████████████\n测试模式"
+        : "████████████████████\nDEVELOPMENT MODE\n████████████████████\n开发模式";
+    const storageKey = "planner-app-env:v1";
+    console.info(
+      "%c" + titleText,
+      "display:block;background:linear-gradient(135deg,#0b1220,#1d4ed8);color:#f8fafc;padding:12px 14px;border:1px solid #38bdf8;border-radius:12px;font-weight:900;font-size:21px;line-height:1.12;letter-spacing:1px;text-shadow:0 1px 0 #0b1220,0 0 14px rgba(56,189,248,0.45);"
+    );
+    console.info(
+      "%cRuntime: " +
+        envText +
+        "\n切换环境 / How to switch" +
+        "\n1) 临时(当前链接): 在 URL 末尾加 ?app_env=development 或 ?app_env=test" +
+        "\n   Temporary (current URL): append ?app_env=development or ?app_env=test" +
+        "\n2) 持久(当前浏览器): localStorage.setItem('" +
+        storageKey +
+        "','development')" +
+        "\n   Persistent (this browser): localStorage.setItem('" +
+        storageKey +
+        "','development')" +
+        "\n3) 恢复生产: localStorage.removeItem('" +
+        storageKey +
+        "')" +
+        "\n   Back to production: localStorage.removeItem('" +
+        storageKey +
+        "')" +
+        "\n4) 查看当前环境: window.__APP_RUNTIME_ENV__" +
+        "\n   Show current env: window.__APP_RUNTIME_ENV__",
+      "display:block;background:#0b1220;color:#a5f3fc;padding:10px 12px;border:1px dashed #155e75;border-radius:10px;line-height:1.6;font-weight:600;"
+    );
+  };
   const parseInitContractList = (value) =>
     Array.isArray(value)
       ? Array.from(new Set(value.map((item) => String(item || "").trim()).filter(Boolean)))
@@ -317,9 +378,22 @@
     setup() {
       const ctx = { ref, computed, onMounted, onBeforeUnmount, watch, nextTick };
       const state = {};
+      const fallbackInterpolate = (key, params) => {
+        const text = String(key || "");
+        if (!params || typeof params !== "object") return text;
+        return text.replace(/\{(\w+)\}/g, (match, name) =>
+          Object.prototype.hasOwnProperty.call(params, name) ? String(params[name]) : match
+        );
+      };
+      state.t = (key, params) => fallbackInterpolate(key, params);
+      state.tTerm = (category, value) => String(value || "");
       state.loadScriptOnce = loadScriptOnce;
       state.createUiScheduler = createUiScheduler;
       const runtimeEnv = readRuntimeEnv();
+      if (typeof window !== "undefined") {
+        window.__APP_RUNTIME_ENV__ = runtimeEnv;
+      }
+      announceStrictRuntimeEnv(runtimeEnv);
       const initializedModules = new Set();
       const providedCapabilities = new Set();
       const pendingInitContractWarnings = [];
@@ -381,8 +455,12 @@
         }
         const summaryText =
           kind === "required"
-            ? "关键模块依赖缺失，当前模块已降级跳过。"
-            : "检测到可选依赖缺失，模块继续初始化。";
+            ? typeof state.t === "function"
+              ? state.t("warning.init_contract_required_summary")
+              : "Critical module dependencies are missing; this module was skipped in degraded mode."
+            : typeof state.t === "function"
+            ? state.t("warning.init_contract_optional_summary")
+            : "Optional dependencies are missing; module initialization continues.";
         const warningKeyParts = [
           kind,
           normalizedName,
@@ -404,8 +482,56 @@
             scope: "init.contract",
             operation: "init.contract-check",
             key: `${kind}:${normalizedName}`,
-            title: "模块初始化依赖检查告警",
+            title:
+              typeof state.t === "function"
+                ? state.t("warning.init_contract_title")
+                : "Module Init Dependency Warning",
             summary: summaryText,
+            note: detailLines.join("\n"),
+            asToast: true,
+            optionalSignature: warningText,
+          });
+        };
+        if (typeof state.reportRuntimeWarning === "function") {
+          sendReporter();
+          return;
+        }
+        warnConsole();
+        pendingInitContractWarnings.push(sendReporter);
+      };
+      const reportInitExecutionWarning = (name, error) => {
+        const normalizedName = String(name || "unknown");
+        const errorName = String((error && error.name) || "Error");
+        const errorMessage = String((error && error.message) || "module init failed");
+        const detailLines = [
+          `env: ${runtimeEnv}`,
+          `module: ${normalizedName}`,
+          `error: ${errorName}: ${errorMessage}`,
+        ];
+        if (error && error.stack) {
+          detailLines.push(`stack: ${String(error.stack)}`);
+        }
+        const warningText = `[init-exec] ${normalizedName}::${errorName}::${errorMessage}`;
+        const warnConsole = () => {
+          if (typeof console !== "undefined" && typeof console.warn === "function") {
+            console.warn(warningText, detailLines.join("\n"));
+          }
+        };
+        const sendReporter = () => {
+          const warningError = error instanceof Error ? error : new Error(errorMessage);
+          warningError.name = errorName;
+          state.reportRuntimeWarning(warningError, {
+            scope: "init.execution",
+            operation: "init.module-run",
+            key: normalizedName,
+            title:
+              typeof state.t === "function"
+                ? state.t("warning.init_execution_title")
+                : "Module Init Execution Error",
+            summary:
+              typeof state.t === "function"
+                ? state.t("warning.init_execution_summary")
+                : "Module initialization failed; this module was skipped in degraded mode.",
             note: detailLines.join("\n"),
             asToast: true,
             optionalSignature: warningText,
@@ -456,7 +582,15 @@
           });
         }
 
-        fn(ctx, state);
+        try {
+          fn(ctx, state);
+        } catch (error) {
+          reportInitExecutionWarning(name, error);
+          if (strictInitContractEnvs.has(runtimeEnv)) {
+            throw error;
+          }
+          return "degraded";
+        }
         initializedModules.add(name);
         markProvidedCapabilities(fn);
         flushPendingInitContractWarnings();

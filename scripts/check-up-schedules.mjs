@@ -28,6 +28,8 @@ const loadUpScheduleHelper = () => {
     encodeURI,
     Date,
     Math,
+    Array,
+    Object,
   };
   vm.runInNewContext(moduleSource, context, { filename: upScheduleModuleFile });
   const helper = context.window.AppModules.normalizeAndBindWeaponUpSchedule;

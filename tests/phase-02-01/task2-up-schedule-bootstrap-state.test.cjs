@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -40,15 +41,41 @@ assert.match(
   /__APP_RESOURCE_MANIFEST/,
   "bootstrap.resources should consume window.__APP_RESOURCE_MANIFEST as startup resource source"
 );
+
+const bootstrapResourcesSandbox = {
+  window: {
+    __APP_RESOURCE_MANIFEST: manifest,
+  },
+};
+vm.runInNewContext(bootstrapResourcesSource, bootstrapResourcesSandbox, { filename: bootstrapResourcesPath });
+assert.equal(
+  typeof (bootstrapResourcesSandbox.__BOOTSTRAP_RESOURCES__ || {}).resolveBootResourceConfig,
+  "function",
+  "bootstrap.resources should expose resolveBootResourceConfig"
+);
+const resolvedBootResourceConfig =
+  bootstrapResourcesSandbox.__BOOTSTRAP_RESOURCES__.resolveBootResourceConfig({
+    warnOnce: () => {},
+  });
+assert.equal(
+  Array.isArray(resolvedBootResourceConfig.startupDataScripts),
+  true,
+  "resolved boot config should expose startupDataScripts"
+);
+assert.equal(
+  resolvedBootResourceConfig.startupDataScripts.includes("./data/up-schedules.js"),
+  true,
+  "startupDataScripts should include ./data/up-schedules.js"
+);
 assert.match(
   bootstrapSource,
-  /startupDataScripts\.map\(\s*function\s*\(src\)\s*\{\s*return\s+loadScript\(src\);\s*\}\s*\)/,
+  /startupDataScripts\s*\.map\s*\(\s*(?:function\s*\(\s*src\s*\)|\(\s*src\s*\)\s*=>)[\s\S]*?loadScript\(\s*src\s*\)/,
   "bootstrap data loading should consume startupDataScripts from manifest"
 );
 
 assert.match(
   appCoreSource,
-  /const\s+weaponUpSchedules\s*=\s*/,
+  /weaponUpSchedules\s*=\s*[\s\S]*window\.WEAPON_UP_SCHEDULES/,
   "app.core should expose weaponUpSchedules runtime reference"
 );
 

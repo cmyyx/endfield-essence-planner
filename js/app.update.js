@@ -163,8 +163,14 @@
         scope: "update.version",
         operation: "update.payload-validate",
         key: `${safeText(source) || "unknown"}:${safeText(reason) || "invalid"}`,
-        title: "版本载荷契约异常",
-        summary: "已拒绝不合规版本载荷，更新提示已跳过。",
+        title:
+          typeof state.t === "function"
+            ? state.t("update.version_payload_invalid_title")
+            : "Invalid version payload",
+        summary:
+          typeof state.t === "function"
+            ? state.t("update.version_payload_invalid_summary")
+            : "Invalid version payload rejected, update prompt skipped.",
         note: details.join("\n"),
         asToast: true,
       });
@@ -527,10 +533,10 @@
       const copyPayload = buildVersionCopyText(currentVersionInfo);
       const copied = await copyTextToClipboard(copyPayload);
       if (copied) {
-        showCopyFeedback("版本信息已复制");
+        showCopyFeedback("update.copy_version_success");
         return;
       }
-      showCopyFeedback("复制失败，请手动复制");
+      showCopyFeedback("update.copy_version_failure");
       if (typeof window !== "undefined" && typeof window.prompt === "function") {
         const promptText =
           typeof state.t === "function"

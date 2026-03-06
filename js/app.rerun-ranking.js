@@ -193,6 +193,8 @@
     state.rerunRankingGeneratedAt = resolveValue(state.rerunRankingGeneratedAt, 0);
 
     state.refreshRerunRanking = (nextNow) => {
+      // Priority: character map ({ value: byCharacter }) -> normalized byCharacter fallback -> weapon map ({ value: byWeapon }).
+      // The first two sources are character-oriented; the last one is weapon-oriented and may use different item keys.
       const source = (
         (state.characterUpByCharacter && state.characterUpByCharacter.value) ||
         (state.upScheduleNormalized &&
