@@ -38,6 +38,29 @@
     -->
     <!-- Google tag (gtag.js) -->
     <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-FQ81EJB28L"></script> -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var preference = "auto";
+        try {
+          var stored = localStorage.getItem("planner-theme-mode:v1");
+          if (stored === "auto" || stored === "light" || stored === "dark") {
+            preference = stored;
+          }
+        } catch (error) {
+          // ignore localStorage read errors
+        }
+        var resolved = preference;
+        if (resolved === "auto") {
+          resolved =
+            window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+        }
+        root.setAttribute("data-theme", resolved);
+        root.style.colorScheme = resolved;
+      })();
+    </script>
     <script src="./js/analytics.bootstrap.js"></script>
     <script src="./js/app.resource-manifest.js" onload="this.dataset.loaded='true'"></script>
     <script src="./js/app.script-chain.js" onload="this.dataset.loaded='true'"></script>

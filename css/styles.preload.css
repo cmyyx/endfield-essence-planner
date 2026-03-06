@@ -24,6 +24,15 @@ html.preload #app {
   display: none;
 }
 
+html.preload body::before {
+  opacity: 0 !important;
+}
+
+html.preload body::after {
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
 [v-cloak] {
   display: none;
 }
