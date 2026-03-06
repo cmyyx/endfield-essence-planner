@@ -65,11 +65,24 @@ assert.match(
   /const\s+showRerunRankingNavHintDot\s*=\s*state\.showRerunRankingNavHintDot;/,
   "ui module should capture rerun-ranking nav hint dot ref"
 );
+
+const markRerunRankingNavHintSeenMatch = appUiSource.match(
+  /const\s+markRerunRankingNavHintSeen\s*=\s*\(\)\s*=>\s*\{([\s\S]*?)\n\s*\};/
+);
+assert.ok(markRerunRankingNavHintSeenMatch, "ui module should define markRerunRankingNavHintSeen");
+
+const markRerunRankingNavHintSeenBody = markRerunRankingNavHintSeenMatch[1];
 assert.match(
-  appUiSource,
-  /const\s+markRerunRankingNavHintSeen\s*=\s*\(\)\s*=>\s*\{[\s\S]*showRerunRankingNavHintDot\.value\s*=\s*false;[\s\S]*localStorage\.setItem\(\s*state\.rerunRankingNavHintStorageKey,\s*state\.rerunRankingNavHintVersion\s*\);[\s\S]*\};/,
+  markRerunRankingNavHintSeenBody,
+  /showRerunRankingNavHintDot\.value\s*=\s*false;/,
+  "ui module should clear rerun-ranking nav hint dot after click"
+);
+assert.match(
+  markRerunRankingNavHintSeenBody,
+  /localStorage\.setItem\(\s*state\.rerunRankingNavHintStorageKey\s*,\s*state\.rerunRankingNavHintVersion\s*\);?/,
   "ui module should persist rerun-ranking nav hint seen version after click"
 );
+
 assert.match(
   appUiSource,
   /reportStorageIssue\("storage\.write",\s*state\.rerunRankingNavHintStorageKey,\s*error,\s*\{\s*scope:\s*"ui\.rerun-ranking-nav-hint-write"/,
@@ -94,8 +107,28 @@ assert.match(
 
 assert.match(
   templateSource,
-  /@click="setView\('rerun-ranking'\)"[\s\S]*v-if="showRerunRankingNavHintDot"[\s\S]*class="nav-hint-dot"[\s\S]*>NEW<\/span>[\s\S]*\{\{\s*t\("nav\.rerun_ranking"\)\s*\}\}/,
-  "rerun-ranking nav entry should render NEW badge with same nav-hint-dot style"
+  /@click="setView\('rerun-ranking'\)"/,
+  "rerun-ranking nav entry should bind setView('rerun-ranking')"
+);
+assert.match(
+  templateSource,
+  /v-if="showRerunRankingNavHintDot"/,
+  "rerun-ranking nav entry should conditionally render NEW badge from showRerunRankingNavHintDot"
+);
+assert.match(
+  templateSource,
+  /class="nav-hint-dot"/,
+  "rerun-ranking nav entry should use nav-hint-dot style class"
+);
+assert.match(
+  templateSource,
+  />NEW<\/span>/,
+  "rerun-ranking nav entry should render NEW badge text"
+);
+assert.match(
+  templateSource,
+  /\{\{\s*t\("nav\.rerun_ranking"\)\s*\}\}/,
+  "rerun-ranking nav entry should render localized nav label"
 );
 
 assert.match(

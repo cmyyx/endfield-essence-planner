@@ -710,6 +710,21 @@
       };
       const toExceptionKey = (entry, kind) => {
         if (!entry || typeof entry !== "object") return `${kind}:unknown`;
+        const optionalSignature = String(
+          entry.optionalSignature || entry.signature || ""
+        ).trim();
+        if (optionalSignature) {
+          return `${kind}:sig:${optionalSignature}`;
+        }
+        if (kind === "runtime") {
+          return [
+            kind,
+            entry.operation || "",
+            entry.key || "",
+            entry.errorName || "",
+            entry.errorMessage || "",
+          ].join("|");
+        }
         if (entry.id) return `${kind}:${entry.id}`;
         return [
           kind,
@@ -907,9 +922,10 @@
           state.runtimeWarningPreviewText.value = buildRuntimeWarningPreviewFromEntry(runtimeEntry);
         }
         if (state.runtimeWarningLogs && Array.isArray(state.runtimeWarningLogs.value)) {
+          const runtimeKey = toExceptionKey(runtimeEntry, "runtime");
           const nextLogs = [runtimeEntry].concat(
             state.runtimeWarningLogs.value.filter(
-              (entry) => String((entry && entry.id) || "") !== String(runtimeEntry.id || "")
+              (entry) => toExceptionKey(entry, "runtime") !== runtimeKey
             )
           );
           state.runtimeWarningLogs.value = nextLogs.slice(0, 20);
@@ -1146,6 +1162,7 @@
         optionalFailureNotice: state.optionalFailureNotice,
         hasOptionalFailureHistory: state.hasOptionalFailureHistory,
         dismissOptionalFailureNotice: state.dismissOptionalFailureNotice,
+        openOptionalFailureDetailByLogId: state.openOptionalFailureDetailByLogId,
         openLatestOptionalFailureDetail: state.openLatestOptionalFailureDetail,
         ignoreRuntimeWarnings: state.ignoreRuntimeWarnings,
         requestIgnoreRuntimeWarnings: state.requestIgnoreRuntimeWarnings,

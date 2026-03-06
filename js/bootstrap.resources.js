@@ -424,9 +424,13 @@
             reportOptionalResourceFailure(failedEntry);
           }
           scriptLoadRegistry.delete(key);
-          probeResourceStatus(requestSrc).then(function (probe) {
-            reject(createLoadError("script", src, "error", probe));
-          });
+          probeResourceStatus(requestSrc)
+            .then(function (probe) {
+              reject(createLoadError("script", src, "error", probe));
+            })
+            .catch(function (error) {
+              reject(createLoadError("script", src, "error", error || null));
+            });
         };
         var target = document.body || document.head || document.documentElement;
         target.appendChild(script);
@@ -554,6 +558,9 @@
                 onFailure("http", probe);
               }
             })
+            .catch(function (error) {
+              onFailure("http", error || null);
+            })
             .finally(function () {
               probeInFlight = false;
             });
@@ -580,19 +587,23 @@
               onLoad();
               return;
             }
-            probeResourceStatus(requestHref).then(function (probe) {
-              if (settled) return;
-              if (isStylesheetReady(key, link)) {
-                onLoad();
-                return;
-              }
-              var status = probe && probe.status ? Number(probe.status) : 0;
-              if (status && isFatalHttpStatus(status)) {
-                onFailure("http", probe);
-                return;
-              }
-              onFailure("stalled", probe);
-            });
+            probeResourceStatus(requestHref)
+              .then(function (probe) {
+                if (settled) return;
+                if (isStylesheetReady(key, link)) {
+                  onLoad();
+                  return;
+                }
+                var status = probe && probe.status ? Number(probe.status) : 0;
+                if (status && isFatalHttpStatus(status)) {
+                  onFailure("http", probe);
+                  return;
+                }
+                onFailure("stalled", probe);
+              })
+              .catch(function (error) {
+                onFailure("http", error || null);
+              });
           }, cssStallLimitMs);
         };
         schedulePoll();

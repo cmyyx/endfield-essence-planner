@@ -31,8 +31,10 @@
     const recoveryApi = createStorageRecoveryApi(state, persistenceApi, {
       storageFeedbackUrl: state.storageFeedbackUrl,
     });
+    // Recovery may fill a default feedback URL; diagnostics should always use the resolved one.
+    const feedbackUrl = recoveryApi.storageFeedbackUrl || state.storageFeedbackUrl;
     const diagnosticApi = createStorageDiagnosticApi(state, persistenceApi, {
-      storageFeedbackUrl: recoveryApi.storageFeedbackUrl,
+      storageFeedbackUrl: feedbackUrl,
     });
 
     persistenceApi.setIssueReporter(recoveryApi.reportStorageIssue);
@@ -235,6 +237,7 @@
       });
     }
 
+    // v1 legacy mark migration has been formally retired; clear any stale bridge cache.
     if (state.legacyMigrationMarks && state.legacyMigrationMarks.value) {
       state.legacyMigrationMarks.value = {};
     }

@@ -46,6 +46,7 @@
       safeText(event && event.operation),
       safeText(event && event.kind),
       safeText(event && event.resource),
+      safeText(event && event.optionalSignature),
       safeText(event && event.errorName),
       safeText(event && event.errorMessage),
     ]

@@ -44,15 +44,26 @@ const run = () => {
       primaryCharacter: "Gamma",
       windows: [{ startMs: nowMs - 6 * oneDayMs, endMs: nowMs - 3 * oneDayMs }],
     },
+    WeaponTieZ: {
+      weaponName: "WeaponTieZ",
+      primaryCharacter: "SameCharacter",
+      windows: [{ startMs: nowMs - 4 * oneDayMs, endMs: nowMs - 2 * oneDayMs }],
+    },
+    WeaponTieA: {
+      weaponName: "WeaponTieA",
+      primaryCharacter: "SameCharacter",
+      windows: [{ startMs: nowMs - 4 * oneDayMs, endMs: nowMs - 2 * oneDayMs }],
+    },
   };
 
   const rows = deriveRerunRankingRows(sourceMap, { nowMs });
   const order = Array.from(rows, (row) => row.weaponName);
   assert.deepEqual(
     order,
-    ["WeaponOld", "WeaponA", "WeaponZ", "WeaponB"],
+    ["WeaponOld", "WeaponA", "WeaponZ", "WeaponB", "WeaponTieA"],
     "rows should be deterministic by gap desc then character/weapon tie-break"
   );
+  assert.equal(order.includes("WeaponTieZ"), false, "same character + same gap should keep weaponName tie-break winner");
 
   console.log("task2-deterministic-tie-break: ok");
 };

@@ -50,10 +50,29 @@ assertOrderedModules(
   manifestSource,
   "[schema] app.resource-manifest app.scriptChain"
 );
-assertOrderedModules(
+assert.match(
   scriptChainSource,
-  "[schema] app.script-chain fallback output"
+  /manifest\.app\.scriptChain/,
+  "[schema] app.script-chain should bridge manifest.app.scriptChain"
 );
+assert.match(
+  scriptChainSource,
+  /window\.__APP_SCRIPT_CHAIN\s*=\s*manifestScriptChain/,
+  "[schema] app.script-chain should expose manifest chain to window.__APP_SCRIPT_CHAIN"
+);
+[
+  "./js/app.storage.schema.js",
+  "./js/app.storage.persistence.js",
+  "./js/app.storage.recovery.js",
+  "./js/app.storage.diagnostic.js",
+  "./js/app.storage.js",
+].forEach((entry) => {
+  assert.doesNotMatch(
+    scriptChainSource,
+    new RegExp(`["']${entry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`),
+    "[schema] app.script-chain should not hardcode storage module chain when manifest is source-of-truth"
+  );
+});
 
 const initOrderMatch = mainSource.match(/const initExecutionOrder = \[([\s\S]*?)\];/);
 assert.ok(initOrderMatch, "[cleanup] app.main should define initExecutionOrder for startup contract checks");

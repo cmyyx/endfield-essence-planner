@@ -33,6 +33,7 @@
     var optionalFailureQueueKey = "__bootOptionalLoadFailures";
     var optionalFailureQueueLimit = 20;
     var optionalFailureIdSeed = 0;
+    var optionalFailureSignatureSet = new Set();
 
     var resolveOptionalFeatureKey = function (entry) {
       if (entry && entry.featureKey) return String(entry.featureKey);
@@ -116,6 +117,12 @@
       var allowUnsafe = Boolean(reportOptions && reportOptions.allowUnsafe);
       if (!allowUnsafe && !entry.optional) return null;
       var payload = buildOptionalFailurePayload(entry);
+      if (payload && payload.signature) {
+        if (optionalFailureSignatureSet.has(payload.signature)) {
+          return payload;
+        }
+        optionalFailureSignatureSet.add(payload.signature);
+      }
       enqueueOptionalFailure(payload);
       reportNonFatalDiagnostic({
         operation: "optional.report-failure",
@@ -156,6 +163,11 @@
     var resolveOptionalRetryDelayMs = function (config) {
       var parsed = Number(config && config.retryDelayMs);
       if (!Number.isFinite(parsed) || parsed < 0) return 1200;
+      return Math.floor(parsed);
+    };
+    var resolveOptionalTimeoutMs = function (config) {
+      var parsed = Number(config && config.timeoutMs);
+      if (!Number.isFinite(parsed) || parsed <= 0) return 12000;
       return Math.floor(parsed);
     };
     var resolveOptionalMaxRetries = function (config) {
@@ -199,18 +211,54 @@
     return function loadOptionalScriptWithRetry(src, config, expectedRunId) {
       var retries = resolveOptionalMaxRetries(config);
       var retryDelayMs = resolveOptionalRetryDelayMs(config);
+      var timeoutMs = resolveOptionalTimeoutMs(config);
       var loadOptions = {
         optional: true,
         featureKey: config && config.featureKey ? String(config.featureKey) : "",
       };
       return new Promise(function (resolve) {
+        var runAttemptWithTimeout = function (runner) {
+          return new Promise(function (attemptResolve, attemptReject) {
+            var settled = false;
+            var timeoutId = setTimeout(function () {
+              if (settled) return;
+              settled = true;
+              var timeoutError = new Error("Optional script load timed out");
+              timeoutError.name = "OptionalScriptLoadTimeoutError";
+              attemptReject(timeoutError);
+            }, timeoutMs);
+            var settle = function (fn, value) {
+              if (settled) return;
+              settled = true;
+              clearTimeout(timeoutId);
+              fn(value);
+            };
+            var task = null;
+            try {
+              task = runner();
+            } catch (error) {
+              settle(attemptReject, error);
+              return;
+            }
+            Promise.resolve(task).then(
+              function (value) {
+                settle(attemptResolve, value);
+              },
+              function (error) {
+                settle(attemptReject, error);
+              }
+            );
+          });
+        };
         var attempts = 0;
         var execute = function () {
           if (getRunSerial() !== expectedRunId) {
             resolve();
             return;
           }
-          loadScript(src, loadOptions)
+          runAttemptWithTimeout(function () {
+            return loadScript(src, loadOptions);
+          })
             .then(function () {
               if (runOptionalScriptValidation(src, config)) {
                 resolve();

@@ -13,7 +13,7 @@
     <span>🔍</span>
     <input
       :value="query"
-      :placeholder="t('搜索装备 / 套装 / 属性（仅中文支持拼音/首字母）...')"
+      :placeholder="t('gear_refining.search_placeholder')"
       @input="$emit('update:query', $event.target.value)"
     />
   </label>

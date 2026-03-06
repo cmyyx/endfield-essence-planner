@@ -6,13 +6,23 @@ const root = path.resolve(__dirname, "../..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
 const manifestPath = path.join(root, "js/app.resource-manifest.js");
+const bootstrapPath = path.join(root, "js/bootstrap.entry.js");
+const bootstrapResourcesPath = path.join(root, "js/bootstrap.resources.js");
+const appCorePath = path.join(root, "js/app.core.js");
+const appStatePath = path.join(root, "js/app.state.js");
+
+assert.equal(fs.existsSync(manifestPath), true, "js/app.resource-manifest.js should exist");
+assert.equal(fs.existsSync(bootstrapPath), true, "js/bootstrap.entry.js should exist");
+assert.equal(fs.existsSync(bootstrapResourcesPath), true, "js/bootstrap.resources.js should exist");
+assert.equal(fs.existsSync(appCorePath), true, "js/app.core.js should exist");
+assert.equal(fs.existsSync(appStatePath), true, "js/app.state.js should exist");
+
 const bootstrapSource = read("js/bootstrap.entry.js");
 const bootstrapResourcesSource = read("js/bootstrap.resources.js");
 const appCoreSource = read("js/app.core.js");
 const appStateSource = read("js/app.state.js");
 const manifest = require(manifestPath);
 
-assert.equal(fs.existsSync(manifestPath), true, "js/app.resource-manifest.js should exist");
 assert.equal(Array.isArray(manifest.boot && manifest.boot.data), true, "manifest boot.data should exist");
 assert.equal(
   manifest.boot.data.includes("./data/up-schedules.js"),

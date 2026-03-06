@@ -177,17 +177,8 @@
 
     const escapeJsonString = (value) => {
       const text = String(value == null ? "" : value);
-      return text.replace(/[\u0000-\u001f"\\]/g, (char) => {
-        if (char === '"') return '\\"';
-        if (char === "\\") return "\\\\";
-        if (char === "\b") return "\\b";
-        if (char === "\f") return "\\f";
-        if (char === "\n") return "\\n";
-        if (char === "\r") return "\\r";
-        if (char === "\t") return "\\t";
-        const code = char.charCodeAt(0).toString(16).padStart(4, "0");
-        return `\\u${code}`;
-      });
+      const serialized = JSON.stringify(text);
+      return typeof serialized === "string" ? serialized.slice(1, -1) : "";
     };
 
     const serializeWeaponMarksNormalized = (normalizedMap) => {
@@ -214,6 +205,8 @@
     const sanitizeState = (raw) => {
       if (!raw || typeof raw !== "object") return null;
       const next = {};
+      const isSafeObjectKey = (key) =>
+        key !== "__proto__" && key !== "prototype" && key !== "constructor";
 
       if (typeof raw.searchQuery === "string") {
         next.searchQuery = raw.searchQuery;
@@ -225,8 +218,9 @@
       }
 
       if (raw.schemeBaseSelections && typeof raw.schemeBaseSelections === "object") {
-        const cleaned = {};
+        const cleaned = Object.create(null);
         Object.keys(raw.schemeBaseSelections).forEach((key) => {
+          if (!key || !isSafeObjectKey(key)) return;
           const values = sanitizeArray(raw.schemeBaseSelections[key]).filter((value) => s1Set.has(value));
           if (values.length) {
             cleaned[key] = Array.from(new Set(values));

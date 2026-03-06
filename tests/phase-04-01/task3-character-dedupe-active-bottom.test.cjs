@@ -5,7 +5,7 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const targetFile = path.join(root, "js/app.rerun-ranking.js");
-const scriptChainFile = path.join(root, "js/app.script-chain.js");
+const manifestFile = path.join(root, "js/app.resource-manifest.js");
 const appMainFile = path.join(root, "js/app.main.js");
 
 const runModuleLevelChecks = () => {
@@ -103,11 +103,15 @@ const runModuleLevelChecks = () => {
 };
 
 runModuleLevelChecks();
-const scriptChainSource = fs.readFileSync(scriptChainFile, "utf8");
-assert.match(
-  scriptChainSource,
-  /\"\.\/js\/app\.rerun-ranking\.js\"/,
-  "app.script-chain.js should include ./js/app.rerun-ranking.js"
+assert.equal(fs.existsSync(manifestFile), true, "js/app.resource-manifest.js should exist");
+const manifest = require(manifestFile);
+const scriptChain = Array.isArray(manifest && manifest.app && manifest.app.scriptChain)
+  ? manifest.app.scriptChain
+  : [];
+assert.equal(
+  scriptChain.includes("./js/app.rerun-ranking.js"),
+  true,
+  "manifest app.scriptChain should include ./js/app.rerun-ranking.js"
 );
 
 const appMainSource = fs.readFileSync(appMainFile, "utf8");

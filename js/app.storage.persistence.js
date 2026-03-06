@@ -147,23 +147,46 @@
     };
 
     const writeJsonStorageWithVerify = (key, payload, meta, options) => {
+      const scope = (meta && meta.scope) || "";
       let serialized = "";
-      if (options && typeof options.serialized === "string") {
-        serialized = options.serialized;
-      } else if (options && typeof options.serialize === "function") {
-        serialized = String(options.serialize(payload));
-      } else {
-        serialized = JSON.stringify(payload);
+      try {
+        if (options && typeof options.serialized === "string") {
+          serialized = options.serialized;
+        } else if (options && typeof options.serialize === "function") {
+          serialized = String(options.serialize(payload));
+        } else {
+          serialized = JSON.stringify(payload);
+        }
+      } catch (error) {
+        reportStorageIssue("storage.serialize", key, error, { scope });
+        return;
       }
-      localStorage.setItem(key, serialized);
-      const readBack = localStorage.getItem(key);
+      try {
+        localStorage.setItem(key, serialized);
+      } catch (error) {
+        reportStorageIssue("storage.write", key, error, {
+          scope,
+          note: `write=${truncateText(serialized, 220)}`,
+        });
+        return;
+      }
+      let readBack = null;
+      try {
+        readBack = localStorage.getItem(key);
+      } catch (error) {
+        reportStorageIssue("storage.read", key, error, {
+          scope,
+          note: `write=${truncateText(serialized, 220)}`,
+        });
+        return;
+      }
       const readBackText = readBack == null ? "<null>" : String(readBack);
       const note = `write=${truncateText(serialized, 220)} | read=${truncateText(readBackText, 220)}`;
       if (readBack == null) {
         const mismatchError = new Error("localStorage read-back is empty after write");
         mismatchError.name = "StorageRoundTripMismatchError";
         reportStorageIssue("storage.verify", key, mismatchError, {
-          scope: (meta && meta.scope) || "",
+          scope,
           note,
         });
         return;
@@ -172,7 +195,7 @@
         const mismatchError = new Error("localStorage read-back mismatch after write");
         mismatchError.name = "StorageRoundTripMismatchError";
         reportStorageIssue("storage.verify", key, mismatchError, {
-          scope: (meta && meta.scope) || "",
+          scope,
           note,
         });
       }
@@ -180,7 +203,7 @@
         JSON.parse(readBackText);
       } catch (error) {
         reportStorageIssue("storage.verify", key, error, {
-          scope: (meta && meta.scope) || "",
+          scope,
           note,
         });
       }

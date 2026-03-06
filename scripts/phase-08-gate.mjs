@@ -28,11 +28,12 @@ export const PHASE_08_GATE_COMMANDS = Object.freeze([
 ]);
 
 const parsePositiveInt = (raw) => {
-  if (!raw) {
+  const normalized = String(raw == null ? "" : raw).trim();
+  if (!/^[1-9]\d*$/.test(normalized)) {
     return null;
   }
-  const value = Number.parseInt(raw, 10);
-  return Number.isInteger(value) && value > 0 ? value : null;
+  const value = Number(normalized);
+  return Number.isSafeInteger(value) && value > 0 ? value : null;
 };
 
 const buildRuntimeCommands = () => {

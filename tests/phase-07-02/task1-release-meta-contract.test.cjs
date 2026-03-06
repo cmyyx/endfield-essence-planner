@@ -1,18 +1,32 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const root = path.resolve(__dirname, "../..");
 const scriptPath = path.join(root, "scripts/gen-version.mjs");
+const scriptSource = fs.readFileSync(scriptPath, "utf8");
+const requiredInputFields = ["announcementVersion", "fingerprint"];
 const requiredCoreFields = ["buildId", "displayVersion", "announcementVersion", "fingerprint", "publishedAt"];
+
+assert.doesNotMatch(
+  scriptSource,
+  /release-meta/i,
+  "gen-version should no longer depend on release-meta inputs"
+);
 
 (async () => {
   const mod = await import(`${pathToFileURL(scriptPath).href}?ts=${Date.now()}`);
 
   assert.equal(
-    typeof mod.validateReleaseMeta,
+    typeof mod.readVersionInputs,
     "function",
-    "gen-version should export validateReleaseMeta for contract validation"
+    "gen-version should export readVersionInputs"
+  );
+  assert.equal(
+    typeof mod.validateVersionInputs,
+    "function",
+    "gen-version should export validateVersionInputs"
   );
   assert.equal(
     typeof mod.buildVersionPayload,
@@ -21,25 +35,21 @@ const requiredCoreFields = ["buildId", "displayVersion", "announcementVersion", 
   );
 
   assert.throws(
-    () => mod.validateReleaseMeta({ announcementVersion: "1.5.0" }),
+    () => mod.validateVersionInputs({ announcementVersion: "1.5.0" }),
     /required|missing|fingerprint/i,
-    "release-meta missing required fields must fail contract validation"
+    "version inputs missing required fields must fail contract validation"
   );
 
-  assert.doesNotThrow(
-    () =>
-      mod.validateReleaseMeta({
-        announcementVersion: "1.5.0",
-        fingerprint: "cmty-ep-2026-02-07",
-      }),
-    "release-meta with required fields should pass validation"
-  );
+  const inputs = await mod.readVersionInputs();
+  requiredInputFields.forEach((field) => {
+    assert.ok(
+      typeof inputs[field] === "string" && inputs[field].trim().length > 0,
+      `version inputs must include non-empty field: ${field}`
+    );
+  });
 
   const payload = mod.buildVersionPayload(
-    {
-      announcementVersion: "1.5.0",
-      fingerprint: "cmty-ep-2026-02-07",
-    },
+    inputs,
     new Date("2026-03-01T14:38:40.644Z")
   );
 
@@ -49,8 +59,10 @@ const requiredCoreFields = ["buildId", "displayVersion", "announcementVersion", 
       `version payload must include non-empty core field: ${field}`
     );
   });
+  assert.equal(payload.announcementVersion, inputs.announcementVersion);
+  assert.equal(payload.fingerprint, inputs.fingerprint);
 
-  console.log("task1-release-meta-contract: ok");
+  console.log("task1-version-input-contract: ok");
 })().catch((error) => {
   console.error(error);
   process.exit(1);

@@ -107,14 +107,14 @@
             <h3>
               {{
                 activeUnifiedExceptionKind === "runtime"
-                  ? (unifiedExceptionCurrent && unifiedExceptionCurrent.title) || "页面初始化异常"
+                  ? (unifiedExceptionCurrent && unifiedExceptionCurrent.title) || t("error.page_init_title")
                   : t("storage.local_storage_error")
               }}
             </h3>
             <p class="storage-error-warning" v-if="activeUnifiedExceptionKind === 'runtime'">
               {{
                 (unifiedExceptionCurrent && unifiedExceptionCurrent.summary) ||
-                  "页面初始化阶段发生异常，部分功能可能不可用。"
+                  t("error.page_init_summary")
               }}
               {{ t("update.refresh_and_try_again_if_it_persists_report_it_with_cons") }}
             </p>
@@ -451,9 +451,9 @@
               role="button"
               tabindex="0"
               :aria-label="t('error.view_optional_failure_details')"
-              @click="openLatestOptionalFailureDetail"
-              @keydown.enter.prevent="openLatestOptionalFailureDetail"
-              @keydown.space.prevent="openLatestOptionalFailureDetail"
+              @click="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
+              @keydown.enter.prevent="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
+              @keydown.space.prevent="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
             >
               <div class="optional-failure-toast-main">
                 <span class="optional-failure-toast-icon" aria-hidden="true">!</span>

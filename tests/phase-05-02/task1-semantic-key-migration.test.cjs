@@ -17,7 +17,7 @@ const migrationScopeFiles = [
 ];
 
 const literalCallPattern = /(?<![\w$.])(?:state\.)?t\(\s*(['"`])((?:\\.|(?!\1)[\s\S])*)\1/g;
-const hasCjk = /[\u4e00-\u9fff]/;
+const hasCjk = /[\u3040-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
 
 const violations = [];
 

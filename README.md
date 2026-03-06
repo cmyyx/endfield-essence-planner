@@ -21,6 +21,25 @@
 - Build command: `node scripts/gen-version.mjs`
 - Output directory: `.`
 
+## 版本元数据契约（更新检测）
+
+`scripts/gen-version.mjs` 在构建时生成：
+- `data/version.json`
+- `data/version.js`（`window.__APP_VERSION_INFO`）
+
+Required inputs（构建输入）：
+- `announcementVersion`：来自 `data/content.js` 的 `CONTENT.announcement.version`
+- `fingerprint`：来自 `index.html` 的 `meta[name="fingerprint"]`（若缺失则回退 `#app[data-fingerprint]`）
+
+Derived outputs（构建产出）：
+- `buildId`
+- `displayVersion`
+- `announcementVersion`
+- `fingerprint`
+- `publishedAt`
+
+其中 `buildId/displayVersion/publishedAt` 为派生字段，`announcementVersion/fingerprint` 为输入透传字段。
+
 ## 维护与门禁文档
 
 完整执行清单、启动链约束、Phase 6 继承治理与 Phase 7 文档门禁，请以 [AGENTS.md](./AGENTS.md) 为唯一真源。

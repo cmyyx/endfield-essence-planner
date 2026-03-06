@@ -159,6 +159,25 @@ const run = () => {
     ["非UP-1", "非UP-3", "非UP-5"],
     "non-UP relative order should stay aligned with pre-partition fallback order"
   );
+
+  const tieState = createHarness({
+    baseSortedNames: ["非UP-A", "UP-B", "非UP-C", "UP-D", "非UP-E"],
+    activeNames: ["UP-B", "UP-D"],
+    searchQuery: "up",
+    scoreByName: {
+      "非UP-A": 100,
+      "UP-B": 100,
+      "非UP-C": 100,
+      "UP-D": 100,
+      "非UP-E": 100,
+    },
+  });
+  const tieActual = Array.from(tieState.filteredWeapons.value, (weapon) => weapon.name);
+  assert.deepEqual(
+    tieActual,
+    ["UP-B", "UP-D", "非UP-A", "非UP-C", "非UP-E"],
+    "when scores tie, UP-first partition should keep original stable fallback order inside each group"
+  );
 };
 
 run();

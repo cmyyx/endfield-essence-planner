@@ -45,16 +45,24 @@
     "./js/bootstrap.optional.js",
   ];
   var bootstrapModulePromises = Object.create(null);
+  var normalizeBootstrapScriptUrl = function (src) {
+    try {
+      return new URL(String(src || ""), window.location.href).href;
+    } catch (error) {
+      return String(src || "");
+    }
+  };
   var loadBootstrapModuleScript = function (src) {
     if (bootstrapModulePromises[src]) {
       return bootstrapModulePromises[src];
     }
     bootstrapModulePromises[src] = new Promise(function (resolve, reject) {
+      var targetScriptSrc = normalizeBootstrapScriptUrl(src);
       var existing = Array.from(document.scripts || []).find(function (script) {
         var loaded = script && script.dataset && script.dataset.loaded === "true";
         if (!loaded) return false;
         var scriptSrc = String(script.getAttribute("src") || script.src || "");
-        return scriptSrc.indexOf(src) !== -1;
+        return normalizeBootstrapScriptUrl(scriptSrc) === targetScriptSrc;
       });
       if (existing) {
         resolve();

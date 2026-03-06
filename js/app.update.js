@@ -28,13 +28,14 @@
     let lastCheckAt = 0;
     let copyFeedbackTimer = null;
     let gameCompatWarningDismissedSession = false;
-    const versionCoreFields = [
+    // Contract with scripts/gen-version.mjs output payload.
+    const versionCoreFields = Object.freeze([
       "buildId",
       "displayVersion",
       "announcementVersion",
       "fingerprint",
       "publishedAt",
-    ];
+    ]);
     const reportNonFatalDiagnostic = (payload) => {
       const source = payload && typeof payload === "object" ? payload : {};
       const reporter =
@@ -320,13 +321,14 @@
       const buildId = safeText(globalVersion && globalVersion.buildId);
       const displayVersion = safeText(globalVersion && globalVersion.displayVersion);
       const publishedAt = safeText(globalVersion && globalVersion.publishedAt);
-      return normalizeVersionInfo({
+      const localCorePayload = {
         buildId,
         displayVersion,
         announcementVersion,
         fingerprint,
         publishedAt,
-      }, {
+      };
+      return normalizeVersionInfo(localCorePayload, {
         source: "local",
         reportInvalid: false,
       });

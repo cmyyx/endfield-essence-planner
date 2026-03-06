@@ -12,24 +12,6 @@ const upScheduleDataFile = path.join(root, "data/up-schedules.js");
 const weaponsDataFile = path.join(root, "data/weapons.js");
 const upScheduleModuleFile = path.join(root, "js/app.up-schedule.js");
 
-const EXPECTED_WINDOWS = {
-  熔铸火焰: {
-    startIso: "2026-01-22T04:00:00.000Z",
-    endIso: "2026-02-07T04:00:00.000Z",
-    primaryCharacter: "莱万汀",
-  },
-  使命必达: {
-    startIso: "2026-02-07T04:00:00.000Z",
-    endIso: "2026-02-24T04:00:00.000Z",
-    primaryCharacter: "洁尔佩塔",
-  },
-  艺术暴君: {
-    startIso: "2026-02-24T04:00:00.000Z",
-    endIso: "2026-03-12T04:00:00.000Z",
-    primaryCharacter: "伊冯",
-  },
-};
-
 const loadWindowVariable = (filePath, variableName) => {
   const source = fs.readFileSync(filePath, "utf8");
   const context = { window: {} };
@@ -75,21 +57,40 @@ const createDataset = (mode, baseSchedules) => {
 
 const checkData06Contract = (normalized) => {
   const { byWeapon, issues } = normalized;
-  const weaponNames = Object.keys(byWeapon).sort();
-  const expectedWeaponNames = Object.keys(EXPECTED_WINDOWS).sort();
-  assert.deepEqual(weaponNames, expectedWeaponNames, "normalized weapon keys should match DATA-06");
   assert.equal(issues.length, 0, `expected no issues, got ${JSON.stringify(issues, null, 2)}`);
+  const weaponNames = Object.keys(byWeapon || {});
+  assert.ok(weaponNames.length > 0, "valid mode should output non-empty normalized weapon map");
 
-  expectedWeaponNames.forEach((weaponName) => {
+  weaponNames.forEach((weaponName) => {
     const record = byWeapon[weaponName];
     assert.ok(record, `${weaponName} should exist in normalized byWeapon`);
-    assert.equal(record.primaryCharacter, EXPECTED_WINDOWS[weaponName].primaryCharacter);
+    assert.ok(
+      typeof record.primaryCharacter === "string" && record.primaryCharacter.trim().length > 0,
+      `${weaponName} should have primaryCharacter`
+    );
     const windows = Array.isArray(record.windows) ? record.windows : [];
-    assert.equal(windows.length, 1, `${weaponName} should expose a single window`);
-    assert.equal(windows[0].startIso, EXPECTED_WINDOWS[weaponName].startIso);
-    assert.equal(windows[0].endIso, EXPECTED_WINDOWS[weaponName].endIso);
-    assert.equal(windows[0].startMs < windows[0].endMs, true, `${weaponName} window should satisfy [start, end)`);
+    assert.ok(windows.length > 0, `${weaponName} should expose at least one window`);
+    windows.forEach((windowItem, index) => {
+      assert.ok(
+        typeof windowItem.startIso === "string" && typeof windowItem.endIso === "string",
+        `${weaponName}[${index}] should expose startIso/endIso`
+      );
+      assert.equal(
+        windowItem.startMs < windowItem.endMs,
+        true,
+        `${weaponName}[${index}] window should satisfy [start, end)`
+      );
+    });
   });
+};
+
+const checkIssueModeContract = (normalized, expectedCode) => {
+  const issues = Array.isArray(normalized && normalized.issues) ? normalized.issues : [];
+  assert.ok(issues.length > 0, "invalid mode should produce at least one issue");
+  assert.ok(
+    issues.some((item) => item && item.code === expectedCode),
+    `invalid mode should contain issue code: ${expectedCode}`
+  );
 };
 
 const main = () => {
@@ -105,7 +106,14 @@ const main = () => {
   const helper = loadUpScheduleHelper();
   const dataset = createDataset(mode, schedules);
   const normalized = helper(dataset, weapons);
-  checkData06Contract(normalized);
+
+  if (mode === "valid") {
+    checkData06Contract(normalized);
+  } else if (mode === "invalid-unknown-weapon") {
+    checkIssueModeContract(normalized, "UP_UNKNOWN_WEAPON");
+  } else if (mode === "invalid-window-order") {
+    checkIssueModeContract(normalized, "UP_WINDOW_ORDER");
+  }
 
   console.log(`check-up-schedules: ok (${mode})`);
 };

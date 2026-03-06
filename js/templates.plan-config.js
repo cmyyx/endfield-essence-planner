@@ -12,7 +12,7 @@
             v-if="showPlanConfigHintDot"
             class="plan-config-hint-dot"
             aria-hidden="true"
-          >NEW</span>
+          >{{ t("plan_config.new_badge") }}</span>
           <span>{{ t("plan_config.plan_recommendation_settings") }}</span>
         </button>
         <div v-if="showPlanConfig" class="plan-config-panel">

@@ -67,15 +67,93 @@
       };
     };
 
+    const isSafeObjectKey = (key) =>
+      key !== "__proto__" && key !== "prototype" && key !== "constructor";
+
+    const isWhitelistedStorageKey = (key) => {
+      const text = String(key || "").trim();
+      if (!text) return false;
+      if (/^planner-/i.test(text)) return true;
+      if (/^weapon-(marks|attr-overrides):/i.test(text)) return true;
+      if (/^announcement:skip(?::|$)/i.test(text)) return true;
+      if (/^weapon-marks-migration:/i.test(text)) return true;
+      return false;
+    };
+
+    const redactStringValue = (value) => {
+      const text = String(value == null ? "" : value);
+      return {
+        redacted: true,
+        length: text.length,
+      };
+    };
+
+    const sanitizeStorageRawValue = (value, depth) => {
+      if (depth > 4) return { redacted: true, type: "depth-limit" };
+      if (value == null) return value;
+      if (typeof value === "string") {
+        try {
+          const parsed = JSON.parse(value);
+          return {
+            type: "json",
+            value: sanitizeStorageRawValue(parsed, depth + 1),
+          };
+        } catch (error) {
+          return {
+            type: "string",
+            value: redactStringValue(value),
+          };
+        }
+      }
+      if (typeof value === "number" || typeof value === "boolean") {
+        return value;
+      }
+      if (Array.isArray(value)) {
+        return value.slice(0, 50).map((item) => sanitizeStorageRawValue(item, depth + 1));
+      }
+      if (typeof value === "object") {
+        const sanitized = Object.create(null);
+        Object.keys(value)
+          .filter((key) => isSafeObjectKey(key))
+          .slice(0, 80)
+          .forEach((key) => {
+            sanitized[key] = sanitizeStorageRawValue(value[key], depth + 1);
+          });
+        return sanitized;
+      }
+      return String(value);
+    };
+
+    const buildSafeStorageRaw = (rawSource) => {
+      const source = rawSource && typeof rawSource === "object" ? rawSource : {};
+      const safeRaw = {};
+      Object.keys(source).forEach((key) => {
+        if (!isWhitelistedStorageKey(key)) return;
+        safeRaw[key] = sanitizeStorageRawValue(source[key], 0);
+      });
+      return safeRaw;
+    };
+
+    const resolveSafeLocation = () => {
+      if (typeof window === "undefined" || !window.location) return "";
+      const origin = String(window.location.origin || "");
+      const pathname = String(window.location.pathname || "");
+      return `${origin}${pathname}`;
+    };
+
     const buildDiagnosticBundle = async () => {
       const estimate = await readStorageEstimate();
       const currentIssue = state.storageErrorCurrent.value || null;
       const bootStorageProbe =
         typeof window !== "undefined" && window.__bootStorageProbe ? window.__bootStorageProbe : null;
+      const storageRawSource =
+        persistenceApi && typeof persistenceApi.readManagedStorageRaw === "function"
+          ? persistenceApi.readManagedStorageRaw()
+          : {};
       return {
         exportedAt: nowIsoString(),
         fingerprint: getAppFingerprint(),
-        location: typeof window !== "undefined" ? window.location.href : "",
+        location: resolveSafeLocation(),
         userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
         online:
           typeof navigator !== "undefined" && typeof navigator.onLine === "boolean"
@@ -91,10 +169,7 @@
           persistenceApi && typeof persistenceApi.readManagedStorageSummary === "function"
             ? persistenceApi.readManagedStorageSummary()
             : {},
-        storageRaw:
-          persistenceApi && typeof persistenceApi.readManagedStorageRaw === "function"
-            ? persistenceApi.readManagedStorageRaw()
-            : {},
+        storageRaw: buildSafeStorageRaw(storageRawSource),
         nonFatalDiagnostics: readNonFatalDiagnosticsHistory(),
         nonFatalDiagnosticsConfig: readNonFatalDiagnosticsConfig(),
       };

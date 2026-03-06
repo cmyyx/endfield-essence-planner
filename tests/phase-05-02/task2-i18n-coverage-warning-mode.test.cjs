@@ -88,6 +88,12 @@ function runCoverageWarningMode(baseStrings, localeStrings, locale, requiredKeys
 const zhCnStrings = loadLocaleStrings("zh-CN");
 const requiredKeys = collectRequiredKeys();
 assert.ok(requiredKeys.length > 0, "required key set should not be empty");
+const zhCnMissingKeys = requiredKeys.filter((key) => !Object.prototype.hasOwnProperty.call(zhCnStrings, key));
+assert.deepEqual(
+  zhCnMissingKeys,
+  [],
+  `zh-CN should fully cover required keys:\n${zhCnMissingKeys.join("\n")}`
+);
 
 // warning-only contract: when keys are missing, checker should still report success exit code.
 const warningModeProbe = runCoverageWarningMode(

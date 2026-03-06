@@ -121,7 +121,7 @@
       if (!normalizedTitle) return fallbackTitle;
       if (!i18nKeyPattern.test(normalizedTitle)) return normalizedTitle;
       const translated = t(normalizedTitle);
-      return translated === "文案缺失" ? fallbackTitle : translated;
+      return translated === "文案缺失" ? normalizedTitle : translated;
     };
 
     const localizedContent = computed(() => getContentForLocale(state.locale.value));

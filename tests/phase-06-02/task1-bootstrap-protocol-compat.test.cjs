@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, "../..");
 const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), "utf8");
 
 const requiredFiles = [
+  "index.html",
   "js/bootstrap.resources.js",
   "js/bootstrap.error.js",
   "js/bootstrap.optional.js",
@@ -20,6 +21,7 @@ requiredFiles.forEach((relativePath) => {
   );
 });
 
+const indexSource = read("index.html");
 const entrySource = read("js/bootstrap.entry.js");
 const errorModuleSource = read("js/bootstrap.error.js");
 
@@ -48,6 +50,21 @@ assert.match(
   entrySource,
   /window\.__startBootstrapEntry\(\{\s*fromRetry:\s*true\s*\}\)/,
   "retry semantic window.__startBootstrapEntry({ fromRetry: true }) should remain callable"
+);
+assert.match(
+  indexSource,
+  /<script[\s\S]*src="\.\/js\/bootstrap\.entry\.js"[\s\S]*onerror=/,
+  "index.html should keep bootstrap.entry onerror fallback hook"
+);
+assert.match(
+  indexSource,
+  /页面初始化失败/,
+  "index.html fallback should expose readable bootstrap-entry failure title"
+);
+assert.match(
+  indexSource,
+  /关键引导脚本 \.\/js\/bootstrap\.entry\.js 加载失败/,
+  "index.html fallback should expose bootstrap.entry load-failure detail"
 );
 
 assert.match(

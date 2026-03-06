@@ -18,47 +18,12 @@
 
   if (typeof console !== "undefined" && typeof console.warn === "function") {
     console.warn(
-      "[app.script-chain] window.__APP_RESOURCE_MANIFEST.app.scriptChain is missing, using legacy fallback chain."
+      "[app.script-chain] window.__APP_RESOURCE_MANIFEST.app.scriptChain is missing; keeping compatibility bridge output only."
     );
   }
-  if (Array.isArray(window.__APP_SCRIPT_CHAIN) && window.__APP_SCRIPT_CHAIN.length) return;
-  window.__APP_SCRIPT_CHAIN = [
-    "./js/app.core.js",
-    "./js/app.utils.js",
-    "./js/app.state.js",
-    "./js/app.diagnostics.js",
-    "./js/app.i18n.js",
-    "./js/app.sanitizer.js",
-    "./js/app.content.js",
-    "./js/app.search.js",
-    "./js/app.ui.js",
-    "./js/app.up-schedule.js",
-    "./js/app.rerun-ranking.js",
-    "./js/app.storage.schema.js",
-    "./js/app.storage.persistence.js",
-    "./js/app.storage.recovery.js",
-    "./js/app.storage.diagnostic.js",
-    "./js/app.storage.js",
-    "./js/app.analytics.js",
-    "./js/app.embed.js",
-    "./js/app.perf.js",
-    "./js/app.background.js",
-    "./js/app.weapons.js",
-    "./js/app.weapon.match.js",
-    "./js/app.recommendations.js",
-    "./js/app.tutorial.js",
-    "./js/app.recommendations.display.js",
-    "./js/app.modals.js",
-    "./js/app.update.js",
-    "./js/app.media.js",
-    "./js/app.strategy.js",
-    "./js/app.gear-refining.js",
-    "./js/templates.plan-config.js",
-    "./js/templates.gear-refining.js",
-    "./js/templates.main.01.js",
-    "./js/templates.main.02.js",
-    "./js/templates.main.03.js",
-    "./js/templates.main.04.js",
-    "./js/app.main.js",
-  ];
+  if (Array.isArray(window.__APP_SCRIPT_CHAIN)) {
+    window.__APP_SCRIPT_CHAIN = window.__APP_SCRIPT_CHAIN.slice();
+    return;
+  }
+  window.__APP_SCRIPT_CHAIN = [];
 })();

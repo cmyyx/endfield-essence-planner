@@ -113,10 +113,17 @@
       const scope = meta && meta.scope ? String(meta.scope) : "init-ui";
       const operation = meta && meta.operation ? String(meta.operation) : "runtime.init";
       const key = meta && meta.key ? String(meta.key) : "app.ui:onMounted";
-      const title = meta && meta.title ? String(meta.title) : "页面初始化异常";
+      const title =
+        meta && meta.title
+          ? String(meta.title)
+          : typeof state.t === "function"
+          ? state.t("error.page_init_title")
+          : "页面初始化异常";
       const summary =
         meta && meta.summary
           ? String(meta.summary)
+          : typeof state.t === "function"
+          ? state.t("error.page_init_summary")
           : "页面初始化阶段发生异常，部分功能可能不可用。";
       return {
         id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
@@ -168,7 +175,9 @@
       optionalFailureToastTimers.delete(key);
     };
     const clearAllOptionalFailureToastTimers = () => {
-      optionalFailureToastTimers.forEach((timer) => clearTimeout(timer));
+      for (const timer of optionalFailureToastTimers.values()) {
+        clearTimeout(timer);
+      }
       optionalFailureToastTimers.clear();
     };
     const removeVisibleOptionalFailureNotice = (noticeId) => {
