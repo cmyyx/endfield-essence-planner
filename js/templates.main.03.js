@@ -167,7 +167,7 @@
                       {{ t("badge.gap_days_days", { days: row.hasEndedHistory ? row.gapDays : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
-                      {{ t("badge.count_count", { count: row.hasEndedHistory ? row.rerunCount : "-" }) }}
+                      {{ t("badge.count_count", { count: row.rerunCount > 0 ? row.rerunCount : "-" }) }}
                     </div>
                     <div class="rerun-ranking-meta">
                       {{

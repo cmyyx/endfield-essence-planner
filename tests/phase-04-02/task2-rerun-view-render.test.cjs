@@ -68,8 +68,8 @@ assert.match(
 );
 assert.match(
   rerunViewBlock,
-  /row\.hasEndedHistory/,
-  "rerun-ranking card should use ended-history guard for placeholder rendering"
+  /row\.rerunCount\s*>\s*0/,
+  "rerun-ranking card should use rerunCount>0 guard for placeholder rendering"
 );
 assert.match(
   rerunViewBlock,

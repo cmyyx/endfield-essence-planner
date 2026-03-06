@@ -11,10 +11,10 @@ const createRef = (value) => ({ value });
 const run = () => {
   const source = fs.readFileSync(upScheduleFile, "utf8");
   const schedules = {
-    熔铸火焰: {
+    莱万汀: {
       windows: [{ start: "2026-01-10", end: "2026-01-11" }],
     },
-    使命必达: {
+    洁尔佩塔: {
       windows: [{ start: "bad-time", end: "2026-01-11" }],
     },
   };
@@ -37,14 +37,31 @@ const run = () => {
   };
   context.window.AppModules.initUpSchedule({ ref: createRef }, state);
 
+  assert.ok(state.characterUpByCharacter && state.characterUpByCharacter.value, "characterUpByCharacter should exist");
   assert.ok(state.weaponUpByWeapon && state.weaponUpByWeapon.value, "weaponUpByWeapon should exist");
   assert.ok(state.weaponUpIssues && Array.isArray(state.weaponUpIssues.value), "weaponUpIssues should exist");
+  assert.ok(
+    state.upScheduleNormalized &&
+      state.upScheduleNormalized.value &&
+      state.upScheduleNormalized.value.byCharacter,
+    "upScheduleNormalized.byCharacter should exist"
+  );
 
+  const byCharacter = state.characterUpByCharacter.value;
   const byWeapon = state.weaponUpByWeapon.value;
   const issueCount = state.weaponUpIssues.value.length;
 
+  assert.equal(Object.keys(byCharacter).length, 1, "valid character should coexist with rejected character issues");
   assert.equal(Object.keys(byWeapon).length, 1, "valid data should coexist with rejected weapon issues");
   assert.ok(issueCount >= 1, "issues should be preserved for downstream UI/logs");
+
+  const characterRecord = byCharacter["莱万汀"];
+  assert.ok(characterRecord, "valid character should be indexed by name");
+  assert.deepEqual(
+    Array.from(characterRecord.weaponNames || []),
+    ["熔铸火焰"],
+    "weaponNames should be derived from WEAPONS[] by character mapping"
+  );
 
   const record = byWeapon["熔铸火焰"];
   assert.ok(record, "valid weapon should be indexed by name");

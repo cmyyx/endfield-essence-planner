@@ -42,12 +42,12 @@
     return candidate;
   };
 
-  const countEndedWindows = (windows, nowMs) => {
+  const countStartedWindows = (windows, nowMs) => {
     if (!Array.isArray(windows)) return 0;
     let count = 0;
     windows.forEach((item) => {
-      const endMs = Number(item && item.endMs);
-      if (!Number.isFinite(endMs) || endMs > nowMs) return;
+      const startMs = Number(item && item.startMs);
+      if (!Number.isFinite(startMs) || startMs > nowMs) return;
       count += 1;
     });
     return count;
@@ -55,6 +55,7 @@
 
   const toCharacterName = (record) => {
     if (!record || typeof record !== "object") return "";
+    if (record.characterName) return String(record.characterName);
     if (record.primaryCharacter) return String(record.primaryCharacter);
     if (Array.isArray(record.characters)) {
       const first = record.characters.find(Boolean);
@@ -62,9 +63,20 @@
     }
     return "";
   };
+  const resolveWeaponNames = (record, fallbackKey) => {
+    if (!record || typeof record !== "object") {
+      return fallbackKey ? [String(fallbackKey)] : [];
+    }
+    if (Array.isArray(record.weaponNames) && record.weaponNames.length) {
+      return Array.from(new Set(record.weaponNames.map((item) => String(item || "").trim()).filter(Boolean)));
+    }
+    if (record.primaryWeaponName) return [String(record.primaryWeaponName)];
+    if (record.weaponName) return [String(record.weaponName)];
+    return fallbackKey ? [String(fallbackKey)] : [];
+  };
 
-  const deriveRerunRankingRows = (weaponUpByWeapon, options) => {
-    const source = weaponUpByWeapon && typeof weaponUpByWeapon === "object" ? weaponUpByWeapon : {};
+  const deriveRerunRankingRows = (scheduleByCharacter, options) => {
+    const source = scheduleByCharacter && typeof scheduleByCharacter === "object" ? scheduleByCharacter : {};
     const nowMs = resolveNowMs(options && options.nowMs);
     const activeByWeapon =
       options && options.activeByWeapon && typeof options.activeByWeapon === "object"
@@ -72,13 +84,19 @@
         : {};
     const rows = [];
 
-    Object.keys(source).forEach((weaponName) => {
-      const record = source[weaponName];
+    Object.keys(source).forEach((scheduleKey) => {
+      const record = source[scheduleKey];
       if (!record || typeof record !== "object") return;
       const characterName = toCharacterName(record);
       if (!characterName) return;
-      const weaponLabel = String(record.weaponName || weaponName);
-      const isActive = Boolean(activeByWeapon[weaponName] || activeByWeapon[weaponLabel]);
+      const weaponNames = resolveWeaponNames(record, scheduleKey);
+      const weaponLabel = String(
+        record.primaryWeaponName ||
+          record.weaponName ||
+          weaponNames[0] ||
+          scheduleKey
+      );
+      const isActive = weaponNames.some((name) => Boolean(activeByWeapon[name]));
       const lastWindow = pickLastEndedWindow(record.windows, nowMs);
       const nextWindow = pickNextUpcomingWindow(record.windows, nowMs);
       const lastEndMs = lastWindow ? Number(lastWindow.endMs) : Number.NaN;
@@ -98,7 +116,7 @@
         nextStartMs: hasUpcomingWindow ? nextStartMs : null,
         gapMs,
         gapDays: hasEndedHistory ? Math.floor(gapMs / DAY_MS) : null,
-        rerunCount: countEndedWindows(record.windows, nowMs),
+        rerunCount: countStartedWindows(record.windows, nowMs),
         isActive,
         isUpcoming: !isActive && hasUpcomingWindow && !hasEndedHistory,
       });
@@ -175,10 +193,14 @@
     state.rerunRankingGeneratedAt = resolveValue(state.rerunRankingGeneratedAt, 0);
 
     state.refreshRerunRanking = (nextNow) => {
-      const source =
-        state.weaponUpByWeapon && state.weaponUpByWeapon.value
-          ? state.weaponUpByWeapon.value
-          : {};
+      const source = (
+        (state.characterUpByCharacter && state.characterUpByCharacter.value) ||
+        (state.upScheduleNormalized &&
+          state.upScheduleNormalized.value &&
+          state.upScheduleNormalized.value.byCharacter) ||
+        (state.weaponUpByWeapon && state.weaponUpByWeapon.value) ||
+        {}
+      );
       const nowMs = resolveNowMs(
         typeof nextNow === "undefined"
           ? options && Object.prototype.hasOwnProperty.call(options, "nowMs")

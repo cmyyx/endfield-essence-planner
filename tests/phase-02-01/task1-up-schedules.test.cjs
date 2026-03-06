@@ -15,10 +15,10 @@ const run = () => {
   const schedules = context.window.WEAPON_UP_SCHEDULES;
   assert.ok(schedules && typeof schedules === "object", "window.WEAPON_UP_SCHEDULES must be an object");
 
-  for (const [weaponName, entry] of Object.entries(schedules)) {
-    assert.ok(weaponName.trim().length > 0, "weapon name key must be non-empty");
+  for (const [characterName, entry] of Object.entries(schedules)) {
+    assert.ok(characterName.trim().length > 0, "character name key must be non-empty");
     const keys = Object.keys(entry);
-    assert.deepEqual(keys, ["windows"], "weapon entry only allows `windows`");
+    assert.deepEqual(keys, ["windows"], "character entry only allows `windows`");
     assert.ok(Array.isArray(entry.windows), "windows must be an array");
 
     entry.windows.forEach((windowEntry) => {

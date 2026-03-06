@@ -36,10 +36,10 @@ const loadUpScheduleHelper = () => {
 };
 
 const createDataset = (mode, baseSchedules) => {
-  if (mode === "invalid-unknown-weapon") {
+  if (mode === "invalid-unknown-character") {
     return {
       ...baseSchedules,
-      未收录武器: {
+      未收录角色: {
         windows: [{ start: "2026-01-22T12:00:00+08:00", end: "2026-02-07T12:00:00+08:00" }],
       },
     };
@@ -47,7 +47,7 @@ const createDataset = (mode, baseSchedules) => {
   if (mode === "invalid-window-order") {
     return {
       ...baseSchedules,
-      使命必达: {
+      洁尔佩塔: {
         windows: [{ start: "2026-02-24T12:00:00+08:00", end: "2026-02-07T12:00:00+08:00" }],
       },
     };
@@ -56,29 +56,31 @@ const createDataset = (mode, baseSchedules) => {
 };
 
 const checkData06Contract = (normalized) => {
-  const { byWeapon, issues } = normalized;
+  const { byCharacter, byWeapon, issues } = normalized;
   assert.equal(issues.length, 0, `expected no issues, got ${JSON.stringify(issues, null, 2)}`);
-  const weaponNames = Object.keys(byWeapon || {});
-  assert.ok(weaponNames.length > 0, "valid mode should output non-empty normalized weapon map");
+  const characterNames = Object.keys(byCharacter || {});
+  assert.ok(characterNames.length > 0, "valid mode should output non-empty normalized character map");
+  assert.ok(Object.keys(byWeapon || {}).length > 0, "valid mode should output non-empty normalized weapon map");
 
-  weaponNames.forEach((weaponName) => {
-    const record = byWeapon[weaponName];
-    assert.ok(record, `${weaponName} should exist in normalized byWeapon`);
+  characterNames.forEach((characterName) => {
+    const record = byCharacter[characterName];
+    assert.ok(record, `${characterName} should exist in normalized byCharacter`);
     assert.ok(
-      typeof record.primaryCharacter === "string" && record.primaryCharacter.trim().length > 0,
-      `${weaponName} should have primaryCharacter`
+      typeof record.characterName === "string" && record.characterName.trim().length > 0,
+      `${characterName} should have characterName`
     );
+    assert.ok(Array.isArray(record.weaponNames) && record.weaponNames.length > 0, `${characterName} should map to weaponNames`);
     const windows = Array.isArray(record.windows) ? record.windows : [];
-    assert.ok(windows.length > 0, `${weaponName} should expose at least one window`);
+    assert.ok(windows.length > 0, `${characterName} should expose at least one window`);
     windows.forEach((windowItem, index) => {
       assert.ok(
         typeof windowItem.startIso === "string" && typeof windowItem.endIso === "string",
-        `${weaponName}[${index}] should expose startIso/endIso`
+        `${characterName}[${index}] should expose startIso/endIso`
       );
       assert.equal(
         windowItem.startMs < windowItem.endMs,
         true,
-        `${weaponName}[${index}] window should satisfy [start, end)`
+        `${characterName}[${index}] window should satisfy [start, end)`
       );
     });
   });
@@ -96,7 +98,7 @@ const checkIssueModeContract = (normalized, expectedCode) => {
 const main = () => {
   const modeArg = process.argv.slice(2).find((arg) => arg.startsWith("--mode="));
   const mode = modeArg ? modeArg.slice("--mode=".length) : "valid";
-  const allowedModes = new Set(["valid", "invalid-unknown-weapon", "invalid-window-order"]);
+  const allowedModes = new Set(["valid", "invalid-unknown-character", "invalid-window-order"]);
   assert.equal(allowedModes.has(mode), true, `unsupported mode: ${mode}`);
 
   const schedules = loadWindowVariable(upScheduleDataFile, "WEAPON_UP_SCHEDULES");
@@ -109,8 +111,8 @@ const main = () => {
 
   if (mode === "valid") {
     checkData06Contract(normalized);
-  } else if (mode === "invalid-unknown-weapon") {
-    checkIssueModeContract(normalized, "UP_UNKNOWN_WEAPON");
+  } else if (mode === "invalid-unknown-character") {
+    checkIssueModeContract(normalized, "UP_UNKNOWN_CHARACTER");
   } else if (mode === "invalid-window-order") {
     checkIssueModeContract(normalized, "UP_WINDOW_ORDER");
   }

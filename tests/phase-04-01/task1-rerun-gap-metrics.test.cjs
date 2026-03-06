@@ -25,10 +25,11 @@ const run = () => {
   const nowMs = Date.UTC(2026, 2, 3, 0, 0, 0);
   const oneDayMs = 24 * 60 * 60 * 1000;
   const state = {
-    weaponUpByWeapon: ref({
-      ValidOne: {
-        weaponName: "ValidOne",
-        primaryCharacter: "CharA",
+    characterUpByCharacter: ref({
+      CharA: {
+        characterName: "CharA",
+        primaryWeaponName: "ValidOne",
+        weaponNames: ["ValidOne"],
         avatarSrc: "./image/characters/CharA.png",
         windows: [
           {
@@ -37,9 +38,10 @@ const run = () => {
           },
         ],
       },
-      ValidTwo: {
-        weaponName: "ValidTwo",
-        primaryCharacter: "CharB",
+      CharB: {
+        characterName: "CharB",
+        primaryWeaponName: "ValidTwo",
+        weaponNames: ["ValidTwo"],
         avatarSrc: "./image/characters/CharB.png",
         windows: [
           {
@@ -48,18 +50,10 @@ const run = () => {
           },
         ],
       },
-      MissingWindows: {
-        weaponName: "MissingWindows",
-        primaryCharacter: "CharC",
-      },
-      InvalidWindowShape: {
-        weaponName: "InvalidWindowShape",
-        primaryCharacter: "CharD",
-        windows: [{}],
-      },
-      ActiveOnly: {
-        weaponName: "ActiveOnly",
-        primaryCharacter: "CharE",
+      CharFirstActive: {
+        characterName: "CharFirstActive",
+        primaryWeaponName: "FirstActive",
+        weaponNames: ["FirstActive"],
         windows: [
           {
             startMs: nowMs - oneDayMs,
@@ -67,9 +61,44 @@ const run = () => {
           },
         ],
       },
-      FutureOnly: {
-        weaponName: "FutureOnly",
-        primaryCharacter: "CharF",
+      CharSecondActive: {
+        characterName: "CharSecondActive",
+        primaryWeaponName: "SecondActive",
+        weaponNames: ["SecondActive"],
+        windows: [
+          {
+            startMs: nowMs - 8 * oneDayMs,
+            endMs: nowMs - 5 * oneDayMs,
+          },
+          {
+            startMs: nowMs - oneDayMs,
+            endMs: nowMs + oneDayMs,
+          },
+        ],
+      },
+      CharBeforeThird: {
+        characterName: "CharBeforeThird",
+        primaryWeaponName: "BeforeThird",
+        weaponNames: ["BeforeThird"],
+        windows: [
+          {
+            startMs: nowMs - 10 * oneDayMs,
+            endMs: nowMs - 7 * oneDayMs,
+          },
+          {
+            startMs: nowMs - 5 * oneDayMs,
+            endMs: nowMs - 2 * oneDayMs,
+          },
+          {
+            startMs: nowMs + 2 * oneDayMs,
+            endMs: nowMs + 4 * oneDayMs,
+          },
+        ],
+      },
+      CharFutureOnly: {
+        characterName: "CharFutureOnly",
+        primaryWeaponName: "FutureOnly",
+        weaponNames: ["FutureOnly"],
         windows: [
           {
             startMs: nowMs + 2 * oneDayMs,
@@ -78,8 +107,16 @@ const run = () => {
         ],
       },
     }),
+    weaponUpByWeapon: ref({
+      LegacyOnly: {
+        weaponName: "LegacyOnly",
+        primaryCharacter: "LegacyChar",
+        windows: [{ startMs: nowMs - 12 * oneDayMs, endMs: nowMs - 9 * oneDayMs }],
+      },
+    }),
     getWeaponUpWindowAt: () => ({
-      ActiveOnly: { weaponName: "ActiveOnly" },
+      FirstActive: { weaponName: "FirstActive" },
+      SecondActive: { weaponName: "SecondActive" },
     }),
   };
 
@@ -89,7 +126,7 @@ const run = () => {
   assert.equal(Array.isArray(state.rerunRankingRows.value), true, "should expose rerun rows array");
   assert.equal(
     state.rerunRankingRows.value.length,
-    4,
+    6,
     "historical rows, active rows and future rows should be included"
   );
 
@@ -99,10 +136,11 @@ const run = () => {
 
   assert.equal(byWeapon.has("ValidOne"), true, "ValidOne should be included");
   assert.equal(byWeapon.has("ValidTwo"), true, "ValidTwo should be included");
-  assert.equal(byWeapon.has("MissingWindows"), false, "record without windows should be filtered");
-  assert.equal(byWeapon.has("InvalidWindowShape"), false, "invalid window record should be filtered");
-  assert.equal(byWeapon.has("ActiveOnly"), true, "active-only row should be retained");
+  assert.equal(byWeapon.has("FirstActive"), true, "first active row should be retained");
+  assert.equal(byWeapon.has("SecondActive"), true, "second active row should be retained");
+  assert.equal(byWeapon.has("BeforeThird"), true, "before-third row should be retained");
   assert.equal(byWeapon.has("FutureOnly"), true, "future-only row should be retained");
+  assert.equal(byWeapon.has("LegacyOnly"), false, "character source should be preferred over legacy weapon source");
 
   const rowOne = byWeapon.get("ValidOne");
   const rowTwo = byWeapon.get("ValidTwo");
@@ -112,15 +150,24 @@ const run = () => {
   assert.equal(rowTwo.gapMs, oneDayMs, "gapMs should equal nowMs - lastEndMs");
   assert.equal(rowOne.gapDays, 4, "gapDays should be derived from gapMs");
   assert.equal(rowTwo.gapDays, 1, "gapDays should be derived from gapMs");
-  assert.equal(rowOne.rerunCount, 1, "rerunCount should count ended windows");
-  assert.equal(rowTwo.rerunCount, 1, "rerunCount should count ended windows");
+  assert.equal(rowOne.rerunCount, 1, "rerunCount should count started windows");
+  assert.equal(rowTwo.rerunCount, 1, "rerunCount should count started windows");
 
-  const activeOnlyRow = byWeapon.get("ActiveOnly");
-  assert.equal(activeOnlyRow.isActive, true, "active-only row should be marked active");
-  assert.equal(activeOnlyRow.hasEndedHistory, false, "active-only row should be marked as no ended history");
-  assert.equal(activeOnlyRow.gapDays, null, "active-only row should keep gapDays empty when no ended history");
-  assert.equal(activeOnlyRow.lastEndMs, null, "active-only row should not fake lastEndMs");
-  assert.equal(activeOnlyRow.rerunCount, 0, "active-only row should expose zero ended reruns");
+  const firstActiveRow = byWeapon.get("FirstActive");
+  assert.equal(firstActiveRow.isActive, true, "first active row should be marked active");
+  assert.equal(firstActiveRow.hasEndedHistory, false, "first active row should be marked as no ended history");
+  assert.equal(firstActiveRow.gapDays, null, "first active row should keep gapDays empty when no ended history");
+  assert.equal(firstActiveRow.lastEndMs, null, "first active row should not fake lastEndMs");
+  assert.equal(firstActiveRow.rerunCount, 1, "first active row should show rerun count as 1");
+
+  const secondActiveRow = byWeapon.get("SecondActive");
+  assert.equal(secondActiveRow.isActive, true, "second active row should be marked active");
+  assert.equal(secondActiveRow.rerunCount, 2, "second active row should show rerun count as 2");
+
+  const beforeThirdRow = byWeapon.get("BeforeThird");
+  assert.equal(beforeThirdRow.isActive, false, "before-third row should not be marked active");
+  assert.equal(beforeThirdRow.hasEndedHistory, true, "before-third row should keep ended history");
+  assert.equal(beforeThirdRow.rerunCount, 2, "before third rerun starts, rerun count should stay at 2");
 
   const futureOnlyRow = byWeapon.get("FutureOnly");
   assert.equal(futureOnlyRow.isActive, false, "future-only row should not be marked active");

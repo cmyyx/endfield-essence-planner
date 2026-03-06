@@ -13,20 +13,20 @@ const createRef = (value) => ({ value });
 const runUpScheduleValidation = () => {
   const source = fs.readFileSync(upScheduleFile, "utf8");
   const schedules = {
-    熔铸火焰: {
+    莱万汀: {
       windows: [{ start: "2026-01-10", end: "2026-01-11" }],
     },
-    使命必达: {
+    洁尔佩塔: {
       windows: [{ start: "not-a-time", end: "2026-01-11" }],
     },
-    艺术暴君: {
+    伊冯: {
       windows: [{ start: "2026-01-12", end: "2026-01-11" }],
     },
-    负山: {
+    黎风: {
       windows: [{ start: "2026-01-10", end: "2026-01-11" }],
       unknownField: true,
     },
-    未收录武器: {
+    未收录角色: {
       windows: [{ start: "2026-01-10", end: "2026-01-11" }],
     },
   };
@@ -53,12 +53,12 @@ const runUpScheduleValidation = () => {
   context.window.AppModules.initUpSchedule({ ref: createRef }, state);
 
   const byWeapon = state.weaponUpByWeapon.value;
-  assert.deepEqual(Object.keys(byWeapon), ["熔铸火焰"], "invalid weapons should be rejected independently");
+  assert.deepEqual(Object.keys(byWeapon), ["熔铸火焰"], "invalid character schedules should be rejected independently");
 
   const issues = state.weaponUpIssues.value;
   assert.ok(Array.isArray(issues) && issues.length >= 4, "issues should be recorded");
   const codes = new Set(issues.map((item) => item.code));
-  assert.equal(codes.has("UP_UNKNOWN_WEAPON"), true, "should report unknown weapon");
+  assert.equal(codes.has("UP_UNKNOWN_CHARACTER"), true, "should report unknown character");
   assert.equal(codes.has("UP_UNKNOWN_KEY"), true, "should report unknown key");
   assert.equal(codes.has("UP_INVALID_TIME"), true, "should report invalid time");
   assert.equal(codes.has("UP_WINDOW_ORDER"), true, "should report reversed window");

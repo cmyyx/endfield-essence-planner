@@ -5,7 +5,7 @@
   const DATE_TIME_RE =
     /^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2}))?(Z|[+\-]\d{2}:\d{2})?$/;
   const ISSUE_CODES = Object.freeze({
-    UNKNOWN_WEAPON: "UP_UNKNOWN_WEAPON",
+    UNKNOWN_CHARACTER: "UP_UNKNOWN_CHARACTER",
     UNKNOWN_KEY: "UP_UNKNOWN_KEY",
     INVALID_TIME: "UP_INVALID_TIME",
     WINDOW_ORDER: "UP_WINDOW_ORDER",
@@ -164,7 +164,22 @@
   const normalizeAndBindWeaponUpSchedule = (rawSource, weaponList, options) => {
     const source = rawSource && typeof rawSource === "object" ? rawSource : {};
     const onIssue = options && typeof options.onIssue === "function" ? options.onIssue : null;
-    const weaponMap = new Map((Array.isArray(weaponList) ? weaponList : []).map((weapon) => [weapon.name, weapon]));
+    const characterWeaponMap = new Map();
+    (Array.isArray(weaponList) ? weaponList : []).forEach((weapon) => {
+      if (!weapon || typeof weapon !== "object") return;
+      const weaponName = String(weapon.name || "").trim();
+      if (!weaponName) return;
+      const characters = Array.isArray(weapon.chars)
+        ? Array.from(new Set(weapon.chars.map((item) => String(item || "").trim()).filter(Boolean)))
+        : [];
+      characters.forEach((characterName) => {
+        if (!characterWeaponMap.has(characterName)) {
+          characterWeaponMap.set(characterName, []);
+        }
+        characterWeaponMap.get(characterName).push(weapon);
+      });
+    });
+    const byCharacter = {};
     const byWeapon = {};
     const issues = [];
     const reportIssue = (issue) => {
@@ -178,25 +193,31 @@
       issues.push(entry);
       if (onIssue) onIssue(entry);
     };
+    const sortWeaponsForCharacter = (left, right) => {
+      const leftRarity = Number(left && left.rarity) || 0;
+      const rightRarity = Number(right && right.rarity) || 0;
+      if (rightRarity !== leftRarity) return rightRarity - leftRarity;
+      return String((left && left.name) || "").localeCompare(String((right && right.name) || ""), "zh-Hans-CN");
+    };
 
-    Object.keys(source).forEach((weaponName) => {
-      const entry = source[weaponName];
-      const weapon = weaponMap.get(weaponName);
-      if (!weapon) {
+    Object.keys(source).forEach((characterName) => {
+      const entry = source[characterName];
+      const relatedWeapons = characterWeaponMap.get(characterName);
+      if (!Array.isArray(relatedWeapons) || !relatedWeapons.length) {
         reportIssue({
-          code: ISSUE_CODES.UNKNOWN_WEAPON,
-          weaponName,
-          path: "weapon",
-          message: "weapon key does not exist in WEAPONS",
+          code: ISSUE_CODES.UNKNOWN_CHARACTER,
+          weaponName: characterName,
+          path: "character",
+          message: "character key does not exist in WEAPONS[].chars",
         });
         return;
       }
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
         reportIssue({
           code: ISSUE_CODES.UNKNOWN_KEY,
-          weaponName,
+          weaponName: characterName,
           path: "entry",
-          message: "weapon entry must be an object",
+          message: "character entry must be an object",
         });
         return;
       }
@@ -205,29 +226,41 @@
       if (unknownEntryKeys.length) {
         reportIssue({
           code: ISSUE_CODES.UNKNOWN_KEY,
-          weaponName,
+          weaponName: characterName,
           path: "entry",
           message: `unknown keys: ${unknownEntryKeys.join(", ")}`,
         });
         return;
       }
-      const windows = normalizeWindows(entry.windows, weaponName, reportIssue);
+      const windows = normalizeWindows(entry.windows, characterName, reportIssue);
       if (!windows) return;
-      if (issues.some((item) => item.weaponName === weaponName)) return;
-      const characters = Array.isArray(weapon.chars)
-        ? Array.from(new Set(weapon.chars.filter(Boolean)))
-        : [];
-      const primaryCharacter = characters.length ? characters[0] : "";
-      byWeapon[weaponName] = {
-        weaponName,
+      if (issues.some((item) => item.weaponName === characterName)) return;
+      const sortedWeapons = relatedWeapons.slice().sort(sortWeaponsForCharacter);
+      const weaponNames = sortedWeapons
+        .map((weapon) => String((weapon && weapon.name) || "").trim())
+        .filter(Boolean);
+      const primaryWeaponName = weaponNames[0] || "";
+      const avatarSrc = encodeURI(`./image/characters/${characterName}.png`);
+      byCharacter[characterName] = {
+        characterName,
         windows,
-        characters,
-        primaryCharacter,
-        avatarSrc: primaryCharacter ? encodeURI(`./image/characters/${primaryCharacter}.png`) : "",
+        weaponNames,
+        primaryWeaponName,
+        avatarSrc,
       };
+      weaponNames.forEach((weaponName) => {
+        byWeapon[weaponName] = {
+          weaponName,
+          windows: windows.slice(),
+          characters: [characterName],
+          primaryCharacter: characterName,
+          avatarSrc,
+        };
+      });
     });
 
     return {
+      byCharacter,
       byWeapon,
       issues,
       reportIssue,
@@ -254,11 +287,14 @@
     if (!state.weaponUpByWeapon || typeof state.weaponUpByWeapon.value === "undefined") {
       state.weaponUpByWeapon = ref({});
     }
+    if (!state.characterUpByCharacter || typeof state.characterUpByCharacter.value === "undefined") {
+      state.characterUpByCharacter = ref({});
+    }
     if (!state.weaponUpIssues || typeof state.weaponUpIssues.value === "undefined") {
       state.weaponUpIssues = ref([]);
     }
 
-    const { byWeapon, issues, reportIssue } = normalizeAndBindWeaponUpSchedule(runtimeRawSource, weapons, {
+    const { byCharacter, byWeapon, issues, reportIssue } = normalizeAndBindWeaponUpSchedule(runtimeRawSource, weapons, {
       onIssue: (entry) => {
         if (typeof state.reportRuntimeWarning === "function") {
           const error = new Error(`[${entry.code}] ${entry.message || "invalid up schedule entry"}`);
@@ -267,9 +303,9 @@
             scope: "up-schedule.normalize",
             operation: "up-schedule.validate",
             key: `${entry.code}:${entry.weaponName || "unknown"}:${entry.path || "-"}`,
-            title: "武器 UP 数据异常",
-            summary: "部分武器 UP 记录已被拒绝，请检查数据格式。",
-            note: `weapon: ${entry.weaponName || "unknown"}\npath: ${entry.path || "-"}\nmessage: ${entry.message || "-"}`,
+            title: "角色 UP 数据异常",
+            summary: "部分角色 UP 记录已被拒绝，请检查数据格式。",
+            note: `character: ${entry.weaponName || "unknown"}\npath: ${entry.path || "-"}\nmessage: ${entry.message || "-"}`,
             asToast: true,
           });
         }
@@ -277,9 +313,11 @@
     });
 
     state.upScheduleNormalized.value = {
+      byCharacter,
       byWeapon,
       issues,
     };
+    state.characterUpByCharacter.value = byCharacter;
     state.upScheduleIssues.value = issues;
     state.weaponUpByWeapon.value = byWeapon;
     state.weaponUpIssues.value = issues;

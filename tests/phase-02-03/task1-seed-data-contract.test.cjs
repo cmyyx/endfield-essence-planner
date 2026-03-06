@@ -26,35 +26,37 @@ const run = () => {
   const schedules = context.window.WEAPON_UP_SCHEDULES;
   assert.ok(schedules && typeof schedules === "object", "WEAPON_UP_SCHEDULES should be an object");
 
-  const weaponNames = Object.keys(schedules).sort();
+  const characterNames = Object.keys(schedules).sort();
   assert.deepEqual(
-    weaponNames,
-    ["使命必达", "艺术暴君", "熔铸火焰"].sort(),
-    "seed data must contain only DATA-06 required weapons"
+    characterNames,
+    ["莱万汀", "洁尔佩塔", "伊冯", "汤汤", "洛茜"].sort(),
+    "seed data must contain only configured character keys"
   );
 
   const expectedWindows = {
-    熔铸火焰: [{ start: "2026-01-22T12:00:00+08:00", end: "2026-02-07T12:00:00+08:00" }],
-    使命必达: [{ start: "2026-02-07", end: "2026-02-24T12:00:00+08:00" }],
-    艺术暴君: [{ start: "2026-02-24T12:00:00+08:00", end: "2026-03-12T12:00:00+08:00" }],
+    莱万汀: [{ start: "2026-01-22T12:00:00+08:00", end: "2026-02-07T11:59:00+08:00" }],
+    洁尔佩塔: [{ start: "2026-02-07T12:00:00+08:00", end: "2026-02-24T11:59:00+08:00" }],
+    伊冯: [{ start: "2026-02-24T12:00:00+08:00", end: "2026-03-12T11:59:00+08:00" }],
+    汤汤: [{ start: "2026-03-12T12:00:00+08:00", end: "2026-03-29T11:59:00+08:00" }],
+    洛茜: [{ start: "2026-03-29T12:00:00+08:00", end: "2026-04-15T11:59:00+08:00" }],
   };
 
-  Object.keys(expectedWindows).forEach((weaponName) => {
-    const entry = schedules[weaponName];
-    assert.ok(entry && typeof entry === "object", `${weaponName} entry should exist`);
-    assert.deepEqual(Object.keys(entry), ["windows"], `${weaponName} only allows windows key`);
+  Object.keys(expectedWindows).forEach((characterName) => {
+    const entry = schedules[characterName];
+    assert.ok(entry && typeof entry === "object", `${characterName} entry should exist`);
+    assert.deepEqual(Object.keys(entry), ["windows"], `${characterName} only allows windows key`);
 
     const actualWindows = entry.windows;
-    const expected = expectedWindows[weaponName];
-    assert.equal(Array.isArray(actualWindows), true, `${weaponName} windows must be array`);
-    assert.equal(actualWindows.length, expected.length, `${weaponName} should have expected window count`);
+    const expected = expectedWindows[characterName];
+    assert.equal(Array.isArray(actualWindows), true, `${characterName} windows must be array`);
+    assert.equal(actualWindows.length, expected.length, `${characterName} should have expected window count`);
 
     actualWindows.forEach((windowItem, index) => {
-      assert.equal(typeof windowItem.start, "string", `${weaponName}[${index}] start should be string`);
-      assert.equal(typeof windowItem.end, "string", `${weaponName}[${index}] end should be string`);
+      assert.equal(typeof windowItem.start, "string", `${characterName}[${index}] start should be string`);
+      assert.equal(typeof windowItem.end, "string", `${characterName}[${index}] end should be string`);
       const startMs = parseExpectedMs(windowItem.start);
       const endMs = parseExpectedMs(windowItem.end);
-      assert.equal(startMs < endMs, true, `${weaponName}[${index}] should satisfy [start, end)`);
+      assert.equal(startMs < endMs, true, `${characterName}[${index}] should satisfy [start, end)`);
     });
   });
 };
