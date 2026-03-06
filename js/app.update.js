@@ -179,6 +179,7 @@
     const normalizeVersionInfo = (raw, options) => {
       const resolved = options && typeof options === "object" ? options : {};
       const source = safeText(resolved.source || "unknown");
+      const isLocalSource = source === "local";
       const reportInvalid = Boolean(resolved.reportInvalid);
       if (!raw || typeof raw !== "object") {
         if (reportInvalid) {
@@ -198,7 +199,9 @@
         if (reportInvalid) {
           reportInvalidVersionPayload(source, "missing-core-fields", raw, missingFields);
         }
-        return null;
+        if (!isLocalSource) {
+          return null;
+        }
       }
       info.buildTimeToken = extractBuildTimeToken(info.buildId);
       const signature =
@@ -217,7 +220,20 @@
         if (reportInvalid) {
           reportInvalidVersionPayload(source, "empty-signature", raw, versionCoreFields);
         }
-        return null;
+        if (!isLocalSource) {
+          return null;
+        }
+        const fallbackSignature = [
+          info.fingerprint,
+          info.announcementVersion,
+          info.publishedAt,
+          info.displayVersion,
+          info.buildId,
+        ]
+          .filter(Boolean)
+          .join("|");
+        info.signature = safeText(fallbackSignature || "local-version-metadata-downgraded");
+        info.display = buildDisplayText(info) || info.signature;
       }
       return info;
     };
@@ -336,7 +352,7 @@
       };
       return normalizeVersionInfo(localCorePayload, {
         source: "local",
-        reportInvalid: false,
+        reportInvalid: true,
       });
     };
 

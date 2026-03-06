@@ -75,10 +75,14 @@
         resolve();
       };
       script.onerror = function () {
+        delete bootstrapModulePromises[src];
         reject(new Error("Failed to load bootstrap helper: " + src));
       };
       var target = document.head || document.documentElement || document.body;
       target.appendChild(script);
+    }).catch(function (error) {
+      delete bootstrapModulePromises[src];
+      throw error;
     });
     return bootstrapModulePromises[src];
   };

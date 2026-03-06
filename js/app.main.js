@@ -547,7 +547,13 @@
       const runInitWithContract = (name) => {
         const fn = modules[name];
         if (typeof fn !== "function") {
-          return "missing";
+          const missingError = new Error(`[init-contract] missing module initializer: ${name}`);
+          missingError.name = "InitModuleMissingError";
+          reportInitExecutionWarning(name, missingError);
+          if (strictInitContractEnvs.has(runtimeEnv)) {
+            throw missingError;
+          }
+          return "degraded";
         }
         const required = parseInitContractList(fn.required);
         const optional = parseInitContractList(fn.optional);
@@ -1024,6 +1030,24 @@
         }
         return lines.join("\n");
       };
+      const buildStorageErrorPreviewFromEntry = (entry) => {
+        if (!entry) return "";
+        if (typeof entry.previewText === "string" && entry.previewText) {
+          return entry.previewText;
+        }
+        const lines = [
+          `operation: ${entry.operation || "unknown"}`,
+          `key: ${entry.key || "unknown"}`,
+          `error: ${entry.errorName || "Error"}: ${entry.errorMessage || "unknown"}`,
+        ];
+        if (entry.scope) {
+          lines.push(`scope: ${entry.scope}`);
+        }
+        if (entry.note) {
+          lines.push(`note: ${entry.note}`);
+        }
+        return lines.join("\n");
+      };
       const openUnifiedExceptionFromLog = (item) => {
         if (!item || typeof item !== "object") return;
         const kind = String(item.__kind || "runtime");
@@ -1032,6 +1056,9 @@
           delete storageEntry.__kind;
           if (state.storageErrorCurrent) {
             state.storageErrorCurrent.value = storageEntry;
+          }
+          if (state.storageErrorPreviewText) {
+            state.storageErrorPreviewText.value = buildStorageErrorPreviewFromEntry(storageEntry);
           }
           if (state.showRuntimeWarningModal) {
             state.showRuntimeWarningModal.value = false;

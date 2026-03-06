@@ -11,7 +11,7 @@ const createRef = (value) => ({ value });
 const run = () => {
   const source = fs.readFileSync(targetFile, "utf8");
   const schedules = {
-    熔铸火焰: {
+    莱万汀: {
       windows: [
         { start: "2026-01-01", end: "2026-01-02" },
         { start: "2026-01-01T12:00:00", end: "2026-01-01T16:00:00" },
@@ -54,7 +54,7 @@ const run = () => {
   );
   assert.ok(dateOnlyWindow, "date-only source window should be kept");
   assert.equal(dateOnlyWindow.startIso, "2026-01-01T04:00:00.000Z", "date-only start should map to +08:00 noon");
-  assert.equal(dateOnlyWindow.endIso, "2026-01-02T03:59:00.000Z", "date-only end should map to +08:00 11:59");
+  assert.equal(dateOnlyWindow.endIso, "2026-01-02T04:00:00.000Z", "date-only end should map to +08:00 noon");
 
   const noTimezoneWindow = windows.find(
     (windowItem) =>

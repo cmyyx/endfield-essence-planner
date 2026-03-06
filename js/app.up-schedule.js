@@ -43,9 +43,8 @@
       const year = toInt(dateOnly[1]);
       const month = toInt(dateOnly[2]);
       const day = toInt(dateOnly[3]);
-      const isEndBoundary = boundary === "end";
-      const hour = isEndBoundary ? 11 : 12;
-      const minute = isEndBoundary ? 59 : 0;
+      const hour = 12;
+      const minute = 0;
       const second = 0;
       if (!isValidDateTime(year, month, day, hour, minute, second)) return null;
       const utcMs =
@@ -199,6 +198,34 @@
       if (rightRarity !== leftRarity) return rightRarity - leftRarity;
       return String((left && left.name) || "").localeCompare(String((right && right.name) || ""), "zh-Hans-CN");
     };
+    const normalizeWindowSignature = (windowItem) => {
+      const startMs = Number(windowItem && windowItem.startMs);
+      const endMs = Number(windowItem && windowItem.endMs);
+      const startIso = String((windowItem && windowItem.startIso) || "");
+      const endIso = String((windowItem && windowItem.endIso) || "");
+      return `${startMs}|${endMs}|${startIso}|${endIso}`;
+    };
+    const sortWindowsByTime = (left, right) => {
+      const leftStart = Number(left && left.startMs);
+      const rightStart = Number(right && right.startMs);
+      if (leftStart !== rightStart) return leftStart - rightStart;
+      const leftEnd = Number(left && left.endMs);
+      const rightEnd = Number(right && right.endMs);
+      if (leftEnd !== rightEnd) return leftEnd - rightEnd;
+      return Number(left && left.sourceIndex) - Number(right && right.sourceIndex);
+    };
+    const mergeWindows = (existing, incoming) => {
+      const merged = Array.isArray(existing) ? existing.map((item) => ({ ...item })) : [];
+      const signatures = new Set(merged.map((item) => normalizeWindowSignature(item)));
+      (Array.isArray(incoming) ? incoming : []).forEach((windowItem) => {
+        const signature = normalizeWindowSignature(windowItem);
+        if (signatures.has(signature)) return;
+        signatures.add(signature);
+        merged.push({ ...windowItem });
+      });
+      merged.sort(sortWindowsByTime);
+      return merged;
+    };
 
     Object.keys(source).forEach((characterName) => {
       const entry = source[characterName];
@@ -249,13 +276,29 @@
         avatarSrc,
       };
       weaponNames.forEach((weaponName) => {
-        byWeapon[weaponName] = {
-          weaponName,
-          windows: windows.slice(),
-          characters: [characterName],
-          primaryCharacter: characterName,
-          avatarSrc,
-        };
+        const existing = byWeapon[weaponName];
+        if (!existing || typeof existing !== "object") {
+          byWeapon[weaponName] = {
+            weaponName,
+            windows: windows.map((item) => ({ ...item })),
+            characters: [characterName],
+            primaryCharacter: characterName,
+            avatarSrc,
+          };
+          return;
+        }
+        const currentCharacters = Array.isArray(existing.characters) ? existing.characters.slice() : [];
+        if (!currentCharacters.includes(characterName)) {
+          currentCharacters.push(characterName);
+        }
+        existing.characters = currentCharacters;
+        existing.windows = mergeWindows(existing.windows, windows);
+        if (!existing.primaryCharacter) {
+          existing.primaryCharacter = characterName;
+        }
+        if (!existing.avatarSrc) {
+          existing.avatarSrc = avatarSrc;
+        }
       });
     });
 
