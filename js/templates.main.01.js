@@ -197,6 +197,11 @@
             :class="{ active: currentView === 'rerun-ranking' }"
             @click="setView('rerun-ranking')"
           >
+            <span
+              v-if="showRerunRankingNavHintDot"
+              class="nav-hint-dot"
+              aria-hidden="true"
+            >NEW</span>
             {{ t("nav.rerun_ranking") }}
           </button>
           </nav>

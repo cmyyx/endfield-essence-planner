@@ -171,6 +171,18 @@
         scope: "restore-gear-refining-nav-hint",
       });
     }
+    try {
+      const storedRerunRankingNavHintVersion = localStorage.getItem(
+        state.rerunRankingNavHintStorageKey
+      );
+      state.showRerunRankingNavHintDot.value =
+        storedRerunRankingNavHintVersion !== state.rerunRankingNavHintVersion;
+    } catch (error) {
+      state.showRerunRankingNavHintDot.value = true;
+      recoveryApi.reportStorageIssue("storage.read", state.rerunRankingNavHintStorageKey, error, {
+        scope: "restore-rerun-ranking-nav-hint",
+      });
+    }
 
     if (!restoredFilterPanelPreference && schemaApi.shouldCollapseFilterPanelByDefault()) {
       state.showFilterPanel.value = false;

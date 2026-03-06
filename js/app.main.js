@@ -932,6 +932,12 @@
           ) {
             state.markGearRefiningNavHintSeen();
           }
+          if (
+            view === "rerun-ranking" &&
+            typeof state.markRerunRankingNavHintSeen === "function"
+          ) {
+            state.markRerunRankingNavHintSeen();
+          }
           state.currentView.value = view;
           window.scrollTo(0, 0);
         },
@@ -976,6 +982,7 @@
         showWeaponAttrDataModal: state.showWeaponAttrDataModal,
         showPlanConfigHintDot: state.showPlanConfigHintDot,
         showGearRefiningNavHintDot: state.showGearRefiningNavHintDot,
+        showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         togglePlanConfig: state.togglePlanConfig,
         openWeaponAttrDataModal: state.openWeaponAttrDataModal,
         openWeaponDataIntegrityDetails: state.openWeaponDataIntegrityDetails,

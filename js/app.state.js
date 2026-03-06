@@ -56,6 +56,9 @@
     state.gearRefiningNavHintStorageKey = "planner-gear-refining-nav-hint:v1";
     // 更新装备精锻导航提示时递增该版本号，可让红点对所有用户重新显示一次。
     state.gearRefiningNavHintVersion = "1";
+    state.rerunRankingNavHintStorageKey = "planner-rerun-ranking-nav-hint:v1";
+    // 更新复刻排行导航提示时递增该版本号，可让红点对所有用户重新显示一次。
+    state.rerunRankingNavHintVersion = "1";
 
     state.lowGpuEnabled = ref(false);
     state.perfPreference = ref("auto");
@@ -87,6 +90,7 @@
     state.showWeaponAttrDataModal = ref(false);
     state.showPlanConfigHintDot = ref(false);
     state.showGearRefiningNavHintDot = ref(false);
+    state.showRerunRankingNavHintDot = ref(false);
     state.recommendationConfig = ref({
       hideEssenceOwnedWeapons: false,
       hideEssenceOwnedOwnedOnly: false,

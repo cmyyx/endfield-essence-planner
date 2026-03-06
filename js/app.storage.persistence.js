@@ -40,6 +40,7 @@
         state.backgroundDisplayStorageKey,
         state.planConfigHintStorageKey,
         state.gearRefiningNavHintStorageKey,
+        state.rerunRankingNavHintStorageKey,
       ].filter(Boolean);
       const unique = Array.from(new Set(keys));
       try {

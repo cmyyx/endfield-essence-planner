@@ -5,13 +5,14 @@ window.CONTENT = {
     nextVersionAt: "2026-03-12T04:00:00Z",
   },
   announcement: {
-    version: "1.5.0",
+    version: "1.6.0",
     title: "nav.announcement",
     date: "2026-03-01",
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
     items: [
-      "更新装备精锻界面(感谢[@Nether-Dream](https://github.com/Nether-Dream)和[@julystone](https://github.com/julystone)整理装备数据,数据未经严格校验,如有错误请反馈)",
+      "新增了两把未上线的前瞻武器,本站不会在正式服上线前提供任何属性,如您使用了自定义属性功能本站(开发者)不承担您自定义属性带来的任何后果/责任,使用自定义属性功能则认为您已知相关风险并自行承担所有后果(包括但不限于您的自定义属性错误导致锁定了错误的基质)",
+      "增加了一个复刻排行界面,这个功能现在可能没什么用,给未来的,论谁最久没复刻.jpg",
       "如果你对本站使用的背景感兴趣,[点此通过网盘下载随机图中的背景](https://pan.quark.cn/s/27540d6f3706),感谢你的喜欢!",
       "角色攻略界面绝赞开发中",
     ],

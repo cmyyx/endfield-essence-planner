@@ -10,6 +10,7 @@
     const showPlanConfig = state.showPlanConfig;
     const showPlanConfigHintDot = state.showPlanConfigHintDot;
     const showGearRefiningNavHintDot = state.showGearRefiningNavHintDot;
+    const showRerunRankingNavHintDot = state.showRerunRankingNavHintDot;
     const isPortrait = state.isPortrait;
     const updateLangMenuPlacement = state.updateLangMenuPlacement;
     const reportStorageIssue = (operation, key, error, meta) => {
@@ -718,6 +719,20 @@
         });
       }
     };
+    const markRerunRankingNavHintSeen = () => {
+      if (!showRerunRankingNavHintDot.value) return;
+      showRerunRankingNavHintDot.value = false;
+      try {
+        localStorage.setItem(
+          state.rerunRankingNavHintStorageKey,
+          state.rerunRankingNavHintVersion
+        );
+      } catch (error) {
+        reportStorageIssue("storage.write", state.rerunRankingNavHintStorageKey, error, {
+          scope: "ui.rerun-ranking-nav-hint-write",
+        });
+      }
+    };
 
     const togglePlanConfig = () => {
       const nextOpen = !showPlanConfig.value;
@@ -870,6 +885,7 @@
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
     state.markGearRefiningNavHintSeen = markGearRefiningNavHintSeen;
+    state.markRerunRankingNavHintSeen = markRerunRankingNavHintSeen;
     state.dismissRuntimeWarning = dismissRuntimeWarning;
     state.ignoreRuntimeWarnings = ignoreRuntimeWarnings;
     state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
