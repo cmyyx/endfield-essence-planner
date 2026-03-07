@@ -16,9 +16,10 @@
       state.recommendationConfig && state.recommendationConfig.value
         ? state.recommendationConfig.value
         : {
-            hideEssenceOwnedWeapons: false,
+            hideEssenceOwnedWeaponsInPlans: false,
             hideEssenceOwnedOwnedOnly: false,
-            hideUnownedWeapons: false,
+            hideUnownedWeaponsInPlans: false,
+            hideFourStarWeaponsInPlans: true,
             preferredRegion1: "",
             preferredRegion2: "",
             regionPriorityMode: "ignore",
@@ -46,10 +47,10 @@
           ? state.isEssenceOwnedForPlanning
           : state.isEssenceOwned;
       const recommendationConfig = getRecommendationConfig();
-      const hideEssenceOwnedInPlans = Boolean(recommendationConfig.hideEssenceOwnedWeapons);
+      const hideEssenceOwnedInPlans = Boolean(recommendationConfig.hideEssenceOwnedWeaponsInPlans);
       const hideEssenceOwnedOwnedOnly = Boolean(recommendationConfig.hideEssenceOwnedOwnedOnly);
-      const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeapons);
-      const hideFourStarWeapons = Boolean(recommendationConfig.hideFourStarWeapons);
+      const hideUnownedInPlans = Boolean(recommendationConfig.hideUnownedWeaponsInPlans);
+      const hideFourStarWeaponsInPlans = Boolean(recommendationConfig.hideFourStarWeaponsInPlans);
       const useEffectiveMetrics = hideEssenceOwnedInPlans && hideEssenceOwnedOwnedOnly;
       const shouldHideWeaponInPlan = (weapon) => {
         if (!weapon) return true;
@@ -69,7 +70,7 @@
         isWeaponOwnedForRecommendation,
         isEssenceOwnedForRecommendation,
         recommendationConfig,
-        hideFourStarWeapons,
+        hideFourStarWeaponsInPlans,
         useEffectiveMetrics,
         shouldHideWeaponInPlan,
         selectedWeapons,
@@ -240,7 +241,7 @@
         isWeaponOwnedForRecommendation,
         isEssenceOwnedForRecommendation,
         recommendationConfig,
-        hideFourStarWeapons,
+        hideFourStarWeaponsInPlans,
         useEffectiveMetrics,
         shouldHideWeaponInPlan,
         targets,
@@ -296,7 +297,7 @@
 
           const schemeKey = `${dungeon.id}-${option.type}-${option.value}`;
           const schemeWeapons = catalogWeapons.filter((weapon) => {
-            if (hideFourStarWeapons && weapon.rarity === 4) return false;
+            if (hideFourStarWeaponsInPlans && weapon.rarity === 4) return false;
             return isWeaponCompatible(weapon, dungeon, option);
           });
 

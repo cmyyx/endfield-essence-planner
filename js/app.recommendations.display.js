@@ -289,9 +289,10 @@
         state.showWeaponAttrs,
         state.showAllSchemes,
         state.mobilePanel,
-        () => (state.recommendationConfig.value || {}).hideEssenceOwnedWeapons,
+        () => (state.recommendationConfig.value || {}).hideEssenceOwnedWeaponsInPlans,
         () => (state.recommendationConfig.value || {}).hideEssenceOwnedOwnedOnly,
-        () => (state.recommendationConfig.value || {}).hideUnownedWeapons,
+        () => (state.recommendationConfig.value || {}).hideUnownedWeaponsInPlans,
+        () => (state.recommendationConfig.value || {}).hideFourStarWeaponsInPlans,
       ],
       () => {
         scheduleAttrWrap();

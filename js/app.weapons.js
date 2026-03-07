@@ -485,16 +485,12 @@
     const getSelectorHiddenFlags = (weapon, config) => {
       const weaponOwned = isWeaponOwned(weapon.name);
       const essenceOwned = isEssenceOwned(weapon.name);
-      const hiddenByUnowned =
-        Boolean(config.hideUnownedWeapons && config.hideUnownedWeaponsInSelector) &&
-        !weaponOwned;
+      const hiddenByUnowned = Boolean(config.hideUnownedWeaponsInSelector) && !weaponOwned;
       const hiddenByEssenceOwned =
-        Boolean(config.hideEssenceOwnedWeapons && config.hideEssenceOwnedWeaponsInSelector) &&
+        Boolean(config.hideEssenceOwnedWeaponsInSelector) &&
         essenceOwned &&
         (!config.hideEssenceOwnedOwnedOnly || weaponOwned);
-      const hiddenByFourStar =
-        Boolean(config.hideFourStarWeapons && config.hideFourStarWeaponsInSelector) &&
-        weapon.rarity === 4;
+      const hiddenByFourStar = Boolean(config.hideFourStarWeaponsInSelector) && weapon.rarity === 4;
       return {
         hiddenByUnowned,
         hiddenByEssenceOwned,
@@ -848,10 +844,10 @@
       const config = state.recommendationConfig.value || {};
       const hasFilters = hasAttributeFilterSelection();
       return [
-        config.hideUnownedWeapons && config.hideUnownedWeaponsInSelector ? 1 : 0,
-        config.hideEssenceOwnedWeapons && config.hideEssenceOwnedWeaponsInSelector ? 1 : 0,
-        config.hideEssenceOwnedOwnedOnly ? 1 : 0,
-        config.hideFourStarWeapons && config.hideFourStarWeaponsInSelector ? 1 : 0,
+        config.hideUnownedWeaponsInSelector ? 1 : 0,
+        config.hideEssenceOwnedWeaponsInSelector ? 1 : 0,
+        config.hideEssenceOwnedWeaponsInSelector && config.hideEssenceOwnedOwnedOnly ? 1 : 0,
+        config.hideFourStarWeaponsInSelector ? 1 : 0,
         config.attributeFilterAffectsHiddenWeapons ? 1 : 0,
         hasFilters ? 1 : 0,
       ].join("|");

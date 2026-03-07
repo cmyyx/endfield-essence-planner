@@ -58,13 +58,13 @@ const createState = () => ({
   gearRefiningNavHintStorageKey: "planner-gear-refining-nav-hint:v1",
   rerunRankingNavHintStorageKey: "planner-rerun-ranking-nav-hint:v1",
   recommendationConfig: createRef({
-    hideEssenceOwnedWeapons: false,
+    hideEssenceOwnedWeaponsInPlans: false,
     hideEssenceOwnedOwnedOnly: false,
     hideEssenceOwnedWeaponsInSelector: false,
-    hideUnownedWeapons: false,
+    hideUnownedWeaponsInPlans: false,
     hideUnownedWeaponsInSelector: false,
-    hideFourStarWeapons: false,
-    hideFourStarWeaponsInSelector: false,
+    hideFourStarWeaponsInPlans: true,
+    hideFourStarWeaponsInSelector: true,
     attributeFilterAffectsHiddenWeapons: false,
     preferredRegion1: "",
     preferredRegion2: "",
@@ -208,6 +208,37 @@ const createHarness = () => {
     normalizedMarks,
     { 测试武器A: { weaponOwned: true, essenceOwned: true } },
     "[schema] dirty marks should be auto-normalized to v2-compatible shape"
+  );
+
+  const sanitizedUiState = schemaApi.sanitizeState({
+    showWeaponAttrs: true,
+    showWeaponOwnership: true,
+    injected: true,
+  });
+  assert.equal(
+    sanitizedUiState.showWeaponAttrs,
+    true,
+    "[schema] ui state sanitizer should retain showWeaponAttrs"
+  );
+  assert.equal(
+    sanitizedUiState.showWeaponOwnership,
+    true,
+    "[schema] ui state sanitizer should retain showWeaponOwnership"
+  );
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(sanitizedUiState, "injected"),
+    false,
+    "[schema] ui state sanitizer should drop unknown fields"
+  );
+  assert.equal(
+    sanitizedUiState.recommendationConfig.hideFourStarWeaponsInPlans,
+    true,
+    "[schema] recommendation defaults should keep 4-star hidden in plans enabled"
+  );
+  assert.equal(
+    sanitizedUiState.recommendationConfig.hideFourStarWeaponsInSelector,
+    true,
+    "[schema] recommendation defaults should keep 4-star hidden in selector enabled"
   );
 
   harness.localStorage.markMismatch(state.marksStorageKey);

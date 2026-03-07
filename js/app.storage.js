@@ -166,6 +166,9 @@
           if (typeof restored.showWeaponAttrs === "boolean") {
             state.showWeaponAttrs.value = restored.showWeaponAttrs;
           }
+          if (typeof restored.showWeaponOwnership === "boolean") {
+            state.showWeaponOwnership.value = restored.showWeaponOwnership;
+          }
           if (typeof restored.filterPanelManuallySet === "boolean") {
             state.filterPanelManuallySet.value = restored.filterPanelManuallySet;
           }
@@ -377,6 +380,7 @@
         schemeBaseSelections: state.schemeBaseSelections.value,
         weaponAttrOverrides: state.weaponAttrOverrides.value,
         showWeaponAttrs: state.showWeaponAttrs.value,
+        showWeaponOwnership: state.showWeaponOwnership.value,
         showAllSchemes: state.showAllSchemes.value,
         backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,
         recommendationConfig: state.recommendationConfig.value,

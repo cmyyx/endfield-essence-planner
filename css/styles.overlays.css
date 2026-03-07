@@ -2580,10 +2580,6 @@
         order: 1;
       }
 
-      .tag-actions .tag-ownership-toggle {
-        margin-right: auto;
-      }
-
       .tag {
         display: inline-flex;
         align-items: center;

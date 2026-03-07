@@ -51,8 +51,8 @@
     state.backgroundApiStorageKey = "planner-bg-api:v1";
     state.backgroundDisplayStorageKey = "planner-bg-display:v1";
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
-    // 更新方案推荐设置时递增该版本号，可让红点对所有用户重新显示一次。
-    state.planConfigHintVersion = "4";
+    // 更新基质规划设置时递增该版本号，可让红点对所有用户重新显示一次。
+    state.planConfigHintVersion = "5";
     state.gearRefiningNavHintStorageKey = "planner-gear-refining-nav-hint:v1";
     // 更新装备精锻导航提示时递增该版本号，可让红点对所有用户重新显示一次。
     state.gearRefiningNavHintVersion = "1";
@@ -93,12 +93,12 @@
     state.showGearRefiningNavHintDot = ref(false);
     state.showRerunRankingNavHintDot = ref(false);
     state.recommendationConfig = ref({
-      hideEssenceOwnedWeapons: false,
+      hideEssenceOwnedWeaponsInPlans: false,
       hideEssenceOwnedOwnedOnly: false,
       hideEssenceOwnedWeaponsInSelector: false,
-      hideUnownedWeapons: false,
+      hideUnownedWeaponsInPlans: false,
       hideUnownedWeaponsInSelector: false,
-      hideFourStarWeapons: true,
+      hideFourStarWeaponsInPlans: true,
       hideFourStarWeaponsInSelector: true,
       attributeFilterAffectsHiddenWeapons: false,
       preferredRegion1: "",

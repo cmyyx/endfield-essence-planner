@@ -39,44 +39,43 @@
       const defaults = state.recommendationConfig.value || {};
       const source = raw && typeof raw === "object" ? raw : {};
 
-      const hideEssenceOwnedWeapons =
-        typeof source.hideEssenceOwnedWeapons === "boolean"
-          ? source.hideEssenceOwnedWeapons
-          : typeof source.hideExcluded === "boolean"
-            ? source.hideExcluded
-            : typeof legacyHideExcluded === "boolean"
-              ? legacyHideExcluded
-              : Boolean(defaults.hideEssenceOwnedWeapons);
-
-      const hideEssenceOwnedOwnedOnly =
-        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedOwnedOnly === "boolean"
-          ? source.hideEssenceOwnedOwnedOnly
-          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedOwnedOnly);
+      const hideEssenceOwnedWeaponsInPlans =
+        typeof source.hideEssenceOwnedWeaponsInPlans === "boolean"
+          ? source.hideEssenceOwnedWeaponsInPlans
+          : Boolean(defaults.hideEssenceOwnedWeaponsInPlans);
 
       const hideEssenceOwnedWeaponsInSelector =
-        hideEssenceOwnedWeapons && typeof source.hideEssenceOwnedWeaponsInSelector === "boolean"
+        typeof source.hideEssenceOwnedWeaponsInSelector === "boolean"
           ? source.hideEssenceOwnedWeaponsInSelector
-          : hideEssenceOwnedWeapons && Boolean(defaults.hideEssenceOwnedWeaponsInSelector);
+          : Boolean(defaults.hideEssenceOwnedWeaponsInSelector);
 
-      const hideUnownedWeapons =
-        typeof source.hideUnownedWeapons === "boolean"
-          ? source.hideUnownedWeapons
-          : Boolean(defaults.hideUnownedWeapons);
+      const hideEssenceOwnedEnabled =
+        hideEssenceOwnedWeaponsInPlans || hideEssenceOwnedWeaponsInSelector;
+
+      const hideEssenceOwnedOwnedOnly =
+        hideEssenceOwnedEnabled && typeof source.hideEssenceOwnedOwnedOnly === "boolean"
+          ? source.hideEssenceOwnedOwnedOnly
+          : hideEssenceOwnedEnabled && Boolean(defaults.hideEssenceOwnedOwnedOnly);
+
+      const hideUnownedWeaponsInPlans =
+        typeof source.hideUnownedWeaponsInPlans === "boolean"
+          ? source.hideUnownedWeaponsInPlans
+          : Boolean(defaults.hideUnownedWeaponsInPlans);
 
       const hideUnownedWeaponsInSelector =
-        hideUnownedWeapons && typeof source.hideUnownedWeaponsInSelector === "boolean"
+        typeof source.hideUnownedWeaponsInSelector === "boolean"
           ? source.hideUnownedWeaponsInSelector
-          : hideUnownedWeapons && Boolean(defaults.hideUnownedWeaponsInSelector);
+          : Boolean(defaults.hideUnownedWeaponsInSelector);
 
-      const hideFourStarWeapons =
-        typeof source.hideFourStarWeapons === "boolean"
-          ? source.hideFourStarWeapons
-          : Boolean(defaults.hideFourStarWeapons);
+      const hideFourStarWeaponsInPlans =
+        typeof source.hideFourStarWeaponsInPlans === "boolean"
+          ? source.hideFourStarWeaponsInPlans
+          : Boolean(defaults.hideFourStarWeaponsInPlans);
 
       const hideFourStarWeaponsInSelector =
-        hideFourStarWeapons && typeof source.hideFourStarWeaponsInSelector === "boolean"
+        typeof source.hideFourStarWeaponsInSelector === "boolean"
           ? source.hideFourStarWeaponsInSelector
-          : hideFourStarWeapons && Boolean(defaults.hideFourStarWeaponsInSelector);
+          : Boolean(defaults.hideFourStarWeaponsInSelector);
 
       const attributeFilterAffectsHiddenWeapons =
         typeof source.attributeFilterAffectsHiddenWeapons === "boolean"
@@ -98,12 +97,12 @@
         : defaults.strictPriorityOrder || "ownershipFirst";
 
       const normalized = {
-        hideEssenceOwnedWeapons,
+        hideEssenceOwnedWeaponsInPlans,
         hideEssenceOwnedOwnedOnly,
         hideEssenceOwnedWeaponsInSelector,
-        hideUnownedWeapons,
+        hideUnownedWeaponsInPlans,
         hideUnownedWeaponsInSelector,
-        hideFourStarWeapons,
+        hideFourStarWeaponsInPlans,
         hideFourStarWeaponsInSelector,
         attributeFilterAffectsHiddenWeapons,
         preferredRegion1: "",
@@ -127,15 +126,8 @@
         normalized.preferredRegion2 = "";
       }
 
-      if (!normalized.hideEssenceOwnedWeapons) {
+      if (!normalized.hideEssenceOwnedWeaponsInPlans && !normalized.hideEssenceOwnedWeaponsInSelector) {
         normalized.hideEssenceOwnedOwnedOnly = false;
-        normalized.hideEssenceOwnedWeaponsInSelector = false;
-      }
-      if (!normalized.hideUnownedWeapons) {
-        normalized.hideUnownedWeaponsInSelector = false;
-      }
-      if (!normalized.hideFourStarWeapons) {
-        normalized.hideFourStarWeaponsInSelector = false;
       }
 
       return normalized;
@@ -256,6 +248,9 @@
 
       if (typeof raw.showWeaponAttrs === "boolean") {
         next.showWeaponAttrs = raw.showWeaponAttrs;
+      }
+      if (typeof raw.showWeaponOwnership === "boolean") {
+        next.showWeaponOwnership = raw.showWeaponOwnership;
       }
       if (typeof raw.filterPanelManuallySet === "boolean") {
         next.filterPanelManuallySet = raw.filterPanelManuallySet;

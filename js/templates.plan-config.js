@@ -17,102 +17,125 @@
         </button>
         <div v-if="showPlanConfig" class="plan-config-panel">
           <div class="plan-config-item">
-            <div class="secondary-label">{{ t("plan_config.plan_display") }}</div>
+            <div class="secondary-label">{{ t("plan_config.weapon_list_display") }}</div>
             <button
+              v-if="!showWeaponAttrs"
               class="ghost-button toggle-button switch-toggle"
-              :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeapons }"
-              :title="t('plan_config.when_enabled_plans_hide_weapons_marked_as_essence_owned')"
+              :class="{ 'is-active': showWeaponOwnership }"
+              :title="t('plan_config.when_enabled_weapon_list_shows_ownership_tags')"
               role="switch"
-              :aria-checked="recommendationConfig.hideEssenceOwnedWeapons ? 'true' : 'false'"
-              @click="recommendationConfig.hideEssenceOwnedWeapons = !recommendationConfig.hideEssenceOwnedWeapons"
+              :aria-checked="showWeaponOwnership ? 'true' : 'false'"
+              @click="toggleShowWeaponOwnership"
             >
-              <span class="switch-label">{{ t("plan_config.hide_essence_owned_weapons") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeapons }" aria-hidden="true">
+              <span class="switch-label">{{ t("plan_config.show_weapon_ownership_tags") }}</span>
+              <span class="switch-track" :class="{ on: showWeaponOwnership }" aria-hidden="true">
                 <span class="switch-thumb"></span>
               </span>
             </button>
-            <button
-              v-if="recommendationConfig.hideEssenceOwnedWeapons"
-              class="ghost-button toggle-button switch-toggle switch-sub-toggle"
-              :class="{ 'is-active': recommendationConfig.hideEssenceOwnedOwnedOnly }"
-              :title="t('plan_config.when_enabled_only_weapons_that_are_both_owned_and_essenc')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideEssenceOwnedOwnedOnly ? 'true' : 'false'"
-              @click="recommendationConfig.hideEssenceOwnedOwnedOnly = !recommendationConfig.hideEssenceOwnedOwnedOnly"
-            >
-              <span class="switch-label">{{ t("plan_config.hide_only_owned_essence_owned") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedOwnedOnly }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
-            <button
-              v-if="recommendationConfig.hideEssenceOwnedWeapons"
-              class="ghost-button toggle-button switch-toggle switch-sub-toggle"
-              :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeaponsInSelector }"
-              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_by_the_curre')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideEssenceOwnedWeaponsInSelector ? 'true' : 'false'"
-              @click="recommendationConfig.hideEssenceOwnedWeaponsInSelector = !recommendationConfig.hideEssenceOwnedWeaponsInSelector"
-            >
-              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeaponsInSelector }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
-            <button
-              class="ghost-button toggle-button switch-toggle"
-              :class="{ 'is-active': recommendationConfig.hideUnownedWeapons }"
-              :title="t('plan_config.when_enabled_plans_hide_weapons_marked_as_unowned')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideUnownedWeapons ? 'true' : 'false'"
-              @click="recommendationConfig.hideUnownedWeapons = !recommendationConfig.hideUnownedWeapons"
-            >
-              <span class="switch-label">{{ t("plan_config.hide_unowned_weapons") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeapons }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
-            <button
-              v-if="recommendationConfig.hideUnownedWeapons"
-              class="ghost-button toggle-button switch-toggle switch-sub-toggle"
-              :class="{ 'is-active': recommendationConfig.hideUnownedWeaponsInSelector }"
-              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_unowned_weap')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideUnownedWeaponsInSelector ? 'true' : 'false'"
-              @click="recommendationConfig.hideUnownedWeaponsInSelector = !recommendationConfig.hideUnownedWeaponsInSelector"
-            >
-              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeaponsInSelector }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
-            <button
-              class="ghost-button toggle-button switch-toggle"
-              :class="{ 'is-active': recommendationConfig.hideFourStarWeapons }"
-              :title="t('plan_config.when_enabled_4_weapons_will_not_appear_in_plan_recommend')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideFourStarWeapons ? 'true' : 'false'"
-              @click="recommendationConfig.hideFourStarWeapons = !recommendationConfig.hideFourStarWeapons"
-            >
-              <span class="switch-label">{{ t("plan_config.hide_4_star_weapons") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeapons }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
-            <button
-              v-if="recommendationConfig.hideFourStarWeapons"
-              class="ghost-button toggle-button switch-toggle switch-sub-toggle"
-              :class="{ 'is-active': recommendationConfig.hideFourStarWeaponsInSelector }"
-              :title="t('plan_config.when_enabled_the_weapon_selector_also_hides_4_weapons')"
-              role="switch"
-              :aria-checked="recommendationConfig.hideFourStarWeaponsInSelector ? 'true' : 'false'"
-              @click="recommendationConfig.hideFourStarWeaponsInSelector = !recommendationConfig.hideFourStarWeaponsInSelector"
-            >
-              <span class="switch-label">{{ t("plan_config.also_apply_to_weapon_list") }}</span>
-              <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeaponsInSelector }" aria-hidden="true">
-                <span class="switch-thumb"></span>
-              </span>
-            </button>
+          </div>
+          <div class="plan-config-item">
+            <div class="secondary-label">{{ t("plan_config.visibility_rules") }}</div>
+            <div class="plan-config-rule">
+              <div class="secondary-hint plan-config-rule-title">{{ t("plan_config.hide_essence_owned_weapons") }}</div>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeaponsInPlans }"
+                :title="t('plan_config.when_enabled_rule_applies_to_plan_recommendations')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideEssenceOwnedWeaponsInPlans ? 'true' : 'false'"
+                @click="recommendationConfig.hideEssenceOwnedWeaponsInPlans = !recommendationConfig.hideEssenceOwnedWeaponsInPlans"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_plan_recommendations") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeaponsInPlans }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideEssenceOwnedWeaponsInSelector }"
+                :title="t('plan_config.when_enabled_rule_applies_to_weapon_list')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideEssenceOwnedWeaponsInSelector ? 'true' : 'false'"
+                @click="recommendationConfig.hideEssenceOwnedWeaponsInSelector = !recommendationConfig.hideEssenceOwnedWeaponsInSelector"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_weapon_list") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedWeaponsInSelector }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+              <button
+                v-if="recommendationConfig.hideEssenceOwnedWeaponsInPlans || recommendationConfig.hideEssenceOwnedWeaponsInSelector"
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideEssenceOwnedOwnedOnly }"
+                :title="t('plan_config.when_enabled_only_weapons_that_are_both_owned_and_essenc')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideEssenceOwnedOwnedOnly ? 'true' : 'false'"
+                @click="recommendationConfig.hideEssenceOwnedOwnedOnly = !recommendationConfig.hideEssenceOwnedOwnedOnly"
+              >
+                <span class="switch-label">{{ t("plan_config.hide_only_owned_essence_owned") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideEssenceOwnedOwnedOnly }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+            </div>
+            <div class="plan-config-rule">
+              <div class="secondary-hint plan-config-rule-title">{{ t("plan_config.hide_unowned_weapons") }}</div>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideUnownedWeaponsInPlans }"
+                :title="t('plan_config.when_enabled_rule_applies_to_plan_recommendations')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideUnownedWeaponsInPlans ? 'true' : 'false'"
+                @click="recommendationConfig.hideUnownedWeaponsInPlans = !recommendationConfig.hideUnownedWeaponsInPlans"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_plan_recommendations") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeaponsInPlans }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideUnownedWeaponsInSelector }"
+                :title="t('plan_config.when_enabled_rule_applies_to_weapon_list')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideUnownedWeaponsInSelector ? 'true' : 'false'"
+                @click="recommendationConfig.hideUnownedWeaponsInSelector = !recommendationConfig.hideUnownedWeaponsInSelector"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_weapon_list") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideUnownedWeaponsInSelector }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+            </div>
+            <div class="plan-config-rule">
+              <div class="secondary-hint plan-config-rule-title">{{ t("plan_config.hide_4_star_weapons") }}</div>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideFourStarWeaponsInPlans }"
+                :title="t('plan_config.when_enabled_rule_applies_to_plan_recommendations')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideFourStarWeaponsInPlans ? 'true' : 'false'"
+                @click="recommendationConfig.hideFourStarWeaponsInPlans = !recommendationConfig.hideFourStarWeaponsInPlans"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_plan_recommendations") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeaponsInPlans }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+              <button
+                class="ghost-button toggle-button switch-toggle switch-sub-toggle"
+                :class="{ 'is-active': recommendationConfig.hideFourStarWeaponsInSelector }"
+                :title="t('plan_config.when_enabled_rule_applies_to_weapon_list')"
+                role="switch"
+                :aria-checked="recommendationConfig.hideFourStarWeaponsInSelector ? 'true' : 'false'"
+                @click="recommendationConfig.hideFourStarWeaponsInSelector = !recommendationConfig.hideFourStarWeaponsInSelector"
+              >
+                <span class="switch-label">{{ t("plan_config.apply_to_weapon_list") }}</span>
+                <span class="switch-track" :class="{ on: recommendationConfig.hideFourStarWeaponsInSelector }" aria-hidden="true">
+                  <span class="switch-thumb"></span>
+                </span>
+              </button>
+            </div>
             <button
               class="ghost-button toggle-button switch-toggle"
               :class="{ 'is-active': recommendationConfig.attributeFilterAffectsHiddenWeapons }"

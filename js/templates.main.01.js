@@ -268,6 +268,9 @@
                 :recommendation-config="recommendationConfig"
                 :show-plan-config="showPlanConfig"
                 :show-plan-config-hint-dot="showPlanConfigHintDot"
+                :show-weapon-attrs="showWeaponAttrs"
+                :show-weapon-ownership="showWeaponOwnership"
+                :toggle-show-weapon-ownership="toggleShowWeaponOwnership"
                 :region-options="regionOptions"
                 :t-region-priority-mode-options="tRegionPriorityModeOptions"
                 :t-ownership-priority-mode-options="tOwnershipPriorityModeOptions"
@@ -446,14 +449,6 @@
               </span>
             </div>
             <div class="tag-actions">
-              <button
-                v-if="!showWeaponAttrs"
-                class="ghost-button tag-ownership-toggle"
-                :class="{ 'is-active': showWeaponOwnership }"
-                @click="toggleShowWeaponOwnership"
-              >
-                {{ showWeaponOwnership ? t("nav.hide_ownership_status") : t("nav.show_ownership_status") }}
-              </button>
               <button
                 class="ghost-button tag-select"
                 @click="selectAllWeapons"
@@ -754,6 +749,9 @@
                 :recommendation-config="recommendationConfig"
                 :show-plan-config="showPlanConfig"
                 :show-plan-config-hint-dot="showPlanConfigHintDot"
+                :show-weapon-attrs="showWeaponAttrs"
+                :show-weapon-ownership="showWeaponOwnership"
+                :toggle-show-weapon-ownership="toggleShowWeaponOwnership"
                 :region-options="regionOptions"
                 :t-region-priority-mode-options="tRegionPriorityModeOptions"
                 :t-ownership-priority-mode-options="tOwnershipPriorityModeOptions"
