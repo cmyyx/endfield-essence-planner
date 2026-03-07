@@ -447,6 +447,7 @@
             </div>
             <div class="tag-actions">
               <button
+                v-if="!showWeaponAttrs"
                 class="ghost-button tag-ownership-toggle"
                 :class="{ 'is-active': showWeaponOwnership }"
                 @click="toggleShowWeaponOwnership"
