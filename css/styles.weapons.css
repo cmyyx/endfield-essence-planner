@@ -1098,6 +1098,19 @@
         }
       }
 
+      @media (max-width: 640px) {
+        .weapon-ownership-badge {
+          bottom: 30px;
+          padding: 1px clamp(3px, 1.2vw, 5px);
+          font-size: clamp(7px, 1.9vw, 9px);
+          max-width: min(58%, 68px);
+        }
+
+        .weapon-ownership-badge.is-unowned {
+          max-width: min(52%, 56px);
+        }
+      }
+
       .weapon-item.rarity-6 .weapon-band {
         background-image: var(--rarity-6-frame);
       }
