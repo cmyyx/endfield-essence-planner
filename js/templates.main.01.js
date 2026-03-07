@@ -447,6 +447,13 @@
             </div>
             <div class="tag-actions">
               <button
+                class="ghost-button tag-ownership-toggle"
+                :class="{ 'is-active': showWeaponOwnership }"
+                @click="toggleShowWeaponOwnership"
+              >
+                {{ showWeaponOwnership ? t("nav.hide_ownership_status") : t("nav.show_ownership_status") }}
+              </button>
+              <button
                 class="ghost-button tag-select"
                 @click="selectAllWeapons"
                 :disabled="!filteredWeapons.length || allFilteredSelected"
@@ -469,7 +476,7 @@
               v-for="weapon in visibleFilteredWeapons"
               :key="weapon.name"
               class="weapon-item"
-              v-memo="[locale, localeRenderVersion, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name), weaponUpBadgeMemoKey, selectorHiddenMemoKey]"
+              v-memo="[locale, localeRenderVersion, selectedNameSet.has(weapon.name), isWeaponOwned(weapon.name), isEssenceOwned(weapon.name), weaponUpBadgeMemoKey, selectorHiddenMemoKey, showWeaponOwnership]"
               :class="{
                 'is-selected': selectedNameSet.has(weapon.name),
                 'is-unowned': isUnowned(weapon.name),
@@ -522,6 +529,7 @@
                 </div>
               </div>
               <span
+                v-if="showWeaponOwnership"
                 class="weapon-ownership-badge"
                 :class="{
                   'is-owned': isWeaponOwned(weapon.name),

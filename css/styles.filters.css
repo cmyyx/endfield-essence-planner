@@ -17,6 +17,18 @@
         margin-left: auto;
       }
 
+      .tag-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+      }
+
+      .tag-actions .tag-ownership-toggle {
+        margin-right: auto;
+      }
+
       .weapon-attr-warning {
         width: 100%;
         margin: 4px 0 12px;

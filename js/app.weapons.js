@@ -723,6 +723,10 @@
       }
     };
 
+    const toggleShowWeaponOwnership = () => {
+      state.showWeaponOwnership.value = !state.showWeaponOwnership.value;
+    };
+
     const toggleFilterPanel = () => {
       state.showFilterPanel.value = !state.showFilterPanel.value;
       if (state.filterPanelManuallySet && state.filterPanelManuallySet.value !== true) {
@@ -1099,6 +1103,7 @@
     state.isEssenceOwnedForPlanning = isEssenceOwnedForPlanning;
     state.toggleWeapon = toggleWeapon;
     state.toggleShowWeaponAttrs = toggleShowWeaponAttrs;
+    state.toggleShowWeaponOwnership = toggleShowWeaponOwnership;
     state.toggleFilterPanel = toggleFilterPanel;
     state.clearSelection = clearSelection;
     state.toggleFilterValue = toggleFilterValue;

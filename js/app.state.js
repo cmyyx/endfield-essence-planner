@@ -82,6 +82,7 @@
     state.matchMobilePanel = ref("source");
     state.gearRefiningMobilePanel = ref("gears");
     state.showWeaponAttrs = ref(false);
+    state.showWeaponOwnership = ref(false);
     state.showAttrHint = ref(false);
     state.showFilterPanel = ref(true);
     state.filterPanelManuallySet = ref(false);

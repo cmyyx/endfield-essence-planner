@@ -2573,10 +2573,15 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        align-self: flex-end;
+        align-self: stretch;
+        width: 100%;
         gap: 8px;
         flex-wrap: wrap;
         order: 1;
+      }
+
+      .tag-actions .tag-ownership-toggle {
+        margin-right: auto;
       }
 
       .tag {

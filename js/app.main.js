@@ -1150,6 +1150,8 @@
         updateWeaponNote: state.updateWeaponNote,
         toggleShowWeaponAttrs: state.toggleShowWeaponAttrs,
         showWeaponAttrs: state.showWeaponAttrs,
+        toggleShowWeaponOwnership: state.toggleShowWeaponOwnership,
+        showWeaponOwnership: state.showWeaponOwnership,
         showAttrHint: state.showAttrHint,
         dismissAttrHint: state.dismissAttrHint,
         showFilterPanel: state.showFilterPanel,

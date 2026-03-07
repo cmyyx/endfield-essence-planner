@@ -822,6 +822,8 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "nav.gear_refining": "裝備精鍛",
   "nav.hidden": "被隱藏",
   "nav.hide_attributes_ownership_notes": "隱藏屬性/擁有/備註",
+  "nav.hide_ownership_status": "隱藏擁有情況",
+  "nav.show_ownership_status": "顯示擁有情況",
   "nav.item": "當前篩選已隱藏全部結果，請調整篩選開關。",
   "nav.light": "日間",
   "nav.locked_plan_conflicts_only": "包含尚未上線武器（已停用衝突兜底）",

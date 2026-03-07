@@ -822,6 +822,8 @@ Object.assign(window.I18N["ja"].strings, {
   "nav.gear_refining": "装備精錬",
   "nav.hidden": "非表示",
   "nav.hide_attributes_ownership_notes": "属性/所持/メモを隠す",
+  "nav.hide_ownership_status": "所持状況を隠す",
+  "nav.show_ownership_status": "所持状況を表示",
   "nav.item": "当前筛选已隐藏全部结果，请调整筛选开关。",
   "nav.light": "ライト",
   "nav.locked_plan_conflicts_only": "未実装武器を含むため（衝突フォールバック無効）",
