@@ -718,7 +718,8 @@
 
       html.modal-open,
       body.modal-open {
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: scroll;
       }
 
       body.modal-open {

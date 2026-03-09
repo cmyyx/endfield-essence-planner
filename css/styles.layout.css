@@ -16,7 +16,7 @@
 
       html {
         --app-safe-top-inset: env(safe-area-inset-top, 0px);
-        scrollbar-gutter: auto;
+        scrollbar-gutter: stable;
       }
 
       html.legacy-scrollbar-hidden {
