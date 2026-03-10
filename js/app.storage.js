@@ -159,8 +159,33 @@
       typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
         ? window.AppUtils
         : {};
+    const fallbackTriggerJsonDownload = (filename, payload) => {
+      if (
+        typeof window === "undefined" ||
+        typeof document === "undefined" ||
+        typeof Blob === "undefined" ||
+        typeof URL === "undefined" ||
+        typeof URL.createObjectURL !== "function"
+      ) {
+        throw new Error("JSON download is unavailable in the current runtime");
+      }
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = String(filename || "planner-marks.json");
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 0);
+    };
     const triggerJsonDownload =
-      typeof appUtils.triggerJsonDownload === "function" ? appUtils.triggerJsonDownload : () => {};
+      typeof appUtils.triggerJsonDownload === "function"
+        ? appUtils.triggerJsonDownload
+        : fallbackTriggerJsonDownload;
     const resolveText = (key, params, fallback) =>
       typeof state.t === "function" ? state.t(key, params) : fallback;
     const buildExportStamp = () =>

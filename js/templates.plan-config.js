@@ -30,11 +30,13 @@
                 class="marks-import-input"
                 type="file"
                 accept="application/json,.json"
+                tabindex="-1"
+                aria-hidden="true"
                 @change="handleMarksImportFile"
               />
             </div>
             <div v-if="marksImportFileName" class="secondary-hint secondary-file">
-              {{ t("plan_config.marks_import_selected_file") }}{{ marksImportFileName }}
+              {{ t("plan_config.marks_import_selected_file", { file: marksImportFileName }) }}
             </div>
             <div v-if="marksImportSummary" class="secondary-hint">
               {{ t("plan_config.marks_import_pending", { count: marksImportSummary.total }) }}

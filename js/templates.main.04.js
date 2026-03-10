@@ -296,7 +296,7 @@
             <h3>{{ t("plan_config.marks_import_confirm_title") }}</h3>
             <p>{{ t("plan_config.marks_import_confirm_desc") }}</p>
             <p v-if="marksImportFileName" class="marks-import-file">
-              {{ t("plan_config.marks_import_confirm_file") }}{{ marksImportFileName }}
+              {{ t("plan_config.marks_import_confirm_file", { file: marksImportFileName }) }}
             </p>
             <div class="marks-import-summary">
               <div class="marks-import-summary-item">

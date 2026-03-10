@@ -719,11 +719,12 @@
       html.modal-open,
       body.modal-open {
         overflow-x: hidden;
-        overflow-y: scroll;
       }
 
       body.modal-open {
+        overflow-y: scroll;
         overscroll-behavior: contain;
+        padding-right: var(--modal-scrollbar-gap);
       }
 
       .domain-overlay {
