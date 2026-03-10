@@ -85,6 +85,22 @@
       if (typeof state.exportStorageDiagnosticBundle !== "function") {
         state.exportStorageDiagnosticBundle = noopAsync;
       }
+      if (typeof state.exportWeaponMarks !== "function") {
+        state.exportWeaponMarks = noopAsync;
+      }
+      if (typeof state.handleMarksImportFile !== "function") {
+        state.handleMarksImportFile = () => {};
+      }
+      if (typeof state.cancelMarksImport !== "function") {
+        state.cancelMarksImport = () => {
+          if (state.showMarksImportConfirmModal && typeof state.showMarksImportConfirmModal === "object") {
+            state.showMarksImportConfirmModal.value = false;
+          }
+        };
+      }
+      if (typeof state.confirmMarksImport !== "function") {
+        state.confirmMarksImport = noopAsync;
+      }
       if (typeof state.requestStorageDataClear !== "function") {
         state.requestStorageDataClear = () => {
           if (state.showStorageClearConfirmModal && typeof state.showStorageClearConfirmModal === "object") {
@@ -138,6 +154,193 @@
     state.cancelStorageDataClear = recoveryApi.cancelStorageDataClear;
     state.confirmStorageDataClearAndReload = recoveryApi.confirmStorageDataClearAndReload;
     state.storageFeedbackUrl = recoveryApi.storageFeedbackUrl;
+
+    const appUtils =
+      typeof window !== "undefined" && window.AppUtils && typeof window.AppUtils === "object"
+        ? window.AppUtils
+        : {};
+    const triggerJsonDownload =
+      typeof appUtils.triggerJsonDownload === "function" ? appUtils.triggerJsonDownload : () => {};
+    const resolveText = (key, params, fallback) =>
+      typeof state.t === "function" ? state.t(key, params) : fallback;
+    const buildExportStamp = () =>
+      new Date().toISOString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
+    const readVersionInfo = () => {
+      if (typeof window === "undefined") return {};
+      const info = window.__APP_VERSION_INFO;
+      return info && typeof info === "object" ? info : {};
+    };
+    const buildMarksImportSummary = (normalized) => {
+      const source = normalized && typeof normalized === "object" ? normalized : {};
+      const names = Object.keys(source);
+      let ownedCount = 0;
+      let essenceCount = 0;
+      let noteCount = 0;
+      names.forEach((name) => {
+        const entry = source[name];
+        if (!entry || typeof entry !== "object") return;
+        if (entry.weaponOwned) ownedCount += 1;
+        if (entry.essenceOwned) essenceCount += 1;
+        if (typeof entry.note === "string" && entry.note) noteCount += 1;
+      });
+      return {
+        total: names.length,
+        ownedCount,
+        essenceCount,
+        noteCount,
+      };
+    };
+    const setRefValue = (refObj, value) => {
+      if (refObj && typeof refObj === "object") {
+        refObj.value = value;
+      }
+    };
+    const getRefValue = (refObj) =>
+      refObj && typeof refObj === "object" ? refObj.value : undefined;
+    let marksImportCountdownTimer = null;
+    const stopMarksImportCountdown = () => {
+      if (!marksImportCountdownTimer) return;
+      clearInterval(marksImportCountdownTimer);
+      marksImportCountdownTimer = null;
+    };
+    const startMarksImportCountdown = () => {
+      stopMarksImportCountdown();
+      setRefValue(state.marksImportConfirmCountdown, 3);
+      marksImportCountdownTimer = setInterval(() => {
+        const current = getRefValue(state.marksImportConfirmCountdown) || 0;
+        if (current > 0) {
+          setRefValue(state.marksImportConfirmCountdown, current - 1);
+        }
+        if (getRefValue(state.marksImportConfirmCountdown) <= 0) {
+          setRefValue(state.marksImportConfirmCountdown, 0);
+          stopMarksImportCountdown();
+        }
+      }, 1000);
+    };
+    const resetMarksImportState = (options = {}) => {
+      const keepFileName = Boolean(options.keepFileName);
+      setRefValue(state.marksImportError, "");
+      if (!keepFileName) {
+        setRefValue(state.marksImportFileName, "");
+      }
+      setRefValue(state.marksImportSummary, null);
+      setRefValue(state.marksImportMeta, null);
+      setRefValue(state.marksImportPending, null);
+      stopMarksImportCountdown();
+      setRefValue(state.marksImportConfirmCountdown, 0);
+      setRefValue(state.showMarksImportConfirmModal, false);
+    };
+    const parseMarksImportPayload = (payload) => {
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
+      }
+      if (payload.marks !== undefined) {
+        if (!payload.marks || typeof payload.marks !== "object" || Array.isArray(payload.marks)) {
+          return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
+        }
+        return { marks: payload.marks, meta: payload.__meta || null };
+      }
+      return { marks: payload, meta: payload.__meta || null };
+    };
+    const exportWeaponMarks = () => {
+      try {
+        const versionInfo = readVersionInfo();
+        const normalized = schemaApi.normalizeWeaponMarks(getRefValue(state.weaponMarks));
+        const exportedAt = new Date().toISOString();
+        const payload = {
+          __meta: {
+            exportedAt,
+            buildId: String(versionInfo.buildId || ""),
+            displayVersion: String(versionInfo.displayVersion || ""),
+          },
+          marks: normalized,
+        };
+        const stamp = buildExportStamp();
+        const buildId = String(versionInfo.buildId || "unknown");
+        const filename = `planner-marks-${buildId}-${stamp}.json`;
+        triggerJsonDownload(filename, payload);
+      } catch (error) {
+        if (typeof state.reportStorageIssue === "function") {
+          state.reportStorageIssue("export", state.marksStorageKey, error, {
+            scope: "marks-export",
+          });
+        }
+      }
+    };
+    const queueMarksImportConfirm = (normalized, meta, fileName) => {
+      setRefValue(state.marksImportPending, normalized);
+      setRefValue(state.marksImportSummary, buildMarksImportSummary(normalized));
+      setRefValue(state.marksImportMeta, meta && typeof meta === "object" ? meta : null);
+      setRefValue(state.marksImportFileName, fileName || "");
+      setRefValue(state.marksImportError, "");
+      setRefValue(state.showMarksImportConfirmModal, true);
+      startMarksImportCountdown();
+    };
+    const handleMarksImportFile = (event) => {
+      const input = event && event.target ? event.target : null;
+      const file = input && input.files && input.files[0];
+      if (!file) return;
+      resetMarksImportState({ keepFileName: true });
+      setRefValue(state.marksImportFileName, file.name || "");
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result || "");
+          const payload = JSON.parse(text);
+          const parsed = parseMarksImportPayload(payload);
+          if (parsed.error) {
+            setRefValue(state.marksImportError, parsed.error);
+            setRefValue(state.marksImportPending, null);
+            return;
+          }
+          const schemaIssues = schemaApi.inspectWeaponMarksSchemaIssues(parsed.marks);
+          if (schemaIssues.length) {
+            setRefValue(
+              state.marksImportError,
+              resolveText(
+                "plan_config.marks_import_invalid_schema",
+                { message: schemaIssues[0] },
+                `Schema error: ${schemaIssues[0]}`
+              )
+            );
+            setRefValue(state.marksImportPending, null);
+            return;
+          }
+          const normalized = schemaApi.normalizeWeaponMarks(parsed.marks);
+          queueMarksImportConfirm(normalized, parsed.meta, file.name || "");
+        } catch (error) {
+          setRefValue(
+            state.marksImportError,
+            resolveText("plan_config.marks_import_invalid_json", null, "Invalid JSON")
+          );
+        }
+      };
+      reader.onerror = () => {
+        setRefValue(
+          state.marksImportError,
+          resolveText("plan_config.marks_import_read_failed", null, "Failed to read file")
+        );
+      };
+      reader.readAsText(file);
+      if (input) input.value = "";
+    };
+    const cancelMarksImport = () => {
+      resetMarksImportState();
+    };
+    const confirmMarksImport = () => {
+      if (getRefValue(state.marksImportConfirmCountdown) > 0) return;
+      const pending = getRefValue(state.marksImportPending);
+      if (!pending || typeof pending !== "object") {
+        resetMarksImportState();
+        return;
+      }
+      setRefValue(state.weaponMarks, pending);
+      resetMarksImportState();
+    };
+    state.exportWeaponMarks = exportWeaponMarks;
+    state.handleMarksImportFile = handleMarksImportFile;
+    state.cancelMarksImport = cancelMarksImport;
+    state.confirmMarksImport = confirmMarksImport;
 
     recoveryApi.flushPendingStorageIssues();
     recoveryApi.applyBootstrapStorageProbeIssue();

@@ -1007,6 +1007,74 @@
         background: rgba(26, 14, 18, 0.92);
       }
 
+      .marks-import-file {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+
+      .marks-import-summary {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
+      }
+
+      .marks-import-summary-item {
+        display: grid;
+        gap: 4px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(10, 14, 22, 0.45);
+      }
+
+      .marks-import-summary-label {
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+      }
+
+      .marks-import-summary-value {
+        color: #f6fbff;
+        font-weight: 700;
+      }
+
+      .marks-import-meta {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(8, 12, 18, 0.48);
+        display: grid;
+        gap: 6px;
+      }
+
+      .marks-import-meta-title {
+        color: #ffd7d7;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+
+      .marks-import-meta-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+      }
+
+      .marks-import-meta-label {
+        color: var(--muted);
+      }
+
+      .marks-import-meta-value {
+        color: #e3edf9;
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+
       .storage-clear-targets {
         margin-top: 10px;
         padding: 10px 12px;

@@ -291,6 +291,73 @@
       </transition>
 
       <transition name="fade-scale">
+        <div v-if="showMarksImportConfirmModal" class="about-overlay storage-error-confirm-overlay">
+          <div class="about-card storage-confirm-card marks-import-confirm-card">
+            <h3>{{ t("plan_config.marks_import_confirm_title") }}</h3>
+            <p>{{ t("plan_config.marks_import_confirm_desc") }}</p>
+            <p v-if="marksImportFileName" class="marks-import-file">
+              {{ t("plan_config.marks_import_confirm_file") }}{{ marksImportFileName }}
+            </p>
+            <div class="marks-import-summary">
+              <div class="marks-import-summary-item">
+                <span class="marks-import-summary-label">{{ t("plan_config.marks_import_summary_total") }}</span>
+                <span class="marks-import-summary-value">{{ marksImportSummary ? marksImportSummary.total : 0 }}</span>
+              </div>
+              <div class="marks-import-summary-item">
+                <span class="marks-import-summary-label">{{ t("plan_config.marks_import_summary_owned") }}</span>
+                <span class="marks-import-summary-value">{{ marksImportSummary ? marksImportSummary.ownedCount : 0 }}</span>
+              </div>
+              <div class="marks-import-summary-item">
+                <span class="marks-import-summary-label">{{ t("plan_config.marks_import_summary_essence") }}</span>
+                <span class="marks-import-summary-value">{{ marksImportSummary ? marksImportSummary.essenceCount : 0 }}</span>
+              </div>
+              <div class="marks-import-summary-item">
+                <span class="marks-import-summary-label">{{ t("plan_config.marks_import_summary_note") }}</span>
+                <span class="marks-import-summary-value">{{ marksImportSummary ? marksImportSummary.noteCount : 0 }}</span>
+              </div>
+            </div>
+            <div
+              v-if="
+                marksImportMeta &&
+                (marksImportMeta.exportedAt || marksImportMeta.buildId || marksImportMeta.displayVersion)
+              "
+              class="marks-import-meta"
+            >
+              <div class="marks-import-meta-title">{{ t("plan_config.marks_import_meta_title") }}</div>
+              <div v-if="marksImportMeta.exportedAt" class="marks-import-meta-line">
+                <span class="marks-import-meta-label">{{ t("plan_config.marks_import_meta_exported_at") }}</span>
+                <span class="marks-import-meta-value">{{ marksImportMeta.exportedAt }}</span>
+              </div>
+              <div v-if="marksImportMeta.buildId" class="marks-import-meta-line">
+                <span class="marks-import-meta-label">{{ t("plan_config.marks_import_meta_build_id") }}</span>
+                <span class="marks-import-meta-value">{{ marksImportMeta.buildId }}</span>
+              </div>
+              <div v-if="marksImportMeta.displayVersion" class="marks-import-meta-line">
+                <span class="marks-import-meta-label">{{ t("plan_config.marks_import_meta_display_version") }}</span>
+                <span class="marks-import-meta-value">{{ marksImportMeta.displayVersion }}</span>
+              </div>
+            </div>
+            <p class="storage-clear-confirm-warning">{{ t("plan_config.marks_import_confirm_warning") }}</p>
+            <div class="about-actions storage-error-actions storage-clear-actions">
+              <button class="ghost-button" @click="cancelMarksImport">
+                {{ t("button.cancel") }}
+              </button>
+              <button
+                class="about-button migration-action migration-action-warn"
+                :disabled="marksImportConfirmCountdown > 0"
+                @click="confirmMarksImport"
+              >
+                {{ t("plan_config.marks_import_confirm_action") }}
+                <span v-if="marksImportConfirmCountdown > 0">
+                  {{ t("storage.countdown_seconds", { count: marksImportConfirmCountdown }) }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade-scale">
         <div v-if="showWeaponAttrDataModal" class="about-overlay weapon-attr-overlay" @click.self="closeWeaponAttrDataModal">
           <div class="about-card weapon-attr-card">
             <div class="weapon-attr-body">

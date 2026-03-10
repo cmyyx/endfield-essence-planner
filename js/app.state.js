@@ -90,6 +90,13 @@
     state.showPlanConfig = ref(false);
     state.showWeaponAttrDataModal = ref(false);
     state.showPlanConfigHintDot = ref(false);
+    state.marksImportError = ref("");
+    state.marksImportFileName = ref("");
+    state.marksImportSummary = ref(null);
+    state.marksImportMeta = ref(null);
+    state.marksImportPending = ref(null);
+    state.marksImportConfirmCountdown = ref(0);
+    state.showMarksImportConfirmModal = ref(false);
     state.showGearRefiningNavHintDot = ref(false);
     state.showRerunRankingNavHintDot = ref(false);
     state.recommendationConfig = ref({

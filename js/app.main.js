@@ -302,6 +302,11 @@
       showWeaponAttrs: { type: Boolean, required: true },
       showWeaponOwnership: { type: Boolean, required: true },
       toggleShowWeaponOwnership: { type: Function, required: true },
+      exportWeaponMarks: { type: Function, required: true },
+      handleMarksImportFile: { type: Function, required: true },
+      marksImportFileName: { type: String, default: "" },
+      marksImportSummary: { type: Object, default: null },
+      marksImportError: { type: String, default: "" },
       regionOptions: { type: Array, required: true },
       tRegionPriorityModeOptions: { type: Array, required: true },
       tOwnershipPriorityModeOptions: { type: Array, required: true },
@@ -309,6 +314,14 @@
       tTerm: { type: Function, required: true },
     },
     emits: ["toggle"],
+    methods: {
+      triggerMarksImport() {
+        const input = this.$refs && this.$refs.marksImportInput;
+        if (input && typeof input.click === "function") {
+          input.click();
+        }
+      },
+    },
     template: planConfigTemplate,
   };
 
@@ -1173,6 +1186,16 @@
         showPlanConfig: state.showPlanConfig,
         showWeaponAttrDataModal: state.showWeaponAttrDataModal,
         showPlanConfigHintDot: state.showPlanConfigHintDot,
+        marksImportError: state.marksImportError,
+        marksImportFileName: state.marksImportFileName,
+        marksImportSummary: state.marksImportSummary,
+        marksImportMeta: state.marksImportMeta,
+        marksImportConfirmCountdown: state.marksImportConfirmCountdown,
+        showMarksImportConfirmModal: state.showMarksImportConfirmModal,
+        exportWeaponMarks: state.exportWeaponMarks,
+        handleMarksImportFile: state.handleMarksImportFile,
+        cancelMarksImport: state.cancelMarksImport,
+        confirmMarksImport: state.confirmMarksImport,
         showGearRefiningNavHintDot: state.showGearRefiningNavHintDot,
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         togglePlanConfig: state.togglePlanConfig,

@@ -575,6 +575,14 @@
         cursor: pointer;
       }
 
+      .marks-import-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
       .secondary-label {
         font-size: 11px;
         letter-spacing: 0.08em;

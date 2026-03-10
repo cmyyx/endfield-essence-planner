@@ -16,6 +16,33 @@
           <span>{{ t("plan_config.plan_recommendation_settings") }}</span>
         </button>
         <div v-if="showPlanConfig" class="plan-config-panel">
+          <div class="plan-config-item plan-config-transfer">
+            <div class="secondary-label">{{ t("plan_config.marks_import_export") }}</div>
+            <div class="secondary-actions">
+              <button class="ghost-button" type="button" @click="exportWeaponMarks">
+                {{ t("plan_config.marks_export") }}
+              </button>
+              <button class="ghost-button" type="button" @click="triggerMarksImport">
+                {{ t("plan_config.marks_import") }}
+              </button>
+              <input
+                ref="marksImportInput"
+                class="marks-import-input"
+                type="file"
+                accept="application/json,.json"
+                @change="handleMarksImportFile"
+              />
+            </div>
+            <div v-if="marksImportFileName" class="secondary-hint secondary-file">
+              {{ t("plan_config.marks_import_selected_file") }}{{ marksImportFileName }}
+            </div>
+            <div v-if="marksImportSummary" class="secondary-hint">
+              {{ t("plan_config.marks_import_pending", { count: marksImportSummary.total }) }}
+            </div>
+            <div v-if="marksImportError" class="secondary-hint secondary-warning">
+              {{ marksImportError }}
+            </div>
+          </div>
           <div class="plan-config-item">
             <div class="secondary-label">{{ t("plan_config.weapon_list_display") }}</div>
             <button

@@ -150,7 +150,8 @@
           state.showTutorialSkipConfirm.value ||
           state.showStorageErrorModal.value ||
           state.showStorageClearConfirmModal.value ||
-          state.showStorageIgnoreConfirmModal.value
+          state.showStorageIgnoreConfirmModal.value ||
+          (state.showMarksImportConfirmModal && state.showMarksImportConfirmModal.value)
       );
 
     const clearStaleLockCheck = () => {
@@ -230,6 +231,7 @@
         state.showStorageErrorModal,
         state.showStorageClearConfirmModal,
         state.showStorageIgnoreConfirmModal,
+        state.showMarksImportConfirmModal,
       ],
       ([
         noticeOpen,
@@ -239,6 +241,7 @@
         storageErrorOpen,
         storageClearConfirmOpen,
         storageIgnoreConfirmOpen,
+        marksImportConfirmOpen,
       ]) => {
         const hasOpenModal = Boolean(
           noticeOpen ||
@@ -247,7 +250,8 @@
             skipOpen ||
             storageErrorOpen ||
             storageClearConfirmOpen ||
-            storageIgnoreConfirmOpen
+            storageIgnoreConfirmOpen ||
+            marksImportConfirmOpen
         );
         if (modalUnlockTimer) {
           clearTimeout(modalUnlockTimer);
@@ -275,6 +279,7 @@
         state.showStorageErrorModal,
         state.showStorageClearConfirmModal,
         state.showStorageIgnoreConfirmModal,
+        state.showMarksImportConfirmModal,
       ],
       () => {
         if (typeof state.maybeAutoStartTutorial === "function") {
