@@ -1060,6 +1060,7 @@
 
       .marks-import-meta-line {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
@@ -1071,6 +1072,8 @@
       }
 
       .marks-import-meta-value {
+        min-width: 0;
+        flex: 1 1 auto;
         color: #e3edf9;
         text-align: right;
         overflow-wrap: anywhere;

@@ -259,13 +259,24 @@
       if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
         return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
       }
-      if (payload.marks !== undefined) {
-        if (!payload.marks || typeof payload.marks !== "object" || Array.isArray(payload.marks)) {
-          return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
-        }
-        return { marks: payload.marks, meta: payload.__meta || null };
+      const topLevelKeys = Object.keys(payload);
+      if (!Object.prototype.hasOwnProperty.call(payload, "marks")) {
+        return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
       }
-      return { marks: payload, meta: payload.__meta || null };
+      const hasUnknownTopLevelKey = topLevelKeys.some((key) => key !== "marks" && key !== "__meta");
+      if (hasUnknownTopLevelKey) {
+        return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
+      }
+      if (!payload.marks || typeof payload.marks !== "object" || Array.isArray(payload.marks)) {
+        return { error: resolveText("plan_config.marks_import_invalid_root", null, "Invalid data") };
+      }
+      return {
+        marks: payload.marks,
+        meta:
+          payload.__meta && typeof payload.__meta === "object" && !Array.isArray(payload.__meta)
+            ? payload.__meta
+            : null,
+      };
     };
     const exportWeaponMarks = () => {
       try {
@@ -319,13 +330,14 @@
             return;
           }
           const schemaIssues = schemaApi.inspectWeaponMarksSchemaIssues(parsed.marks);
-          if (schemaIssues.length) {
+          const importSchemaIssue = schemaIssues[0] || "";
+          if (importSchemaIssue) {
             setRefValue(
               state.marksImportError,
               resolveText(
                 "plan_config.marks_import_invalid_schema",
-                { message: schemaIssues[0] },
-                `Schema error: ${schemaIssues[0]}`
+                { message: importSchemaIssue },
+                `Schema error: ${importSchemaIssue}`
               )
             );
             setRefValue(state.marksImportPending, null);
@@ -656,6 +668,7 @@
 
     if (typeof onBeforeUnmount === "function") {
       onBeforeUnmount(() => {
+        stopMarksImportCountdown();
         recoveryApi.stopStorageClearCountdown();
       });
     }

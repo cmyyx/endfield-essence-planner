@@ -141,7 +141,7 @@
         issues.push("顶层结构不是对象");
         return issues;
       }
-      const allowedKeys = new Set(["weaponOwned", "essenceOwned", "excluded", "note"]);
+      const allowedKeys = new Set(["weaponOwned", "essenceOwned", "note"]);
       Object.keys(raw).forEach((name) => {
         if (!name || !weaponNameSet.has(name)) return;
         const entry = raw[name];
@@ -161,9 +161,6 @@
         }
         if (Object.prototype.hasOwnProperty.call(entry, "essenceOwned") && typeof entry.essenceOwned !== "boolean") {
           issues.push(`${name}: essenceOwned 不是布尔值`);
-        }
-        if (Object.prototype.hasOwnProperty.call(entry, "excluded") && typeof entry.excluded !== "boolean") {
-          issues.push(`${name}: excluded 不是布尔值`);
         }
         if (Object.prototype.hasOwnProperty.call(entry, "note") && typeof entry.note !== "string") {
           issues.push(`${name}: note 不是字符串`);
