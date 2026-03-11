@@ -18,12 +18,10 @@
 
   if (typeof console !== "undefined" && typeof console.warn === "function") {
     console.warn(
-      "[app.script-chain] window.__APP_RESOURCE_MANIFEST.app.scriptChain is missing; keeping compatibility bridge output only."
+      "[app.script-chain] window.__APP_RESOURCE_MANIFEST.app.scriptChain is missing; waiting for bootstrap to publish compatibility bridge output."
     );
   }
-  if (Array.isArray(window.__APP_SCRIPT_CHAIN)) {
+  if (Array.isArray(window.__APP_SCRIPT_CHAIN) && window.__APP_SCRIPT_CHAIN.length) {
     window.__APP_SCRIPT_CHAIN = window.__APP_SCRIPT_CHAIN.slice();
-    return;
   }
-  window.__APP_SCRIPT_CHAIN = [];
 })();

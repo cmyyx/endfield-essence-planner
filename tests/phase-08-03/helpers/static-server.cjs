@@ -41,6 +41,21 @@ const startStaticServer = async (options = {}) => {
   const failPaths = new Set(
     Array.isArray(options.failPaths) ? options.failPaths.map((entry) => String(entry || "")) : []
   );
+  const failCounts = new Map(
+    Object.entries(options.failCounts && typeof options.failCounts === "object" ? options.failCounts : {}).map(
+      ([pathname, count]) => [String(pathname || ""), Math.max(0, Number(count) || 0)]
+    )
+  );
+  const responseOverrides = new Map(
+    Object.entries(
+      options.responseOverrides && typeof options.responseOverrides === "object"
+        ? options.responseOverrides
+        : {}
+    ).map(([pathname, config]) => [
+      String(pathname || ""),
+      config && typeof config === "object" ? { ...config } : null,
+    ])
+  );
   const requestLog = [];
 
   const server = http.createServer((req, res) => {
@@ -50,6 +65,25 @@ const startStaticServer = async (options = {}) => {
 
     if (failPaths.has(pathname)) {
       send(res, 404, "Not Found", { "Content-Type": "text/plain; charset=utf-8" });
+      return;
+    }
+    if (failCounts.has(pathname)) {
+      const remaining = failCounts.get(pathname) || 0;
+      if (remaining > 0) {
+        failCounts.set(pathname, remaining - 1);
+        send(res, 404, "Not Found", { "Content-Type": "text/plain; charset=utf-8" });
+        return;
+      }
+    }
+    if (responseOverrides.has(pathname)) {
+      const override = responseOverrides.get(pathname) || {};
+      const body = Object.prototype.hasOwnProperty.call(override, "body") ? override.body : "";
+      const statusCode = Number(override.statusCode) || 200;
+      const ext = path.extname(pathname).toLowerCase();
+      send(res, statusCode, body, {
+        "Content-Type": CONTENT_TYPES[ext] || "application/octet-stream",
+        ...(override.headers && typeof override.headers === "object" ? override.headers : {}),
+      });
       return;
     }
 

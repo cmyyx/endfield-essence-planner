@@ -24,6 +24,8 @@ export const PHASE_08_GATE_COMMANDS = Object.freeze([
   "node tests/phase-08-03/task3-up-rerun-critical-path.test.cjs",
   "node tests/phase-08-04/task1-phase8-gate-manifest.test.cjs",
   "node tests/phase-08-04/task2-phase8-hard-gate-behavior.test.cjs",
+  "node tests/phase-08-04/task3-startup-script-chain-recovery-contract.test.cjs",
+  "node tests/phase-08-04/task4-boot-diagnostic-export-contract.test.cjs",
   "node tests/phase-08-06/task1-ad-style-i18n-residue.test.cjs",
 ]);
 

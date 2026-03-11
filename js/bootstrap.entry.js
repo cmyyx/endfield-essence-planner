@@ -2,6 +2,287 @@
   var root = document.documentElement;
   var themeStorageKey = "planner-theme-mode:v1";
   var runSerial = 0;
+  var nowIsoString = function () {
+    return new Date().toISOString();
+  };
+  var normalizeDiagnosticData = function (value, depth, seen) {
+    var nextDepth = Number(depth) || 0;
+    var stack = Array.isArray(seen) ? seen : [];
+    if (value == null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      return value;
+    }
+    if (nextDepth >= 3) {
+      return String(value);
+    }
+    if (typeof value === "function") {
+      return "[function]";
+    }
+    if (value && typeof value === "object") {
+      if (stack.indexOf(value) !== -1) {
+        return "[circular]";
+      }
+      var nextSeen = stack.concat([value]);
+      if (
+        Object.prototype.toString.call(value) === "[object Error]" ||
+        (typeof value.name === "string" && typeof value.message === "string")
+      ) {
+        return {
+          name: String(value.name || "Error"),
+          message: String(value.message || ""),
+          stack: typeof value.stack === "string" ? value.stack : "",
+        };
+      }
+      if (Array.isArray(value)) {
+        return value.slice(0, 20).map(function (entry) {
+          return normalizeDiagnosticData(entry, nextDepth + 1, nextSeen);
+        });
+      }
+      var result = {};
+      Object.keys(value)
+        .slice(0, 24)
+        .forEach(function (key) {
+          result[key] = normalizeDiagnosticData(value[key], nextDepth + 1, nextSeen);
+        });
+      return result;
+    }
+    return String(value);
+  };
+  var createBootDiagnosticsStore = function () {
+    var consoleEntries = [];
+    var eventEntries = [];
+    var nonFatalEntries = [];
+    var consoleEntryLimit = 200;
+    var eventEntryLimit = 200;
+    var nonFatalLimit = 200;
+    var resourceStateReader = null;
+    var consoleInstalled = false;
+    var errorListenersInstalled = false;
+    var pushBounded = function (target, entry, limit) {
+      target.push(entry);
+      if (target.length > limit) {
+        target.splice(0, target.length - limit);
+      }
+    };
+    var normalizeNonFatalEntry = function (raw) {
+      var source = raw && typeof raw === "object" ? raw : {};
+      return {
+        module: String(source.module || "bootstrap.entry"),
+        operation: String(source.operation || "bootstrap.unknown"),
+        kind: String(source.kind || "non-fatal"),
+        resource: String(source.resource || "bootstrap.entry"),
+        timestamp: String(source.timestamp || nowIsoString()),
+        errorName: String(source.errorName || ""),
+        errorMessage: String(source.errorMessage || ""),
+        note: String(source.note || ""),
+        optionalSignature: String(source.optionalSignature || ""),
+      };
+    };
+    var recordConsole = function (level, argsLike) {
+      var values = Array.prototype.slice.call(argsLike || []).map(function (value) {
+        return normalizeDiagnosticData(value, 0, []);
+      });
+      pushBounded(
+        consoleEntries,
+        {
+          timestamp: nowIsoString(),
+          level: String(level || "log"),
+          values: values,
+        },
+        consoleEntryLimit
+      );
+    };
+    var recordEvent = function (kind, payload) {
+      pushBounded(
+        eventEntries,
+        {
+          timestamp: nowIsoString(),
+          kind: String(kind || "event"),
+          payload: normalizeDiagnosticData(payload, 0, []),
+        },
+        eventEntryLimit
+      );
+    };
+    var reportNonFatal = function (raw) {
+      var entry = normalizeNonFatalEntry(raw);
+      pushBounded(nonFatalEntries, entry, nonFatalLimit);
+      return { recorded: true, reason: "boot-diagnostics", event: entry };
+    };
+    var installConsoleCapture = function () {
+      if (consoleInstalled || typeof console === "undefined") return;
+      ["log", "info", "warn", "error", "debug"].forEach(function (level) {
+        if (typeof console[level] !== "function") return;
+        var original = console[level];
+        console[level] = function () {
+          recordConsole(level, arguments);
+          return original.apply(this, arguments);
+        };
+      });
+      consoleInstalled = true;
+    };
+    var installErrorListeners = function () {
+      if (errorListenersInstalled || typeof window === "undefined" || typeof window.addEventListener !== "function") {
+        return;
+      }
+      window.addEventListener("error", function (event) {
+        recordEvent("window.error", {
+          message: event && event.message ? event.message : "",
+          filename: event && event.filename ? event.filename : "",
+          lineno: event && event.lineno ? event.lineno : 0,
+          colno: event && event.colno ? event.colno : 0,
+          error: event && event.error ? event.error : null,
+        });
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        recordEvent("window.unhandledrejection", {
+          reason: event && Object.prototype.hasOwnProperty.call(event, "reason") ? event.reason : null,
+        });
+      });
+      errorListenersInstalled = true;
+    };
+    var installGlobalShim = function () {
+      if (typeof window === "undefined") return;
+      try {
+        if (!window.__APP_DIAGNOSTICS__ || typeof window.__APP_DIAGNOSTICS__.reportNonFatalDiagnostic !== "function") {
+          Object.defineProperty(window, "__APP_DIAGNOSTICS__", {
+            configurable: true,
+            writable: true,
+            value: {
+              reportNonFatalDiagnostic: reportNonFatal,
+              readDiagnosticsHistory: function () {
+                return nonFatalEntries.slice();
+              },
+            },
+          });
+        }
+        if (typeof window.__reportNonFatalDiagnostic !== "function") {
+          Object.defineProperty(window, "__reportNonFatalDiagnostic", {
+            configurable: true,
+            writable: true,
+            value: reportNonFatal,
+          });
+        }
+      } catch (error) {
+        recordEvent("diagnostic-shim-failed", { error: error });
+      }
+    };
+    var setResourceStateReader = function (reader) {
+      resourceStateReader = typeof reader === "function" ? reader : null;
+    };
+    var readResourceState = function () {
+      if (!resourceStateReader) return [];
+      try {
+        var entries = resourceStateReader();
+        if (!Array.isArray(entries)) {
+          return normalizeDiagnosticData(entries, 0, []);
+        }
+        return entries.map(function (entry) {
+          return normalizeDiagnosticData(entry, 0, []);
+        });
+      } catch (error) {
+        return [
+          {
+            kind: "resource-state-read-failed",
+            error: normalizeDiagnosticData(error, 0, []),
+          },
+        ];
+      }
+    };
+    var readPerformanceResources = function () {
+      if (typeof performance === "undefined" || typeof performance.getEntriesByType !== "function") return [];
+      try {
+        return performance.getEntriesByType("resource").map(function (entry) {
+          return {
+            name: String(entry.name || ""),
+            initiatorType: String(entry.initiatorType || ""),
+            startTime: Number(entry.startTime || 0),
+            duration: Number(entry.duration || 0),
+            transferSize: Number(entry.transferSize || 0),
+            encodedBodySize: Number(entry.encodedBodySize || 0),
+            decodedBodySize: Number(entry.decodedBodySize || 0),
+            responseStatus: Number(entry.responseStatus || 0),
+          };
+        });
+      } catch (error) {
+        return [{ error: normalizeDiagnosticData(error, 0, []) }];
+      }
+    };
+    var readNavigationTiming = function () {
+      if (typeof performance === "undefined" || typeof performance.getEntriesByType !== "function") return null;
+      try {
+        var entries = performance.getEntriesByType("navigation");
+        if (!entries || !entries.length) return null;
+        var entry = entries[0];
+        return {
+          type: String(entry.type || ""),
+          startTime: Number(entry.startTime || 0),
+          duration: Number(entry.duration || 0),
+          domContentLoadedEventEnd: Number(entry.domContentLoadedEventEnd || 0),
+          loadEventEnd: Number(entry.loadEventEnd || 0),
+          responseStatus: Number(entry.responseStatus || 0),
+        };
+      } catch (error) {
+        return { error: normalizeDiagnosticData(error, 0, []) };
+      }
+    };
+    var readScriptNodes = function () {
+      return Array.from(document.scripts || []).map(function (script) {
+        return {
+          src: String(script.getAttribute("src") || script.src || ""),
+          loaded: Boolean(script.dataset && script.dataset.loaded === "true"),
+          async: Boolean(script.async),
+          defer: Boolean(script.defer),
+        };
+      });
+    };
+    var readStylesheetNodes = function () {
+      return Array.from(document.querySelectorAll('link[rel="stylesheet"]') || []).map(function (link) {
+        return {
+          href: String(link.getAttribute("href") || link.href || ""),
+          loaded: Boolean(link.dataset && link.dataset.loaded === "true"),
+          disabled: Boolean(link.disabled),
+        };
+      });
+    };
+    var buildBundle = function (extra) {
+      var payload = extra && typeof extra === "object" ? extra : {};
+      return {
+        exportedAt: nowIsoString(),
+        runSerial: runSerial,
+        location: typeof window !== "undefined" ? window.location.href : "",
+        referrer: typeof document !== "undefined" ? document.referrer || "" : "",
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+        language: typeof navigator !== "undefined" ? navigator.language || "" : "",
+        online: typeof navigator !== "undefined" && typeof navigator.onLine === "boolean" ? navigator.onLine : null,
+        documentReadyState: typeof document !== "undefined" ? document.readyState : "",
+        visibilityState: typeof document !== "undefined" ? document.visibilityState || "" : "",
+        bootStorageProbe: typeof window !== "undefined" && window.__bootStorageProbe ? window.__bootStorageProbe : null,
+        bootCacheBustToken: typeof window !== "undefined" ? String(window.__bootCacheBustToken || "") : "",
+        bootstrapModules: bootstrapModuleScripts.slice(),
+        errorContext: normalizeDiagnosticData(payload, 0, []),
+        consoleEntries: consoleEntries.slice(),
+        eventEntries: eventEntries.slice(),
+        nonFatalDiagnostics: nonFatalEntries.slice(),
+        resourceState: readResourceState(),
+        navigationTiming: readNavigationTiming(),
+        performanceResources: readPerformanceResources(),
+        scripts: readScriptNodes(),
+        stylesheets: readStylesheetNodes(),
+      };
+    };
+    return {
+      installConsoleCapture: installConsoleCapture,
+      installErrorListeners: installErrorListeners,
+      installGlobalShim: installGlobalShim,
+      recordEvent: recordEvent,
+      reportNonFatalDiagnostic: reportNonFatal,
+      setResourceStateReader: setResourceStateReader,
+      buildBundle: buildBundle,
+    };
+  };
+  var bootDiagnostics = createBootDiagnosticsStore();
+  bootDiagnostics.installConsoleCapture();
+  bootDiagnostics.installErrorListeners();
+  bootDiagnostics.installGlobalShim();
   var warnFlags = Object.create(null);
   var warnOnce = function (key, message) {
     if (warnFlags[key]) return;
@@ -113,6 +394,48 @@
     }
     return value;
   };
+  var buildBootDiagnosticBundle = function (extra) {
+    return bootDiagnostics.buildBundle(extra);
+  };
+  var triggerBootDiagnosticDownload = function (filename, payload) {
+    if (typeof document === "undefined" || typeof Blob === "undefined") return false;
+    var serialized = JSON.stringify(payload, null, 2);
+    var blob = new Blob([serialized], { type: "application/json;charset=utf-8" });
+    if (typeof navigator !== "undefined" && typeof navigator.msSaveOrOpenBlob === "function") {
+      navigator.msSaveOrOpenBlob(blob, filename);
+      return true;
+    }
+    if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+      return false;
+    }
+    var objectUrl = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = filename;
+    link.rel = "noopener";
+    link.style.display = "none";
+    (document.body || document.documentElement || document.head).appendChild(link);
+    link.click();
+    setTimeout(function () {
+      if (link.parentNode) {
+        link.parentNode.removeChild(link);
+      }
+      URL.revokeObjectURL(objectUrl);
+    }, 0);
+    return true;
+  };
+  var exportBootDiagnosticBundle = function (extra) {
+    var stamp = nowIsoString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
+    var filename = "planner-boot-diagnostic-" + stamp + ".json";
+    var payload = buildBootDiagnosticBundle(extra);
+    return {
+      filename: filename,
+      payload: payload,
+      downloaded: triggerBootDiagnosticDownload(filename, payload),
+    };
+  };
+  publishBootProtocolValue("buildBootDiagnosticBundle", "__buildBootDiagnosticBundle", buildBootDiagnosticBundle);
+  publishBootProtocolValue("exportBootDiagnosticBundle", "__exportBootDiagnosticBundle", exportBootDiagnosticBundle);
   var langStorageKey = "planner-lang";
   var fallbackBootLocale = "zh-CN";
   var supportedBootLocales = ["zh-CN", "zh-TW", "en", "ja"];
@@ -141,6 +464,7 @@
         "若长时间无变化，可点击“重试加载”或“刷新页面”；仍未恢复请点击“反馈问题”。",
       action_retry: "重试加载",
       action_refresh: "刷新页面",
+      action_export_diag: "导出诊断",
       action_feedback: "反馈问题",
       unknown_resource: "未知资源",
       unknown_item: "未知",
@@ -150,8 +474,10 @@
       error_suggestions_title: "建议处理",
       error_title_resource: "页面资源加载失败",
       error_summary_script_chain_missing: "脚本加载清单缺失，应用暂时无法启动。",
-      error_detail_missing_chain: "缺失资源清单：window.__APP_SCRIPT_CHAIN",
-      error_detail_confirm_chain: "请确认 ./js/app.script-chain.js 已成功部署且可访问",
+      error_summary_manifest_invalid: "启动资源清单配置无效，应用暂时无法启动。",
+      error_detail_missing_chain: "缺失关键字段：window.__APP_RESOURCE_MANIFEST.app.scriptChain",
+      error_detail_manifest_chain_invalid: "无效字段：window.__APP_RESOURCE_MANIFEST.app.scriptChain（需为非空数组）",
+      error_detail_confirm_chain: "请确认 ./js/app.resource-manifest.js 已成功部署且包含非空 scriptChain",
       error_summary_core_script: "核心脚本未能完整加载，应用暂时无法启动。",
       error_summary_core_resource: "核心资源未能完整加载，应用暂时无法启动。",
       error_summary_http_404: "检测到资源路径错误（404），请检查部署目录与访问路径。",
@@ -222,6 +548,7 @@
         "若長時間無變化，可點擊「重試載入」或「重新整理頁面」；仍未恢復請點擊「回報問題」。",
       action_retry: "重試載入",
       action_refresh: "重新整理頁面",
+      action_export_diag: "匯出診斷",
       action_feedback: "回報問題",
       unknown_resource: "未知資源",
       unknown_item: "未知",
@@ -231,8 +558,10 @@
       error_suggestions_title: "建議處理",
       error_title_resource: "頁面資源載入失敗",
       error_summary_script_chain_missing: "腳本載入清單缺失，應用暫時無法啟動。",
-      error_detail_missing_chain: "缺失資源清單：window.__APP_SCRIPT_CHAIN",
-      error_detail_confirm_chain: "請確認 ./js/app.script-chain.js 已成功部署且可訪問",
+      error_summary_manifest_invalid: "啟動資源清單設定無效，應用暫時無法啟動。",
+      error_detail_missing_chain: "缺失關鍵欄位：window.__APP_RESOURCE_MANIFEST.app.scriptChain",
+      error_detail_manifest_chain_invalid: "無效欄位：window.__APP_RESOURCE_MANIFEST.app.scriptChain（需為非空陣列）",
+      error_detail_confirm_chain: "請確認 ./js/app.resource-manifest.js 已成功部署且包含非空 scriptChain",
       error_summary_core_script: "核心腳本未完整載入，應用暫時無法啟動。",
       error_summary_core_resource: "核心資源未完整載入，應用暫時無法啟動。",
       error_summary_http_404: "偵測到資源路徑錯誤（404），請檢查部署目錄與訪問路徑。",
@@ -303,6 +632,7 @@
         "If progress stalls for long, try Retry or Refresh. If it still fails, use Report Issue.",
       action_retry: "Retry",
       action_refresh: "Refresh",
+      action_export_diag: "Export Diagnostics",
       action_feedback: "Report Issue",
       unknown_resource: "Unknown resource",
       unknown_item: "Unknown",
@@ -312,8 +642,10 @@
       error_suggestions_title: "Suggested Actions",
       error_title_resource: "Resource Load Failed",
       error_summary_script_chain_missing: "Script chain is missing. The app cannot start right now.",
-      error_detail_missing_chain: "Missing manifest: window.__APP_SCRIPT_CHAIN",
-      error_detail_confirm_chain: "Please verify ./js/app.script-chain.js is deployed and accessible",
+      error_summary_manifest_invalid: "Startup manifest is invalid. The app cannot start right now.",
+      error_detail_missing_chain: "Missing key: window.__APP_RESOURCE_MANIFEST.app.scriptChain",
+      error_detail_manifest_chain_invalid: "Invalid key: window.__APP_RESOURCE_MANIFEST.app.scriptChain (expected a non-empty array)",
+      error_detail_confirm_chain: "Please verify ./js/app.resource-manifest.js is deployed and contains a non-empty scriptChain",
       error_summary_core_script: "Core scripts failed to load completely.",
       error_summary_core_resource: "Core resources failed to load completely.",
       error_summary_http_404: "Detected a 404 resource path error. Please verify deployment directory and URL path.",
@@ -385,6 +717,7 @@
         "長時間変化がない場合は「再試行」または「再読み込み」を試してください。改善しない場合は「問題を報告」。",
       action_retry: "再試行",
       action_refresh: "再読み込み",
+      action_export_diag: "診断をエクスポート",
       action_feedback: "問題を報告",
       unknown_resource: "不明なリソース",
       unknown_item: "不明",
@@ -393,11 +726,11 @@
       error_details_title: "エラー詳細",
       error_suggestions_title: "対処方法",
       error_title_resource: "リソースの読み込みに失敗しました",
-      error_summary_script_chain_missing:
-        "スクリプト読み込みマニフェストが見つからず、アプリを起動できません。",
-      error_detail_missing_chain: "欠落マニフェスト：window.__APP_SCRIPT_CHAIN",
-      error_detail_confirm_chain:
-        "./js/app.script-chain.js が正しく配置されアクセス可能か確認してください",
+      error_summary_script_chain_missing: "スクリプト読み込みマニフェストが見つからず、アプリを起動できません。",
+      error_summary_manifest_invalid: "起動リソースマニフェストの設定が無効なため、アプリを起動できません。",
+      error_detail_missing_chain: "必須キーがありません：window.__APP_RESOURCE_MANIFEST.app.scriptChain",
+      error_detail_manifest_chain_invalid: "無効なキーです：window.__APP_RESOURCE_MANIFEST.app.scriptChain（空でない配列が必要です）",
+      error_detail_confirm_chain: "./js/app.resource-manifest.js が正しく配置され、空でない scriptChain を含むか確認してください",
       error_summary_core_script: "コアスクリプトの読み込みが完了しませんでした。",
       error_summary_core_resource: "コアリソースの読み込みが完了しませんでした。",
       error_summary_http_404:
@@ -546,19 +879,21 @@
       return "";
     }
   };
-  var bootCacheBustToken = resolveBootCacheBustToken();
+  var baseBootCacheBustToken = resolveBootCacheBustToken();
+  var activeBootCacheBustToken = baseBootCacheBustToken;
+  var setActiveBootCacheBustToken = function (token) { activeBootCacheBustToken = String(token || "").trim(); window.__bootCacheBustToken = activeBootCacheBustToken; return activeBootCacheBustToken; };
+  setActiveBootCacheBustToken(baseBootCacheBustToken);
   var applyBootCacheBust = function (src) {
     var input = String(src || "");
-    if (!input || !bootCacheBustToken) return input;
+    if (!input || !activeBootCacheBustToken) return input;
     try {
       var url = new URL(input, window.location.href);
-      url.searchParams.set("__cb", bootCacheBustToken);
+      url.searchParams.set("__cb", activeBootCacheBustToken);
       return url.toString();
     } catch (error) {
       return input;
     }
   };
-  window.__bootCacheBustToken = bootCacheBustToken;
   var normalizeResourceKey = function (src) {
     try {
       return new URL(src, window.location.href).href;
@@ -640,6 +975,25 @@
     var key = resolveStatusSummaryKey(status);
     if (key) return bt(key);
     return bt(fallbackKey);
+  };
+  var resolveManifestAppScriptChain = function () {
+    var manifest = window.__APP_RESOURCE_MANIFEST && typeof window.__APP_RESOURCE_MANIFEST === "object" ? window.__APP_RESOURCE_MANIFEST : null;
+    var manifestApp = manifest && manifest.app && typeof manifest.app === "object" ? manifest.app : null;
+    var scriptChain = manifestApp ? manifestApp.scriptChain : undefined;
+    if (typeof scriptChain === "undefined") return { status: "missing", scripts: [] };
+    if (!Array.isArray(scriptChain) || !scriptChain.length) return { status: "invalid", scripts: [] };
+    return { status: "ok", scripts: scriptChain.slice() };
+  };
+  var publishAppScriptChain = function (scripts) {
+    var normalized = Array.isArray(scripts) && scripts.length ? scripts.slice() : undefined;
+    publishBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN", normalized);
+    return Array.isArray(normalized) ? normalized.slice() : [];
+  };
+  var clearPublishedAppScriptChain = function () { publishBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN", undefined); return []; };
+  var createManifestScriptChainError = function (reason) {
+    var error = new Error("App script-chain manifest is unavailable.");
+    error.resource = { kind: "manifest", src: "./js/app.resource-manifest.js", reason: String(reason || "missing") === "invalid" ? "invalid-script-chain" : "missing-script-chain", probe: null };
+    return error;
   };
 
   var createLoadError = function (kind, src, reason, probe) {
@@ -820,12 +1174,24 @@
 
   var runBootstrap = function (options) {
     options = options || {};
+    var runBootCacheBustToken = setActiveBootCacheBustToken(options.fromRetry ? "retry-" + Date.now() : baseBootCacheBustToken);
     if (options.fromRetry && document.body) {
       document.body.textContent = "";
     }
     runSerial += 1;
     var runId = runSerial;
     window.__bootstrapEntryRunning = true;
+    publishBootProtocolValue("buildBootDiagnosticBundle", "__buildBootDiagnosticBundle", buildBootDiagnosticBundle);
+    publishBootProtocolValue("exportBootDiagnosticBundle", "__exportBootDiagnosticBundle", exportBootDiagnosticBundle);
+    var initialManifestScriptChainState = resolveManifestAppScriptChain();
+    bootDiagnostics.recordEvent("bootstrap.run", {
+      runId: runId,
+      fromRetry: Boolean(options.fromRetry),
+      cacheBustToken: runBootCacheBustToken,
+      initialManifestScriptChainStatus: initialManifestScriptChainState.status,
+    });
+    if (initialManifestScriptChainState.status === "ok") publishAppScriptChain(initialManifestScriptChainState.scripts);
+    else clearPublishedAppScriptChain();
     var appScriptChainFromProtocol = resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN");
     var declaredAppScriptChain =
       Array.isArray(appScriptChainFromProtocol) && appScriptChainFromProtocol.length
@@ -963,9 +1329,27 @@
       isFatalHttpStatus: isFatalHttpStatus,
       createLoadError: createLoadError,
       reportOptionalResourceFailure: reportOptionalResourceFailure,
-      bootCacheBustToken: bootCacheBustToken,
+      bootCacheBustToken: runBootCacheBustToken,
+    });
+    bootDiagnostics.setResourceStateReader(function () {
+      return Array.from(resourceRuntime.resourceState.values()).map(function (entry) {
+        return {
+          key: String((entry && entry.key) || ""),
+          src: String((entry && entry.src) || ""),
+          kind: String((entry && entry.kind) || ""),
+          label: String((entry && entry.label) || ""),
+          status: String((entry && entry.status) || ""),
+          statusAt: Number((entry && entry.statusAt) || 0),
+          optional: Boolean(entry && entry.optional),
+          featureKey: String((entry && entry.featureKey) || ""),
+        };
+      });
     });
     resourceRuntime.initialize();
+    bootDiagnostics.recordEvent("bootstrap.resource-runtime-ready", {
+      runId: runId,
+      trackedResources: resourceRuntime.resourceState.size,
+    });
 
     var ensureResource = resourceRuntime.ensureResource;
     var renderProgress = resourceRuntime.renderProgress;
@@ -1063,17 +1447,18 @@
       runtimePreludePromise,
     ])
       .then(function () {
-        if (
-          !declaredAppScriptChain.length &&
-          Array.isArray(resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN")) &&
-          resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN").length
-        ) {
-          declaredAppScriptChain = resolveBootProtocolValue("appScriptChain", "__APP_SCRIPT_CHAIN").slice();
-          declaredAppScriptChain.forEach(function (src) {
-            ensureResource(src, "script");
+        var manifestScriptChainState = resolveManifestAppScriptChain();
+        if (manifestScriptChainState.status !== "ok") {
+          bootDiagnostics.recordEvent("bootstrap.manifest-script-chain-invalid", {
+            runId: runId,
+            status: manifestScriptChainState.status,
           });
-          renderProgress();
+          clearPublishedAppScriptChain();
+          throw createManifestScriptChainError(manifestScriptChainState.status);
         }
+        declaredAppScriptChain = publishAppScriptChain(manifestScriptChainState.scripts);
+        declaredAppScriptChain.forEach(function (src) { ensureResource(src, "script"); });
+        renderProgress();
         optionalScriptPromise.catch(function (error) {
           reportNonFatalDiagnostic({
             operation: "bootstrap.optional-preload",
@@ -1089,6 +1474,11 @@
     Promise.race([bootLoadPromise, stallTimeoutPromise])
       .catch(function (error) {
         if (runId !== runSerial) return;
+        bootDiagnostics.recordEvent("bootstrap.failure", {
+          runId: runId,
+          error: error,
+          resource: error && error.resource ? error.resource : null,
+        });
         finish();
         var errorApi = window.__BOOTSTRAP_ERROR__;
         if (errorApi && typeof errorApi.handleBootFailure === "function") {
@@ -1112,12 +1502,26 @@
   };
 
   var startBootstrap = function (options) {
+    options = options || {};
+    bootDiagnostics.recordEvent("bootstrap.helper-modules-requested", {
+      fromRetry: Boolean(options.fromRetry),
+      modules: bootstrapModuleScripts.slice(),
+    });
     ensureBootstrapModulesReady()
       .then(function () {
-        runBootstrap(options || {});
+        bootDiagnostics.recordEvent("bootstrap.helper-modules-ready", {
+          fromRetry: Boolean(options.fromRetry),
+          modules: bootstrapModuleScripts.slice(),
+        });
+        runBootstrap(options);
       })
       .catch(function (error) {
         var message = String((error && error.message) || "Failed to load bootstrap helper modules.");
+        bootDiagnostics.recordEvent("bootstrap.helper-modules-failed", {
+          fromRetry: Boolean(options.fromRetry),
+          modules: bootstrapModuleScripts.slice(),
+          error: error,
+        });
         warnOnce("bootstrap-module-load-failed", "[bootstrap] " + message);
         reportNonFatalDiagnostic({
           operation: "bootstrap.load-helper-modules",
@@ -1156,6 +1560,20 @@
           messageNode.textContent = message;
           fallbackRoot.appendChild(titleNode);
           fallbackRoot.appendChild(messageNode);
+          var exportButton = document.createElement("button");
+          exportButton.type = "button";
+          exportButton.textContent = bt("action_export_diag");
+          exportButton.style.cssText =
+            "margin-top:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:4px 10px;background:rgba(12,18,28,0.9);color:#fff;font-size:12px;";
+          exportButton.addEventListener("click", function () {
+            exportBootDiagnosticBundle({
+              title: bt("error_title_resource"),
+              summary: bt("error_summary_core_resource"),
+              details: [message],
+              suggestions: [bt("suggestion_retry"), bt("suggestion_hard_refresh")],
+            });
+          });
+          fallbackRoot.appendChild(exportButton);
         }
         if (typeof console !== "undefined" && typeof console.error === "function") {
           console.error(error);
