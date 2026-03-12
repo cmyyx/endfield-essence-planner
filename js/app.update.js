@@ -319,10 +319,11 @@
         ? formatPublishedAtLocal(config.nextVersionAt)
         : "";
       const nextAtTime = Date.parse(config.nextVersionAt);
-      if (Number.isFinite(nextAtTime) && Date.now() < nextAtTime) {
+      const now = Date.now();
+      if (Number.isFinite(nextAtTime) && now < nextAtTime) {
         clearGameCompatTimer();
         const maxDelay = 2147480000;
-        const delay = Math.max(1000, Math.min(nextAtTime - Date.now() + 500, maxDelay));
+        const delay = Math.max(1000, Math.min(nextAtTime - now + 500, maxDelay));
         gameCompatTimer = window.setTimeout(() => {
           gameCompatTimer = null;
           applyGameCompatState();
