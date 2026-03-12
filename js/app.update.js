@@ -28,6 +28,7 @@
     let lastCheckAt = 0;
     let copyFeedbackTimer = null;
     let gameCompatWarningDismissedSession = false;
+    let gameCompatTimer = null;
     // Contract with scripts/gen-version.mjs output payload.
     const versionCoreFields = Object.freeze([
       "buildId",
@@ -317,9 +318,27 @@
       state.gameCompatNextVersionAtText.value = config.nextVersionAt
         ? formatPublishedAtLocal(config.nextVersionAt)
         : "";
+      const nextAtTime = Date.parse(config.nextVersionAt);
+      if (Number.isFinite(nextAtTime) && Date.now() < nextAtTime) {
+        clearGameCompatTimer();
+        const maxDelay = 2147480000;
+        const delay = Math.max(1000, Math.min(nextAtTime - Date.now() + 500, maxDelay));
+        gameCompatTimer = window.setTimeout(() => {
+          gameCompatTimer = null;
+          applyGameCompatState();
+        }, delay);
+      } else {
+        clearGameCompatTimer();
+      }
       const shouldWarn = shouldShowGameCompatWarning(config);
       state.showGameCompatWarning.value = shouldWarn && !gameCompatWarningDismissedSession;
       updateVersionBadgeDisplayText();
+    };
+    const clearGameCompatTimer = () => {
+      if (gameCompatTimer) {
+        clearTimeout(gameCompatTimer);
+        gameCompatTimer = null;
+      }
     };
 
     const getLocalVersionInfo = () => {
@@ -521,6 +540,7 @@
       if (typeof document !== "undefined" && document.visibilityState === "hidden") {
         return;
       }
+      applyGameCompatState();
       checkForUpdate(false);
     };
 
@@ -612,6 +632,7 @@
 
     onBeforeUnmount(() => {
       clearCopyFeedbackTimer();
+      clearGameCompatTimer();
       if (state.versionCopyFeedbackText) {
         state.versionCopyFeedbackText.value = "";
       }

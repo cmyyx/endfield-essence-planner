@@ -7,9 +7,11 @@ const PROJECT_ROOT = path.resolve(__dirname, "../../..");
 const RETRY_TEXT = /重试加载|重試載入|Retry|再試行/i;
 const EXPORT_DIAG_TEXT = /导出诊断|匯出診斷|Export Diagnostics|診断をエクスポート/i;
 const MANIFEST_PATH = path.join(PROJECT_ROOT, "js/app.resource-manifest.js");
-const INVALID_MANIFEST_SOURCE = fs
-  .readFileSync(MANIFEST_PATH, "utf8")
-  .replace(/scriptChain:\s*\[[\s\S]*?\n\s*\],/, "scriptChain: [],");
+const MANIFEST_SOURCE = fs.readFileSync(MANIFEST_PATH, "utf8");
+const INVALID_MANIFEST_SOURCE = MANIFEST_SOURCE.replace(/scriptChain:\s*\[[\s\S]*?\n\s*\],/, "scriptChain: [],");
+if (INVALID_MANIFEST_SOURCE === MANIFEST_SOURCE) {
+  throw new Error("Failed to create invalid manifest source - regex may need update");
+}
 
 const createServer = (options = {}) =>
   startStaticServer({

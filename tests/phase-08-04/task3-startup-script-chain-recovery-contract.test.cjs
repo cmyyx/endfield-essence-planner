@@ -50,6 +50,13 @@ assert.deepEqual(
   "[recovery] app.script-chain should still mirror a valid manifest-provided script chain"
 );
 
+const prepopulated = evaluateScriptChain({ __APP_SCRIPT_CHAIN: ["./js/app.core.js"] });
+assert.deepEqual(
+  prepopulated.window.__APP_SCRIPT_CHAIN,
+  ["./js/app.core.js"],
+  "[recovery] app.script-chain should preserve a pre-populated script chain when manifest is missing"
+);
+
 assert.match(
   bootstrapEntrySource,
   /resolveManifestAppScriptChain/,
@@ -57,7 +64,7 @@ assert.match(
 );
 assert.match(
   bootstrapEntrySource,
-  /publishBootProtocolValue\("appScriptChain", "__APP_SCRIPT_CHAIN", normalized\)/,
+  /publishBootProtocolValue\("appScriptChain", "__APP_SCRIPT_CHAIN"/,
   "[recovery] bootstrap.entry should publish appScriptChain through the protocol bridge"
 );
 assert.match(

@@ -312,7 +312,7 @@
   modules.normalizeAndBindWeaponUpSchedule = normalizeAndBindWeaponUpSchedule;
 
   modules.initUpSchedule = function initUpSchedule(ctx, state) {
-    const { ref } = ctx;
+    const { ref, onMounted, onBeforeUnmount } = ctx;
     const ctxRawSource =
       ctx && ctx.weaponUpSchedules && typeof ctx.weaponUpSchedules === "object"
         ? ctx.weaponUpSchedules
@@ -359,6 +359,9 @@
     }
     if (!state.weaponUpIssues || typeof state.weaponUpIssues.value === "undefined") {
       state.weaponUpIssues = ref([]);
+    }
+    if (!state.upScheduleNowMs || typeof state.upScheduleNowMs.value === "undefined") {
+      state.upScheduleNowMs = ref(Date.now());
     }
 
     const { byCharacter, byWeapon, issues, reportIssue } = normalizeAndBindWeaponUpSchedule(
@@ -424,6 +427,93 @@
       return result;
     };
     state.reportUpScheduleIssue = reportIssue;
+
+    let nextBoundaryTimer = null;
+    const clearNextBoundaryTimer = () => {
+      if (nextBoundaryTimer) {
+        clearTimeout(nextBoundaryTimer);
+        nextBoundaryTimer = null;
+      }
+    };
+    const updateUpScheduleNow = (now) => {
+      const nowMs = resolveNowMs(typeof now === "undefined" ? Date.now() : now);
+      if (state.upScheduleNowMs && state.upScheduleNowMs.value !== nowMs) {
+        state.upScheduleNowMs.value = nowMs;
+      }
+      return nowMs;
+    };
+    const findNextBoundaryMs = (nowMs) => {
+      const source = state.weaponUpByWeapon && state.weaponUpByWeapon.value
+        ? state.weaponUpByWeapon.value
+        : {};
+      let candidate = Number.POSITIVE_INFINITY;
+      Object.keys(source).forEach((weaponName) => {
+        const record = source[weaponName];
+        const windows = Array.isArray(record && record.windows) ? record.windows : [];
+        windows.forEach((windowItem) => {
+          const startMs = Number(windowItem && windowItem.startMs);
+          if (Number.isFinite(startMs) && startMs > nowMs && startMs < candidate) {
+            candidate = startMs;
+          }
+          const endMs = Number(windowItem && windowItem.endMs);
+          if (Number.isFinite(endMs) && endMs > nowMs && endMs < candidate) {
+            candidate = endMs;
+          }
+        });
+      });
+      return Number.isFinite(candidate) ? candidate : null;
+    };
+    const scheduleNextBoundary = () => {
+      clearNextBoundaryTimer();
+      const nowMs = resolveNowMs(Date.now());
+      const nextBoundaryMs = findNextBoundaryMs(nowMs);
+      if (!Number.isFinite(nextBoundaryMs) || nextBoundaryMs <= nowMs) {
+        return;
+      }
+      const maxDelay = 2147480000;
+      const delay = Math.max(200, Math.min(nextBoundaryMs - nowMs + 500, maxDelay));
+      nextBoundaryTimer = setTimeout(() => {
+        const nextNow = updateUpScheduleNow(Date.now());
+        if (typeof state.refreshRerunRanking === "function") {
+          state.refreshRerunRanking(nextNow);
+        }
+        scheduleNextBoundary();
+      }, delay);
+    };
+    const handleVisibilityRecovery = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      const nowMs = updateUpScheduleNow(Date.now());
+      if (typeof state.refreshRerunRanking === "function") {
+        state.refreshRerunRanking(nowMs);
+      }
+      scheduleNextBoundary();
+    };
+
+    if (typeof onMounted === "function") {
+      onMounted(() => {
+        updateUpScheduleNow(Date.now());
+        scheduleNextBoundary();
+        if (typeof window !== "undefined") {
+          window.addEventListener("focus", handleVisibilityRecovery);
+          window.addEventListener("pageshow", handleVisibilityRecovery);
+        }
+        if (typeof document !== "undefined") {
+          document.addEventListener("visibilitychange", handleVisibilityRecovery);
+        }
+      });
+    }
+    if (typeof onBeforeUnmount === "function") {
+      onBeforeUnmount(() => {
+        clearNextBoundaryTimer();
+        if (typeof window !== "undefined") {
+          window.removeEventListener("focus", handleVisibilityRecovery);
+          window.removeEventListener("pageshow", handleVisibilityRecovery);
+        }
+        if (typeof document !== "undefined") {
+          document.removeEventListener("visibilitychange", handleVisibilityRecovery);
+        }
+      });
+    }
   };
   modules.initUpSchedule.required = ["initState", "initUi"];
   modules.initUpSchedule.optional = [];

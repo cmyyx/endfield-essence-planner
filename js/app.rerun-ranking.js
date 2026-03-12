@@ -182,7 +182,7 @@
   modules.deriveRerunRankingRows = deriveRerunRankingRows;
 
   modules.initRerunRanking = function initRerunRanking(ctx, state, options) {
-    const { ref } = ctx;
+    const { ref, watch } = ctx;
     const resolveValue = (value, fallback) =>
       value && typeof value === "object" && Object.prototype.hasOwnProperty.call(value, "value")
         ? value
@@ -203,13 +203,17 @@
         (state.weaponUpByWeapon && state.weaponUpByWeapon.value) ||
         {}
       );
-      const nowMs = resolveNowMs(
-        typeof nextNow === "undefined"
-          ? options && Object.prototype.hasOwnProperty.call(options, "nowMs")
-            ? options.nowMs
-            : undefined
-          : nextNow
-      );
+      const scheduleNowMs =
+        state.upScheduleNowMs && typeof state.upScheduleNowMs.value !== "undefined"
+          ? Number(state.upScheduleNowMs.value)
+          : Number.NaN;
+      const fallbackNow =
+        Number.isFinite(scheduleNowMs) && scheduleNowMs > 0
+          ? scheduleNowMs
+          : options && Object.prototype.hasOwnProperty.call(options, "nowMs")
+          ? options.nowMs
+          : undefined;
+      const nowMs = resolveNowMs(typeof nextNow === "undefined" ? fallbackNow : nextNow);
       const activeByWeapon =
         typeof state.getWeaponUpWindowAt === "function" ? state.getWeaponUpWindowAt(nowMs) : {};
       const rows = deriveRerunRankingRows(source, { nowMs, activeByWeapon });
@@ -218,7 +222,16 @@
       state.rerunRankingGeneratedAt.value = nowMs;
       return rows;
     };
-
-    state.refreshRerunRanking();
+    if (typeof watch === "function" && state.upScheduleNowMs && typeof state.upScheduleNowMs === "object") {
+      watch(
+        () => Number(state.upScheduleNowMs.value || 0),
+        (nextNow) => {
+          state.refreshRerunRanking(nextNow);
+        },
+        { immediate: true }
+      );
+    } else {
+      state.refreshRerunRanking();
+    }
   };
 })();

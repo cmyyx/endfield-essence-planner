@@ -86,8 +86,13 @@ assert.match(
 );
 
 const entryLineCount = entrySource.split(/\r?\n/).length;
-// User-approved waiver: bootstrap.entry.js no longer has a hard line budget gate.
-const entryLineBudget = Number.POSITIVE_INFINITY;
+const DEFAULT_ENTRY_LINE_BUDGET = 2200;
+const parsedEntryLineBudget = Number(process.env.BOOTSTRAP_ENTRY_LINE_BUDGET);
+// entryLineBudget is a soft guardrail; adjust via BOOTSTRAP_ENTRY_LINE_BUDGET or replace with a different complexity check.
+const entryLineBudget =
+  Number.isFinite(parsedEntryLineBudget) && parsedEntryLineBudget > 0
+    ? parsedEntryLineBudget
+    : DEFAULT_ENTRY_LINE_BUDGET;
 assert.ok(
   entryLineCount <= entryLineBudget,
   `bootstrap.entry should stay within orchestrator complexity budget (<=${entryLineBudget} lines), got ${entryLineCount}`

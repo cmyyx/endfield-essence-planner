@@ -394,44 +394,51 @@
     }
     return value;
   };
+  var bootDiagnosticExportUtils = {
+    nowIsoString: nowIsoString,
+    buildFilename: function () {
+      var stamp = nowIsoString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
+      return "planner-boot-diagnostic-" + stamp + ".json";
+    },
+    triggerJsonDownload: function (filename, payload) {
+      if (typeof document === "undefined" || typeof Blob === "undefined") return false;
+      var serialized = JSON.stringify(payload, null, 2);
+      var blob = new Blob([serialized], { type: "application/json;charset=utf-8" });
+      if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+        return false;
+      }
+      var objectUrl = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      link.rel = "noopener";
+      link.style.display = "none";
+      (document.body || document.documentElement || document.head).appendChild(link);
+      link.click();
+      setTimeout(function () {
+        if (link.parentNode) {
+          link.parentNode.removeChild(link);
+        }
+        URL.revokeObjectURL(objectUrl);
+      }, 0);
+      return true;
+    },
+  };
+  publishBootProtocolValue(
+    "bootDiagnosticExportUtils",
+    "__BOOT_DIAGNOSTIC_EXPORT_UTILS__",
+    bootDiagnosticExportUtils
+  );
   var buildBootDiagnosticBundle = function (extra) {
     return bootDiagnostics.buildBundle(extra);
   };
-  var triggerBootDiagnosticDownload = function (filename, payload) {
-    if (typeof document === "undefined" || typeof Blob === "undefined") return false;
-    var serialized = JSON.stringify(payload, null, 2);
-    var blob = new Blob([serialized], { type: "application/json;charset=utf-8" });
-    if (typeof navigator !== "undefined" && typeof navigator.msSaveOrOpenBlob === "function") {
-      navigator.msSaveOrOpenBlob(blob, filename);
-      return true;
-    }
-    if (typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
-      return false;
-    }
-    var objectUrl = URL.createObjectURL(blob);
-    var link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = filename;
-    link.rel = "noopener";
-    link.style.display = "none";
-    (document.body || document.documentElement || document.head).appendChild(link);
-    link.click();
-    setTimeout(function () {
-      if (link.parentNode) {
-        link.parentNode.removeChild(link);
-      }
-      URL.revokeObjectURL(objectUrl);
-    }, 0);
-    return true;
-  };
   var exportBootDiagnosticBundle = function (extra) {
-    var stamp = nowIsoString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
-    var filename = "planner-boot-diagnostic-" + stamp + ".json";
+    var filename = bootDiagnosticExportUtils.buildFilename();
     var payload = buildBootDiagnosticBundle(extra);
     return {
       filename: filename,
       payload: payload,
-      downloaded: triggerBootDiagnosticDownload(filename, payload),
+      downloaded: bootDiagnosticExportUtils.triggerJsonDownload(filename, payload),
     };
   };
   publishBootProtocolValue("buildBootDiagnosticBundle", "__buildBootDiagnosticBundle", buildBootDiagnosticBundle);
@@ -881,7 +888,11 @@
   };
   var baseBootCacheBustToken = resolveBootCacheBustToken();
   var activeBootCacheBustToken = baseBootCacheBustToken;
-  var setActiveBootCacheBustToken = function (token) { activeBootCacheBustToken = String(token || "").trim(); window.__bootCacheBustToken = activeBootCacheBustToken; return activeBootCacheBustToken; };
+  var setActiveBootCacheBustToken = function (token) {
+    activeBootCacheBustToken = String(token || "").trim();
+    window.__bootCacheBustToken = activeBootCacheBustToken;
+    return activeBootCacheBustToken;
+  };
   setActiveBootCacheBustToken(baseBootCacheBustToken);
   var applyBootCacheBust = function (src) {
     var input = String(src || "");

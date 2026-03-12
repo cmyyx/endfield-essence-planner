@@ -755,9 +755,17 @@
       () => state.filterS1.value.length || state.filterS2.value.length || state.filterS3.value.length
     );
 
+    const resolveUpScheduleNowMs = () => {
+      const candidate = state.upScheduleNowMs;
+      if (candidate && typeof candidate === "object" && "value" in candidate) {
+        const value = Number(candidate.value);
+        if (Number.isFinite(value) && value > 0) return value;
+      }
+      return Date.now();
+    };
     const getCurrentWeaponUpActiveMap = () => {
       if (typeof state.getWeaponUpWindowAt !== "function") return {};
-      const activeByWeapon = state.getWeaponUpWindowAt(Date.now());
+      const activeByWeapon = state.getWeaponUpWindowAt(resolveUpScheduleNowMs());
       if (!activeByWeapon || typeof activeByWeapon !== "object") return {};
       return activeByWeapon;
     };
