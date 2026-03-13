@@ -7,3 +7,4 @@ error
 node_modules
 test-results
 pic
+.tmp
