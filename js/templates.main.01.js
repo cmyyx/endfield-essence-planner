@@ -183,15 +183,15 @@
           </button>
           <button 
             class="nav-item" 
-            :class="{ active: currentView === 'gear-refining' }" 
-            @click="setView('gear-refining')"
+            :class="{ active: currentView === 'equip-refining' }" 
+            @click="setView('equip-refining')"
           >
             <span
-              v-if="showGearRefiningNavHintDot"
+              v-if="showEquipRefiningNavHintDot"
               class="nav-hint-dot"
               aria-hidden="true"
             >NEW</span>
-            {{ t("nav.gear_refining") }}
+            {{ t("nav.equip_refining") }}
           </button>
           <button
             class="nav-item"

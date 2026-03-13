@@ -50,7 +50,7 @@
           "./css/styles.filters.css",
           "./css/styles.weapons.css",
           "./css/styles.recommendations.css",
-          "./css/styles.gear-refining.css",
+          "./css/styles.equip-refining.css",
           "./css/styles.theme.modes.css",
         ],
         data: [
@@ -59,7 +59,8 @@
           "./data/dungeons.js",
           "./data/weapons.js",
           "./data/up-schedules.js",
-          "./data/gears.js",
+          "./data/equip.js",
+          "./data/equip-images.js",
           "./data/weapon-images.js",
           "./data/i18n/zh-CN.js",
           "./data/i18n/zh-TW.js",

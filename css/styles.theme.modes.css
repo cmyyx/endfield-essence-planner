@@ -680,31 +680,31 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #2a3f59;
 }
 
-[data-theme="light"] .gear-table,
+[data-theme="light"] .equip-table,
 [data-theme="light"] .team-table {
   background: rgba(255, 255, 255, 0.75);
   border-color: rgba(22, 44, 72, 0.14);
 }
 
-[data-theme="light"] .gear-row + .gear-row,
+[data-theme="light"] .equip-row + .equip-row,
 [data-theme="light"] .team-cell,
-[data-theme="light"] .gear-cell {
+[data-theme="light"] .equip-cell {
   border-color: rgba(22, 44, 72, 0.1);
 }
 
-[data-theme="light"] .gear-row-head,
+[data-theme="light"] .equip-row-head,
 [data-theme="light"] .team-head {
   background: rgba(233, 242, 252, 0.92);
   color: #49617d;
 }
 
-[data-theme="light"] .gear-weapon,
+[data-theme="light"] .equip-weapon,
 [data-theme="light"] .team-card {
   background: rgba(245, 250, 255, 0.62);
   border-color: rgba(22, 44, 72, 0.12);
 }
 
-[data-theme="light"] .gear-tag-secondary,
+[data-theme="light"] .equip-tag-secondary,
 [data-theme="light"] .team-badge.muted {
   background: rgba(234, 242, 251, 0.95);
   border-color: rgba(22, 44, 72, 0.18);
@@ -716,7 +716,7 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .team-note,
 [data-theme="light"] .team-name,
 [data-theme="light"] .team-label,
-[data-theme="light"] .gear-empty,
+[data-theme="light"] .equip-empty,
 [data-theme="light"] .team-empty {
   color: #425974;
 }
@@ -873,11 +873,11 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #8a3737;
 }
 
-[data-theme="light"] .gear-name {
+[data-theme="light"] .equip-name {
   color: #2d4a67;
 }
 
-[data-theme="light"] .gear-note {
+[data-theme="light"] .equip-note {
   color: #607894;
 }
 

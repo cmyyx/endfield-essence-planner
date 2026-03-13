@@ -4,8 +4,11 @@
         window.WEAPON_UP_SCHEDULES && typeof window.WEAPON_UP_SCHEDULES === "object"
           ? window.WEAPON_UP_SCHEDULES
           : {};
-      const gears = Array.isArray(window.GEARS) ? window.GEARS : [];
-      const weaponImages = new Set(Array.isArray(window.WEAPON_IMAGES) ? window.WEAPON_IMAGES : []);
+      const equips = Array.isArray(window.EQUIPS) ? window.EQUIPS : [];
+      const weaponImages =
+        window.WEAPON_IMAGES && typeof window.WEAPON_IMAGES === "object"
+          ? window.WEAPON_IMAGES
+          : {};
       const i18nState = {
         locale: "zh-CN",
         t: (key, params) => {

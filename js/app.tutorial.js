@@ -84,7 +84,7 @@
             state.t("tutorial.step_note_tip_optional"),
             state.t("tutorial.step_note_tip_example"),
             state.t("tutorial.step_note_tip_manual_next", {
-              label: state.t("gear_refining.next"),
+              label: state.t("equip_refining.next"),
             }),
           ],
         },

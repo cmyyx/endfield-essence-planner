@@ -928,7 +928,7 @@
         }
       }
 
-      .strategy-view, .gear-refining-view {
+      .strategy-view, .equip-refining-view {
         display: block;
         grid-column: 1 / -1;
         background: var(--panel);
@@ -1732,7 +1732,7 @@
         text-transform: uppercase;
       }
 
-      .gear-table {
+      .equip-table {
         display: grid;
         border-radius: 12px;
         overflow-x: hidden;
@@ -1741,16 +1741,16 @@
         background: rgba(8, 12, 18, 0.65);
       }
 
-      .gear-row {
+      .equip-row {
         display: grid;
         grid-template-columns: minmax(64px, 90px) minmax(0, 1fr);
       }
 
-      .gear-row + .gear-row {
+      .equip-row + .equip-row {
         border-top: 1px solid rgba(255, 255, 255, 0.08);
       }
 
-      .gear-row-head {
+      .equip-row-head {
         background: rgba(255, 255, 255, 0.04);
         font-size: 12px;
         text-transform: uppercase;
@@ -1758,17 +1758,17 @@
         color: var(--muted);
       }
 
-      .gear-row-main {
+      .equip-row-main {
         display: grid;
         grid-template-columns: minmax(180px, 1.1fr) repeat(4, minmax(120px, 1fr));
         border-left: 1px solid rgba(255, 255, 255, 0.06);
       }
 
-      .gear-row-head .gear-row-main {
+      .equip-row-head .equip-row-main {
         border-left-color: rgba(255, 255, 255, 0.12);
       }
 
-      .gear-row-label {
+      .equip-row-label {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1778,21 +1778,21 @@
         color: var(--muted);
       }
 
-      .gear-cell {
+      .equip-cell {
         padding: 10px 12px;
         border-right: 1px solid rgba(255, 255, 255, 0.06);
         min-width: 0;
       }
 
-      .gear-cell:last-child {
+      .equip-cell:last-child {
         border-right: none;
       }
 
-      .gear-weapon {
+      .equip-weapon {
         background: rgba(255, 255, 255, 0.02);
       }
 
-      .gear-tag {
+      .equip-tag {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1806,40 +1806,40 @@
         color: var(--muted);
       }
 
-      .gear-tag-block {
+      .equip-tag-block {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
       }
 
-      .gear-tag-primary {
+      .equip-tag-primary {
         color: var(--accent);
         border-color: rgba(242, 182, 50, 0.45);
         background: rgba(242, 182, 50, 0.12);
       }
 
-      .gear-tag-secondary {
+      .equip-tag-secondary {
         color: var(--muted);
         border-color: rgba(255, 255, 255, 0.16);
         background: rgba(255, 255, 255, 0.04);
       }
 
-      .gear-tag-desc {
+      .equip-tag-desc {
         font-size: 11px;
         color: var(--muted);
         letter-spacing: 0.02em;
         text-align: center;
       }
 
-      .gear-items {
+      .equip-items {
         display: flex;
         flex-direction: column;
         gap: 8px;
         align-items: center;
       }
 
-      .gear-item {
+      .equip-item {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1847,7 +1847,7 @@
         gap: 6px;
       }
 
-      .gear-icon-frame,
+      .equip-icon-frame,
       .team-icon-frame {
         position: relative;
         --icon-size: 104px;
@@ -1865,7 +1865,7 @@
         box-shadow: 0 16px 28px rgba(0, 0, 0, 0.4);
       }
 
-      .gear-icon-frame::before,
+      .equip-icon-frame::before,
       .team-icon-frame::before {
         content: "";
         position: absolute;
@@ -1879,7 +1879,7 @@
         pointer-events: none;
       }
 
-      .gear-icon-frame::after,
+      .equip-icon-frame::after,
       .team-icon-frame::after {
         content: "";
         position: absolute;
@@ -1896,41 +1896,41 @@
         z-index: 2;
       }
 
-      .gear-icon-frame.gear-rarity-5::after,
-      .team-icon-frame.gear-rarity-5::after {
+      .equip-icon-frame.equip-rarity-5::after,
+      .team-icon-frame.equip-rarity-5::after {
         background-image: var(--rarity-5-frame);
       }
 
-      .gear-icon-frame.gear-rarity-4::after,
-      .team-icon-frame.gear-rarity-4::after {
-        background-image: var(--gear-4-frame);
+      .equip-icon-frame.equip-rarity-4::after,
+      .team-icon-frame.equip-rarity-4::after {
+        background-image: var(--equip-4-frame);
       }
 
-      .gear-icon-frame.weapon-rarity-6::after,
+      .equip-icon-frame.weapon-rarity-6::after,
       .team-icon-frame.weapon-rarity-6::after {
         background-image: var(--rarity-6-frame);
       }
 
-      .gear-icon-frame.weapon-rarity-5::after,
+      .equip-icon-frame.weapon-rarity-5::after,
       .team-icon-frame.weapon-rarity-5::after {
         background-image: var(--rarity-5-frame);
       }
 
-      .gear-icon-frame.weapon-rarity-4::after,
+      .equip-icon-frame.weapon-rarity-4::after,
       .team-icon-frame.weapon-rarity-4::after {
         background-image: var(--rarity-4-frame);
       }
 
-      .gear-icon-frame.weapon-rarity-6,
-      .gear-icon-frame.weapon-rarity-5,
-      .gear-icon-frame.weapon-rarity-4,
+      .equip-icon-frame.weapon-rarity-6,
+      .equip-icon-frame.weapon-rarity-5,
+      .equip-icon-frame.weapon-rarity-4,
       .team-icon-frame.weapon-rarity-6,
       .team-icon-frame.weapon-rarity-5,
       .team-icon-frame.weapon-rarity-4 {
         border-radius: 8px;
       }
 
-      .gear-icon {
+      .equip-icon {
         width: 100%;
         height: 100%;
         border-radius: 8px;
@@ -1941,13 +1941,13 @@
         display: block;
       }
 
-      .gear-icon-frame.weapon-rarity-6 .gear-icon,
-      .gear-icon-frame.weapon-rarity-5 .gear-icon,
-      .gear-icon-frame.weapon-rarity-4 .gear-icon {
+      .equip-icon-frame.weapon-rarity-6 .equip-icon,
+      .equip-icon-frame.weapon-rarity-5 .equip-icon,
+      .equip-icon-frame.weapon-rarity-4 .equip-icon {
         border-radius: 8px;
       }
 
-      .gear-text {
+      .equip-text {
         display: flex;
         flex-direction: column;
         gap: 3px;
@@ -1957,21 +1957,21 @@
         text-align: center;
       }
 
-      .gear-name {
+      .equip-name {
         font-weight: 600;
         color: rgba(235, 240, 246, 0.75);
         font-size: 14px;
         line-height: 1.2;
       }
 
-      .gear-note {
+      .equip-note {
         font-size: 12px;
         color: rgba(195, 205, 219, 0.55);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
       }
 
-      .gear-empty {
+      .equip-empty {
         color: var(--muted);
         font-size: 12px;
       }
@@ -2405,23 +2405,23 @@
           padding: 16px;
         }
 
-        .gear-row-main {
+        .equip-row-main {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .gear-row {
+        .equip-row {
           grid-template-columns: minmax(56px, 72px) minmax(0, 1fr);
         }
 
-        .gear-row-main .gear-weapon {
+        .equip-row-main .equip-weapon {
           grid-column: 1 / -1;
         }
 
-        .gear-cell {
+        .equip-cell {
           padding: 10px 12px;
         }
 
-        .gear-icon-frame,
+        .equip-icon-frame,
         .team-icon-frame {
           --icon-size: 80px;
           --band-height: 34px;
@@ -2432,22 +2432,22 @@
           --band-height: 26px;
         }
 
-        .gear-icon-frame::after,
+        .equip-icon-frame::after,
         .team-icon-frame::after {
           height: var(--band-height);
         }
 
-        .gear-text,
+        .equip-text,
         .team-text {
           max-width: 150px;
         }
 
-        .gear-name,
+        .equip-name,
         .team-item-name {
           font-size: 12px;
         }
 
-        .gear-note,
+        .equip-note,
         .team-note {
           font-size: 11px;
         }
@@ -2683,23 +2683,23 @@
       }
 
       @media (max-width: 560px) {
-        .gear-row-main {
+        .equip-row-main {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .gear-row {
+        .equip-row {
           grid-template-columns: minmax(52px, 64px) minmax(0, 1fr);
         }
 
-        .gear-row-main .gear-weapon {
+        .equip-row-main .equip-weapon {
           grid-column: 1 / -1;
         }
 
-        .gear-cell {
+        .equip-cell {
           padding: 8px 10px;
         }
 
-        .gear-icon-frame,
+        .equip-icon-frame,
         .team-icon-frame {
           --icon-size: 68px;
           --band-height: 30px;
@@ -2710,17 +2710,17 @@
           --band-height: 22px;
         }
 
-        .gear-icon-frame::after,
+        .equip-icon-frame::after,
         .team-icon-frame::after {
           height: var(--band-height);
         }
 
-        .gear-name,
+        .equip-name,
         .team-item-name {
           font-size: 12px;
         }
 
-        .gear-note,
+        .equip-note,
         .team-note {
           font-size: 10px;
         }
@@ -2748,7 +2748,7 @@
       }
 
       @media (max-width: 360px) {
-        .gear-icon-frame,
+        .equip-icon-frame,
         .team-icon-frame {
           --icon-size: 60px;
           --band-height: 26px;
@@ -2759,12 +2759,12 @@
           --band-height: 20px;
         }
 
-        .gear-name,
+        .equip-name,
         .team-item-name {
           font-size: 11px;
         }
 
-        .gear-note,
+        .equip-note,
         .team-note {
           font-size: 9px;
         }

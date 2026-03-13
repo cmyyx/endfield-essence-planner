@@ -33,7 +33,7 @@ const requiredDomains = new Set([
   "guide",
   "label",
   "badge",
-  "gear_refining",
+  "equip_refining",
   "version",
   "embed",
 ]);

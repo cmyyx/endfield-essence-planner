@@ -39,7 +39,7 @@ assert.deepEqual(
     "initUpdate",
     "initMedia",
     "initStrategy",
-    "initGearRefining",
+    "initEquipRefining",
   ],
   "app.main should keep the startup init order stable while enforcing module contracts"
 );

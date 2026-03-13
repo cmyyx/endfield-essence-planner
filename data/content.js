@@ -5,13 +5,13 @@ window.CONTENT = {
     nextVersionAt: "2026-04-16T00:00:00Z",
   },
   announcement: {
-    version: "1.1.0",
+    version: "1.1.1",
     title: "nav.announcement",
-    date: "2026-03-12",
+    date: "2026-03-13",
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
     items: [
-      "装备数据/淤积点已更新;新增装备/武器均缺失图标是预期的,因为我没有图标来源渠道,先前的渠道尚未更新,如果想提供图片可以通过任意方式向我联系(包括但不限于GitHub/QQ)",
+      "装备数据/淤积点已更新;武器/装备图片均已更新,如有错误请反馈;图片格式均为avif,绝大多数设备(浏览器)均已支持此格式,如果有大量的反馈无法正常显示那么会考虑换为webp",
       "加了个FAQ(常见问题)",
       "如果你对本站使用的背景感兴趣,[点此通过网盘下载随机图中的背景](https://pan.quark.cn/s/27540d6f3706),感谢你的喜欢!",
       "角色攻略界面绝赞开发中",
@@ -20,6 +20,12 @@ window.CONTENT = {
   changelog: {
     title: "nav.changelog",
     entries: [
+      {
+        date: "2026-03-13",
+        items: [
+          "图片更新",
+        ],
+      },
       {
         date: "2026-03-12",
         items: [

@@ -37,7 +37,7 @@
     return;
   }
 
-  if (!dungeons.length || !weapons.length || !gears.length) {
+  if (!dungeons.length || !weapons.length || !equips.length) {
     finishPreload();
     showBootError({
       title: "数据文件缺失",
@@ -45,8 +45,8 @@
       details: [
         `副本数据：${dungeons.length ? "已加载" : "缺失"}`,
         `武器数据：${weapons.length ? "已加载" : "缺失"}`,
-        `装备数据：${gears.length ? "已加载" : "缺失"}`,
-        "请确认 ./data/dungeons.js、./data/weapons.js 与 ./data/gears.js 可访问",
+        `装备数据：${equips.length ? "已加载" : "缺失"}`,
+        "请确认 ./data/dungeons.js、./data/weapons.js 与 ./data/equip.js 可访问",
       ],
       suggestions: ["检查 data 目录与发布路径", "强制刷新页面后重试"],
     });
@@ -279,18 +279,18 @@
     typeof appTemplates.planConfigControl === "string" && appTemplates.planConfigControl.trim()
       ? appTemplates.planConfigControl.trim()
       : "<div></div>";
-  const gearRefiningListTemplate =
-    typeof appTemplates.gearRefiningList === "string" && appTemplates.gearRefiningList.trim()
-      ? appTemplates.gearRefiningList.trim()
+  const equipRefiningListTemplate =
+    typeof appTemplates.equipRefiningList === "string" && appTemplates.equipRefiningList.trim()
+      ? appTemplates.equipRefiningList.trim()
       : "<div></div>";
-  const gearRefiningDetailTemplate =
-    typeof appTemplates.gearRefiningDetail === "string" && appTemplates.gearRefiningDetail.trim()
-      ? appTemplates.gearRefiningDetail.trim()
+  const equipRefiningDetailTemplate =
+    typeof appTemplates.equipRefiningDetail === "string" && appTemplates.equipRefiningDetail.trim()
+      ? appTemplates.equipRefiningDetail.trim()
       : "<div></div>";
-  const gearRefiningRecommendationTemplate =
-    typeof appTemplates.gearRefiningRecommendation === "string" &&
-    appTemplates.gearRefiningRecommendation.trim()
-      ? appTemplates.gearRefiningRecommendation.trim()
+  const equipRefiningRecommendationTemplate =
+    typeof appTemplates.equipRefiningRecommendation === "string" &&
+    appTemplates.equipRefiningRecommendation.trim()
+      ? appTemplates.equipRefiningRecommendation.trim()
       : "<div></div>";
 
   const planConfigControl = {
@@ -349,25 +349,25 @@
 </div>`,
   };
 
-  const gearRefiningList = {
+  const equipRefiningList = {
     props: {
       t: { type: Function, required: true },
       mobilePanel: { type: String, required: true },
       query: { type: String, required: true },
       groupedSets: { type: Array, required: true },
-      selectedGearName: { type: String, default: "" },
+      selectedEquipName: { type: String, default: "" },
       isSetCollapsed: { type: Function, required: true },
       toggleSetCollapsed: { type: Function, required: true },
-      selectGear: { type: Function, required: true },
-      hasGearImage: { type: Function, required: true },
-      gearImageSrc: { type: Function, required: true },
-      onGearImageError: { type: Function, required: true },
+      selectEquip: { type: Function, required: true },
+      hasEquipImage: { type: Function, required: true },
+      equipImageSrc: { type: Function, required: true },
+      onEquipImageError: { type: Function, required: true },
     },
     emits: ["update:query"],
-    template: gearRefiningListTemplate,
+    template: equipRefiningListTemplate,
   };
 
-  const gearRefiningRecommendation = {
+  const equipRefiningRecommendation = {
     props: {
       t: { type: Function, required: true },
       recommendation: { type: Object, required: true },
@@ -375,28 +375,28 @@
       hasMoreCandidates: { type: Boolean, required: true },
       expanded: { type: Boolean, required: true },
       toggleExpanded: { type: Function, required: true },
-      hasGearImage: { type: Function, required: true },
-      gearImageSrc: { type: Function, required: true },
-      onGearImageError: { type: Function, required: true },
+      hasEquipImage: { type: Function, required: true },
+      equipImageSrc: { type: Function, required: true },
+      onEquipImageError: { type: Function, required: true },
     },
-    template: gearRefiningRecommendationTemplate,
+    template: equipRefiningRecommendationTemplate,
   };
 
-  const gearRefiningDetail = {
+  const equipRefiningDetail = {
     props: {
       t: { type: Function, required: true },
       mobilePanel: { type: String, required: true },
-      selectedGear: { type: Object, default: null },
+      selectedEquip: { type: Object, default: null },
       recommendations: { type: Array, required: true },
       visibleRecommendationCandidates: { type: Function, required: true },
       hasMoreRecommendationCandidates: { type: Function, required: true },
       isRecommendationExpanded: { type: Function, required: true },
       toggleRecommendationExpanded: { type: Function, required: true },
-      hasGearImage: { type: Function, required: true },
-      gearImageSrc: { type: Function, required: true },
-      onGearImageError: { type: Function, required: true },
+      hasEquipImage: { type: Function, required: true },
+      equipImageSrc: { type: Function, required: true },
+      onEquipImageError: { type: Function, required: true },
     },
-    template: gearRefiningDetailTemplate,
+    template: equipRefiningDetailTemplate,
   };
 
   const app = createApp({
@@ -651,7 +651,7 @@
         "initUpdate",
         "initMedia",
         "initStrategy",
-        "initGearRefining",
+        "initEquipRefining",
       ];
 
       initExecutionOrder.forEach((name) => {
@@ -691,8 +691,8 @@
         if (view === "strategy") {
           return { view: "strategy", characterId, weaponNames, hasWeaponParam };
         }
-        if (view === "gear-refining") {
-          return { view: "gear-refining", weaponNames, hasWeaponParam };
+        if (view === "equip-refining") {
+          return { view: "equip-refining", weaponNames, hasWeaponParam };
         }
         if (view === "rerun-ranking") {
           return { view: "rerun-ranking" };
@@ -747,8 +747,8 @@
           if (id) return `/strategy/${encodeURIComponent(id)}`;
           return "/strategy";
         }
-        if (view === "gear-refining") {
-          return "/gear-refining";
+        if (view === "equip-refining") {
+          return "/equip-refining";
         }
         if (view === "rerun-ranking") {
           return "/rerun-ranking";
@@ -763,7 +763,7 @@
         "planner",
         "match",
         "strategy",
-        "gear-refining",
+        "equip-refining",
         "rerun-ranking",
       ]);
       const syncLegacyScrollbarMode = () => {
@@ -1155,10 +1155,10 @@
         currentView: state.currentView,
         setView: (view) => {
           if (
-            view === "gear-refining" &&
-            typeof state.markGearRefiningNavHintSeen === "function"
+            view === "equip-refining" &&
+            typeof state.markEquipRefiningNavHintSeen === "function"
           ) {
-            state.markGearRefiningNavHintSeen();
+            state.markEquipRefiningNavHintSeen();
           }
           if (
             view === "rerun-ranking" &&
@@ -1221,7 +1221,7 @@
         handleMarksImportFile: state.handleMarksImportFile,
         cancelMarksImport: state.cancelMarksImport,
         confirmMarksImport: state.confirmMarksImport,
-        showGearRefiningNavHintDot: state.showGearRefiningNavHintDot,
+        showEquipRefiningNavHintDot: state.showEquipRefiningNavHintDot,
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         togglePlanConfig: state.togglePlanConfig,
         openWeaponAttrDataModal: state.openWeaponAttrDataModal,
@@ -1332,25 +1332,25 @@
         matchSourceWeapon: state.matchSourceWeapon,
         matchResults: state.matchResults,
         selectMatchSource: state.selectMatchSource,
-        gearRefiningMobilePanel: state.gearRefiningMobilePanel,
-        isGearRefiningCompact: state.isGearRefiningCompact,
-        setGearRefiningMobilePanel: state.setGearRefiningMobilePanel,
-        gearRefiningQuery: state.gearRefiningQuery,
-        gearRefiningGearCount: state.gearRefiningGearCount,
-        isGearRefiningSetCollapsed: state.isGearRefiningSetCollapsed,
-        toggleGearRefiningSetCollapsed: state.toggleGearRefiningSetCollapsed,
+        equipRefiningMobilePanel: state.equipRefiningMobilePanel,
+        isEquipRefiningCompact: state.isEquipRefiningCompact,
+        setEquipRefiningMobilePanel: state.setEquipRefiningMobilePanel,
+        equipRefiningQuery: state.equipRefiningQuery,
+        equipRefiningEquipCount: state.equipRefiningEquipCount,
+        isEquipRefiningSetCollapsed: state.isEquipRefiningSetCollapsed,
+        toggleEquipRefiningSetCollapsed: state.toggleEquipRefiningSetCollapsed,
         isRecommendationExpanded: state.isRecommendationExpanded,
         toggleRecommendationExpanded: state.toggleRecommendationExpanded,
         hasMoreRecommendationCandidates: state.hasMoreRecommendationCandidates,
         visibleRecommendationCandidates: state.visibleRecommendationCandidates,
-        gearRefiningGroupedSets: state.gearRefiningGroupedSets,
-        selectedGearRefiningGearName: state.selectedGearRefiningGearName,
-        selectedGearRefiningGear: state.selectedGearRefiningGear,
-        selectGearRefiningGear: state.selectGearRefiningGear,
-        gearRefiningRecommendations: state.gearRefiningRecommendations,
-        gearRefiningGearImageSrc: state.gearRefiningGearImageSrc,
-        hasGearRefiningGearImage: state.hasGearRefiningGearImage,
-        handleGearRefiningGearImageError: state.handleGearRefiningGearImageError,
+        equipRefiningGroupedSets: state.equipRefiningGroupedSets,
+        selectedEquipRefiningEquipName: state.selectedEquipRefiningEquipName,
+        selectedEquipRefiningEquip: state.selectedEquipRefiningEquip,
+        selectEquipRefiningEquip: state.selectEquipRefiningEquip,
+        equipRefiningRecommendations: state.equipRefiningRecommendations,
+        equipRefiningEquipImageSrc: state.equipRefiningEquipImageSrc,
+        hasEquipRefiningEquipImage: state.hasEquipRefiningEquipImage,
+        handleEquipRefiningEquipImageError: state.handleEquipRefiningEquipImageError,
         hasImage: state.hasImage,
         weaponImageSrc: state.weaponImageSrc,
         weaponCharacters: state.weaponCharacters,
@@ -1490,9 +1490,9 @@
 
   app.component("PlanConfigControl", planConfigControl);
   app.component("MatchStatusLine", matchStatusLine);
-  app.component("GearRefiningList", gearRefiningList);
-  app.component("GearRefiningDetail", gearRefiningDetail);
-  app.component("GearRefiningRecommendation", gearRefiningRecommendation);
+  app.component("EquipRefiningList", equipRefiningList);
+  app.component("EquipRefiningDetail", equipRefiningDetail);
+  app.component("EquipRefiningRecommendation", equipRefiningRecommendation);
   app.directive("lazy-src", lazyImageDirective);
   app.mount("#app");
 })();

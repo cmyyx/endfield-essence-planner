@@ -39,7 +39,7 @@
         state.backgroundApiStorageKey,
         state.backgroundDisplayStorageKey,
         state.planConfigHintStorageKey,
-        state.gearRefiningNavHintStorageKey,
+        state.equipRefiningNavHintStorageKey,
         state.rerunRankingNavHintStorageKey,
       ].filter(Boolean);
       const unique = Array.from(new Set(keys));

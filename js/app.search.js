@@ -12,6 +12,10 @@
       if (b.rarity !== a.rarity) return b.rarity - a.rarity;
       return compareText(a.name, b.name);
     });
+    const weaponImageMap =
+      window.WEAPON_IMAGES && typeof window.WEAPON_IMAGES === "object"
+        ? window.WEAPON_IMAGES
+        : {};
     const weaponCharacterMap = new Map();
     const weaponImageSrcCache = new Map();
     const characterImageSrcCache = new Map();
@@ -21,7 +25,13 @@
       const chars = Array.isArray(weapon.chars) ? weapon.chars.filter(Boolean) : [];
       const uniqueChars = Array.from(new Set(chars));
       weaponCharacterMap.set(weapon.name, uniqueChars);
-      weaponImageSrcCache.set(weapon.name, encodeURI(`./image/${weapon.name}.png`));
+      const internalName = weaponImageMap[weapon.name];
+      if (internalName) {
+        weaponImageSrcCache.set(
+          weapon.name,
+          encodeURI(`./image/weapon/${internalName}.avif`)
+        );
+      }
       uniqueChars.forEach((name) => {
         if (!characterImageSrcCache.has(name)) {
           characterImageSrcCache.set(name, encodeURI(`./image/characters/${name}.png`));

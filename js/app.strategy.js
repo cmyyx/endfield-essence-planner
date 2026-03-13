@@ -119,7 +119,7 @@
       return state.characters.value.find((c) => c.id === state.selectedCharacterId.value);
     });
 
-    const normalizeGearRows = (rows) => {
+    const normalizeEquipRows = (rows) => {
       if (!Array.isArray(rows)) return [];
       return rows.map((row) => {
         const weapons = Array.isArray(row.weapons) ? row.weapons.filter(Boolean) : [];
@@ -249,7 +249,7 @@
     state.guideRows = computed(() => {
       const guide = state.currentGuide.value;
       if (!guide) return [];
-      return normalizeGearRows(guide.gearRows || []);
+      return normalizeEquipRows(guide.equipRows || []);
     });
 
     state.teamSlots = computed(() => {

@@ -5,42 +5,42 @@
                             </span>
                           </div>
                         </div>
-                        <div class="gear-row-main">
-                          <div class="gear-cell gear-weapon">
-                            <div class="gear-items">
-                              <div v-for="(weapon, wIdx) in row.weapons" :key="wIdx" class="gear-item">
+                        <div class="equip-row-main">
+                          <div class="equip-cell equip-weapon">
+                            <div class="equip-items">
+                              <div v-for="(weapon, wIdx) in row.weapons" :key="wIdx" class="equip-item">
                                 <div
-                                  class="gear-icon-frame"
+                                  class="equip-icon-frame"
                                   :class="weapon.rarity === 6 ? 'weapon-rarity-6' : weapon.rarity === 5 ? 'weapon-rarity-5' : weapon.rarity === 4 ? 'weapon-rarity-4' : ''"
                                 >
-                                  <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="gear-icon" alt="" />
+                                  <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="equip-icon" alt="" />
                                 </div>
-                                <div class="gear-text">
-                                  <div class="gear-name">{{ weapon.name }}</div>
-                                  <div class="gear-note" v-if="weapon.note">{{ weapon.note }}</div>
+                                <div class="equip-text">
+                                  <div class="equip-name">{{ weapon.name }}</div>
+                                  <div class="equip-note" v-if="weapon.note">{{ weapon.note }}</div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div v-for="(equip, eIdx) in row.equipment" :key="eIdx" class="gear-cell">
-                            <div v-if="equip" class="gear-item">
+                          <div v-for="(equip, eIdx) in row.equipment" :key="eIdx" class="equip-cell">
+                            <div v-if="equip" class="equip-item">
                               <div
-                                class="gear-icon-frame"
-                                :class="equip.rarity === 5 ? 'gear-rarity-5' : equip.rarity === 4 ? 'gear-rarity-4' : ''"
+                                class="equip-icon-frame"
+                                :class="equip.rarity === 5 ? 'equip-rarity-5' : equip.rarity === 4 ? 'equip-rarity-4' : ''"
                               >
-                                <img v-if="equip.icon" v-lazy-src="equip.icon" class="gear-icon" alt="" />
+                                <img v-if="equip.icon" v-lazy-src="equip.icon" class="equip-icon" alt="" />
                               </div>
-                              <div class="gear-text">
-                                <div class="gear-name">{{ equip.name }}</div>
-                                <div class="gear-note" v-if="equip.note">{{ equip.note }}</div>
+                              <div class="equip-text">
+                                <div class="equip-name">{{ equip.name }}</div>
+                                <div class="equip-note" v-if="equip.note">{{ equip.note }}</div>
                               </div>
                             </div>
-                            <div v-else class="gear-empty">-</div>
+                            <div v-else class="equip-empty">-</div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div class="gear-empty" v-else>{{ t("badge.item_3") }}</div>
+                    <div class="equip-empty" v-else>{{ t("badge.item_3") }}</div>
                   </div>
                 </div>
 
@@ -98,7 +98,7 @@
                                 <div v-for="(equip, eIdx) in (entry.equipment || [])" :key="eIdx" class="team-item">
                                   <div
                                     class="team-icon-frame"
-                                    :class="equip.rarity === 5 ? 'gear-rarity-5' : equip.rarity === 4 ? 'gear-rarity-4' : ''"
+                                    :class="equip.rarity === 5 ? 'equip-rarity-5' : equip.rarity === 4 ? 'equip-rarity-4' : ''"
                                   >
                                     <img v-if="equip.icon" v-lazy-src="equip.icon" class="team-icon" alt="" />
                                   </div>
@@ -425,52 +425,52 @@
               </section>
             </div>
           </div>
-          <div v-else key="gear-refining" class="view-shell planner-shell gear-refining-shell">
+          <div v-else key="equip-refining" class="view-shell planner-shell equip-refining-shell">
             <div class="mobile-tabs">
               <button
                 class="mobile-tab"
                 type="button"
-                :class="{ active: gearRefiningMobilePanel === 'gears' }"
-                @click="setGearRefiningMobilePanel('gears')"
+                :class="{ active: equipRefiningMobilePanel === 'equips' }"
+                @click="setEquipRefiningMobilePanel('equips')"
               >
-                {{ t("badge.gear_list") }} <span class="count">{{ gearRefiningGearCount }}</span>
+                {{ t("badge.equip_list") }} <span class="count">{{ equipRefiningEquipCount }}</span>
               </button>
               <button
                 class="mobile-tab"
                 type="button"
-                :class="{ active: gearRefiningMobilePanel === 'recommend' }"
-                @click="setGearRefiningMobilePanel('recommend')"
+                :class="{ active: equipRefiningMobilePanel === 'recommend' }"
+                @click="setEquipRefiningMobilePanel('recommend')"
               >
                 {{ t("badge.refining_recommendations") }}
-                <span class="count">{{ selectedGearRefiningGear ? gearRefiningRecommendations.length : 0 }}</span>
+                <span class="count">{{ selectedEquipRefiningEquip ? equipRefiningRecommendations.length : 0 }}</span>
               </button>
             </div>
-            <gear-refining-list
+            <equip-refining-list
               :t="t"
-              :mobile-panel="gearRefiningMobilePanel"
-              :query="gearRefiningQuery"
-              :grouped-sets="gearRefiningGroupedSets"
-              :selected-gear-name="selectedGearRefiningGearName"
-              :is-set-collapsed="isGearRefiningSetCollapsed"
-              :toggle-set-collapsed="toggleGearRefiningSetCollapsed"
-              :select-gear="selectGearRefiningGear"
-              :has-gear-image="hasGearRefiningGearImage"
-              :gear-image-src="gearRefiningGearImageSrc"
-              :on-gear-image-error="handleGearRefiningGearImageError"
-              @update:query="gearRefiningQuery = $event"
+              :mobile-panel="equipRefiningMobilePanel"
+              :query="equipRefiningQuery"
+              :grouped-sets="equipRefiningGroupedSets"
+              :selected-equip-name="selectedEquipRefiningEquipName"
+              :is-set-collapsed="isEquipRefiningSetCollapsed"
+              :toggle-set-collapsed="toggleEquipRefiningSetCollapsed"
+              :select-equip="selectEquipRefiningEquip"
+              :has-equip-image="hasEquipRefiningEquipImage"
+              :equip-image-src="equipRefiningEquipImageSrc"
+              :on-equip-image-error="handleEquipRefiningEquipImageError"
+              @update:query="equipRefiningQuery = $event"
             />
-            <gear-refining-detail
+            <equip-refining-detail
               :t="t"
-              :mobile-panel="gearRefiningMobilePanel"
-              :selected-gear="selectedGearRefiningGear"
-              :recommendations="gearRefiningRecommendations"
+              :mobile-panel="equipRefiningMobilePanel"
+              :selected-equip="selectedEquipRefiningEquip"
+              :recommendations="equipRefiningRecommendations"
               :visible-recommendation-candidates="visibleRecommendationCandidates"
               :has-more-recommendation-candidates="hasMoreRecommendationCandidates"
               :is-recommendation-expanded="isRecommendationExpanded"
               :toggle-recommendation-expanded="toggleRecommendationExpanded"
-              :has-gear-image="hasGearRefiningGearImage"
-              :gear-image-src="gearRefiningGearImageSrc"
-              :on-gear-image-error="handleGearRefiningGearImageError"
+              :has-equip-image="hasEquipRefiningEquipImage"
+              :equip-image-src="equipRefiningEquipImageSrc"
+              :on-equip-image-error="handleEquipRefiningEquipImageError"
             />
           </div>
         </transition>

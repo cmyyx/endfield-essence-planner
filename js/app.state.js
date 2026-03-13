@@ -54,9 +54,9 @@
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
     // 更新基质规划设置时递增该版本号，可让红点对所有用户重新显示一次。
     state.planConfigHintVersion = "5";
-    state.gearRefiningNavHintStorageKey = "planner-gear-refining-nav-hint:v1";
+    state.equipRefiningNavHintStorageKey = "planner-equip-refining-nav-hint:v1";
     // 更新装备精锻导航提示时递增该版本号，可让红点对所有用户重新显示一次。
-    state.gearRefiningNavHintVersion = "1";
+    state.equipRefiningNavHintVersion = "1";
     state.rerunRankingNavHintStorageKey = "planner-rerun-ranking-nav-hint:v1";
     // 更新复刻排行导航提示时递增该版本号，可让红点对所有用户重新显示一次。
     state.rerunRankingNavHintVersion = "1";
@@ -81,7 +81,7 @@
     state.currentView = ref("planner");
     state.mobilePanel = ref("weapons");
     state.matchMobilePanel = ref("source");
-    state.gearRefiningMobilePanel = ref("gears");
+    state.equipRefiningMobilePanel = ref("equips");
     state.showWeaponAttrs = ref(false);
     state.showWeaponOwnership = ref(false);
     state.showAttrHint = ref(false);
@@ -98,7 +98,7 @@
     state.marksImportPending = ref(null);
     state.marksImportConfirmCountdown = ref(0);
     state.showMarksImportConfirmModal = ref(false);
-    state.showGearRefiningNavHintDot = ref(false);
+    state.showEquipRefiningNavHintDot = ref(false);
     state.showRerunRankingNavHintDot = ref(false);
     state.recommendationConfig = ref({
       hideEssenceOwnedWeaponsInPlans: false,

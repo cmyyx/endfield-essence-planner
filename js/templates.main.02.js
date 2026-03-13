@@ -762,26 +762,26 @@
                   </div>
                   <div class="detail-section" v-if="currentGuide">
                     <h3>{{ t("guide.item_17") }}</h3>
-                    <div class="gear-table" v-if="guideRows.length">
-                      <div class="gear-row gear-row-head">
-                        <div class="gear-row-label"></div>
-                        <div class="gear-row-main">
-                          <div class="gear-cell gear-weapon">{{ t("guide.item_5") }}</div>
-                          <div class="gear-cell">{{ t("plan.item_19") }}</div>
-                          <div class="gear-cell">{{ t("plan.item_20") }}</div>
-                          <div class="gear-cell">{{ t("plan.item_21") }}</div>
-                          <div class="gear-cell">{{ t("plan.item_21") }}</div>
+                    <div class="equip-table" v-if="guideRows.length">
+                      <div class="equip-row equip-row-head">
+                        <div class="equip-row-label"></div>
+                        <div class="equip-row-main">
+                          <div class="equip-cell equip-weapon">{{ t("guide.item_5") }}</div>
+                          <div class="equip-cell">{{ t("plan.item_19") }}</div>
+                          <div class="equip-cell">{{ t("plan.item_20") }}</div>
+                          <div class="equip-cell">{{ t("plan.item_21") }}</div>
+                          <div class="equip-cell">{{ t("plan.item_21") }}</div>
                         </div>
                       </div>
-                      <div v-for="(row, idx) in guideRows" :key="idx" class="gear-row">
-                        <div class="gear-row-label">
-                          <div class="gear-tag-block">
+                      <div v-for="(row, idx) in guideRows" :key="idx" class="equip-row">
+                        <div class="equip-row-label">
+                          <div class="equip-tag-block">
                             <span
-                              class="gear-tag"
-                              :class="idx === 0 ? 'gear-tag-primary' : 'gear-tag-secondary'"
+                              class="equip-tag"
+                              :class="idx === 0 ? 'equip-tag-primary' : 'equip-tag-secondary'"
                             >
                               {{ idx === 0 ? t("plan.item_22") : t("plan.item_23") }}
                             </span>
-                            <span class="gear-tag-desc">
+                            <span class="equip-tag-desc">
 `);
 })();

@@ -55,7 +55,7 @@ const createState = () => ({
   backgroundApiStorageKey: "planner-bg-api:v1",
   backgroundDisplayStorageKey: "planner-bg-display:v1",
   planConfigHintStorageKey: "planner-plan-config-hint:v1",
-  gearRefiningNavHintStorageKey: "planner-gear-refining-nav-hint:v1",
+  equipRefiningNavHintStorageKey: "planner-equip-refining-nav-hint:v1",
   rerunRankingNavHintStorageKey: "planner-rerun-ranking-nav-hint:v1",
   recommendationConfig: createRef({
     hideEssenceOwnedWeaponsInPlans: false,

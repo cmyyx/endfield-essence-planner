@@ -490,15 +490,15 @@
     }
 
     try {
-      const storedGearRefiningNavHintVersion = localStorage.getItem(
-        state.gearRefiningNavHintStorageKey
+      const storedEquipRefiningNavHintVersion = localStorage.getItem(
+        state.equipRefiningNavHintStorageKey
       );
-      state.showGearRefiningNavHintDot.value =
-        storedGearRefiningNavHintVersion !== state.gearRefiningNavHintVersion;
+      state.showEquipRefiningNavHintDot.value =
+        storedEquipRefiningNavHintVersion !== state.equipRefiningNavHintVersion;
     } catch (error) {
-      state.showGearRefiningNavHintDot.value = true;
-      recoveryApi.reportStorageIssue("storage.read", state.gearRefiningNavHintStorageKey, error, {
-        scope: "restore-gear-refining-nav-hint",
+      state.showEquipRefiningNavHintDot.value = true;
+      recoveryApi.reportStorageIssue("storage.read", state.equipRefiningNavHintStorageKey, error, {
+        scope: "restore-equip-refining-nav-hint",
       });
     }
     try {

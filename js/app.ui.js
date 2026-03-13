@@ -9,7 +9,7 @@
     const showSecondaryMenu = state.showSecondaryMenu;
     const showPlanConfig = state.showPlanConfig;
     const showPlanConfigHintDot = state.showPlanConfigHintDot;
-    const showGearRefiningNavHintDot = state.showGearRefiningNavHintDot;
+    const showEquipRefiningNavHintDot = state.showEquipRefiningNavHintDot;
     const showRerunRankingNavHintDot = state.showRerunRankingNavHintDot;
     const isPortrait = state.isPortrait;
     const updateLangMenuPlacement = state.updateLangMenuPlacement;
@@ -714,17 +714,17 @@
       }
     };
 
-    const markGearRefiningNavHintSeen = () => {
-      if (!showGearRefiningNavHintDot.value) return;
-      showGearRefiningNavHintDot.value = false;
+    const markEquipRefiningNavHintSeen = () => {
+      if (!showEquipRefiningNavHintDot.value) return;
+      showEquipRefiningNavHintDot.value = false;
       try {
         localStorage.setItem(
-          state.gearRefiningNavHintStorageKey,
-          state.gearRefiningNavHintVersion
+          state.equipRefiningNavHintStorageKey,
+          state.equipRefiningNavHintVersion
         );
       } catch (error) {
-        reportStorageIssue("storage.write", state.gearRefiningNavHintStorageKey, error, {
-          scope: "ui.gear-refining-nav-hint-write",
+        reportStorageIssue("storage.write", state.equipRefiningNavHintStorageKey, error, {
+          scope: "ui.equip-refining-nav-hint-write",
         });
       }
     };
@@ -893,7 +893,7 @@
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
-    state.markGearRefiningNavHintSeen = markGearRefiningNavHintSeen;
+    state.markEquipRefiningNavHintSeen = markEquipRefiningNavHintSeen;
     state.markRerunRankingNavHintSeen = markRerunRankingNavHintSeen;
     state.dismissRuntimeWarning = dismissRuntimeWarning;
     state.ignoreRuntimeWarnings = ignoreRuntimeWarnings;

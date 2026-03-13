@@ -43,8 +43,8 @@ assert.match(
 
 assert.match(
   templateSource,
-  /@click="setView\('gear-refining'\)"/,
-  "gear-refining nav entry should remain available after ad removal"
+  /@click="setView\('equip-refining'\)"/,
+  "equip-refining nav entry should remain available after ad removal"
 );
 
 assert.match(

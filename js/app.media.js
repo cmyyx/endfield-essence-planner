@@ -8,12 +8,18 @@
       if (path.startsWith("./") || path.startsWith("../")) return encodeURI(path);
       return encodeURI(`./${path.replace(/^\/+/, "")}`);
     };
-    const hasImage = (weapon) => weaponImages.has(weapon.name);
+    const weaponImageMap =
+      window.WEAPON_IMAGES && typeof window.WEAPON_IMAGES === "object"
+        ? window.WEAPON_IMAGES
+        : {};
+    const hasImage = (weapon) => Boolean(weapon && weaponImageMap[weapon.name]);
     const weaponImageSrc = (weapon) => {
       if (!weapon) return "";
       const cached = state.weaponImageSrcCache.get(weapon.name);
       if (cached) return cached;
-      const src = encodeURI(`./image/${weapon.name}.png`);
+      const internalName = weaponImageMap[weapon.name];
+      if (!internalName) return "";
+      const src = encodeURI(`./image/weapon/${internalName}.avif`);
       state.weaponImageSrcCache.set(weapon.name, src);
       return src;
     };

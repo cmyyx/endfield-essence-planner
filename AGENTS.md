@@ -37,7 +37,7 @@
   - 不刷新重试：`window.__startBootstrapEntry({ fromRetry: true })`。
 - `js/app.js` 继续加载模块链（`window.__APP_SCRIPT_CHAIN` 或默认清单）。
 - `js/app.main.js` 负责 `createApp(...).mount("#app")`，并在依赖/数据缺失时走错误页。
-- 模板分片文件：`js/templates.plan-config.js`、`js/templates.gear-refining.js`、`js/templates.main.01.js`、`js/templates.main.02.js`、`js/templates.main.03.js`、`js/templates.main.04.js`（单文件尽量 < 1000 行）。
+- 模板分片文件：`js/templates.plan-config.js`、`js/templates.equip-refining.js`、`js/templates.main.01.js`、`js/templates.main.02.js`、`js/templates.main.03.js`、`js/templates.main.04.js`（单文件尽量 < 1000 行）。
 
 ## 4.1 可选资源（Optional）接入规范
 - 可选资源统一在 `js/bootstrap.entry.js` 的 `optionalScriptConfigs` 中声明。
@@ -103,7 +103,7 @@
   - `node --check js/app.ui.js`
   - `node --check scripts/gen-version.mjs`
   - `node --check js/templates.plan-config.js`
-  - `node --check js/templates.gear-refining.js`
+  - `node --check js/templates.equip-refining.js`
   - `node --check js/templates.main.01.js`
   - `node --check js/templates.main.02.js`
   - `node --check js/templates.main.03.js`

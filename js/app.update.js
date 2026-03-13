@@ -466,7 +466,7 @@
       latestVersionInfo = info;
       state.updateLatestVersionText.value =
         (latestVersionInfo && latestVersionInfo.display) ||
-        (typeof state.t === "function" ? state.t("gear_refining.unknown") : "unknown");
+        (typeof state.t === "function" ? state.t("equip_refining.unknown") : "unknown");
       state.updateLatestPublishedAt.value = latestVersionInfo
         ? formatPublishedAtLocal(latestVersionInfo.publishedAt)
         : "";

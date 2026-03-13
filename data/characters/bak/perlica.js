@@ -56,16 +56,16 @@
       { name: "企划", description: "会客室线索搜集速度 +10%" }
     ],
     guide: {
-      gearRows: [
+      equipRows: [
         {
           weapons: [
             { name: "典范", icon: "image/典范.png" }
           ],
           equipment: [
-            { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-            { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-            { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-            { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+            { name: "轻超域护板", icon: "image/equip/item_equip_t4_suit_poise01_body_01.avif", rarity: 5 },
+            { name: "轻超域护手", icon: "image/equip/item_equip_t4_suit_poise01_hand_01.avif", rarity: 5 },
+            { name: "轻超域分析环", icon: "image/equip/item_equip_t4_suit_poise01_edc_01.avif", rarity: 5 },
+            { name: "轻超域稳定盘", icon: "image/equip/item_equip_t4_suit_poise01_edc_02.avif", rarity: 5 }
           ]
         },
         {
@@ -73,10 +73,6 @@
             { name: "爆破单元", icon: "image/爆破单元.png" }
           ],
           equipment: [
-            { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-            { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-            { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-            { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
           ]
         }
       ],
@@ -93,10 +89,10 @@
                 { name: "热熔切割器", icon: "image/热熔切割器.png" }
               ],
               equipment: [
-                { name: "拓荒护甲", icon: "image/gear/5/拓荒护甲.png", rarity: 5 },
-                { name: "拓荒耐蚀手套", icon: "image/gear/5/拓荒耐蚀手套.png", rarity: 5 },
-                { name: "拓荒通信器", icon: "image/gear/5/拓荒通信器.png", rarity: 5 },
-                { name: "拓荒增量供氧栓", icon: "image/gear/5/拓荒增量供氧栓.png", rarity: 5 }
+                { name: "拓荒护甲", icon: "image/equip/item_equip_t4_suit_atb01_body_01.avif", rarity: 5 },
+                { name: "拓荒耐蚀手套", icon: "image/equip/item_equip_t4_suit_atb01_hand_01.avif", rarity: 5 },
+                { name: "拓荒通信器", icon: "image/equip/item_equip_t4_suit_atb01_edc_01.avif", rarity: 5 },
+                { name: "拓荒增量供氧栓", icon: "image/equip/item_equip_t4_suit_atb01_edc_04.avif", rarity: 5 }
               ]
             },
             {
@@ -106,10 +102,6 @@
                 { name: "大雷斑", icon: "image/大雷斑.png" }
               ],
               equipment: [
-                { name: "矿场防护服·壹型", icon: "image/gear/4/矿场防护服·壹型.png", rarity: 4 },
-                { name: "矿场护手·壹型", icon: "image/gear/4/矿场护手·壹型.png", rarity: 4 },
-                { name: "矿场联络仪·壹型", icon: "image/gear/4/矿场联络仪·壹型.png", rarity: 4 },
-                { name: "矿场传动轮·壹型", icon: "image/gear/4/矿场传动轮·壹型.png", rarity: 4 }
               ]
             }
           ]
@@ -122,10 +114,10 @@
                 { name: "作品：蚀迹", icon: "image/作品：蚀迹.png" }
               ],
               equipment: [
-                { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+                { name: "轻超域护板", icon: "image/equip/item_equip_t4_suit_poise01_body_01.avif", rarity: 5 },
+                { name: "轻超域护手", icon: "image/equip/item_equip_t4_suit_poise01_hand_01.avif", rarity: 5 },
+                { name: "轻超域分析环", icon: "image/equip/item_equip_t4_suit_poise01_edc_01.avif", rarity: 5 },
+                { name: "轻超域稳定盘", icon: "image/equip/item_equip_t4_suit_poise01_edc_02.avif", rarity: 5 }
               ]
             },
             {
@@ -135,10 +127,6 @@
                 { name: "白夜新星", icon: "image/白夜新星.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
               ]
             }
           ]
@@ -151,10 +139,10 @@
                 { name: "宏愿", icon: "image/宏愿.png" }
               ],
               equipment: [
-                { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+                { name: "轻超域护板", icon: "image/equip/item_equip_t4_suit_poise01_body_01.avif", rarity: 5 },
+                { name: "轻超域护手", icon: "image/equip/item_equip_t4_suit_poise01_hand_01.avif", rarity: 5 },
+                { name: "轻超域分析环", icon: "image/equip/item_equip_t4_suit_poise01_edc_01.avif", rarity: 5 },
+                { name: "轻超域稳定盘", icon: "image/equip/item_equip_t4_suit_poise01_edc_02.avif", rarity: 5 }
               ]
             },
             {
@@ -164,10 +152,6 @@
                 { name: "古渠", icon: "image/古渠.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
               ]
             }
           ]
@@ -180,10 +164,10 @@
                 { name: "典范", icon: "image/典范.png" }
               ],
               equipment: [
-                { name: "轻超域护板", icon: "image/gear/5/轻超域护板.png", rarity: 5 },
-                { name: "轻超域护手", icon: "image/gear/5/轻超域护手.png", rarity: 5 },
-                { name: "轻超域分析环", icon: "image/gear/5/轻超域分析环.png", rarity: 5 },
-                { name: "轻超域稳定盘", icon: "image/gear/5/轻超域稳定盘.png", rarity: 5 }
+                { name: "轻超域护板", icon: "image/equip/item_equip_t4_suit_poise01_body_01.avif", rarity: 5 },
+                { name: "轻超域护手", icon: "image/equip/item_equip_t4_suit_poise01_hand_01.avif", rarity: 5 },
+                { name: "轻超域分析环", icon: "image/equip/item_equip_t4_suit_poise01_edc_01.avif", rarity: 5 },
+                { name: "轻超域稳定盘", icon: "image/equip/item_equip_t4_suit_poise01_edc_02.avif", rarity: 5 }
               ]
             },
             {
@@ -193,10 +177,6 @@
                 { name: "爆破单元", icon: "image/爆破单元.png" }
               ],
               equipment: [
-                { name: "阿伯莉轻甲", icon: "image/gear/4/阿伯莉轻甲.png", rarity: 4 },
-                { name: "阿伯莉手甲", icon: "image/gear/4/阿伯莉手甲.png", rarity: 4 },
-                { name: "阿伯莉侦听芯片", icon: "image/gear/4/阿伯莉侦听芯片.png", rarity: 4 },
-                { name: "阿伯莉传感芯片", icon: "image/gear/4/阿伯莉传感芯片.png", rarity: 4 }
               ]
             }
           ]
