@@ -148,7 +148,8 @@ window.I18N["zh-TW"] = {
       "长柄武器": "長柄武器",
       "施术单元": "施術單元",
       "手铳": "手銃",
-      "示例类型": "示例類型"
+      "示例类型": "示例類型",
+      "自定义": "自訂"
     },
     "dungeon": {
       "四号谷地": "四號谷地",
@@ -363,7 +364,7 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "error.optional_feature_load_failed": "可選功能載入失敗",
   "error.runtime_warning_history": "錯誤記錄",
   "error.view_runtime_warning_details": "查看錯誤詳情",
-  "warning.runtime_warning_history_hint": "偵測到執行時異常，點擊查看詳情。"
+  "warning.runtime_warning_history_hint": "偵測到執行時異常，點擊查看詳情。",
   "error.this_language_is_ai_translated_and_may_be_inaccurate_if_": "目前語言內容由 AI 翻譯，可能存在不準確。如發現錯誤，請前往 GitHub 回報。",
   "filter.attribute_filters_follow_also_apply_to_weapon_list": "屬性篩選受「套用到武器列表」影響",
   "filter.owned_weapon_priority_strategy": "已擁有武器優先策略",

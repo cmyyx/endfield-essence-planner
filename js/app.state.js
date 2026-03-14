@@ -8,6 +8,7 @@
     state.matchQuery = ref("");
     state.selectedNames = ref([]);
     state.matchSourceName = ref("");
+    state.selectedCharacterId = ref(null);
     state.schemeBaseSelections = ref({});
     state.weaponMarks = ref({});
     state.weaponAttrOverrides = ref({});

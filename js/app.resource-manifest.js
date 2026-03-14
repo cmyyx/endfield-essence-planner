@@ -34,6 +34,7 @@
         },
       "./js/analytics.bootstrap.js": {
         featureKey: "analytics",
+        timeoutMs: 12000,
         retryDelayMs: 1200,
         maxRetries: 1,
       },
