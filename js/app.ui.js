@@ -835,6 +835,29 @@
       }
     };
 
+    const planConfigSectionCollapsed =
+      state.planConfigSectionCollapsed || ref({});
+    const planConfigSectionManuallySet =
+      state.planConfigSectionManuallySet || ref(false);
+    const isPlanConfigSectionCollapsed = (key) => {
+      const name = String(key || "");
+      if (!name) return true;
+      if (!planConfigSectionManuallySet.value) return true;
+      const map = planConfigSectionCollapsed.value || {};
+      return map[name] !== false;
+    };
+    const togglePlanConfigSectionCollapsed = (key) => {
+      const name = String(key || "");
+      if (!name) return;
+      const current = isPlanConfigSectionCollapsed(name);
+      const next = { ...(planConfigSectionCollapsed.value || {}) };
+      next[name] = !current;
+      planConfigSectionCollapsed.value = next;
+      if (!planConfigSectionManuallySet.value) {
+        planConfigSectionManuallySet.value = true;
+      }
+    };
+
     const handleDocClick = (event) => {
       if (!event || !event.target || !event.target.closest) {
         showSecondaryMenu.value = false;
@@ -977,6 +1000,8 @@
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
+    state.isPlanConfigSectionCollapsed = isPlanConfigSectionCollapsed;
+    state.togglePlanConfigSectionCollapsed = togglePlanConfigSectionCollapsed;
     state.markEquipRefiningNavHintSeen = markEquipRefiningNavHintSeen;
     state.markRerunRankingNavHintSeen = markRerunRankingNavHintSeen;
     state.dismissRuntimeWarning = dismissRuntimeWarning;

@@ -11,6 +11,16 @@
     state.schemeBaseSelections = ref({});
     state.weaponMarks = ref({});
     state.weaponAttrOverrides = ref({});
+    state.customWeapons = ref([]);
+    state.customWeaponDraft = ref({
+      name: "",
+      rarity: 6,
+      type: "自定义",
+      s1: "",
+      s2: "",
+      s3: "",
+    });
+    state.customWeaponError = ref(null);
     state.showAbout = ref(false);
     state.showFaq = ref(false);
     state.showSecondaryMenu = ref(false);
@@ -43,6 +53,7 @@
     state.uiStateStorageKey = "planner-ui-state:v1";
     state.attrHintStorageKey = "planner-attr-hint:v1";
     state.weaponAttrOverridesStorageKey = "weapon-attr-overrides:v1";
+    state.customWeaponsStorageKey = "planner-custom-weapons:v1";
     state.noticeSkipKey = "announcement:skip";
     state.legacyNoticePrefix = "announcement:skip:";
     state.perfModeStorageKey = "planner-perf-mode:v1";
@@ -53,7 +64,7 @@
     state.backgroundDisplayStorageKey = "planner-bg-display:v1";
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
     // 更新基质规划设置时递增该版本号，可让红点对所有用户重新显示一次。
-    state.planConfigHintVersion = "5";
+    state.planConfigHintVersion = "6";
     state.equipRefiningNavHintStorageKey = "planner-equip-refining-nav-hint:v1";
     // 更新装备精锻导航提示时递增该版本号，可让红点对所有用户重新显示一次。
     state.equipRefiningNavHintVersion = "1";
@@ -91,6 +102,8 @@
     state.filterPanelManuallySet = ref(false);
     state.showAllSchemes = ref(false);
     state.showPlanConfig = ref(false);
+    state.planConfigSectionCollapsed = ref({});
+    state.planConfigSectionManuallySet = ref(false);
     state.showWeaponAttrDataModal = ref(false);
     state.showPlanConfigHintDot = ref(false);
     state.marksImportError = ref("");

@@ -35,6 +35,16 @@
     };
     const weaponAttrOverridesRef = ensureStateRef("weaponAttrOverrides", {});
     const showWeaponAttrDataModalRef = ensureStateRef("showWeaponAttrDataModal", false);
+    const customWeaponsRef = ensureStateRef("customWeapons", []);
+    const customWeaponDraftRef = ensureStateRef("customWeaponDraft", {
+      name: "",
+      rarity: 6,
+      type: "自定义",
+      s1: "",
+      s2: "",
+      s3: "",
+    });
+    const customWeaponErrorRef = ensureStateRef("customWeaponError", null);
 
     const uniqueSorted = (items, sorter) => {
       const values = Array.from(new Set(items.filter(Boolean)));
@@ -60,6 +70,69 @@
         if (normalized) s3AllowedSet.add(normalized);
       });
     });
+
+    const CUSTOM_WEAPON_DEFAULT_TYPE = "自定义";
+    const customWeaponsStorageKey = state.customWeaponsStorageKey || "planner-custom-weapons:v1";
+    const setCustomWeaponError = (key, params, fallback) => {
+      customWeaponErrorRef.value = {
+        key: String(key || ""),
+        params: params || null,
+        fallback: fallback || "",
+      };
+    };
+    const normalizeCustomWeaponName = (value) => String(value || "").trim();
+    const normalizeCustomWeaponType = (value) => String(value || "").trim();
+    const normalizeCustomWeaponRarity = (value) => {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed) && (parsed === 4 || parsed === 5 || parsed === 6)) {
+        return parsed;
+      }
+      return 6;
+    };
+    const normalizeCustomWeaponImage = (value) => {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      if (/^data:image\//i.test(raw)) return raw;
+      if (/^https?:\/\//i.test(raw)) return raw;
+      return "";
+    };
+    const sanitizeCustomWeaponEntry = (entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const name = normalizeCustomWeaponName(entry.name);
+      if (!name) return null;
+      if (weaponMap.has(name)) return null;
+      const s1 = normalizeAttrValue(entry.s1);
+      const s2 = normalizeAttrValue(entry.s2);
+      const s3 = normalizeAttrValue(entry.s3);
+      if (!s1AllowedSet.has(s1) || !s2AllowedSet.has(s2) || !s3AllowedSet.has(s3)) {
+        return null;
+      }
+      const rarity = normalizeCustomWeaponRarity(entry.rarity);
+      const type = normalizeCustomWeaponType(entry.type) || CUSTOM_WEAPON_DEFAULT_TYPE;
+      return {
+        name,
+        short: "",
+        chars: [],
+        rarity,
+        type,
+        s1,
+        s2,
+        s3,
+        isCustom: true,
+      };
+    };
+    const sanitizeCustomWeapons = (raw) => {
+      const source = Array.isArray(raw) ? raw : [];
+      const seen = new Set();
+      const cleaned = [];
+      source.forEach((entry) => {
+        const normalized = sanitizeCustomWeaponEntry(entry);
+        if (!normalized || seen.has(normalized.name)) return;
+        seen.add(normalized.name);
+        cleaned.push(normalized);
+      });
+      return cleaned;
+    };
 
     const sanitizeWeaponAttrOverrides = (raw) => {
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
@@ -138,6 +211,113 @@
     const getWeaponNote = (name) => getWeaponMark(name).note || "";
 
     weaponAttrOverridesRef.value = sanitizeWeaponAttrOverrides(weaponAttrOverridesRef.value);
+    const defaultCustomWeaponDraft = () => ({
+      name: "",
+      rarity: 6,
+      type: CUSTOM_WEAPON_DEFAULT_TYPE,
+      s1: "",
+      s2: "",
+      s3: "",
+    });
+
+    const restoreCustomWeapons = () => {
+      if (typeof localStorage === "undefined") return;
+      try {
+        const stored = localStorage.getItem(customWeaponsStorageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          customWeaponsRef.value = sanitizeCustomWeapons(parsed);
+        }
+      } catch (error) {
+        reportStorageIssue("storage.read", customWeaponsStorageKey, error, {
+          scope: "custom-weapons-restore",
+        });
+      }
+    };
+    restoreCustomWeapons();
+    customWeaponsRef.value = sanitizeCustomWeapons(customWeaponsRef.value);
+    if (!customWeaponDraftRef.value || typeof customWeaponDraftRef.value !== "object") {
+      customWeaponDraftRef.value = defaultCustomWeaponDraft();
+    }
+
+    const persistCustomWeapons = (value) => {
+      if (typeof localStorage === "undefined") return;
+      try {
+        const cleaned = sanitizeCustomWeapons(value);
+        if (!cleaned.length) {
+          localStorage.removeItem(customWeaponsStorageKey);
+        } else {
+          localStorage.setItem(customWeaponsStorageKey, JSON.stringify(cleaned));
+        }
+      } catch (error) {
+        setCustomWeaponError(
+          "plan_config.custom_weapon_storage_failed",
+          null,
+          "Failed to save custom weapons"
+        );
+        reportStorageIssue("storage.write", customWeaponsStorageKey, error, {
+          scope: "custom-weapons-persist",
+        });
+      }
+    };
+
+    const resetCustomWeaponDraft = () => {
+      customWeaponDraftRef.value = defaultCustomWeaponDraft();
+    };
+
+    const addCustomWeapon = () => {
+      const draft = customWeaponDraftRef.value || {};
+      const name = normalizeCustomWeaponName(draft.name);
+      if (!name) {
+        setCustomWeaponError(
+          "plan_config.custom_weapon_required",
+          null,
+          "Please fill in name and attributes."
+        );
+        return;
+      }
+      if (weaponMap.has(name) || customWeaponsRef.value.some((weapon) => weapon.name === name)) {
+        setCustomWeaponError(
+          "plan_config.custom_weapon_duplicate",
+          { name },
+          `Name already exists: ${name}`
+        );
+        return;
+      }
+      const entry = sanitizeCustomWeaponEntry({
+        ...draft,
+        name,
+        type: normalizeCustomWeaponType(draft.type) || CUSTOM_WEAPON_DEFAULT_TYPE,
+        rarity: draft.rarity,
+      });
+      if (!entry) {
+        setCustomWeaponError(
+          "plan_config.custom_weapon_required",
+          null,
+          "Please fill in name and attributes."
+        );
+        return;
+      }
+      customWeaponsRef.value = [...customWeaponsRef.value, entry];
+      customWeaponErrorRef.value = null;
+      resetCustomWeaponDraft();
+    };
+
+    const removeCustomWeapon = (name) => {
+      const normalized = normalizeCustomWeaponName(name);
+      if (!normalized) return;
+      customWeaponsRef.value = customWeaponsRef.value.filter((weapon) => weapon.name !== normalized);
+      const selected = Array.isArray(state.selectedNames.value) ? state.selectedNames.value : [];
+      if (selected.includes(normalized)) {
+        state.selectedNames.value = selected.filter((item) => item !== normalized);
+      }
+      const marks = state.weaponMarks.value || {};
+      if (Object.prototype.hasOwnProperty.call(marks, normalized)) {
+        const next = { ...marks };
+        delete next[normalized];
+        state.weaponMarks.value = next;
+      }
+    };
 
     const setWeaponAttrOverride = (weaponName, field, nextValue) => {
       if (!weaponName || ATTR_KEYS.indexOf(field) === -1) return;
@@ -212,9 +392,13 @@
       a.localeCompare(b, "zh-Hans-CN")
     );
 
-    const catalogWeapons = computed(() =>
-      weapons.map((weapon) => resolveWeaponAttrs(weapon)).filter(Boolean)
-    );
+    const catalogWeapons = computed(() => {
+      const base = weapons.map((weapon) => resolveWeaponAttrs(weapon)).filter(Boolean);
+      const custom = Array.isArray(customWeaponsRef.value)
+        ? customWeaponsRef.value.map((weapon) => resolveWeaponAttrs(weapon)).filter(Boolean)
+        : [];
+      return base.concat(custom);
+    });
 
     const catalogWeaponMap = computed(() => {
       const map = new Map();
@@ -569,7 +753,11 @@
       const list = Array.isArray(state.baseSortedWeapons) && state.baseSortedWeapons.length
         ? state.baseSortedWeapons
         : weapons;
-      return list.map((weapon) => resolveWeaponAttrs(weapon)).filter(Boolean);
+      const custom = Array.isArray(customWeaponsRef.value) ? customWeaponsRef.value : [];
+      return custom
+        .concat(list)
+        .map((weapon) => resolveWeaponAttrs(weapon))
+        .filter(Boolean);
     };
 
     const buildFilterOptionEntry = (group, value, queryMeta, searchIndex, config) => {
@@ -771,16 +959,21 @@
     };
 
     const partitionWeaponsByUpActive = (rows, activeByWeapon) => {
+      const customRows = [];
       const upActiveRows = [];
       const fallbackRows = [];
       rows.forEach((weapon) => {
+        if (weapon && weapon.isCustom) {
+          customRows.push(weapon);
+          return;
+        }
         if (weapon && activeByWeapon[weapon.name]) {
           upActiveRows.push(weapon);
           return;
         }
         fallbackRows.push(weapon);
       });
-      return upActiveRows.concat(fallbackRows);
+      return customRows.concat(upActiveRows, fallbackRows);
     };
 
     const isWeaponUpActive = (name) => {
@@ -1019,6 +1212,28 @@
       },
       { deep: true }
     );
+    watch(
+      customWeaponsRef,
+      (value) => {
+        const cleaned = sanitizeCustomWeapons(value);
+        const same = JSON.stringify(cleaned) === JSON.stringify(value || []);
+        if (!same) {
+          customWeaponsRef.value = cleaned;
+          return;
+        }
+        persistCustomWeapons(cleaned);
+      },
+      { deep: true }
+    );
+    watch(
+      customWeaponDraftRef,
+      () => {
+        if (customWeaponErrorRef.value) {
+          customWeaponErrorRef.value = null;
+        }
+      },
+      { deep: true }
+    );
 
     let previousSelectedNameSet = new Set(
       Array.isArray(state.selectedNames.value) ? state.selectedNames.value : []
@@ -1063,6 +1278,12 @@
     state.weaponAttrS1Options = weaponAttrS1Options;
     state.weaponAttrS2Options = weaponAttrS2Options;
     state.weaponAttrS3Options = weaponAttrS3Options;
+    state.customWeapons = customWeaponsRef;
+    state.customWeaponDraft = customWeaponDraftRef;
+    state.customWeaponError = customWeaponErrorRef;
+    state.addCustomWeapon = addCustomWeapon;
+    state.removeCustomWeapon = removeCustomWeapon;
+    state.resetCustomWeaponDraft = resetCustomWeaponDraft;
     state.getCatalogWeapons = () => catalogWeapons.value.slice();
     state.getCatalogWeaponByName = getCatalogWeaponByName;
     state.weaponAttrIssueRows = previewWeaponRows;

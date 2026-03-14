@@ -231,6 +231,9 @@
                         <span class="rarity" :style="rarityTextStyle(weapon.rarity)">
                           {{ weapon.rarity }}★
                         </span>
+                        <span v-if="weapon.isCustom" class="badge custom-weapon-badge">
+                          {{ t("badge.custom_weapon") }}
+                        </span>
                         <span class="badge warn">{{ t("plan.conflict") }}</span>
                         <span v-if="weapon.short" class="weapon-short">
                           {{ tTerm("short", weapon.short) }}
@@ -354,6 +357,9 @@
                     </span>
                     <span class="rarity" :style="rarityTextStyle(weapon.rarity)">
                       {{ weapon.rarity }}★
+                    </span>
+                    <span v-if="weapon.isCustom" class="badge custom-weapon-badge">
+                      {{ t("badge.custom_weapon") }}
                     </span>
                     <span v-if="weapon.isSelected" class="badge">{{ t("nav.selected") }}</span>
                     <span v-if="weapon.isUnowned" class="badge muted">{{ t("nav.not_owned") }}</span>

@@ -312,6 +312,29 @@
       tOwnershipPriorityModeOptions: { type: Array, required: true },
       tStrictPriorityOrderOptions: { type: Array, required: true },
       tTerm: { type: Function, required: true },
+      weaponAttrS1Options: { type: Array, required: true },
+      weaponAttrS2Options: { type: Array, required: true },
+      weaponAttrS3Options: { type: Array, required: true },
+      customWeapons: { type: Array, default: () => [] },
+      customWeaponDraft: {
+        type: Object,
+        default: () => ({
+          name: "",
+          rarity: 6,
+          type: "自定义",
+          s1: "",
+          s2: "",
+          s3: "",
+        }),
+      },
+      customWeaponError: { type: [String, Object], default: null },
+      addCustomWeapon: { type: Function, required: true },
+      removeCustomWeapon: { type: Function, required: true },
+      resetCustomWeaponDraft: { type: Function, required: true },
+      isPlanConfigSectionCollapsed: { type: Function, required: true },
+      togglePlanConfigSectionCollapsed: { type: Function, required: true },
+      hasPreviewWeapons: { type: Boolean, required: true },
+      openWeaponAttrDataModal: { type: Function, required: true },
     },
     emits: ["toggle"],
     methods: {
@@ -320,6 +343,19 @@
         if (input && typeof input.click === "function") {
           input.click();
         }
+      },
+      resolveCustomWeaponError(error) {
+        if (!error) return "";
+        if (typeof error === "string") return error;
+        const key = error.key || "";
+        const params = error.params || null;
+        if (key && typeof this.t === "function") {
+          const resolved = this.t(key, params);
+          if (resolved && resolved !== key) {
+            return resolved;
+          }
+        }
+        return error.fallback || String(key || "");
       },
     },
     template: planConfigTemplate,
@@ -1390,6 +1426,8 @@
         showEquipRefiningNavHintDot: state.showEquipRefiningNavHintDot,
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         togglePlanConfig: state.togglePlanConfig,
+        isPlanConfigSectionCollapsed: state.isPlanConfigSectionCollapsed,
+        togglePlanConfigSectionCollapsed: state.togglePlanConfigSectionCollapsed,
         openWeaponAttrDataModal: state.openWeaponAttrDataModal,
         openWeaponDataIntegrityDetails: state.openWeaponDataIntegrityDetails,
         closeWeaponAttrDataModal: state.closeWeaponAttrDataModal,
@@ -1402,6 +1440,12 @@
         weaponAttrS1Options: state.weaponAttrS1Options,
         weaponAttrS2Options: state.weaponAttrS2Options,
         weaponAttrS3Options: state.weaponAttrS3Options,
+        customWeapons: state.customWeapons,
+        customWeaponDraft: state.customWeaponDraft,
+        customWeaponError: state.customWeaponError,
+        addCustomWeapon: state.addCustomWeapon,
+        removeCustomWeapon: state.removeCustomWeapon,
+        resetCustomWeaponDraft: state.resetCustomWeaponDraft,
         setWeaponAttrOverride: state.setWeaponAttrOverride,
         clearWeaponAttrOverride: state.clearWeaponAttrOverride,
         getWeaponAttrEditorValue: state.getWeaponAttrEditorValue,

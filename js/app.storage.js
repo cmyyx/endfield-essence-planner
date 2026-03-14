@@ -188,6 +188,20 @@
         : fallbackTriggerJsonDownload;
     const resolveText = (key, params, fallback) =>
       typeof state.t === "function" ? state.t(key, params) : fallback;
+    const pushInfoToast = (titleKey, summaryKey, fallbackTitle, fallbackSummary, signature) => {
+      if (typeof state.pushToastNotice !== "function") return;
+      const title = resolveText(titleKey, null, fallbackTitle);
+      const summary = resolveText(summaryKey, null, fallbackSummary);
+      state.pushToastNotice({
+        title,
+        summary,
+        tone: "info",
+        icon: "i",
+        durationMs: 6000,
+        signature: signature || "",
+        ariaLabel: title,
+      });
+    };
     const buildExportStamp = () =>
       new Date().toISOString().replace(/[^\d]/g, "").slice(0, 14) || String(Date.now());
     const readVersionInfo = () => {
@@ -295,6 +309,13 @@
         const buildId = String(versionInfo.buildId || "unknown");
         const filename = `planner-marks-${buildId}-${stamp}.json`;
         triggerJsonDownload(filename, payload);
+        pushInfoToast(
+          "plan_config.marks_export_success_title",
+          "plan_config.marks_export_success_summary",
+          "标记数据已导出",
+          "已触发下载文件。",
+          "marks-export"
+        );
       } catch (error) {
         if (typeof state.reportStorageIssue === "function") {
           state.reportStorageIssue("export", state.marksStorageKey, error, {
@@ -373,6 +394,13 @@
       }
       setRefValue(state.weaponMarks, pending);
       resetMarksImportState();
+      pushInfoToast(
+        "plan_config.marks_import_success_title",
+        "plan_config.marks_import_success_summary",
+        "标记数据已导入",
+        "已更新标记数据。",
+        "marks-import"
+      );
     };
     state.exportWeaponMarks = exportWeaponMarks;
     state.handleMarksImportFile = handleMarksImportFile;
@@ -415,6 +443,15 @@
           if (state.filterPanelManuallySet.value && typeof restored.showFilterPanel === "boolean") {
             state.showFilterPanel.value = restored.showFilterPanel;
             restoredFilterPanelPreference = true;
+          }
+          if (typeof restored.planConfigSectionManuallySet === "boolean") {
+            state.planConfigSectionManuallySet.value = restored.planConfigSectionManuallySet;
+          }
+          if (
+            state.planConfigSectionManuallySet.value &&
+            restored.planConfigSectionCollapsed
+          ) {
+            state.planConfigSectionCollapsed.value = restored.planConfigSectionCollapsed;
           }
           if (typeof restored.showAllSchemes === "boolean") {
             state.showAllSchemes.value = restored.showAllSchemes;
@@ -631,9 +668,15 @@
         filterPanelManuallySet: Boolean(
           state.filterPanelManuallySet && state.filterPanelManuallySet.value
         ),
+        planConfigSectionManuallySet: Boolean(
+          state.planConfigSectionManuallySet && state.planConfigSectionManuallySet.value
+        ),
       };
       if (value.filterPanelManuallySet) {
         value.showFilterPanel = state.showFilterPanel.value;
+      }
+      if (value.planConfigSectionManuallySet) {
+        value.planConfigSectionCollapsed = state.planConfigSectionCollapsed.value;
       }
       return value;
     });

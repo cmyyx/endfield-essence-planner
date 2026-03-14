@@ -92,6 +92,13 @@
       return Number.isFinite(scheme && scheme.selectedMatchCount) ? scheme.selectedMatchCount : 0;
     };
 
+    const getRealFarmableCountForSort = (scheme) => {
+      if (Number.isFinite(scheme && scheme.effectiveRealFarmableCount)) {
+        return scheme.effectiveRealFarmableCount;
+      }
+      return Number.isFinite(scheme && scheme.realFarmableCount) ? scheme.realFarmableCount : 0;
+    };
+
     const getWeaponCountForSort = (scheme) => {
       if (Number.isFinite(scheme && scheme.effectiveWeaponCount)) {
         return scheme.effectiveWeaponCount;
@@ -157,6 +164,7 @@
       const strictPriorityOrder = config.strictPriorityOrder || "ownershipFirst";
       const baseDiff = compareBaseEfficiency(a, b);
       const coverageDiff = getSelectedMatchCountForSort(b) - getSelectedMatchCountForSort(a);
+      const realFarmableDiff = getRealFarmableCountForSort(b) - getRealFarmableCountForSort(a);
       const regionDiff = compareRegion(a, b, preferred1, preferred2);
       const ownershipDiff = compareOwnership(a, b);
 
@@ -175,6 +183,7 @@
       }
 
       if (coverageDiff !== 0) return coverageDiff;
+      if (realFarmableDiff !== 0) return realFarmableDiff;
 
       if (ownershipMode === "sameCoverage" && ownershipDiff !== 0) return ownershipDiff;
       if (regionMode === "sameCoverage" && regionDiff !== 0) return regionDiff;
@@ -432,6 +441,9 @@
           const displayWeaponCount = schemeWeaponsActive.filter((weapon) =>
             activeBaseSet.has(weapon.s1)
           ).length;
+          const realFarmableCount = schemeWeapons.filter(
+            (weapon) => activeBaseSet.has(weapon.s1) && !state.isEssenceOwned(weapon.name)
+          ).length;
 
           const basePickLabels = baseOverflow ? [...displayBaseKeys] : baseAutoPick.slice();
           if (baseOverflow) {
@@ -469,6 +481,8 @@
             maxWeaponCount: schemeWeaponsVisible.length,
             selectedMatchCount: autoCoveredSelected.length,
             effectiveSelectedMatchCount: effectiveAutoCoveredSelected.length,
+            realFarmableCount,
+            effectiveRealFarmableCount: realFarmableCount,
             ownedPendingMatchCount: autoCoveredOwnedSelected.length,
             effectiveOwnedPendingMatchCount: effectiveAutoCoveredOwnedSelected.length,
             unownedPendingMatchCount: Math.max(

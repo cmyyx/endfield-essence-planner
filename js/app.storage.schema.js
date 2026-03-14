@@ -255,6 +255,24 @@
       if (next.filterPanelManuallySet && typeof raw.showFilterPanel === "boolean") {
         next.showFilterPanel = raw.showFilterPanel;
       }
+      if (typeof raw.planConfigSectionManuallySet === "boolean") {
+        next.planConfigSectionManuallySet = raw.planConfigSectionManuallySet;
+      }
+      if (
+        next.planConfigSectionManuallySet &&
+        raw.planConfigSectionCollapsed &&
+        typeof raw.planConfigSectionCollapsed === "object"
+      ) {
+        const cleaned = {};
+        Object.keys(raw.planConfigSectionCollapsed).forEach((key) => {
+          if (!key || !isSafeObjectKey(key)) return;
+          const value = raw.planConfigSectionCollapsed[key];
+          if (typeof value === "boolean") {
+            cleaned[key] = value;
+          }
+        });
+        next.planConfigSectionCollapsed = cleaned;
+      }
       if (typeof raw.showAllSchemes === "boolean") {
         next.showAllSchemes = raw.showAllSchemes;
       }

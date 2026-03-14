@@ -1561,12 +1561,12 @@
         height: 28px;
         min-height: 28px;
         border-radius: 999px;
-        border: 1px solid rgba(255, 224, 148, 0.55);
-        background: rgba(68, 52, 18, 0.92);
+        border: none;
+        background: transparent;
         color: #ffe7b6;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        display: inline-grid;
+        place-items: center;
+        padding: 0;
         font-size: 15px;
         font-weight: 700;
         line-height: 1;
@@ -1575,7 +1575,6 @@
       }
 
       .toast-close-button:hover {
-        border-color: rgba(255, 204, 112, 0.78);
         color: #fff2d8;
       }
 
@@ -1719,8 +1718,8 @@
       }
 
       .planner-toast-info .toast-close-button {
-        border-color: rgba(120, 220, 210, 0.55);
-        background: rgba(16, 28, 36, 0.9);
+        border: none;
+        background: transparent;
         color: #c4f0e8;
       }
 
@@ -2045,8 +2044,8 @@
       }
 
       [data-theme="light"] .toast-close-button {
-        border-color: rgba(218, 160, 57, 0.58);
-        background: rgba(255, 242, 214, 0.94);
+        border: none;
+        background: transparent;
         color: #7b5b18;
       }
 
@@ -2066,8 +2065,8 @@
       }
 
       [data-theme="light"] .planner-toast-info .toast-close-button {
-        border-color: rgba(35, 153, 126, 0.5);
-        background: rgba(242, 251, 249, 0.95);
+        border: none;
+        background: transparent;
         color: #2a7f6c;
       }
 
