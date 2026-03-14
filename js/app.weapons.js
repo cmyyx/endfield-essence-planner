@@ -73,6 +73,7 @@
 
     const CUSTOM_WEAPON_DEFAULT_TYPE = "自定义";
     const customWeaponsStorageKey = state.customWeaponsStorageKey || "planner-custom-weapons:v1";
+    state.customWeaponsStorageKey = customWeaponsStorageKey;
     const setCustomWeaponError = (key, params, fallback) => {
       customWeaponErrorRef.value = {
         key: String(key || ""),

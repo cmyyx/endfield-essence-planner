@@ -829,6 +829,13 @@
       const retryViewLoad = (view) => ensureViewBundleLoaded(view, { force: true });
       const refreshPage = () => {
         if (typeof window === "undefined") return;
+        if (typeof state.reloadBypassCache === "function") {
+          const url = new URL(window.location.href);
+          if (!url.searchParams.has("__reload_ts")) {
+            state.reloadBypassCache();
+            return;
+          }
+        }
         window.location.reload();
       };
 
@@ -930,7 +937,7 @@
           const id =
             state.selectedCharacterId && state.selectedCharacterId.value
               ? state.selectedCharacterId.value
-              : "";
+              : pendingStrategyCharacterId || "";
           if (id) return `/strategy/${encodeURIComponent(id)}`;
           return "/strategy";
         }

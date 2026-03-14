@@ -229,6 +229,8 @@
       if (!notice || typeof notice.action !== "function") return;
       try {
         notice.action();
+      } catch (error) {
+        console.error("[toast] action failed", error);
       } finally {
         dismissToastNotice(noticeId);
       }
@@ -239,6 +241,8 @@
       if (typeof notice.onActivate === "function") {
         try {
           notice.onActivate();
+        } catch (error) {
+          console.error("[toast] activate failed", error);
         } finally {
           dismissToastNotice(noticeId);
         }
@@ -247,6 +251,8 @@
       if (typeof notice.action === "function") {
         try {
           notice.action();
+        } catch (error) {
+          console.error("[toast] action failed", error);
         } finally {
           dismissToastNotice(noticeId);
         }

@@ -1420,18 +1420,23 @@
       if (typeof document === "undefined") {
         return Promise.resolve(false);
       }
-      if (document.querySelector("script[data-analytics-bootstrap]")) {
+      if (document.querySelector('script[data-analytics-bootstrap="true"]')) {
         return Promise.resolve(true);
       }
       return new Promise(function (resolve, reject) {
         var script = document.createElement("script");
         script.src = "./js/analytics.bootstrap.js";
         script.defer = true;
-        script.dataset.analyticsBootstrap = "true";
+        script.dataset.analyticsBootstrap = "loading";
         script.onload = function () {
+          script.dataset.analyticsBootstrap = "true";
           resolve(true);
         };
         script.onerror = function (event) {
+          script.dataset.analyticsBootstrap = "failed";
+          if (script.parentNode) {
+            script.parentNode.removeChild(script);
+          }
           reject(event);
         };
         var target = document.head || document.body || document.documentElement;
