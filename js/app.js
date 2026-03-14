@@ -116,7 +116,9 @@
     return;
   }
 
-  scripts.forEach((src) => preloadScript(src));
+  scripts.forEach((src) => {
+    preloadScript(src);
+  });
 
   scripts
     .reduce((promise, src) => promise.then(() => loadScript(src)), Promise.resolve())

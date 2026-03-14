@@ -303,6 +303,7 @@
       return normalized;
     };
     const dismissOptionalFailureNotice = (noticeId) => {
+      if (!noticeId) return;
       dismissToastNotice(noticeId);
     };
     const pushOptionalFailureNotice = (entry, meta) => {
@@ -357,7 +358,7 @@
       } else if (state.showRuntimeWarningModal) {
         state.showRuntimeWarningModal.value = true;
       }
-      dismissOptionalFailureNotice();
+      dismissOptionalFailureNotice(logId);
     };
     const openLatestOptionalFailureDetail = () => {
       const first =

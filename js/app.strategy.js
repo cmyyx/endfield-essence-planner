@@ -7,7 +7,9 @@
     const weaponMap = new Map(weaponCatalog.map((weapon) => [weapon.name, weapon]));
 
     state.characters = ref(Array.isArray(window.characters) ? window.characters : []);
-    state.selectedCharacterId = ref(null);
+    if (!state.selectedCharacterId || typeof state.selectedCharacterId !== "object" || !("value" in state.selectedCharacterId)) {
+      state.selectedCharacterId = ref(null);
+    }
     state.strategyCategory = ref("info");
     state.strategyTab = ref("base");
 

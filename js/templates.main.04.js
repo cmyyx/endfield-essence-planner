@@ -520,7 +520,7 @@
               :class="{ 'is-clickable': notice && notice.clickable }"
               :role="notice && notice.clickable ? 'button' : 'status'"
               :tabindex="notice && notice.clickable ? 0 : -1"
-              :aria-label="notice && notice.ariaLabel ? notice.ariaLabel : ''"
+              :aria-label="notice && notice.clickable && notice.ariaLabel ? notice.ariaLabel : null"
               @click="activateToastNotice((notice && notice.id) || '')"
               @keydown.enter.prevent="activateToastNotice((notice && notice.id) || '')"
               @keydown.space.prevent="activateToastNotice((notice && notice.id) || '')"

@@ -1400,7 +1400,8 @@
         })
       );
     });
-    if (typeof window.__loadAnalyticsNow === "function") {
+    var triggerAnalyticsNow = function () {
+      if (typeof window.__loadAnalyticsNow !== "function") return;
       try {
         // Intentionally eager: capture real startup timing under first-screen contention.
         window.__loadAnalyticsNow();
@@ -1414,7 +1415,48 @@
           optionalSignature: "bootstrap.analytics-preload",
         });
       }
-    }
+    };
+    var loadAnalyticsBootstrap = function () {
+      if (typeof document === "undefined") {
+        return Promise.resolve(false);
+      }
+      if (document.querySelector("script[data-analytics-bootstrap]")) {
+        return Promise.resolve(true);
+      }
+      return new Promise(function (resolve, reject) {
+        var script = document.createElement("script");
+        script.src = "./js/analytics.bootstrap.js";
+        script.defer = true;
+        script.dataset.analyticsBootstrap = "true";
+        script.onload = function () {
+          resolve(true);
+        };
+        script.onerror = function (event) {
+          reject(event);
+        };
+        var target = document.head || document.body || document.documentElement;
+        if (!target) {
+          resolve(false);
+          return;
+        }
+        target.appendChild(script);
+      });
+    };
+    Promise.resolve(loadAnalyticsBootstrap())
+      .then(function () {
+        triggerAnalyticsNow();
+      })
+      .catch(function (error) {
+        reportNonFatalDiagnostic({
+          operation: "bootstrap.analytics-script",
+          kind: "analytics-bootstrap-load-failed",
+          resource: "./js/analytics.bootstrap.js",
+          errorName: String((error && error.name) || "Error"),
+          errorMessage: String((error && error.message) || "analytics bootstrap load failed"),
+          optionalSignature: "bootstrap.analytics-script",
+        });
+        triggerAnalyticsNow();
+      });
     var shellReadyPromise = new Promise(function (resolve) {
       var guard = 0;
       var check = function () {

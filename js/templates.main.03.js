@@ -438,9 +438,12 @@
               <div v-else class="empty-state view-load-state">
                 <h2>{{ t("error.view_load_failed_title") }}</h2>
                 <p>{{ t("error.view_load_failed_summary") }}</p>
-                <button class="ghost-button" @click="retryViewLoad('equip-refining')">
-                  {{ t("action_retry") }}
-                </button>
+          <button class="ghost-button" @click="retryViewLoad('equip-refining')">
+            {{ t("action_retry") }}
+          </button>
+          <button class="ghost-button" @click="refreshPage">
+            {{ t("action_refresh") }}
+          </button>
               </div>
             </div>
             <template v-else>

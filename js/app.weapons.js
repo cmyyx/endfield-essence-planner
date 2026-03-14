@@ -1013,7 +1013,7 @@
         return a.index - b.index;
       });
       const orderedRows = matched.map((item) => item.weapon);
-      return partitionWeaponsByUpActive(orderedRows, activeByWeapon);
+      return orderedRows;
     });
 
     const hiddenInSelectorSummary = computed(() => {

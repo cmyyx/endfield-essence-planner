@@ -1911,7 +1911,7 @@
           --overlay-update-base: calc(
             220px + env(safe-area-inset-bottom, 0px) + var(--viewport-safe-bottom, 0px)
           );
-          --optional-toast-stack-gap: 60px;
+          --toast-stack-gap: 60px;
         }
 
         .version-debug-badge-wrap {

@@ -827,6 +827,10 @@
       };
 
       const retryViewLoad = (view) => ensureViewBundleLoaded(view, { force: true });
+      const refreshPage = () => {
+        if (typeof window === "undefined") return;
+        window.location.reload();
+      };
 
       const weaponCatalog =
         typeof window !== "undefined" && Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
@@ -1371,6 +1375,7 @@
         isViewBundleReady,
         getViewBundleError,
         retryViewLoad,
+        refreshPage,
         locale: state.locale,
         languageOptions: state.languageOptions,
         langSwitchRef: state.langSwitchRef,
