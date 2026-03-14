@@ -261,8 +261,9 @@
         refs.count.textContent = completedCount + "/" + total;
       }
       if (refs.progressFill) {
-        var percent = total > 0 ? Math.min(100, Math.round((completedCount / total) * 100)) : 0;
-        refs.progressFill.style.width = percent + "%";
+        var ratio = total > 0 ? Math.min(1, Math.max(0, completedCount / total)) : 0;
+        var percent = Math.round(ratio * 100);
+        refs.progressFill.style.transform = "scaleX(" + ratio + ")";
         refs.progressFill.setAttribute("aria-valuenow", String(percent));
       }
       if (refs.status) {

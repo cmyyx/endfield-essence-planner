@@ -226,15 +226,15 @@
       const raw = stripAvatarName(name);
       if (!raw) return [];
       const candidates = [];
-      candidates.push(`image/characters/${raw}.png`);
+      candidates.push(`image/characters/${raw}.avif`);
 
       const base = raw.replace(/[\u7537\u5973]$/u, "").trim();
       if (base && base !== raw) {
         const gender = /\u7537$/u.test(raw) ? "\u7537" : "\u5973";
-        candidates.push(`image/characters/${base}(${gender}).png`);
+        candidates.push(`image/characters/${base}(${gender}).avif`);
       } else {
-        candidates.push(`image/characters/${raw}(\u5973).png`);
-        candidates.push(`image/characters/${raw}(\u7537).png`);
+        candidates.push(`image/characters/${raw}(\u5973).avif`);
+        candidates.push(`image/characters/${raw}(\u7537).avif`);
       }
 
       return Array.from(new Set(candidates));

@@ -267,7 +267,7 @@
         .map((weapon) => String((weapon && weapon.name) || "").trim())
         .filter(Boolean);
       const primaryWeaponName = weaponNames[0] || "";
-      const avatarSrc = encodeURI(`./image/characters/${characterName}.png`);
+      const avatarSrc = encodeURI(`./image/characters/${characterName}.avif`);
       byCharacter[characterName] = {
         characterName,
         windows,

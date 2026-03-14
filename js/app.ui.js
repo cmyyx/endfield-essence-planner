@@ -76,18 +76,18 @@
 
     const runtimeWarningLogLimit = 20;
     const runtimeWarningDedupWindowMs = 4000;
+    const toastVisibleLimit = 2;
+    const toastDefaultDurationMs = 6500;
+    const toastLastSeenAt = new Map();
+    const toastTimers = new Map();
     const optionalFailureNotificationDedupWindowMs = 10000;
-    const optionalFailureVisibleLimit = 2;
-    const optionalFailureToastDurationMs = 6500;
     const optionalFailureQueueKey = "__bootOptionalLoadFailures";
     const optionalFailureEventName = "planner:optional-resource-failed";
     let optionalFailurePollTimer = null;
-    const optionalFailureToastTimers = new Map();
     let lastRuntimeWarningSignature = "";
     let lastRuntimeWarningAt = 0;
-    const optionalFailureLastSeenAt = new Map();
-    const optionalFailureNotices = state.optionalFailureNotices || ref([]);
-    const optionalFailureNotice = state.optionalFailureNotice || ref(null);
+    const toastNotices = state.toastNotices || ref([]);
+    const toastNotice = state.toastNotice || ref(null);
     const optionalFailureHistory = state.optionalFailureHistory || ref([]);
     const hasOptionalFailureHistory = state.hasOptionalFailureHistory || ref(false);
     hasOptionalFailureHistory.value =
@@ -155,105 +155,189 @@
       }
       return lines.join("\n");
     };
-    const syncOptionalFailurePrimaryNotice = () => {
-      if (!optionalFailureNotice || !optionalFailureNotices) return;
-      const list = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
-      optionalFailureNotice.value = list.length ? list[0] : null;
+    const syncToastPrimaryNotice = () => {
+      if (!toastNotice || !toastNotices) return;
+      const list = Array.isArray(toastNotices.value) ? toastNotices.value : [];
+      toastNotice.value = list.length ? list[0] : null;
     };
-    const setVisibleOptionalFailureNotices = (nextList) => {
-      if (!optionalFailureNotices) return;
-      const list = Array.isArray(nextList) ? nextList.slice(0, optionalFailureVisibleLimit) : [];
-      optionalFailureNotices.value = list;
-      syncOptionalFailurePrimaryNotice();
+    const setVisibleToastNotices = (nextList) => {
+      if (!toastNotices) return;
+      const list = Array.isArray(nextList) ? nextList.slice(0, toastVisibleLimit) : [];
+      toastNotices.value = list;
+      syncToastPrimaryNotice();
     };
-    const clearOptionalFailureToastTimer = (noticeId) => {
+    const clearToastTimer = (noticeId) => {
       const key = String(noticeId || "");
       if (!key) return;
-      const timer = optionalFailureToastTimers.get(key);
+      const timer = toastTimers.get(key);
       if (!timer) return;
       clearTimeout(timer);
-      optionalFailureToastTimers.delete(key);
+      toastTimers.delete(key);
     };
-    const clearAllOptionalFailureToastTimers = () => {
-      for (const timer of optionalFailureToastTimers.values()) {
+    const clearAllToastTimers = () => {
+      for (const timer of toastTimers.values()) {
         clearTimeout(timer);
       }
-      optionalFailureToastTimers.clear();
+      toastTimers.clear();
     };
-    const removeVisibleOptionalFailureNotice = (noticeId) => {
-      if (!optionalFailureNotices) return;
+    const removeVisibleToastNotice = (noticeId) => {
+      if (!toastNotices) return;
       const key = String(noticeId || "");
       if (!key) {
-        setVisibleOptionalFailureNotices([]);
+        setVisibleToastNotices([]);
         return;
       }
-      const current = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
+      const current = Array.isArray(toastNotices.value) ? toastNotices.value : [];
       const next = current.filter((item) => String((item && item.id) || "") !== key);
-      setVisibleOptionalFailureNotices(next);
+      setVisibleToastNotices(next);
     };
-    const scheduleOptionalFailureAutoDismiss = (noticeId) => {
-      const key = String(noticeId || "");
-      if (!key) return;
-      clearOptionalFailureToastTimer(key);
+    const scheduleToastAutoDismiss = (notice) => {
+      if (!notice || !notice.id) return;
+      const duration = Number.isFinite(notice.durationMs)
+        ? Number(notice.durationMs)
+        : toastDefaultDurationMs;
+      if (!Number.isFinite(duration) || duration <= 0) return;
+      clearToastTimer(notice.id);
       const timer = setTimeout(() => {
-        optionalFailureToastTimers.delete(key);
-        removeVisibleOptionalFailureNotice(key);
-      }, optionalFailureToastDurationMs);
-      optionalFailureToastTimers.set(key, timer);
+        toastTimers.delete(notice.id);
+        removeVisibleToastNotice(notice.id);
+      }, duration);
+      toastTimers.set(notice.id, timer);
     };
-    const dismissOptionalFailureNotice = (noticeId) => {
-      if (!optionalFailureNotices) return;
+    const dismissToastNotice = (noticeId) => {
+      if (!toastNotices) return;
       if (!noticeId) {
         const first =
-          Array.isArray(optionalFailureNotices.value) && optionalFailureNotices.value.length
-            ? optionalFailureNotices.value[0]
+          Array.isArray(toastNotices.value) && toastNotices.value.length
+            ? toastNotices.value[0]
             : null;
         if (!first || !first.id) return;
-        clearOptionalFailureToastTimer(first.id);
-        removeVisibleOptionalFailureNotice(first.id);
+        clearToastTimer(first.id);
+        removeVisibleToastNotice(first.id);
         return;
       }
-      clearOptionalFailureToastTimer(noticeId);
-      removeVisibleOptionalFailureNotice(noticeId);
+      clearToastTimer(noticeId);
+      removeVisibleToastNotice(noticeId);
+    };
+    const getToastNoticeById = (noticeId) => {
+      if (!toastNotices || !noticeId) return null;
+      const list = Array.isArray(toastNotices.value) ? toastNotices.value : [];
+      return list.find((item) => String((item && item.id) || "") === String(noticeId)) || null;
+    };
+    const runToastAction = (noticeId) => {
+      const notice = getToastNoticeById(noticeId);
+      if (!notice || typeof notice.action !== "function") return;
+      try {
+        notice.action();
+      } finally {
+        dismissToastNotice(noticeId);
+      }
+    };
+    const activateToastNotice = (noticeId) => {
+      const notice = getToastNoticeById(noticeId);
+      if (!notice) return;
+      if (typeof notice.onActivate === "function") {
+        try {
+          notice.onActivate();
+        } finally {
+          dismissToastNotice(noticeId);
+        }
+        return;
+      }
+      if (typeof notice.action === "function") {
+        try {
+          notice.action();
+        } finally {
+          dismissToastNotice(noticeId);
+        }
+      }
+    };
+    const pushToastNotice = (payload, options = {}) => {
+      if (!toastNotices) return null;
+      const raw = payload && typeof payload === "object" ? payload : {};
+      const id = String(raw.id || `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`);
+      const normalized = {
+        id,
+        title: String(raw.title || ""),
+        summary: String(raw.summary || ""),
+        occurredAt: String(raw.occurredAt || nowIsoString()),
+        tone: String(raw.tone || "warning"),
+        icon: String(raw.icon || "!"),
+        actionLabel: raw.actionLabel ? String(raw.actionLabel) : "",
+        action: typeof raw.action === "function" ? raw.action : null,
+        onActivate: typeof raw.onActivate === "function" ? raw.onActivate : null,
+        durationMs: Number.isFinite(raw.durationMs) ? Number(raw.durationMs) : toastDefaultDurationMs,
+        signature: String(raw.signature || ""),
+        ariaLabel: raw.ariaLabel ? String(raw.ariaLabel) : "",
+        logId: raw.logId ? String(raw.logId) : "",
+      };
+      normalized.clickable = Boolean(normalized.onActivate || normalized.action);
+      const signature = String(options.signature || normalized.signature || "");
+      const dedupWindowMs = Number.isFinite(options.dedupWindowMs)
+        ? Number(options.dedupWindowMs)
+        : 0;
+      if (signature && dedupWindowMs > 0) {
+        const now = Date.now();
+        const lastAt = toastLastSeenAt.get(signature) || 0;
+        if (now - lastAt <= dedupWindowMs) {
+          return null;
+        }
+        toastLastSeenAt.set(signature, now);
+      }
+      if (signature) {
+        normalized.signature = signature;
+      }
+      const current = Array.isArray(toastNotices.value) ? toastNotices.value : [];
+      const withoutSameSignature = signature
+        ? current.filter((item) => String((item && item.signature) || "") !== signature)
+        : current.slice();
+      const nextVisible = [normalized].concat(withoutSameSignature).slice(0, toastVisibleLimit);
+      const dropped = [normalized].concat(withoutSameSignature).slice(toastVisibleLimit);
+      dropped.forEach((item) => {
+        if (item && item.id) {
+          clearToastTimer(item.id);
+        }
+      });
+      setVisibleToastNotices(nextVisible);
+      scheduleToastAutoDismiss(normalized);
+      return normalized;
+    };
+    const dismissOptionalFailureNotice = (noticeId) => {
+      dismissToastNotice(noticeId);
     };
     const pushOptionalFailureNotice = (entry, meta) => {
-      if (!optionalFailureNotices || !optionalFailureHistory) return;
+      if (!optionalFailureHistory) return;
       const signature = String((meta && meta.optionalSignature) || entry.key || "").trim();
+      const summaryText =
+        typeof state.t === "function"
+          ? state.t("equip_refining.tap_the_notification_to_view_details")
+          : "点击通知查看详情";
       const notice = {
         id: entry.id,
         logId: entry.id,
         occurredAt: entry.occurredAt || nowIsoString(),
         title: entry.title,
-        summary: entry.summary,
+        summary: summaryText,
         note: entry.note || "",
         signature,
+        tone: "warning",
+        icon: "!",
+        durationMs: toastDefaultDurationMs,
+        ariaLabel:
+          typeof state.t === "function"
+            ? state.t("error.view_optional_failure_details")
+            : "查看可选失败详情",
+        onActivate: () => openOptionalFailureDetailByLogId(entry.id),
       };
       const nextHistory = [notice].concat(
         Array.isArray(optionalFailureHistory.value) ? optionalFailureHistory.value : []
       );
       optionalFailureHistory.value = nextHistory.slice(0, runtimeWarningLogLimit);
       hasOptionalFailureHistory.value = optionalFailureHistory.value.length > 0;
-      const now = Date.now();
-      if (signature) {
-        const lastAt = optionalFailureLastSeenAt.get(signature) || 0;
-        if (now - lastAt <= optionalFailureNotificationDedupWindowMs) {
-          return;
-        }
-        optionalFailureLastSeenAt.set(signature, now);
-      }
-      const current = Array.isArray(optionalFailureNotices.value) ? optionalFailureNotices.value : [];
-      const withoutSameSignature = signature
-        ? current.filter((item) => String((item && item.signature) || "") !== signature)
-        : current.slice();
-      const nextVisible = [notice].concat(withoutSameSignature).slice(0, optionalFailureVisibleLimit);
-      const dropped = [notice].concat(withoutSameSignature).slice(optionalFailureVisibleLimit);
-      dropped.forEach((item) => {
-        if (item && item.id) {
-          clearOptionalFailureToastTimer(item.id);
-        }
+      pushToastNotice(notice, {
+        signature,
+        dedupWindowMs: optionalFailureNotificationDedupWindowMs,
       });
-      setVisibleOptionalFailureNotices(nextVisible);
-      scheduleOptionalFailureAutoDismiss(notice.id);
     };
     const resolveRuntimeWarningLogById = (logId) => {
       if (!state.runtimeWarningLogs || !Array.isArray(state.runtimeWarningLogs.value)) return null;
@@ -876,7 +960,7 @@
         clearInterval(optionalFailurePollTimer);
         optionalFailurePollTimer = null;
       }
-      clearAllOptionalFailureToastTimers();
+      clearAllToastTimers();
       document.removeEventListener("click", handleDocClick);
       document.removeEventListener("keydown", handleDocKeydown);
       if (preloadBackgroundFadeTimer) {
@@ -888,7 +972,7 @@
       }
     });
 
-    syncOptionalFailurePrimaryNotice();
+    syncToastPrimaryNotice();
     state.reportRuntimeWarning = reportRuntimeWarning;
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
@@ -900,8 +984,15 @@
     state.requestIgnoreRuntimeWarnings = requestIgnoreRuntimeWarnings;
     state.cancelIgnoreRuntimeWarnings = cancelIgnoreRuntimeWarnings;
     state.confirmIgnoreRuntimeWarnings = confirmIgnoreRuntimeWarnings;
-    state.optionalFailureNotices = optionalFailureNotices;
-    state.optionalFailureNotice = optionalFailureNotice;
+    state.toastNotices = toastNotices;
+    state.toastNotice = toastNotice;
+    state.toastDefaultDurationMs = toastDefaultDurationMs;
+    state.pushToastNotice = pushToastNotice;
+    state.dismissToastNotice = dismissToastNotice;
+    state.runToastAction = runToastAction;
+    state.activateToastNotice = activateToastNotice;
+    state.optionalFailureNotices = toastNotices;
+    state.optionalFailureNotice = toastNotice;
     state.optionalFailureHistory = optionalFailureHistory;
     state.hasOptionalFailureHistory = hasOptionalFailureHistory;
     state.dismissOptionalFailureNotice = dismissOptionalFailureNotice;

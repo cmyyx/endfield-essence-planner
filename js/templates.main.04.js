@@ -503,45 +503,59 @@
         class="planner-bottom-right-overlays"
         :class="{
           'has-update-toast': showUpdatePrompt,
-          'has-optional-toast': optionalFailureNotices && optionalFailureNotices.length > 0,
+          'has-toast': toastNotices && toastNotices.length > 0,
         }"
       >
-        <transition-group name="fade-scale" tag="div" class="optional-toast-stack">
+        <transition-group name="fade-scale" tag="div" class="toast-stack">
           <div
-            v-for="(notice, index) in optionalFailureNotices"
-            :key="notice.id || ['optional-failure', index].join('|')"
-            class="update-toast optional-failure-toast"
-            :class="'optional-failure-toast-' + index"
+            v-for="(notice, index) in toastNotices"
+            :key="notice.id || ['toast', index].join('|')"
+            class="update-toast planner-toast"
+            :class="['planner-toast-' + index, notice.tone ? 'planner-toast-' + notice.tone : '']"
             role="status"
             aria-live="polite"
           >
             <div
-              class="update-toast-card optional-failure-toast-card"
-              role="button"
-              tabindex="0"
-              :aria-label="t('error.view_optional_failure_details')"
-              @click="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
-              @keydown.enter.prevent="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
-              @keydown.space.prevent="openOptionalFailureDetailByLogId((notice && (notice.logId || notice.id)) || '')"
+              class="update-toast-card toast-card"
+              :class="{ 'is-clickable': notice && notice.clickable }"
+              :role="notice && notice.clickable ? 'button' : 'status'"
+              :tabindex="notice && notice.clickable ? 0 : -1"
+              :aria-label="notice && notice.ariaLabel ? notice.ariaLabel : ''"
+              @click="activateToastNotice((notice && notice.id) || '')"
+              @keydown.enter.prevent="activateToastNotice((notice && notice.id) || '')"
+              @keydown.space.prevent="activateToastNotice((notice && notice.id) || '')"
             >
-              <div class="optional-failure-toast-main">
-                <span class="optional-failure-toast-icon" aria-hidden="true">!</span>
-                <div class="optional-failure-toast-text">
-                  <strong>{{ notice.title || t("error.optional_feature_load_failed") }}</strong>
-                  <span>{{ t("equip_refining.tap_the_notification_to_view_details") }}</span>
+              <div class="toast-main">
+                <span class="toast-icon" aria-hidden="true">{{ notice && notice.icon ? notice.icon : "!" }}</span>
+                <div class="toast-text">
+                  <strong>{{ notice && notice.title ? notice.title : t("error.optional_feature_load_failed") }}</strong>
+                  <span v-if="notice && notice.summary">{{ notice.summary }}</span>
                 </div>
               </div>
-              <div class="optional-failure-toast-actions">
+              <div class="toast-actions">
+                <button
+                  v-if="notice && notice.actionLabel"
+                  type="button"
+                  class="ghost-button toast-action"
+                  @click.stop="runToastAction((notice && notice.id) || '')"
+                >
+                  {{ notice.actionLabel }}
+                </button>
                 <button
                   type="button"
-                  class="optional-failure-close-button"
+                  class="toast-close-button"
                   :aria-label="t('plan_config.close')"
                   :title="t('plan_config.close')"
-                  @click.stop="dismissOptionalFailureNotice(notice.id)"
+                  @click.stop="dismissToastNotice((notice && notice.id) || '')"
                 >
                   &times;
                 </button>
               </div>
+              <div
+                v-if="notice && notice.durationMs && notice.durationMs > 0"
+                class="toast-progress"
+                :style="{ '--toast-duration': (notice.durationMs || toastDefaultDurationMs) + 'ms' }"
+              ></div>
             </div>
           </div>
         </transition-group>

@@ -34,7 +34,7 @@
       }
       uniqueChars.forEach((name) => {
         if (!characterImageSrcCache.has(name)) {
-          characterImageSrcCache.set(name, encodeURI(`./image/characters/${name}.png`));
+          characterImageSrcCache.set(name, encodeURI(`./image/characters/${name}.avif`));
         }
       });
     });

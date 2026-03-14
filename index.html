@@ -61,12 +61,155 @@
         root.style.colorScheme = resolved;
       })();
     </script>
-    <script src="./js/analytics.bootstrap.js"></script>
-    <script src="./js/app.resource-manifest.js" onload="this.dataset.loaded='true'"></script>
-    <script src="./js/app.script-chain.js" onload="this.dataset.loaded='true'"></script>
-    <link rel="stylesheet" href="./css/styles.preload.css" />
+    <script src="./js/analytics.bootstrap.js" defer></script>
+    <script src="./js/app.resource-manifest.js" defer onload="this.dataset.loaded='true'"></script>
+    <script src="./js/app.script-chain.js" defer onload="this.dataset.loaded='true'"></script>
+    <style>
+      html.preload body {
+        background: #0b0f14;
+        color: #e6e9ef;
+      }
+
+      html[data-theme="light"].preload body {
+        background: #eef3fb;
+        color: #1c2b3f;
+      }
+
+      html[data-theme="dark"].preload body {
+        background: #0b0f14;
+        color: #e6e9ef;
+      }
+
+      @media (prefers-color-scheme: light) {
+        html.preload:not([data-theme]) body {
+          background: #eef3fb;
+          color: #1c2b3f;
+        }
+      }
+
+      html.preload #app {
+        display: none;
+      }
+
+      html.preload body::before {
+        opacity: 0 !important;
+      }
+
+      html.preload body::after {
+        opacity: 0 !important;
+        background: transparent !important;
+      }
+
+      [v-cloak] {
+        display: none;
+      }
+
+      #app-preload {
+        --preload-backdrop: rgba(6, 8, 12, 0.55);
+        --preload-card-bg: rgba(14, 20, 30, 0.85);
+        --preload-card-border: rgba(255, 255, 255, 0.12);
+        --preload-sub: #9aa5b1;
+        --preload-track: rgba(255, 255, 255, 0.14);
+        --preload-fill: #4dd6c9;
+        --preload-current: #cbd5e1;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--preload-backdrop);
+        color: #e6e9ef;
+        font-family: "Microsoft YaHei UI", "PingFang SC", sans-serif;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
+
+      html[data-theme="light"] #app-preload {
+        --preload-backdrop: rgba(232, 239, 248, 0.72);
+        --preload-card-bg: rgba(255, 255, 255, 0.9);
+        --preload-card-border: rgba(51, 79, 107, 0.2);
+        --preload-sub: #4f647a;
+        --preload-track: rgba(51, 79, 107, 0.18);
+        --preload-fill: #1fc8b7;
+        --preload-current: #2f4358;
+        color: #1c2b3f;
+      }
+
+      #app-preload.preload-hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #app-preload .preload-card {
+        padding: 16px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--preload-card-border);
+        background: var(--preload-card-bg);
+        text-align: center;
+        min-width: min(460px, calc(100vw - 36px));
+        max-width: 560px;
+      }
+
+      #app-preload .preload-title {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+      }
+
+      #app-preload .preload-sub {
+        font-size: 12px;
+        color: var(--preload-sub);
+      }
+
+      #app-preload .preload-status {
+        margin-top: 8px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--preload-current);
+      }
+
+      #app-preload .preload-current {
+        margin-top: 4px;
+        min-height: 18px;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--preload-current);
+        opacity: 0.92;
+        word-break: break-all;
+      }
+
+      #app-preload .preload-progress {
+        margin-top: 10px;
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--preload-track);
+        overflow: hidden;
+      }
+
+      #app-preload .preload-progress-fill {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--preload-fill), rgba(255, 255, 255, 0.75));
+        transform: scaleX(0);
+        transform-origin: left center;
+        will-change: transform;
+        transition: transform 0.25s ease;
+      }
+
+      #app-preload .preload-count {
+        margin-top: 6px;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        color: var(--preload-sub);
+      }
+    </style>
     <script
       src="./js/bootstrap.entry.js"
+      defer
       onerror="(function(){var show=function(){var body=document.body||document.documentElement;if(!body)return;body.innerHTML='<div style=&quot;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0f14;color:#e6e9ef;font-family:Microsoft YaHei UI,PingFang SC,sans-serif;&quot;><div style=&quot;width:min(640px,92vw);border:1px solid rgba(243,108,108,.42);border-radius:14px;padding:18px;background:rgba(26,14,18,.84);&quot;><div style=&quot;font-size:16px;font-weight:700;color:#ff9e9e;&quot;>页面初始化失败</div><div style=&quot;margin-top:8px;line-height:1.7;color:#ffd7d7;&quot;>关键引导脚本 ./js/bootstrap.entry.js 加载失败，应用无法启动。</div><div style=&quot;margin-top:12px;line-height:1.7;color:#f2e5c9;&quot;>请检查静态资源部署路径、CDN 缓存与拦截插件，然后强制刷新（Ctrl + F5）。</div></div></div>';};if(document.readyState==='loading'){window.addEventListener('DOMContentLoaded',show,{once:true});}else{show();}})()"
     ></script>
 

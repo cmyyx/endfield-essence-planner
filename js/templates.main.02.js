@@ -426,6 +426,18 @@
           </div>
 
           <div v-else-if="currentView === 'strategy'" key="strategy" class="view-shell strategy-view">
+            <div v-if="isViewBundleLoading('strategy')" class="empty-state view-load-state">
+              <h2>{{ t("error.view_loading_title") }}</h2>
+              <p>{{ t("error.view_loading_summary") }}</p>
+            </div>
+            <div v-else-if="isViewBundleFailed('strategy')" class="empty-state view-load-state">
+              <h2>{{ t("error.view_load_failed_title") }}</h2>
+              <p>{{ t("error.view_load_failed_summary") }}</p>
+              <button class="ghost-button" @click="retryViewLoad('strategy')">
+                {{ t("action_retry") }}
+              </button>
+            </div>
+            <template v-else>
             <div class="strategy-notice">
               {{ t("guide.guide_is_not_finished_yet_content_is_still_being_updated") }}
             </div>

@@ -76,6 +76,8 @@
     state.showNotice = ref(false);
     state.showChangelog = ref(false);
     state.skipNotice = ref(false);
+    state.toastNotices = ref([]);
+    state.toastNotice = ref(null);
 
     state.appReady = ref(false);
     state.currentView = ref("planner");

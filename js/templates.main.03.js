@@ -425,7 +425,25 @@
               </section>
             </div>
           </div>
+          </template>
           <div v-else key="equip-refining" class="view-shell planner-shell equip-refining-shell">
+            <div
+              v-if="isViewBundleLoading('equip-refining') || isViewBundleFailed('equip-refining')"
+              class="panel view-load-panel"
+            >
+              <div v-if="isViewBundleLoading('equip-refining')" class="empty-state view-load-state">
+                <h2>{{ t("error.view_loading_title") }}</h2>
+                <p>{{ t("error.view_loading_summary") }}</p>
+              </div>
+              <div v-else class="empty-state view-load-state">
+                <h2>{{ t("error.view_load_failed_title") }}</h2>
+                <p>{{ t("error.view_load_failed_summary") }}</p>
+                <button class="ghost-button" @click="retryViewLoad('equip-refining')">
+                  {{ t("action_retry") }}
+                </button>
+              </div>
+            </div>
+            <template v-else>
             <div class="mobile-tabs">
               <button
                 class="mobile-tab"
@@ -472,6 +490,7 @@
               :equip-image-src="equipRefiningEquipImageSrc"
               :on-equip-image-error="handleEquipRefiningEquipImageError"
             />
+          </template>
           </div>
         </transition>
       </main>

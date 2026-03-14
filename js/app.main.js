@@ -423,6 +423,40 @@
       const initializedModules = new Set();
       const providedCapabilities = new Set();
       const pendingInitContractWarnings = [];
+      const deferredInitModules = new Set();
+      const viewBundleRegistry = (() => {
+        if (typeof window === "undefined") return {};
+        const manifest =
+          window.__APP_RESOURCE_MANIFEST && typeof window.__APP_RESOURCE_MANIFEST === "object"
+            ? window.__APP_RESOURCE_MANIFEST
+            : null;
+        const raw =
+          manifest && manifest.app && typeof manifest.app === "object"
+            ? manifest.app.viewBundles
+            : null;
+        if (!raw || typeof raw !== "object") return {};
+        const normalized = {};
+        Object.keys(raw).forEach((viewKey) => {
+          const entry = raw[viewKey];
+          if (Array.isArray(entry)) {
+            normalized[viewKey] = { scripts: entry.slice(), init: [] };
+            return;
+          }
+          if (!entry || typeof entry !== "object") return;
+          const scripts = Array.isArray(entry.scripts) ? entry.scripts.slice() : [];
+          const init = Array.isArray(entry.init) ? entry.init.slice() : [];
+          if (!scripts.length && !init.length) return;
+          normalized[viewKey] = { scripts, init };
+        });
+        return normalized;
+      })();
+      Object.keys(viewBundleRegistry).forEach((viewKey) => {
+        const bundle = viewBundleRegistry[viewKey];
+        if (!bundle || !Array.isArray(bundle.init)) return;
+        bundle.init.forEach((name) => {
+          if (name) deferredInitModules.add(name);
+        });
+      });
       const markProvidedCapabilities = (fn) => {
         parseInitContractList(fn && fn.provides).forEach((capability) => {
           providedCapabilities.add(capability);
@@ -571,6 +605,9 @@
         pendingInitContractWarnings.push(sendReporter);
       };
       const runInitWithContract = (name) => {
+        if (deferredInitModules.has(name)) {
+          return "deferred";
+        }
         const fn = modules[name];
         if (typeof fn !== "function") {
           const missingError = new Error(`[init-contract] missing module initializer: ${name}`);
@@ -658,6 +695,103 @@
         runInitWithContract(name);
       });
 
+      const viewLoadState = ref({});
+      const normalizeViewKey = (view) => String(view || "").trim();
+      const isViewBundleRegistered = (view) => {
+        const key = normalizeViewKey(view);
+        const bundle = key ? viewBundleRegistry[key] : null;
+        return Boolean(bundle && Array.isArray(bundle.scripts) && bundle.scripts.length);
+      };
+      const getViewLoadEntry = (view) => {
+        const key = normalizeViewKey(view);
+        const entry = key && viewLoadState.value ? viewLoadState.value[key] : null;
+        if (entry && typeof entry === "object") return entry;
+        return { status: "idle", error: "" };
+      };
+      const setViewLoadEntry = (view, patch) => {
+        const key = normalizeViewKey(view);
+        if (!key) return;
+        const base = viewLoadState.value && viewLoadState.value[key] ? viewLoadState.value[key] : {};
+        viewLoadState.value = {
+          ...(viewLoadState.value || {}),
+          [key]: { ...base, ...(patch || {}) },
+        };
+      };
+      const isViewBundleLoading = (view) =>
+        isViewBundleRegistered(view) && getViewLoadEntry(view).status === "loading";
+      const isViewBundleFailed = (view) =>
+        isViewBundleRegistered(view) && getViewLoadEntry(view).status === "error";
+      const isViewBundleReady = (view) =>
+        !isViewBundleRegistered(view) || getViewLoadEntry(view).status === "ready";
+      const getViewBundleError = (view) =>
+        isViewBundleRegistered(view) ? String(getViewLoadEntry(view).error || "") : "";
+
+      const viewLoadRegistry = new Map();
+      const describeViewLoadError = (error) => {
+        const message = String((error && error.message) || "");
+        const failed = message.replace(/^Failed to load:\\s*/i, "").trim();
+        return failed && failed !== message ? failed : message || "unknown";
+      };
+
+      let pendingStrategyCharacterId = null;
+
+      const ensureViewBundleLoaded = (view, options) => {
+        const key = normalizeViewKey(view);
+        if (!key) return Promise.resolve(false);
+        const bundle = viewBundleRegistry[key];
+        if (!bundle || !Array.isArray(bundle.scripts) || !bundle.scripts.length) {
+          if (isViewBundleRegistered(key) && !isViewBundleReady(key)) {
+            setViewLoadEntry(key, { status: "ready", error: "" });
+          }
+          return Promise.resolve(true);
+        }
+        if (options && options.force) {
+          viewLoadRegistry.delete(key);
+        }
+        if (viewLoadRegistry.has(key)) {
+          return viewLoadRegistry.get(key);
+        }
+        const task = (async () => {
+          setViewLoadEntry(key, { status: "loading", error: "" });
+          for (let index = 0; index < bundle.scripts.length; index += 1) {
+            await loadScriptOnce(bundle.scripts[index]);
+          }
+          let initFailed = false;
+          if (Array.isArray(bundle.init)) {
+            bundle.init.forEach((name) => {
+              if (!name) return;
+              deferredInitModules.delete(name);
+              if (initializedModules.has(name)) return;
+              const result = runInitWithContract(name);
+              if (result !== "ok") initFailed = true;
+            });
+          }
+          if (key === "strategy" && pendingStrategyCharacterId !== null) {
+            if (state.selectedCharacterId && state.selectedCharacterId.value !== undefined) {
+              state.selectedCharacterId.value = pendingStrategyCharacterId;
+              pendingStrategyCharacterId = null;
+            }
+          }
+          if (initFailed) {
+            throw new Error("View init failed");
+          }
+          setViewLoadEntry(key, { status: "ready", error: "" });
+          return true;
+        })().catch((error) => {
+          const detail = describeViewLoadError(error);
+          setViewLoadEntry(key, { status: "error", error: detail });
+          viewLoadRegistry.delete(key);
+          if (typeof console !== "undefined" && typeof console.warn === "function") {
+            console.warn("[view-bundle] load failed", key, error);
+          }
+          return false;
+        });
+        viewLoadRegistry.set(key, task);
+        return task;
+      };
+
+      const retryViewLoad = (view) => ensureViewBundleLoaded(view, { force: true });
+
       const weaponCatalog =
         typeof window !== "undefined" && Array.isArray(window.WEAPONS) ? window.WEAPONS : [];
       const weaponNameSet = new Set(weaponCatalog.map((weapon) => weapon.name));
@@ -713,7 +847,11 @@
         applyingRoute = true;
         state.currentView.value = route.view || "planner";
         if (route.view === "strategy") {
-          state.selectedCharacterId.value = route.characterId || null;
+          if (state.selectedCharacterId && state.selectedCharacterId.value !== undefined) {
+            state.selectedCharacterId.value = route.characterId || null;
+          } else {
+            pendingStrategyCharacterId = route.characterId || null;
+          }
         }
         if (route.view === "planner" && route.hasWeaponParam) {
           state.selectedNames.value = Array.isArray(route.weaponNames) ? route.weaponNames : [];
@@ -728,7 +866,10 @@
           params.set("view", view);
         }
         if (view === "strategy") {
-          const id = state.selectedCharacterId.value;
+          const id =
+            state.selectedCharacterId && state.selectedCharacterId.value
+              ? state.selectedCharacterId.value
+              : pendingStrategyCharacterId || "";
           if (id) params.set("operator", id);
         }
         if (view === "planner") {
@@ -746,7 +887,10 @@
       const buildAnalyticsPath = () => {
         const view = state.currentView.value;
         if (view === "strategy") {
-          const id = state.selectedCharacterId.value;
+          const id =
+            state.selectedCharacterId && state.selectedCharacterId.value
+              ? state.selectedCharacterId.value
+              : "";
           if (id) return `/strategy/${encodeURIComponent(id)}`;
           return "/strategy";
         }
@@ -862,7 +1006,17 @@
         document.documentElement.classList.remove("legacy-scrollbar-hidden");
       });
 
-      watch([state.currentView, state.selectedCharacterId], () => {
+      if (typeof watch === "function") {
+        watch(
+          state.currentView,
+          (view) => {
+            ensureViewBundleLoaded(view);
+          },
+          { immediate: true }
+        );
+      }
+
+      watch([state.currentView, () => (state.selectedCharacterId ? state.selectedCharacterId.value : null)], () => {
         syncLegacyScrollbarMode();
         syncQuery(false);
         trackPageview();
@@ -1176,6 +1330,11 @@
           state.currentView.value = view;
           window.scrollTo(0, 0);
         },
+        isViewBundleLoading,
+        isViewBundleFailed,
+        isViewBundleReady,
+        getViewBundleError,
+        retryViewLoad,
         locale: state.locale,
         languageOptions: state.languageOptions,
         langSwitchRef: state.langSwitchRef,
@@ -1340,24 +1499,65 @@
         matchResults: state.matchResults,
         selectMatchSource: state.selectMatchSource,
         equipRefiningMobilePanel: state.equipRefiningMobilePanel,
-        isEquipRefiningCompact: state.isEquipRefiningCompact,
-        setEquipRefiningMobilePanel: state.setEquipRefiningMobilePanel,
-        equipRefiningQuery: state.equipRefiningQuery,
-        equipRefiningEquipCount: state.equipRefiningEquipCount,
-        isEquipRefiningSetCollapsed: state.isEquipRefiningSetCollapsed,
-        toggleEquipRefiningSetCollapsed: state.toggleEquipRefiningSetCollapsed,
-        isRecommendationExpanded: state.isRecommendationExpanded,
-        toggleRecommendationExpanded: state.toggleRecommendationExpanded,
-        hasMoreRecommendationCandidates: state.hasMoreRecommendationCandidates,
-        visibleRecommendationCandidates: state.visibleRecommendationCandidates,
-        equipRefiningGroupedSets: state.equipRefiningGroupedSets,
-        selectedEquipRefiningEquipName: state.selectedEquipRefiningEquipName,
-        selectedEquipRefiningEquip: state.selectedEquipRefiningEquip,
-        selectEquipRefiningEquip: state.selectEquipRefiningEquip,
-        equipRefiningRecommendations: state.equipRefiningRecommendations,
-        equipRefiningEquipImageSrc: state.equipRefiningEquipImageSrc,
-        hasEquipRefiningEquipImage: state.hasEquipRefiningEquipImage,
-        handleEquipRefiningEquipImageError: state.handleEquipRefiningEquipImageError,
+        get isEquipRefiningCompact() {
+          return state.isEquipRefiningCompact;
+        },
+        get setEquipRefiningMobilePanel() {
+          return state.setEquipRefiningMobilePanel;
+        },
+        get equipRefiningQuery() {
+          return state.equipRefiningQuery;
+        },
+        set equipRefiningQuery(value) {
+          if (state.equipRefiningQuery) {
+            state.equipRefiningQuery.value = value;
+          }
+        },
+        get equipRefiningEquipCount() {
+          return state.equipRefiningEquipCount;
+        },
+        get isEquipRefiningSetCollapsed() {
+          return state.isEquipRefiningSetCollapsed;
+        },
+        get toggleEquipRefiningSetCollapsed() {
+          return state.toggleEquipRefiningSetCollapsed;
+        },
+        get isRecommendationExpanded() {
+          return state.isRecommendationExpanded;
+        },
+        get toggleRecommendationExpanded() {
+          return state.toggleRecommendationExpanded;
+        },
+        get hasMoreRecommendationCandidates() {
+          return state.hasMoreRecommendationCandidates;
+        },
+        get visibleRecommendationCandidates() {
+          return state.visibleRecommendationCandidates;
+        },
+        get equipRefiningGroupedSets() {
+          return state.equipRefiningGroupedSets;
+        },
+        get selectedEquipRefiningEquipName() {
+          return state.selectedEquipRefiningEquipName;
+        },
+        get selectedEquipRefiningEquip() {
+          return state.selectedEquipRefiningEquip;
+        },
+        get selectEquipRefiningEquip() {
+          return state.selectEquipRefiningEquip;
+        },
+        get equipRefiningRecommendations() {
+          return state.equipRefiningRecommendations;
+        },
+        get equipRefiningEquipImageSrc() {
+          return state.equipRefiningEquipImageSrc;
+        },
+        get hasEquipRefiningEquipImage() {
+          return state.hasEquipRefiningEquipImage;
+        },
+        get handleEquipRefiningEquipImageError() {
+          return state.handleEquipRefiningEquipImageError;
+        },
         hasImage: state.hasImage,
         weaponImageSrc: state.weaponImageSrc,
         weaponCharacters: state.weaponCharacters,
@@ -1392,8 +1592,12 @@
         storageErrorClearTargetKeys: state.storageErrorClearTargetKeys,
         storageFeedbackUrl: state.storageFeedbackUrl,
         dismissRuntimeWarning: state.dismissRuntimeWarning,
-        optionalFailureNotices: state.optionalFailureNotices,
-        optionalFailureNotice: state.optionalFailureNotice,
+        toastNotices: state.toastNotices,
+        toastNotice: state.toastNotice,
+        toastDefaultDurationMs: state.toastDefaultDurationMs,
+        dismissToastNotice: state.dismissToastNotice,
+        runToastAction: state.runToastAction,
+        activateToastNotice: state.activateToastNotice,
         hasOptionalFailureHistory: state.hasOptionalFailureHistory,
         dismissOptionalFailureNotice: state.dismissOptionalFailureNotice,
         openOptionalFailureDetailByLogId: state.openOptionalFailureDetailByLogId,
@@ -1470,27 +1674,65 @@
         handleBackgroundFile: state.handleBackgroundFile,
         clearCustomBackground: state.clearCustomBackground,
         // Strategy Module
-        characters: state.characters,
-        visibleCharacters: state.visibleCharacters,
-        characterGridTopSpacer: state.characterGridTopSpacer,
-        characterGridBottomSpacer: state.characterGridBottomSpacer,
+        get characters() {
+          return state.characters;
+        },
+        get visibleCharacters() {
+          return state.visibleCharacters;
+        },
+        get characterGridTopSpacer() {
+          return state.characterGridTopSpacer;
+        },
+        get characterGridBottomSpacer() {
+          return state.characterGridBottomSpacer;
+        },
         charactersLoading: state.charactersLoading,
         charactersLoaded: state.charactersLoaded,
-        selectedCharacterId: state.selectedCharacterId,
-        currentCharacter: state.currentCharacter,
-        currentGuide: state.currentGuide,
-        skillLevelLabels: state.skillLevelLabels,
-        getSkillTables: state.getSkillTables,
-        guideRows: state.guideRows,
-        teamSlots: state.teamSlots,
-        strategyCategory: state.strategyCategory,
-        strategyTab: state.strategyTab,
-        selectCharacter: state.selectCharacter,
-        setStrategyCategory: state.setStrategyCategory,
-        setStrategyTab: state.setStrategyTab,
-        backToCharacterList: state.backToCharacterList,
-        guideBeforeLeave: state.guideBeforeLeave,
-        guideEnter: state.guideEnter,
+        get selectedCharacterId() {
+          return state.selectedCharacterId;
+        },
+        get currentCharacter() {
+          return state.currentCharacter;
+        },
+        get currentGuide() {
+          return state.currentGuide;
+        },
+        get skillLevelLabels() {
+          return state.skillLevelLabels;
+        },
+        get getSkillTables() {
+          return state.getSkillTables;
+        },
+        get guideRows() {
+          return state.guideRows;
+        },
+        get teamSlots() {
+          return state.teamSlots;
+        },
+        get strategyCategory() {
+          return state.strategyCategory;
+        },
+        get strategyTab() {
+          return state.strategyTab;
+        },
+        get selectCharacter() {
+          return state.selectCharacter;
+        },
+        get setStrategyCategory() {
+          return state.setStrategyCategory;
+        },
+        get setStrategyTab() {
+          return state.setStrategyTab;
+        },
+        get backToCharacterList() {
+          return state.backToCharacterList;
+        },
+        get guideBeforeLeave() {
+          return state.guideBeforeLeave;
+        },
+        get guideEnter() {
+          return state.guideEnter;
+        },
       };
     },
   });

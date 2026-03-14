@@ -211,16 +211,46 @@
     onMounted(() => {
       cleanupLegacyNoticeKeys();
 
-      const autoOpenNotice = async () => {
+      const remindNewNotice = async () => {
         await ensureModalContent(false);
         if (!state.contentLoaded.value) return;
+        const currentVersion = (state.announcement.value || {}).version;
+        if (!currentVersion) return;
         const skippedVersion = readNoticeSkipVersion();
-        if (skippedVersion !== (state.announcement.value || {}).version) {
-          state.skipNotice.value = false;
-          state.showNotice.value = true;
+        if (skippedVersion === currentVersion) return;
+        if (typeof state.pushToastNotice === "function") {
+          const title =
+            typeof state.t === "function"
+              ? state.t("notice.new_announcement_title")
+              : "新公告已发布";
+          const summary =
+            typeof state.t === "function"
+              ? state.t("notice.new_announcement_summary")
+              : "点击查看公告详情，或稍后从菜单打开。";
+        state.pushToastNotice(
+          {
+            title,
+            summary,
+            onActivate: () => {
+              openNotice();
+            },
+            tone: "info",
+            icon: "i",
+            durationMs: 9000,
+            signature: `announcement:${currentVersion}`,
+            ariaLabel: title,
+          },
+            {
+              signature: `announcement:${currentVersion}`,
+              dedupWindowMs: 30000,
+            }
+          );
+          return;
         }
+        state.skipNotice.value = false;
+        state.showNotice.value = true;
       };
-      autoOpenNotice();
+      remindNewNotice();
 
       window.addEventListener("pageshow", handleLifecycleRecovery);
       window.addEventListener("focus", handleLifecycleRecovery);
