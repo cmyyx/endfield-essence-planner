@@ -223,17 +223,14 @@
             typeof state.t === "function"
               ? state.t("notice.new_announcement_title")
               : "新公告已发布";
-          const summary =
-            typeof state.t === "function"
-              ? state.t("notice.new_announcement_summary")
-              : "点击查看公告详情，或稍后从菜单打开。";
-          const actionLabel =
-            typeof state.t === "function" ? state.t("notice.new_announcement_action") : "查看公告";
+        const summary =
+          typeof state.t === "function"
+            ? state.t("notice.new_announcement_summary")
+            : "点击查看公告详情，或稍后从菜单打开。";
         state.pushToastNotice(
           {
             title,
             summary,
-            actionLabel,
             onActivate: () => {
               openNotice();
             },

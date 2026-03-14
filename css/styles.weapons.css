@@ -550,12 +550,14 @@
         align-items: center;
         gap: 4px;
         max-width: 100%;
+        min-width: 0;
       }
 
-      .weapon-name .weapon-title-text {
+      .weapon-title-text {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        min-width: 0;
       }
 
       .weapon-name .custom-weapon-badge {
@@ -1151,11 +1153,11 @@
           right: clamp(24px, 7vw, 44px);
           bottom: auto;
           max-height: calc(
-            100vh -
-              clamp(92px, 14vh, 156px) -
-              clamp(72px, 14vh, 140px) -
-              env(safe-area-inset-bottom, 0px) -
-              var(--viewport-safe-bottom, 0px)
+            100vh
+              - clamp(92px, 14vh, 156px)
+              - clamp(72px, 14vh, 140px)
+              - env(safe-area-inset-bottom, 0px)
+              - var(--viewport-safe-bottom, 0px)
           );
           padding: 14px 14px 16px;
           border-radius: 14px;
@@ -1884,10 +1886,6 @@
 
         .weapon-fallback {
           font-size: 10px;
-        }
-
-        .custom-weapon-grid {
-          grid-template-columns: 1fr;
         }
 
       }

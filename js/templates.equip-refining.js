@@ -65,7 +65,9 @@
             </div>
             <div class="weapon-band"></div>
             <div class="weapon-name">
-              <div class="weapon-title equip-refining-name">{{ equip.name }}</div>
+            <div class="weapon-title equip-refining-name">
+              <span class="weapon-title-text">{{ equip.name }}</span>
+            </div>
               <div class="equip-refining-equip-meta">{{ equip.part }}</div>
             </div>
           </button>
@@ -116,7 +118,9 @@
         </div>
         <div class="weapon-band"></div>
         <div class="weapon-name">
-          <div class="weapon-title equip-refining-name">{{ candidate.equip.name }}</div>
+        <div class="weapon-title equip-refining-name">
+          <span class="weapon-title-text">{{ candidate.equip.name }}</span>
+        </div>
           <div class="equip-refining-equip-meta">{{ candidate.equip.part }}</div>
         </div>
       </div>
@@ -164,7 +168,9 @@
         </div>
         <div class="weapon-band"></div>
         <div class="weapon-name">
-          <div class="weapon-title equip-refining-name">{{ selectedEquip.name }}</div>
+        <div class="weapon-title equip-refining-name">
+          <span class="weapon-title-text">{{ selectedEquip.name }}</span>
+        </div>
           <div class="equip-refining-equip-meta">{{ selectedEquip.part }}</div>
         </div>
       </div>

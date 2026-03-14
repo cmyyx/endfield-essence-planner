@@ -763,6 +763,7 @@
         isViewBundleRegistered(view) ? String(getViewLoadEntry(view).error || "") : "";
 
       const viewLoadRegistry = new Map();
+      const viewLoadRetryRegistry = new Set();
       const describeViewLoadError = (error) => {
         const message = String((error && error.message) || "");
         const failed = message.replace(/^Failed to load:\\s*/i, "").trim();
@@ -781,17 +782,7 @@
           }
           return Promise.resolve(true);
         }
-        if (options && options.force) {
-          viewLoadRegistry.delete(key);
-        }
-        if (viewLoadRegistry.has(key)) {
-          return viewLoadRegistry.get(key);
-        }
-        const task = (async () => {
-          setViewLoadEntry(key, { status: "loading", error: "" });
-          for (let index = 0; index < bundle.scripts.length; index += 1) {
-            await loadScriptOnce(bundle.scripts[index]);
-          }
+        const runViewInit = () => {
           let initFailed = false;
           if (Array.isArray(bundle.init)) {
             bundle.init.forEach((name) => {
@@ -811,9 +802,8 @@
           if (initFailed) {
             throw new Error("View init failed");
           }
-          setViewLoadEntry(key, { status: "ready", error: "" });
-          return true;
-        })().catch((error) => {
+        };
+        const handleViewLoadFailure = (error) => {
           const detail = describeViewLoadError(error);
           setViewLoadEntry(key, { status: "error", error: detail });
           viewLoadRegistry.delete(key);
@@ -821,7 +811,39 @@
             console.warn("[view-bundle] load failed", key, error);
           }
           return false;
-        });
+        };
+        const scheduleForceRetry = (task) => {
+          if (!task || viewLoadRetryRegistry.has(key)) return;
+          viewLoadRetryRegistry.add(key);
+          Promise.resolve(task).then((result) => {
+            if (!viewLoadRetryRegistry.has(key)) return;
+            viewLoadRetryRegistry.delete(key);
+            if (!result) return;
+            try {
+              setViewLoadEntry(key, { status: "loading", error: "" });
+              runViewInit();
+              setViewLoadEntry(key, { status: "ready", error: "" });
+            } catch (error) {
+              handleViewLoadFailure(error);
+            }
+          });
+        };
+        if (viewLoadRegistry.has(key)) {
+          const existing = viewLoadRegistry.get(key);
+          if (options && options.force) {
+            scheduleForceRetry(existing);
+          }
+          return existing;
+        }
+        const task = (async () => {
+          setViewLoadEntry(key, { status: "loading", error: "" });
+          for (let index = 0; index < bundle.scripts.length; index += 1) {
+            await loadScriptOnce(bundle.scripts[index]);
+          }
+          runViewInit();
+          setViewLoadEntry(key, { status: "ready", error: "" });
+          return true;
+        })().catch(handleViewLoadFailure);
         viewLoadRegistry.set(key, task);
         return task;
       };
@@ -1654,10 +1676,10 @@
         dismissToastNotice: state.dismissToastNotice,
         runToastAction: state.runToastAction,
         activateToastNotice: state.activateToastNotice,
-        hasOptionalFailureHistory: state.hasOptionalFailureHistory,
+        hasRuntimeWarningHistory: state.hasRuntimeWarningHistory,
         dismissOptionalFailureNotice: state.dismissOptionalFailureNotice,
         openOptionalFailureDetailByLogId: state.openOptionalFailureDetailByLogId,
-        openLatestOptionalFailureDetail: state.openLatestOptionalFailureDetail,
+        openLatestRuntimeWarningDetail: state.openLatestRuntimeWarningDetail,
         ignoreRuntimeWarnings: state.ignoreRuntimeWarnings,
         requestIgnoreRuntimeWarnings: state.requestIgnoreRuntimeWarnings,
         cancelIgnoreRuntimeWarnings: state.cancelIgnoreRuntimeWarnings,

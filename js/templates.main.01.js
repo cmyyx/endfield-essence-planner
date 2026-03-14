@@ -144,15 +144,15 @@
                   {{ t("tutorial.don_t_auto_open_this_version_s_tutorial") }}
                 </label>
               </div>
-              <div v-if="hasOptionalFailureHistory" class="secondary-item">
-                <div class="secondary-label">{{ t("error.optional_feature_load_failed") }}</div>
+              <div v-if="hasRuntimeWarningHistory" class="secondary-item">
+                <div class="secondary-label">{{ t("error.runtime_warning_history") }}</div>
                 <div class="secondary-actions">
-                  <button class="ghost-button secondary-warning-action" @click="openLatestOptionalFailureDetail">
-                    {{ t("error.view_optional_failure_details") }}
+                  <button class="ghost-button secondary-warning-action" @click="openLatestRuntimeWarningDetail">
+                    {{ t("error.view_runtime_warning_details") }}
                   </button>
                 </div>
                 <div class="secondary-hint secondary-warning">
-                  {{ t("warning.some_optional_features_could_not_be_loaded_core_page_usa") }}
+                  {{ t("warning.runtime_warning_history_hint") }}
                 </div>
               </div>
             </div>

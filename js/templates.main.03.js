@@ -274,7 +274,9 @@
                     </div>
                     <div class="weapon-band"></div>
                     <div class="weapon-name">
-                      <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
+                      <div class="weapon-title">
+                        <span class="weapon-title-text">{{ tTerm("weapon", weapon.name) }}</span>
+                      </div>
                       <match-status-line
                         :weapon-name="weapon.name"
                         :t="t"
@@ -348,7 +350,9 @@
                         <div class="weapon-band"></div>
                         <div class="weapon-name">
                           <div class="weapon-title">
-                            {{ tTerm("weapon", matchSourceWeapon.name) }}
+                            <span class="weapon-title-text">
+                              {{ tTerm("weapon", matchSourceWeapon.name) }}
+                            </span>
                           </div>
                           <div class="weapon-type-subtitle">
                             {{ tTerm("type", matchSourceWeapon.type) }}
@@ -411,7 +415,9 @@
                       </div>
                       <div class="weapon-band"></div>
                       <div class="weapon-name">
-                        <div class="weapon-title">{{ tTerm("weapon", weapon.name) }}</div>
+                        <div class="weapon-title">
+                          <span class="weapon-title-text">{{ tTerm("weapon", weapon.name) }}</span>
+                        </div>
                         <match-status-line
                           :weapon-name="weapon.name"
                           :t="t"

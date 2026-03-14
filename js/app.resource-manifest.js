@@ -32,6 +32,11 @@
           retryDelayMs: 1200,
           maxRetries: 1,
         },
+      "./js/analytics.bootstrap.js": {
+        featureKey: "analytics",
+        retryDelayMs: 1200,
+        maxRetries: 1,
+      },
       },
     },
     app: {

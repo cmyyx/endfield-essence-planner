@@ -2,7 +2,7 @@
   const modules = (window.AppModules = window.AppModules || {});
 
   modules.initUi = function initUi(ctx, state) {
-    const { ref, onMounted, onBeforeUnmount, nextTick } = ctx;
+    const { ref, computed, onMounted, onBeforeUnmount, nextTick } = ctx;
 
     const showBackToTop = state.showBackToTop;
     const showLangMenu = state.showLangMenu;
@@ -88,6 +88,18 @@
     let lastRuntimeWarningAt = 0;
     const toastNotices = state.toastNotices || ref([]);
     const toastNotice = state.toastNotice || ref(null);
+    const runtimeWarningLogs = state.runtimeWarningLogs || ref([]);
+    if (!state.runtimeWarningLogs) {
+      state.runtimeWarningLogs = runtimeWarningLogs;
+    }
+    const hasRuntimeWarningHistory =
+      state.hasRuntimeWarningHistory && typeof state.hasRuntimeWarningHistory === "object"
+        ? state.hasRuntimeWarningHistory
+        : computed(
+            () =>
+              Array.isArray(runtimeWarningLogs.value) && runtimeWarningLogs.value.length > 0
+          );
+    state.hasRuntimeWarningHistory = hasRuntimeWarningHistory;
     const optionalFailureHistory = state.optionalFailureHistory || ref([]);
     const hasOptionalFailureHistory = state.hasOptionalFailureHistory || ref(false);
     hasOptionalFailureHistory.value =
@@ -294,11 +306,19 @@
         normalized.signature = signature;
       }
       const current = Array.isArray(toastNotices.value) ? toastNotices.value : [];
+      const removedBySignature = signature
+        ? current.filter((item) => String((item && item.signature) || "") === signature)
+        : [];
       const withoutSameSignature = signature
         ? current.filter((item) => String((item && item.signature) || "") !== signature)
         : current.slice();
       const nextVisible = [normalized].concat(withoutSameSignature).slice(0, toastVisibleLimit);
       const dropped = [normalized].concat(withoutSameSignature).slice(toastVisibleLimit);
+      removedBySignature.forEach((item) => {
+        if (item && item.id) {
+          clearToastTimer(item.id);
+        }
+      });
       dropped.forEach((item) => {
         if (item && item.id) {
           clearToastTimer(item.id);
@@ -332,8 +352,8 @@
         durationMs: toastDefaultDurationMs,
         ariaLabel:
           typeof state.t === "function"
-            ? state.t("error.view_optional_failure_details")
-            : "查看可选失败详情",
+            ? state.t("error.view_runtime_warning_details")
+            : "查看错误详情",
         onActivate: () => openOptionalFailureDetailByLogId(entry.id),
       };
       const nextHistory = [notice].concat(
@@ -366,13 +386,16 @@
       }
       dismissOptionalFailureNotice(logId);
     };
-    const openLatestOptionalFailureDetail = () => {
+    const openLatestRuntimeWarningDetail = () => {
       const first =
-        optionalFailureHistory && Array.isArray(optionalFailureHistory.value)
-          ? optionalFailureHistory.value[0]
+        runtimeWarningLogs && Array.isArray(runtimeWarningLogs.value)
+          ? runtimeWarningLogs.value[0]
           : null;
       if (!first) return;
-      openOptionalFailureDetailByLogId(first.logId);
+      openOptionalFailureDetailByLogId(first.id || first.logId);
+    };
+    const openLatestOptionalFailureDetail = () => {
+      openLatestRuntimeWarningDetail();
     };
     const showUiInitWarning = (error, meta) => {
       const runtimeWarningCurrent = state.runtimeWarningCurrent;
@@ -1030,6 +1053,8 @@
     state.dismissOptionalFailureNotice = dismissOptionalFailureNotice;
     state.openOptionalFailureDetailByLogId = openOptionalFailureDetailByLogId;
     state.openLatestOptionalFailureDetail = openLatestOptionalFailureDetail;
+    state.hasRuntimeWarningHistory = hasRuntimeWarningHistory;
+    state.openLatestRuntimeWarningDetail = openLatestRuntimeWarningDetail;
     state.reloadBypassCache = reloadBypassCache;
     state.exportRuntimeDiagnosticBundle = exportRuntimeDiagnosticBundle;
   };
