@@ -13,7 +13,12 @@
                                   class="equip-icon-frame"
                                   :class="weapon.rarity === 6 ? 'weapon-rarity-6' : weapon.rarity === 5 ? 'weapon-rarity-5' : weapon.rarity === 4 ? 'weapon-rarity-4' : ''"
                                 >
-                                  <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="equip-icon" alt="" />
+                                  <img
+                                    v-if="hasImage(weapon)"
+                                    v-lazy-src="weaponImageSrc(weapon)"
+                                    class="equip-icon"
+                                    alt=""
+                                  />
                                 </div>
                                 <div class="equip-text">
                                   <div class="equip-name">{{ weapon.name }}</div>
@@ -28,7 +33,12 @@
                                 class="equip-icon-frame"
                                 :class="equip.rarity === 5 ? 'equip-rarity-5' : equip.rarity === 4 ? 'equip-rarity-4' : ''"
                               >
-                                <img v-if="equip.icon" v-lazy-src="equip.icon" class="equip-icon" alt="" />
+                                <img
+                                  v-if="hasEquipImage(equip)"
+                                  v-lazy-src="equipImageSrc(equip)"
+                                  class="equip-icon"
+                                  alt=""
+                                />
                               </div>
                               <div class="equip-text">
                                 <div class="equip-name">{{ equip.name }}</div>
@@ -83,7 +93,12 @@
                                     class="team-icon-frame"
                                     :class="weapon.rarity === 6 ? 'weapon-rarity-6' : weapon.rarity === 5 ? 'weapon-rarity-5' : weapon.rarity === 4 ? 'weapon-rarity-4' : ''"
                                   >
-                                    <img v-if="weapon.icon" v-lazy-src="weapon.icon" class="team-icon" alt="" />
+                                    <img
+                                      v-if="hasImage(weapon)"
+                                      v-lazy-src="weaponImageSrc(weapon)"
+                                      class="team-icon"
+                                      alt=""
+                                    />
                                   </div>
                                   <div class="team-text">
                                     <div class="team-item-name">{{ weapon.name }}</div>
@@ -96,12 +111,17 @@
                               <span class="team-label">{{ t("badge.item_7") }}</span>
                               <div class="team-items">
                                 <div v-for="(equip, eIdx) in (entry.equipment || [])" :key="eIdx" class="team-item">
-                                  <div
-                                    class="team-icon-frame"
-                                    :class="equip.rarity === 5 ? 'equip-rarity-5' : equip.rarity === 4 ? 'equip-rarity-4' : ''"
-                                  >
-                                    <img v-if="equip.icon" v-lazy-src="equip.icon" class="team-icon" alt="" />
-                                  </div>
+                                <div
+                                  class="team-icon-frame"
+                                  :class="equip.rarity === 5 ? 'equip-rarity-5' : equip.rarity === 4 ? 'equip-rarity-4' : ''"
+                                >
+                                  <img
+                                    v-if="hasEquipImage(equip)"
+                                    v-lazy-src="equipImageSrc(equip)"
+                                    class="team-icon"
+                                    alt=""
+                                  />
+                                </div>
                                   <div class="team-text">
                                     <div class="team-item-name">{{ equip.name }}</div>
                                     <div class="team-note" v-if="equip.note">{{ equip.note }}</div>

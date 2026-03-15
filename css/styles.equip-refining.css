@@ -176,6 +176,12 @@
   display: block;
 }
 
+.equip-refining-name.weapon-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .equip-refining-selected-card .equip-refining-name {
   font-size: clamp(13px, 1.06vw, 16px);
 }

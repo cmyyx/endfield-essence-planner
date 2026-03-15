@@ -100,17 +100,47 @@
     const isEquipRefiningCompact = ref(false);
     const equipRefiningMobileListScrollY = ref(0);
     const recommendationRowCapacity = ref(1);
-    const selectedEquipRefiningEquipName = ref(equipList.length ? equipList[0].name : "");
+    const storedEquipRefiningName =
+      state.equipRefiningSelectedName && state.equipRefiningSelectedName.value
+        ? String(state.equipRefiningSelectedName.value)
+        : "";
+    const initialEquipRefiningName =
+      storedEquipRefiningName && equipMap.has(storedEquipRefiningName)
+        ? storedEquipRefiningName
+        : equipList.length
+          ? equipList[0].name
+          : "";
+    const selectedEquipRefiningEquipName = ref(initialEquipRefiningName);
+    if (state.equipRefiningSelectedName && initialEquipRefiningName) {
+      state.equipRefiningSelectedName.value = initialEquipRefiningName;
+    }
 
     const equipImageMap =
       window.EQUIP_IMAGES && typeof window.EQUIP_IMAGES === "object"
         ? window.EQUIP_IMAGES
         : {};
+    const formatEquipMediaPath = (path) => {
+      if (!path) return "";
+      if (/^(https?:)?\/\//.test(path)) return encodeURI(path);
+      if (path.startsWith("./") || path.startsWith("../")) return encodeURI(path);
+      return encodeURI(`./${path.replace(/^\/+/, "")}`);
+    };
+    const resolveEquipImageOverride = (equip) => {
+      if (!equip) return "";
+      const override = equip.image || equip.icon;
+      if (!override) return "";
+      return formatEquipMediaPath(override);
+    };
     const hasEquipRefiningEquipImage = (equip) =>
-      Boolean(equip && equip.name && equipImageMap[equip.name]) &&
-      !imageErrorNameSet.value.has(equip.name);
+      Boolean(
+        equip &&
+          (equip.image || equip.icon || (equip.name && equipImageMap[equip.name]))
+      ) && !imageErrorNameSet.value.has(equip && equip.name);
     const equipRefiningEquipImageSrc = (equip) => {
-      if (!equip || !equip.name) return "";
+      if (!equip) return "";
+      const override = resolveEquipImageOverride(equip);
+      if (override) return override;
+      if (!equip.name) return "";
       const internalName = equipImageMap[equip.name];
       if (!internalName) return "";
       return encodeURI(`./image/equip/${internalName}.avif`);
@@ -177,7 +207,7 @@
     };
     const syncEquipRefiningLayout = () => {
       syncCompactLayout();
-      syncRecommendationRowCapacity();
+      scheduleRecommendationRowCapacitySync();
     };
 
     onMounted(() => {
@@ -207,9 +237,15 @@
       if (!equip || !equip.name || !equipMap.has(equip.name)) return;
       if (selectedEquipRefiningEquipName.value === equip.name) {
         selectedEquipRefiningEquipName.value = "";
+        if (state.equipRefiningSelectedName) {
+          state.equipRefiningSelectedName.value = "";
+        }
         return;
       }
       selectedEquipRefiningEquipName.value = equip.name;
+      if (state.equipRefiningSelectedName) {
+        state.equipRefiningSelectedName.value = equip.name;
+      }
       if (isEquipRefiningCompact.value) setEquipRefiningMobilePanel("recommend");
     };
 
@@ -405,13 +441,33 @@
     };
 
     if (typeof watch === "function") {
+      if (state.equipRefiningSelectedName) {
+        watch(selectedEquipRefiningEquipName, (value) => {
+          if (state.equipRefiningSelectedName.value !== value) {
+            state.equipRefiningSelectedName.value = value || "";
+          }
+        });
+      }
+
       watch(
         [selectedEquipRefiningEquipName, equipRefiningRecommendations],
         () => {
           scheduleRecommendationRowCapacitySync();
         },
-        { deep: false }
+        { deep: false, immediate: true, flush: "post" }
       );
+
+      if (state.currentView) {
+        watch(
+          state.currentView,
+          (value) => {
+            if (value === "equip-refining") {
+              scheduleRecommendationRowCapacitySync();
+            }
+          },
+          { immediate: true }
+        );
+      }
     }
 
     const equipRefiningEquipCount = computed(() => equipList.length);

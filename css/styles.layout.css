@@ -2184,7 +2184,7 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
         background: rgba(255, 255, 255, 0.03);
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 1fr;
         align-items: center;
         gap: 12px;
       }
@@ -3142,12 +3142,28 @@
       }
 
       .material-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         background: rgba(255, 255, 255, 0.08);
         padding: 4px 10px;
         border-radius: 4px;
         font-size: 13px;
         color: var(--text);
         border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .material-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        object-fit: contain;
+        background: rgba(8, 12, 18, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .material-name {
+        line-height: 1.2;
       }
 
       .material-tag.is-empty {

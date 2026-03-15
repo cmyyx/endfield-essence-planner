@@ -96,6 +96,7 @@
     state.mobilePanel = ref("weapons");
     state.matchMobilePanel = ref("source");
     state.equipRefiningMobilePanel = ref("equips");
+    state.equipRefiningSelectedName = ref("");
     state.showWeaponAttrs = ref(false);
     state.showWeaponOwnership = ref(false);
     state.showAttrHint = ref(false);

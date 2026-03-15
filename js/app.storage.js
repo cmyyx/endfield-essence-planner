@@ -468,6 +468,12 @@
           if (restored.filterS1) state.filterS1.value = restored.filterS1;
           if (restored.filterS2) state.filterS2.value = restored.filterS2;
           if (restored.filterS3) state.filterS3.value = restored.filterS3;
+          if (
+            typeof restored.equipRefiningSelectedName === "string" &&
+            state.equipRefiningSelectedName
+          ) {
+            state.equipRefiningSelectedName.value = restored.equipRefiningSelectedName;
+          }
         }
       }
     } catch (error) {
@@ -664,6 +670,9 @@
         filterS1: state.filterS1.value,
         filterS2: state.filterS2.value,
         filterS3: state.filterS3.value,
+        equipRefiningSelectedName: state.equipRefiningSelectedName
+          ? state.equipRefiningSelectedName.value
+          : "",
         mobilePanel: state.mobilePanel.value,
         filterPanelManuallySet: Boolean(
           state.filterPanelManuallySet && state.filterPanelManuallySet.value

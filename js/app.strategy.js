@@ -150,13 +150,41 @@
       return stripped.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]/g, "");
     };
 
+    const buildAvatarPathCandidates = (name) => {
+      const raw = stripAvatarName(name);
+      if (!raw) return [];
+      const candidates = [];
+      candidates.push(`image/characters/${raw}.avif`);
+
+      const base = raw.replace(/[\u7537\u5973]$/u, "").trim();
+      if (base && base !== raw) {
+        const gender = /\u7537$/u.test(raw) ? "\u7537" : "\u5973";
+        candidates.push(`image/characters/${base}(${gender}).avif`);
+      } else {
+        candidates.push(`image/characters/${raw}(\u5973).avif`);
+        candidates.push(`image/characters/${raw}(\u7537).avif`);
+      }
+
+      return Array.from(new Set(candidates));
+    };
+
+    const resolveAvatarFromName = (name) => {
+      if (!name) return "";
+      if (typeof state.characterImageSrc === "function") {
+        const src = state.characterImageSrc(name);
+        if (src) return src;
+      }
+      const fallbackCandidates = buildAvatarPathCandidates(name);
+      return fallbackCandidates[0] || "";
+    };
+
     const findCharacterAvatarByName = (name) => {
       const target = normalizeNameForAvatar(name);
       if (!target) return "";
 
       let bestMatch = null;
       state.characters.value.forEach((character) => {
-        if (!character || !character.name || !character.avatar) return;
+        if (!character || !character.name) return;
         const current = normalizeNameForAvatar(character.name);
         if (!current) return;
 
@@ -176,12 +204,13 @@
           bestMatch = {
             score,
             length: current.length,
-            avatar: character.avatar,
+            name: character.name,
           };
         }
       });
 
-      return bestMatch ? bestMatch.avatar : "";
+      if (bestMatch) return resolveAvatarFromName(bestMatch.name);
+      return resolveAvatarFromName(name);
     };
 
     const normalizeTeamSlots = (slots) => {
@@ -211,9 +240,6 @@
     };
 
     const resolveTeamAvatar = (option, slot) => {
-      if (option && option.avatar) return option.avatar;
-      if (slot && slot.avatar) return slot.avatar;
-
       const names = [option && option.name, slot && slot.name].filter(Boolean);
       for (let index = 0; index < names.length; index += 1) {
         const found = findCharacterAvatarByName(names[index]);
@@ -222,24 +248,6 @@
 
       const fallbackCandidates = names.flatMap((name) => buildAvatarPathCandidates(name));
       return fallbackCandidates[0] || "";
-    };
-
-    const buildAvatarPathCandidates = (name) => {
-      const raw = stripAvatarName(name);
-      if (!raw) return [];
-      const candidates = [];
-      candidates.push(`image/characters/${raw}.avif`);
-
-      const base = raw.replace(/[\u7537\u5973]$/u, "").trim();
-      if (base && base !== raw) {
-        const gender = /\u7537$/u.test(raw) ? "\u7537" : "\u5973";
-        candidates.push(`image/characters/${base}(${gender}).avif`);
-      } else {
-        candidates.push(`image/characters/${raw}(\u5973).avif`);
-        candidates.push(`image/characters/${raw}(\u7537).avif`);
-      }
-
-      return Array.from(new Set(candidates));
     };
 
     state.currentGuide = computed(() => {
@@ -516,14 +524,18 @@
       }
     };
 
-    watch(() => state.currentView.value, async (view) => {
-      if (view === "strategy") {
-        invalidateCharacterVirtualMetrics();
-        const loaded = await ensureCharacterDataLoaded();
-        if (!loaded) return;
-        scheduleCharacterVirtualWindow();
-      }
-    });
+    watch(
+      () => state.currentView.value,
+      async (view) => {
+        if (view === "strategy") {
+          invalidateCharacterVirtualMetrics();
+          const loaded = await ensureCharacterDataLoaded();
+          if (!loaded) return;
+          scheduleCharacterVirtualWindow();
+        }
+      },
+      { immediate: true }
+    );
 
     watch(
       [() => state.characters.value.length, state.selectedCharacterId, state.charactersLoaded],

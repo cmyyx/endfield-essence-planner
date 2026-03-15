@@ -474,7 +474,11 @@
                  @click="selectCharacter(char.id)"
                >
                  <div class="character-avatar">
-                   <img v-lazy-src="char.avatar" :alt="char.name" loading="lazy" />
+                   <img
+                     v-lazy-src="characterImageSrc(char.name || char.id)"
+                     :alt="char.name"
+                     loading="lazy"
+                   />
                  </div>
                  <div class="character-info">
                    <div class="character-name">{{ char.name }}</div>
@@ -499,7 +503,11 @@
                     ← {{ t("plan.item_2") }}
                   </button>
                   <div class="hero-identity">
-                    <img v-lazy-src="currentCharacter.avatar" :alt="currentCharacter.name" class="detail-avatar hero-avatar" />
+                    <img
+                      v-lazy-src="characterImageSrc(currentCharacter.name || currentCharacter.id)"
+                      :alt="currentCharacter.name"
+                      class="detail-avatar hero-avatar"
+                    />
                     <div class="hero-title">
                       <div class="hero-name-row">
                         <h1>{{ currentCharacter.name }}</h1>
@@ -565,12 +573,6 @@
               </div>
 
               <div class="detail-tabs detail-tabs-sub">
-                <div class="detail-sub-header">
-                  <span class="detail-sub-label">{{ t("plan.item_7") }}</span>
-                  <span class="detail-sub-title">
-                    {{ strategyCategory === 'guide' ? t("guide.item_7") : t("guide.item_6") }}
-                  </span>
-                </div>
                 <div class="detail-sub-tabs">
                   <button
                     v-if="strategyCategory === 'info'"
@@ -672,8 +674,18 @@
                               v-for="(mat, idx) in currentCharacter.materials[level]"
                               :key="idx"
                               class="material-tag"
+                              :class="{ 'has-icon': hasItemImage(mat) }"
                             >
-                              {{ mat }}
+                              <img
+                                v-if="hasItemImage(mat)"
+                                class="material-icon"
+                                v-lazy-src="itemImageSrc(mat)"
+                                :alt="resolveItemLabel(mat)"
+                                loading="lazy"
+                                decoding="async"
+                                @error="handleCharacterImageError"
+                              />
+                              <span class="material-name">{{ resolveItemLabel(mat) }}</span>
                             </span>
                           </template>
                           <span v-else class="material-tag is-empty">-</span>

@@ -664,6 +664,12 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   border-color: rgba(22, 44, 72, 0.14);
 }
 
+[data-theme="light"] .stat-item {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(22, 44, 72, 0.16);
+  box-shadow: 0 8px 16px rgba(44, 77, 118, 0.12);
+}
+
 [data-theme="light"] .strategy-loading,
 [data-theme="light"] .strategy-empty {
   background: rgba(245, 250, 255, 0.94);
@@ -752,6 +758,11 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   background: rgba(245, 250, 255, 0.65);
   border-color: rgba(22, 44, 72, 0.16);
   color: #254663;
+}
+
+[data-theme="light"] .material-icon {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(22, 44, 72, 0.18);
 }
 
 [data-theme="light"] .material-tag.is-empty {
