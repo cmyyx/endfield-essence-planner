@@ -23,8 +23,6 @@ window.I18N["en"] = {
     "只要方案里包含你设置的优先地区（地区1 > 地区2 > 其他），就先排在前面；同组里再看效率。": "If a plan includes your preferred region (Region 1 > Region 2 > Others), rank it first; compare efficiency within the same group.",
     "先看每个方案能覆盖多少把待刷武器；数量一样时，再按优先地区（地区1 > 地区2 > 其他）排序。": "First compare how many pending weapons each plan covers; when equal, sort by preferred region (Region 1 > Region 2 > Others).",
     "先按效率排序；只有效率完全一样时，才按优先地区（地区1 > 地区2 > 其他）排序。": "Sort by efficiency first; only when efficiency is exactly equal, sort by preferred region (Region 1 > Region 2 > Others).",
-    "日间": "Light",
-    "夜间": "Dark",
     "开": "On",
     "关": "Off",
     "当前：": "Current:",

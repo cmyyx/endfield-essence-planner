@@ -1713,7 +1713,7 @@
 
       .detail-section {
         margin-bottom: 32px;
-        background: rgba(var(--color-black-rgb), 0.2);
+        background: rgba(var(--color-black-rgb), 0.65);
         padding: 20px;
         border-radius: 8px;
       }
@@ -2261,7 +2261,7 @@
         padding: 12px 14px;
         border-radius: 10px;
         border: 1px solid rgba(var(--color-white-rgb), 0.08);
-        background: rgba(var(--color-black-rgb), 0.2);
+        background: rgba(var(--color-black-rgb), 0.65);
         display: flex;
         flex-direction: column;
         gap: 6px;
@@ -3060,7 +3060,7 @@
 
       .potential-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
       }
 
