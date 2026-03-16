@@ -150,25 +150,25 @@
 
     const rarityBadgeStyle = (rarity, withImage = false) => ({
       backgroundColor: withImage
-        ? "rgba(255,255,255,0.04)"
+        ? "rgba(var(--color-white-rgb), 0.04)"
         : rarity === 6
-          ? "#ff7000"
+          ? "rgba(255, 112, 0, 1)"
           : rarity === 5
-            ? "#ffba03"
+            ? "rgba(var(--color-rarity-5-rgb), 1)"
             : rarity === 4
-              ? "#9b6bff"
-              : "#9aa5b1",
-      color: withImage ? "transparent" : "#0c1118",
+              ? "rgba(var(--color-rarity-4-rgb), 1)"
+              : "rgba(var(--color-info-rgb), 1)",
+      color: withImage ? "transparent" : "rgba(var(--color-black-rgb), 1)",
     });
 
     const rarityTextStyle = (rarity) => ({
       color:
         rarity === 6
-          ? "#ff7000"
+          ? "rgba(255, 112, 0, 1)"
           : rarity === 5
-            ? "#ffba03"
+            ? "rgba(var(--color-rarity-5-rgb), 1)"
             : rarity === 4
-              ? "#9b6bff"
+              ? "rgba(var(--color-rarity-4-rgb), 1)"
               : "inherit",
     });
 

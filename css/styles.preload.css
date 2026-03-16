@@ -38,11 +38,11 @@ html.preload body::after {
 }
 
 #app-preload {
-  --preload-backdrop: rgba(6, 8, 12, 0.55);
-  --preload-card-bg: rgba(14, 20, 30, 0.85);
-  --preload-card-border: rgba(255, 255, 255, 0.12);
+  --preload-backdrop: rgba(var(--color-black-rgb), 0.55);
+  --preload-card-bg: rgba(var(--color-surface-rgb), 0.85);
+  --preload-card-border: rgba(var(--color-white-rgb), 0.12);
   --preload-sub: #9aa5b1;
-  --preload-track: rgba(255, 255, 255, 0.14);
+  --preload-track: rgba(var(--color-white-rgb), 0.14);
   --preload-fill: #4dd6c9;
   --preload-current: #cbd5e1;
   position: fixed;
@@ -60,7 +60,7 @@ html.preload body::after {
 
 html[data-theme="light"] #app-preload {
   --preload-backdrop: rgba(232, 239, 248, 0.72);
-  --preload-card-bg: rgba(255, 255, 255, 0.9);
+  --preload-card-bg: rgba(var(--color-white-rgb), 0.9);
   --preload-card-border: rgba(51, 79, 107, 0.2);
   --preload-sub: #4f647a;
   --preload-track: rgba(51, 79, 107, 0.18);
@@ -126,7 +126,7 @@ html[data-theme="light"] #app-preload {
   width: 100%;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--preload-fill), rgba(255, 255, 255, 0.75));
+  background: linear-gradient(90deg, var(--preload-fill), rgba(var(--color-white-rgb), 0.75));
   transform: scaleX(0);
   transform-origin: left center;
   will-change: transform;

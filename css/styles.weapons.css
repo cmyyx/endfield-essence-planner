@@ -230,15 +230,15 @@
         }
 
         .weapon-ownership-badge.is-owned {
-          border: 1px solid rgba(77, 214, 201, 0.5);
-          background: rgba(13, 58, 55, 0.88);
-          color: #b8f5f0;
+          border: 1px solid rgba(var(--color-accent-rgb), 0.5);
+          background: rgba(var(--color-ok-rgb), 0.88);
+          color: rgba(var(--color-accent-rgb), 0.9);
         }
 
         .weapon-ownership-badge.is-unowned {
-          border: 1px solid rgba(255, 196, 83, 0.5);
+          border: 1px solid rgba(var(--color-rarity-5-rgb), 0.5);
           background: rgba(45, 35, 18, 0.78);
-          color: #ffe8b4;
+          color: rgba(var(--color-rarity-5-rgb), 0.9);
           max-width: min(52%, 56px);
         }
 
@@ -449,7 +449,7 @@
         justify-content: flex-start;
         padding: 6px;
         border-radius: 10px;
-        border: 1px dashed rgba(255, 255, 255, 0.12);
+        border: 1px dashed rgba(var(--color-white-rgb), 0.12);
         background: rgba(8, 12, 18, 0.45);
       }
 
@@ -472,7 +472,7 @@
         gap: 10px;
         padding: 8px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(var(--color-white-rgb), 0.08);
         background: rgba(12, 18, 28, 0.75);
       }
 
@@ -482,8 +482,30 @@
         border-radius: 8px;
         overflow: hidden;
         flex: 0 0 auto;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        background: rgba(8, 12, 18, 0.6);
+        border: 1px solid rgba(var(--color-white-rgb), 0.16);
+        background: rgba(var(--color-black-rgb), 0.6);
+        position: relative;
+      }
+
+      .custom-weapon-thumb::after {
+        content: "CUSTOM";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(var(--color-accent-rgb), 0.9);
+        color: rgba(var(--color-black-rgb), 1);
+        font-size: 8px;
+        font-weight: 900;
+        text-align: center;
+        padding: 1px 0;
+        letter-spacing: 0.05em;
+        transform: scale(0.9);
+      }
+
+      [data-theme="light"] .custom-weapon-thumb::after {
+        background: rgba(var(--color-accent-rgb), 1);
+        color: #ffffff;
       }
 
       .custom-weapon-thumb img {
@@ -525,9 +547,11 @@
       }
 
       .badge.custom-weapon-badge {
-        border: 1px solid rgba(125, 211, 252, 0.6);
-        background: rgba(15, 44, 63, 0.6);
-        color: #b6e8ff;
+        border: 1px solid rgba(var(--color-accent-rgb), 0.6) !important;
+        background: rgba(var(--color-accent-rgb), 0.9) !important;
+        color: #ffffff !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+        font-weight: 800 !important;
       }
 
       .weapon-custom-chip {
@@ -535,14 +559,15 @@
         align-self: flex-end;
         padding: 2px 6px;
         border-radius: 999px;
-        border: 1px solid rgba(125, 211, 252, 0.6);
-        background: rgba(15, 44, 63, 0.7);
-        color: #b6e8ff;
+        border: 1px solid rgba(var(--color-accent-rgb), 0.6);
+        background: rgba(var(--color-accent-rgb), 0.9);
+        color: #ffffff;
         font-size: 10px;
-        font-weight: 700;
+        font-weight: 800;
         line-height: 1.1;
         letter-spacing: 0.04em;
         text-transform: uppercase;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
       }
 
       .weapon-name .weapon-title {
@@ -633,7 +658,7 @@
         aspect-ratio: 1 / 1;
         border-radius: 8px;
         border: 1px solid var(--stroke);
-        background: rgba(12, 14, 18, 0.92);
+        background: rgba(var(--color-black-rgb), 0.92);
         cursor: pointer;
         transition: 0.2s ease;
         overflow: hidden;
@@ -642,20 +667,20 @@
       }
 
       .weapon-item:hover {
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(var(--color-white-rgb), 0.35);
         transform: none;
       }
 
       .weapon-item.is-selected {
-        border-color: rgba(77, 214, 201, 0.95);
-        box-shadow: 0 0 0 2px rgba(77, 214, 201, 0.5), 0 0 0 6px rgba(77, 214, 201, 0.22),
-          0 20px 34px rgba(0, 0, 0, 0.5);
-        background: radial-gradient(120% 120% at 50% 0%, rgba(77, 214, 201, 0.28), rgba(12, 14, 18, 0.92) 60%);
+        border-color: rgba(var(--color-accent-rgb), 0.95);
+        box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.5), 0 0 0 6px rgba(var(--color-accent-rgb), 0.22),
+          0 20px 34px rgba(var(--color-black-rgb), 0.5);
+        background: radial-gradient(120% 120% at 50% 0%, rgba(var(--color-accent-rgb), 0.28), rgba(var(--color-black-rgb), 0.92) 60%);
       }
 
       .weapon-item.is-selected .weapon-name {
-        color: #e9fff9;
-        text-shadow: 0 2px 10px rgba(77, 214, 201, 0.35);
+        color: rgba(var(--color-accent-rgb), 1);
+        text-shadow: 0 2px 10px rgba(var(--color-accent-rgb), 0.35);
       }
 
       .weapon-item.is-essence-owned {
@@ -674,9 +699,9 @@
         z-index: 5;
         padding: 4px 8px;
         border-radius: 999px;
-        border: 1px solid rgba(128, 154, 183, 0.46);
-        background: rgba(128, 154, 183, 0.14);
-        color: #d8e6f4;
+        border: 1px solid rgba(var(--color-info-rgb), 0.46);
+        background: rgba(var(--color-info-rgb), 0.14);
+        color: rgba(var(--color-info-rgb), 1);
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
@@ -703,9 +728,9 @@
         min-width: 220px;
         padding: 10px 12px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(var(--color-white-rgb), 0.12);
         background: rgba(12, 18, 28, 0.98);
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), 0.45);
         z-index: 20;
       }
 
@@ -803,34 +828,35 @@
       }
 
       .secondary-warning {
-        color: #f0b45a;
+        color: rgba(var(--color-danger-rgb), 1);
       }
 
       .secondary-warning-action {
-        border-color: rgba(255, 188, 106, 0.55);
-        background: rgba(255, 188, 106, 0.18);
-        color: #ffe8bf;
+        border-color: rgba(var(--color-danger-rgb), 0.55);
+        background: rgba(var(--color-danger-rgb), 0.18);
+        color: rgba(var(--color-danger-rgb), 0.85);
       }
 
       .secondary-warning-action:hover {
-        border-color: rgba(255, 201, 132, 0.78);
-        background: rgba(255, 188, 106, 0.28);
+        border-color: rgba(var(--color-danger-rgb), 0.78);
+        background: rgba(var(--color-danger-rgb), 0.28);
       }
 
       [data-theme="light"] .secondary-warning-action {
-        border-color: rgba(176, 118, 19, 0.46);
-        background: rgba(255, 223, 156, 0.9);
-        color: #6b4908;
+        border-color: rgba(var(--color-danger-rgb), 0.45);
+        background: rgba(var(--color-danger-rgb), 0.12);
+        color: #8b3636;
+        font-weight: 700;
       }
 
       [data-theme="light"] .secondary-warning-action:hover {
-        border-color: rgba(176, 118, 19, 0.62);
-        background: rgba(255, 214, 133, 0.96);
-        color: #593d06;
+        border-color: rgba(var(--color-danger-rgb), 0.6);
+        background: rgba(var(--color-danger-rgb), 0.18);
+        color: #7a2d2d;
       }
 
       .secondary-desc {
-        border-top: 1px dashed rgba(255, 255, 255, 0.12);
+        border-top: 1px dashed rgba(var(--color-white-rgb), 0.12);
         padding-top: 8px;
         font-size: 11px;
         color: var(--muted);
@@ -854,8 +880,8 @@
         height: 16px;
         padding: 0 6px;
         border-radius: 999px;
-        border: 1px solid rgba(255, 130, 130, 0.72);
-        background: linear-gradient(135deg, #ff8a74, #ff5f6d);
+        border: 1px solid rgba(var(--color-danger-rgb), 0.72);
+        background: linear-gradient(135deg, rgba(var(--color-danger-rgb), 0.8), rgba(var(--color-danger-rgb), 1));
         color: #fff8f8;
         font-size: 9px;
         font-weight: 800;
@@ -889,9 +915,9 @@
         overflow: auto;
         padding: 12px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(var(--color-white-rgb), 0.14);
         background: rgba(12, 18, 28, 0.98);
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), 0.45);
         z-index: 28;
         display: grid;
         gap: 10px;
@@ -927,8 +953,8 @@
       .plan-config-section {
         display: grid;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(var(--color-white-rgb), 0.08);
+        background: rgba(var(--color-white-rgb), 0.03);
         overflow: hidden;
       }
 
@@ -947,7 +973,7 @@
       }
 
       .plan-config-section-header:hover {
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(var(--color-white-rgb), 0.04);
       }
 
       .plan-config-section-title {
@@ -974,7 +1000,7 @@
         display: grid;
         gap: 8px;
         padding: 8px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid rgba(var(--color-white-rgb), 0.06);
       }
 
       .plan-config-collapse-enter-active,
@@ -1011,7 +1037,7 @@
 
       .plan-config-rule-head {
         padding-bottom: 2px;
-        border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+        border-bottom: 1px dashed rgba(var(--color-white-rgb), 0.08);
       }
 
       .plan-config-rule-head-cell {
@@ -1092,8 +1118,8 @@
         gap: 6px;
         padding: 8px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(var(--color-white-rgb), 0.08);
+        background: rgba(var(--color-white-rgb), 0.03);
       }
 
       .plan-config-rule {
@@ -1104,7 +1130,7 @@
       .plan-config-rule + .plan-config-rule {
         margin-top: 4px;
         padding-top: 8px;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        border-top: 1px solid rgba(var(--color-white-rgb), 0.06);
       }
 
       .plan-config-rule-title {
@@ -1174,8 +1200,8 @@
         margin: 0 0 16px;
         padding: 12px 14px;
         border-radius: 14px;
-        border: 1px solid rgba(240, 180, 90, 0.35);
-        background: rgba(240, 180, 90, 0.08);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.35);
+        background: rgba(var(--color-rarity-5-rgb), 0.08);
         color: #ffd9b6;
         display: flex;
         flex-wrap: wrap;
@@ -1187,7 +1213,7 @@
         margin: 0 0 12px;
         padding: 10px 14px;
         border-radius: 12px;
-        border: 1px dashed rgba(77, 214, 201, 0.3);
+        border: 1px dashed rgba(var(--color-accent-rgb), 0.3);
         background: rgba(12, 18, 28, 0.7);
         display: flex;
         align-items: center;
@@ -1227,8 +1253,8 @@
       }
 
       .exclude-toggle.intent-alert {
-        border-color: rgba(243, 108, 108, 0.8);
-        background: rgba(243, 108, 108, 0.22);
+        border-color: rgba(var(--color-danger-rgb), 0.8);
+        background: rgba(var(--color-danger-rgb), 0.22);
         color: #ffe6e6;
       }
 
@@ -1258,9 +1284,9 @@
         position: absolute;
         inset: 0;
         border-radius: 8px;
-        border: 2px solid rgba(255, 255, 255, 0);
-        background: rgba(255, 255, 255, 0);
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+        border: 2px solid rgba(var(--color-white-rgb), 0);
+        background: rgba(var(--color-white-rgb), 0);
+        box-shadow: 0 0 0 0 rgba(var(--color-white-rgb), 0);
         opacity: 0;
         transition: 0.2s ease;
         z-index: 4;
@@ -1269,16 +1295,16 @@
 
       .weapon-item.is-selected::after {
         opacity: 1;
-        border-color: rgba(77, 214, 201, 0.85);
-        background: linear-gradient(135deg, rgba(77, 214, 201, 0.28), rgba(12, 14, 18, 0));
-        box-shadow: 0 0 0 3px rgba(77, 214, 201, 0.45), inset 0 0 24px rgba(77, 214, 201, 0.28);
+        border-color: rgba(var(--color-accent-rgb), 0.85);
+        background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.28), rgba(var(--color-black-rgb), 0));
+        box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.45), inset 0 0 24px rgba(var(--color-accent-rgb), 0.28);
       }
 
       .weapon-item:hover::after {
         opacity: 1;
-        border-color: rgba(255, 255, 255, 0.75);
-        background: rgba(255, 255, 255, 0.03);
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+        border-color: rgba(var(--color-white-rgb), 0.75);
+        background: rgba(var(--color-white-rgb), 0.03);
+        box-shadow: 0 0 0 2px rgba(var(--color-white-rgb), 0.4);
       }
 
       .weapon-item::before {
@@ -1397,9 +1423,9 @@
         max-width: 100%;
         padding: 2px 6px;
         border-radius: 999px;
-        border: 1px solid rgba(255, 196, 83, 0.65);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.65);
         background: rgba(45, 35, 18, 0.78);
-        color: #ffe8b4;
+        color: rgba(var(--color-rarity-5-rgb), 0.9);
         font-size: 11px;
         line-height: 1.15;
         white-space: nowrap;
@@ -1426,15 +1452,15 @@
       }
 
       .weapon-ownership-badge.is-owned {
-        border: 1px solid rgba(77, 214, 201, 0.5);
-        background: rgba(13, 58, 55, 0.88);
-        color: #b8f5f0;
+        border: 1px solid rgba(var(--color-accent-rgb), 0.5);
+        background: rgba(var(--color-ok-rgb), 0.88);
+        color: rgba(var(--color-accent-rgb), 0.9);
       }
 
       .weapon-ownership-badge.is-unowned {
-        border: 1px solid rgba(255, 196, 83, 0.5);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.5);
         background: rgba(45, 35, 18, 0.78);
-        color: #ffe8b4;
+        color: rgba(var(--color-rarity-5-rgb), 0.9);
         max-width: min(54%, 68px);
       }
 
@@ -1495,7 +1521,7 @@
         color: #f5f2ee;
         overflow: hidden;
         text-overflow: ellipsis;
-        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
+        text-shadow: 0 1px 6px rgba(var(--color-black-rgb), 0.65);
         z-index: 3;
       }
 
@@ -1539,8 +1565,8 @@
         border-radius: 50%;
         object-fit: cover;
         background: rgba(10, 14, 22, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(var(--color-white-rgb), 0.35);
+        box-shadow: 0 2px 6px rgba(var(--color-black-rgb), 0.35);
       }
 
       .weapon-item .weapon-avatars {
@@ -1599,13 +1625,13 @@
       }
 
       .weapon-attr-item:hover {
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(var(--color-white-rgb), 0.35);
       }
 
       .weapon-attr-item.is-selected {
-        border-color: rgba(77, 214, 201, 0.7);
+        border-color: rgba(var(--color-accent-rgb), 0.7);
         background: rgba(18, 34, 40, 0.88);
-        box-shadow: 0 0 0 1px rgba(77, 214, 201, 0.4), 0 10px 18px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.4), 0 10px 18px rgba(var(--color-black-rgb), 0.35);
       }
 
       .weapon-attr-item.is-selected::before {
@@ -1616,13 +1642,13 @@
         bottom: 0;
         width: 4px;
         border-radius: var(--radius-md) 0 0 var(--radius-md);
-        background: rgba(77, 214, 201, 0.9);
-        box-shadow: 0 0 10px rgba(77, 214, 201, 0.45);
+        background: rgba(var(--color-accent-rgb), 0.9);
+        box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.45);
         pointer-events: none;
       }
 
       .weapon-attr-item.is-selected .scheme-weapon-title {
-        color: #e9fff9;
+        color: rgba(var(--color-accent-rgb), 1);
       }
 
       .weapon-attr-item.is-essence-owned {
@@ -1651,7 +1677,7 @@
         padding: 3px 7px;
         box-sizing: border-box;
         border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(var(--color-white-rgb), 0.12);
         background: rgba(10, 14, 20, 0.45);
         color: var(--text);
         font-size: 12px;
@@ -1669,7 +1695,7 @@
       }
 
       .exclude-note-input:focus {
-        border-color: rgba(255, 255, 255, 0.35);
+        border-color: rgba(var(--color-white-rgb), 0.35);
       }
 
       @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
@@ -1781,8 +1807,8 @@
       .missing-tag {
         padding: 2px 8px;
         border-radius: 999px;
-        border: 1px solid rgba(243, 108, 108, 0.45);
-        background: rgba(243, 108, 108, 0.12);
+        border: 1px solid rgba(var(--color-danger-rgb), 0.45);
+        background: rgba(var(--color-danger-rgb), 0.12);
         color: #ffd1d1;
         font-size: 11px;
       }
@@ -1853,7 +1879,7 @@
         height: 80px;
         border-radius: 10px;
         border: 1px solid var(--stroke);
-        background: rgba(255, 255, 255, 0.04);
+        background: rgba(var(--color-white-rgb), 0.04);
         overflow: hidden;
       }
 
