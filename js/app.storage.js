@@ -302,6 +302,11 @@
             exportedAt,
             buildId: String(versionInfo.buildId || ""),
             displayVersion: String(versionInfo.displayVersion || ""),
+            source: {
+              type: "planner-web",
+              version: String(versionInfo.displayVersion || ""),
+              userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+            },
           },
           marks: normalized,
         };

@@ -544,6 +544,8 @@ Object.assign(window.I18N["zh-CN"].strings, {
   "plan_config.marks_import_meta_exported_at": "导出时间",
   "plan_config.marks_import_meta_build_id": "构建 ID",
   "plan_config.marks_import_meta_display_version": "版本号",
+  "plan_config.marks_import_meta_source": "来源",
+  "plan_config.marks_import_source_browser": "浏览器导出",
   "plan_config.marks_import_confirm_warning": "该操作不可撤销。",
   "plan_config.marks_import_confirm_action": "确认导入",
   "plan_config.show_weapon_ownership_tags": "显示武器拥有标签",

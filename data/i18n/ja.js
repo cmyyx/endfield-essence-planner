@@ -575,6 +575,8 @@ Object.assign(window.I18N["ja"].strings, {
   "plan_config.marks_import_meta_exported_at": "エクスポート日時",
   "plan_config.marks_import_meta_build_id": "ビルドID",
   "plan_config.marks_import_meta_display_version": "バージョン",
+  "plan_config.marks_import_meta_source": "ソース",
+  "plan_config.marks_import_source_browser": "ブラウザエクスポート",
   "plan_config.marks_import_confirm_warning": "この操作は元に戻せません。",
   "plan_config.marks_import_confirm_action": "インポートを実行",
   "plan_config.show_weapon_ownership_tags": "武器の所持タグを表示",

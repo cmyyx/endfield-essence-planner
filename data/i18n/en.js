@@ -575,6 +575,8 @@ Object.assign(window.I18N["en"].strings, {
   "plan_config.marks_import_meta_exported_at": "Exported at",
   "plan_config.marks_import_meta_build_id": "Build ID",
   "plan_config.marks_import_meta_display_version": "Version",
+  "plan_config.marks_import_meta_source": "Source",
+  "plan_config.marks_import_source_browser": "Browser export",
   "plan_config.marks_import_confirm_warning": "This action cannot be undone.",
   "plan_config.marks_import_confirm_action": "Import and overwrite",
   "plan_config.show_weapon_ownership_tags": "Show weapon ownership tags",

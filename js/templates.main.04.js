@@ -319,7 +319,7 @@
             <div
               v-if="
                 marksImportMeta &&
-                (marksImportMeta.exportedAt || marksImportMeta.buildId || marksImportMeta.displayVersion)
+                (marksImportMeta.exportedAt || marksImportMeta.buildId || marksImportMeta.displayVersion || marksImportMeta.source)
               "
               class="marks-import-meta"
             >
@@ -335,6 +335,10 @@
               <div v-if="marksImportMeta.displayVersion" class="marks-import-meta-line">
                 <span class="marks-import-meta-label">{{ t("plan_config.marks_import_meta_display_version") }}</span>
                 <span class="marks-import-meta-value">{{ marksImportMeta.displayVersion }}</span>
+              </div>
+              <div v-if="marksImportMeta.source" class="marks-import-meta-line">
+                <span class="marks-import-meta-label">{{ t("plan_config.marks_import_meta_source") }}</span>
+                <span class="marks-import-meta-value">{{ formatSourceInfo(marksImportMeta.source) }}</span>
               </div>
             </div>
             <p class="storage-clear-confirm-warning">{{ t("plan_config.marks_import_confirm_warning") }}</p>

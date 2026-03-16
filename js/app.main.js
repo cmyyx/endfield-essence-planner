@@ -1573,6 +1573,25 @@
               }
             };
 
+      const formatSourceInfo = (source) => {
+        if (!source || typeof source !== "object") return "";
+
+        if (source.type === "planner-web") {
+          const ua = source.userAgent || "";
+          let platform = null;
+          if (ua.includes("Windows")) platform = "Windows";
+          else if (ua.includes("Mac OS")) platform = "macOS";
+          else if (ua.includes("Linux")) platform = "Linux";
+          else if (ua.includes("Android")) platform = "Android";
+          else if (ua.includes("iPhone") || ua.includes("iPad")) platform = "iOS";
+
+          const browserText = state.t ? state.t("plan_config.marks_import_source_browser") : "浏览器导出";
+          return platform ? `${browserText} (${platform})` : browserText;
+        }
+
+        return source.version ? `${source.type} v${source.version}` : source.type;
+      };
+
       return {
         currentView: state.currentView,
         setView: (view) => {
@@ -1649,6 +1668,7 @@
         handleMarksImportFile: state.handleMarksImportFile,
         cancelMarksImport: state.cancelMarksImport,
         confirmMarksImport: state.confirmMarksImport,
+        formatSourceInfo,
         showEquipRefiningNavHintDot: state.showEquipRefiningNavHintDot,
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         showEditorEntry: state.showEditorEntry,

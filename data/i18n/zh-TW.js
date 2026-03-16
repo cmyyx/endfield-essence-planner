@@ -575,6 +575,8 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "plan_config.marks_import_meta_exported_at": "匯出時間",
   "plan_config.marks_import_meta_build_id": "建置 ID",
   "plan_config.marks_import_meta_display_version": "版本號",
+  "plan_config.marks_import_meta_source": "來源",
+  "plan_config.marks_import_source_browser": "瀏覽器匯出",
   "plan_config.marks_import_confirm_warning": "此操作無法復原。",
   "plan_config.marks_import_confirm_action": "確認匯入",
   "plan_config.show_weapon_ownership_tags": "顯示武器擁有標籤",
