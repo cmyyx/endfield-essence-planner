@@ -96,7 +96,7 @@
       {{ t("equip_refining.recommend_self") }}
     </p>
     <p class="equip-refining-recommend-tip" v-else>
-      {{ t("equip_refining.recommend_other_equip") }}（<span class="equip-refining-tip-value">{{ recommendation.topValueDisplay }}</span>）
+      {{ t("equip_refining.recommend_other_equip") }}
     </p>
     <div class="weapon-list equip-refining-candidate-list">
       <div
@@ -115,6 +115,7 @@
             @error="onEquipImageError($event, candidate.equip)"
           />
           <span v-else class="weapon-fallback-large">5★</span>
+          <span class="equip-refining-attr-badge">{{ candidate.matchAttr.display }}</span>
         </div>
         <div class="weapon-band"></div>
         <div class="weapon-name">
