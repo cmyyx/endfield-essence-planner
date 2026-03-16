@@ -64,13 +64,24 @@
       if (!value) return "";
       const raw = String(value).trim();
       if (!raw) return "";
-      const match = raw.match(/^(.*?)(?:\s*[xX×]\s*\d+)?$/);
+      const match = raw.match(
+        /^(.*?)(?:\s*[xX×]\s*\d+(?:\.\d+)?\s*(?:k|K|w|W|千|万)?\s*)?$/
+      );
       return match ? match[1].trim() : raw;
     };
     const resolveItemLabel = (item) => {
       if (!item) return "";
       if (typeof item === "string") return item;
       return item.label || item.name || item.id || "";
+    };
+    const resolvePotentialName = (entry) => {
+      if (!entry) return "";
+      if (typeof entry === "string") return entry;
+      return entry.name || entry.title || entry.label || "";
+    };
+    const resolvePotentialDescription = (entry) => {
+      if (!entry || typeof entry === "string") return "";
+      return entry.description || entry.desc || entry.detail || "";
     };
     const resolveItemImageName = (item) => {
       if (!item) return "";
@@ -166,6 +177,8 @@
     state.hasEquipImage = hasEquipImage;
     state.equipImageSrc = equipImageSrc;
     state.resolveItemLabel = resolveItemLabel;
+    state.resolvePotentialName = resolvePotentialName;
+    state.resolvePotentialDescription = resolvePotentialDescription;
     state.hasItemImage = hasItemImage;
     state.itemImageSrc = itemImageSrc;
     state.weaponCharacters = weaponCharacters;

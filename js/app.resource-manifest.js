@@ -72,6 +72,7 @@
         "./js/app.media.js",
         "./js/templates.plan-config.js",
         "./js/templates.equip-refining.js",
+        "./js/templates.strategy-guide-detail.js",
         "./js/templates.main.01.js",
         "./js/templates.main.02.js",
         "./js/templates.main.03.js",
@@ -86,6 +87,10 @@
         "equip-refining": {
           scripts: ["./js/app.equip-refining.js"],
           init: ["initEquipRefining"],
+        },
+        editor: {
+          scripts: ["./js/app.editor.js"],
+          init: ["initEditor"],
         },
       },
     },

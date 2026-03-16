@@ -76,6 +76,9 @@
 
   const applyLazyImage = (el, src) => {
     if (!src) return;
+    if (el && el.style && el.style.display === "none") {
+      el.style.display = "";
+    }
     if (!lazyImageObserver) {
       if (el.src !== src) {
         el.src = src;
@@ -184,7 +187,7 @@
   };
 
   const modules = window.AppModules || {};
-  const readRuntimeEnv = () => {
+      const readRuntimeEnv = () => {
     const normalizeEnv = (value) => String(value || "").trim().toLowerCase();
     if (typeof window !== "undefined" && window.location && typeof window.location.search === "string") {
       try {
@@ -292,6 +295,30 @@
     appTemplates.equipRefiningRecommendation.trim()
       ? appTemplates.equipRefiningRecommendation.trim()
       : "<div></div>";
+  const strategyGuideDetailTemplate =
+    typeof appTemplates.strategyGuideDetail === "string" && appTemplates.strategyGuideDetail.trim()
+      ? appTemplates.strategyGuideDetail.trim()
+      : "<div></div>";
+
+  const formatMarkdownBlocks = (() => {
+    if (
+      typeof window !== "undefined" &&
+      window.__APP_SANITIZER__ &&
+      typeof window.__APP_SANITIZER__.tokenizeMarkdownBlocks === "function"
+    ) {
+      return window.__APP_SANITIZER__.tokenizeMarkdownBlocks;
+    }
+    return (value) => {
+      const text = String(value || "");
+      if (!text.trim()) return [];
+      return [
+        {
+          type: "paragraph",
+          tokens: [{ type: "text", text }],
+        },
+      ];
+    };
+  })();
 
   const planConfigControl = {
     props: {
@@ -435,11 +462,118 @@
     template: equipRefiningDetailTemplate,
   };
 
+  const markdownText = {
+    props: {
+      content: { type: String, default: "" },
+      className: { type: String, default: "" },
+    },
+    setup(props) {
+      const blocks = computed(() => formatMarkdownBlocks(props.content));
+      return { blocks };
+    },
+    template: `
+<div v-if="blocks.length" class="markdown-text" :class="className">
+  <template v-for="(block, blockIndex) in blocks" :key="blockIndex">
+    <p v-if="block.type === 'paragraph'" class="markdown-paragraph">
+      <template v-for="(token, tokenIndex) in block.tokens" :key="tokenIndex">
+        <br v-if="token.type === 'break'" />
+        <strong v-else-if="token.type === 'strong'">{{ token.text }}</strong>
+        <em v-else-if="token.type === 'em'">{{ token.text }}</em>
+        <code v-else-if="token.type === 'code'">{{ token.text }}</code>
+        <a
+          v-else-if="token.type === 'link'"
+          :href="token.href"
+          target="_blank"
+          rel="noopener"
+        >
+          {{ token.text }}
+        </a>
+        <span v-else>{{ token.text }}</span>
+      </template>
+    </p>
+    <ul v-else-if="block.type === 'list' && !block.ordered" class="markdown-list">
+      <li v-for="(item, itemIndex) in block.items" :key="itemIndex">
+        <template v-for="(token, tokenIndex) in item.tokens" :key="tokenIndex">
+          <br v-if="token.type === 'break'" />
+          <strong v-else-if="token.type === 'strong'">{{ token.text }}</strong>
+          <em v-else-if="token.type === 'em'">{{ token.text }}</em>
+          <code v-else-if="token.type === 'code'">{{ token.text }}</code>
+          <a
+            v-else-if="token.type === 'link'"
+            :href="token.href"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ token.text }}
+          </a>
+          <span v-else>{{ token.text }}</span>
+        </template>
+      </li>
+    </ul>
+    <ol v-else-if="block.type === 'list' && block.ordered" class="markdown-list">
+      <li v-for="(item, itemIndex) in block.items" :key="itemIndex">
+        <template v-for="(token, tokenIndex) in item.tokens" :key="tokenIndex">
+          <br v-if="token.type === 'break'" />
+          <strong v-else-if="token.type === 'strong'">{{ token.text }}</strong>
+          <em v-else-if="token.type === 'em'">{{ token.text }}</em>
+          <code v-else-if="token.type === 'code'">{{ token.text }}</code>
+          <a
+            v-else-if="token.type === 'link'"
+            :href="token.href"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ token.text }}
+          </a>
+          <span v-else>{{ token.text }}</span>
+        </template>
+      </li>
+    </ol>
+  </template>
+</div>`,
+  };
+
+  const strategyGuideDetail = {
+    props: {
+      t: { type: Function, required: true },
+      tTerm: { type: Function, required: true },
+      currentCharacter: { type: Object, default: null },
+      currentGuide: { type: Object, default: null },
+      guideRows: { type: Array, required: true },
+      teamSlots: { type: Array, required: true },
+      strategyCategory: { type: String, required: true },
+      strategyTab: { type: String, required: true },
+      setStrategyCategory: { type: Function, required: true },
+      setStrategyTab: { type: Function, required: true },
+      backToCharacterList: { type: Function, required: true },
+      showBackButton: { type: Boolean, default: true },
+      skillLevelLabels: { type: Array, required: true },
+      getSkillTables: { type: Function, required: true },
+      hasImage: { type: Function, required: true },
+      weaponImageSrc: { type: Function, required: true },
+      weaponCharacters: { type: Function, required: true },
+      characterImageSrc: { type: Function, required: true },
+      characterCardSrc: { type: Function, required: true },
+      handleCharacterCardError: { type: Function, required: true },
+      handleCharacterImageError: { type: Function, required: true },
+      hasEquipImage: { type: Function, required: true },
+      equipImageSrc: { type: Function, required: true },
+      hasItemImage: { type: Function, required: true },
+      itemImageSrc: { type: Function, required: true },
+      resolveItemLabel: { type: Function, required: true },
+      resolvePotentialName: { type: Function, required: true },
+      resolvePotentialDescription: { type: Function, required: true },
+    },
+    template: strategyGuideDetailTemplate,
+  };
+
   const app = createApp({
     template: mainAppTemplate,
     setup() {
       const ctx = { ref, computed, onMounted, onBeforeUnmount, watch, nextTick };
       const state = {};
+      state.editorIdentityDraft = ref({ id: "", name: "" });
+      state.commitEditorCharacterIdentity = () => {};
       const fallbackInterpolate = (key, params) => {
         const text = String(key || "");
         if (!params || typeof params !== "object") return text;
@@ -449,6 +583,7 @@
       };
       state.t = (key, params) => fallbackInterpolate(key, params);
       state.tTerm = (category, value) => String(value || "");
+      state.formatMarkdownBlocks = formatMarkdownBlocks;
       state.loadScriptOnce = loadScriptOnce;
       state.createUiScheduler = createUiScheduler;
       const runtimeEnv = readRuntimeEnv();
@@ -456,6 +591,8 @@
         window.__APP_RUNTIME_ENV__ = runtimeEnv;
       }
       announceStrictRuntimeEnv(runtimeEnv);
+      const showEditorEntry = runtimeEnv === "development" || runtimeEnv === "test";
+      state.showEditorEntry = showEditorEntry;
       const initializedModules = new Set();
       const providedCapabilities = new Set();
       const pendingInitContractWarnings = [];
@@ -725,11 +862,59 @@
         "initMedia",
         "initStrategy",
         "initEquipRefining",
+        "initEditor",
       ];
 
       initExecutionOrder.forEach((name) => {
         runInitWithContract(name);
       });
+
+      const prepareToastLeave = (el) => {
+        if (!el || typeof window === "undefined") return;
+        let rect = null;
+        const parsedTop = el.dataset ? Number.parseFloat(el.dataset.toastTop) : Number.NaN;
+        const parsedLeft = el.dataset ? Number.parseFloat(el.dataset.toastLeft) : Number.NaN;
+        const parsedWidth = el.dataset ? Number.parseFloat(el.dataset.toastWidth) : Number.NaN;
+        const parsedHeight = el.dataset ? Number.parseFloat(el.dataset.toastHeight) : Number.NaN;
+        if (Number.isFinite(parsedTop) && Number.isFinite(parsedLeft)) {
+          rect = {
+            top: parsedTop,
+            left: parsedLeft,
+            width: Number.isFinite(parsedWidth) ? parsedWidth : el.getBoundingClientRect().width,
+            height: Number.isFinite(parsedHeight) ? parsedHeight : el.getBoundingClientRect().height,
+          };
+        }
+        if (!rect && el.querySelector && state.toastLeaveRects && typeof state.toastLeaveRects.get === "function") {
+          const card = el.querySelector(".toast-card[data-toast-id]");
+          const toastId = card ? card.getAttribute("data-toast-id") : "";
+          if (toastId) {
+            const cached = state.toastLeaveRects.get(String(toastId));
+            if (cached) {
+              rect = cached;
+            }
+          }
+        }
+        if (!rect && typeof el.getBoundingClientRect === "function") {
+          rect = el.getBoundingClientRect();
+        }
+        if (!rect) return;
+        const computed = window.getComputedStyle ? window.getComputedStyle(el) : null;
+        const computedTransform = computed ? computed.transform : "";
+        el.style.position = "fixed";
+        el.style.top = `${rect.top}px`;
+        el.style.left = `${rect.left}px`;
+        el.style.width = `${rect.width}px`;
+        el.style.height = `${rect.height}px`;
+        el.style.margin = "0";
+        el.style.right = "auto";
+        el.style.bottom = "auto";
+        el.style.pointerEvents = "none";
+        if (computedTransform && computedTransform !== "none") {
+          el.style.transform = computedTransform;
+        } else {
+          el.style.transform = "translateX(0) translateY(0)";
+        }
+      };
 
       const viewLoadState = ref({});
       const normalizeViewKey = (view) => String(view || "").trim();
@@ -894,6 +1079,9 @@
         if (view === "strategy") {
           return { view: "strategy", characterId, weaponNames, hasWeaponParam };
         }
+        if (view === "editor") {
+          return { view: "editor" };
+        }
         if (view === "equip-refining") {
           return { view: "equip-refining", weaponNames, hasWeaponParam };
         }
@@ -963,6 +1151,9 @@
           if (id) return `/strategy/${encodeURIComponent(id)}`;
           return "/strategy";
         }
+        if (view === "editor") {
+          return "/editor";
+        }
         if (view === "equip-refining") {
           return "/equip-refining";
         }
@@ -982,6 +1173,7 @@
         "planner",
         "match",
         "strategy",
+        "editor",
         "equip-refining",
         "rerun-ranking",
         "background",
@@ -1459,6 +1651,7 @@
         confirmMarksImport: state.confirmMarksImport,
         showEquipRefiningNavHintDot: state.showEquipRefiningNavHintDot,
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
+        showEditorEntry: state.showEditorEntry,
         togglePlanConfig: state.togglePlanConfig,
         isPlanConfigSectionCollapsed: state.isPlanConfigSectionCollapsed,
         togglePlanConfigSectionCollapsed: state.togglePlanConfigSectionCollapsed,
@@ -1641,6 +1834,8 @@
         hasEquipImage: state.hasEquipImage,
         equipImageSrc: state.equipImageSrc,
         resolveItemLabel: state.resolveItemLabel,
+        resolvePotentialName: state.resolvePotentialName,
+        resolvePotentialDescription: state.resolvePotentialDescription,
         hasItemImage: state.hasItemImage,
         itemImageSrc: state.itemImageSrc,
         weaponCharacters: state.weaponCharacters,
@@ -1679,6 +1874,12 @@
         toastNotice: state.toastNotice,
         toastDefaultDurationMs: state.toastDefaultDurationMs,
         dismissToastNotice: state.dismissToastNotice,
+        pauseToastNotice: state.pauseToastNotice,
+        resumeToastNotice: state.resumeToastNotice,
+        resumeToastNoticeIfNotHovered: state.resumeToastNoticeIfNotHovered,
+        pauseAllToastNotices: state.pauseAllToastNotices,
+        resumeAllToastNotices: state.resumeAllToastNotices,
+        prepareToastLeave,
         runToastAction: state.runToastAction,
         activateToastNotice: state.activateToastNotice,
         hasRuntimeWarningHistory: state.hasRuntimeWarningHistory,
@@ -1816,15 +2017,252 @@
         get guideEnter() {
           return state.guideEnter;
         },
+        // Editor Module
+        get editorReady() {
+          return state.editorReady;
+        },
+        get editorEnvLabel() {
+          return state.editorEnvLabel;
+        },
+        get editorCharacters() {
+          return state.editorCharacters;
+        },
+        get editorFilteredCharacters() {
+          return state.editorFilteredCharacters;
+        },
+        get editorSelectedId() {
+          return state.editorSelectedId;
+        },
+        get editorSelectedCharacter() {
+          return state.editorSelectedCharacter;
+        },
+        get editorSearchQuery() {
+          return state.editorSearchQuery;
+        },
+        get editorPickerOpen() {
+          return state.editorPickerOpen;
+        },
+        get editorIssues() {
+          return state.editorIssues;
+        },
+        get editorIssueMap() {
+          return state.editorIssueMap;
+        },
+        get editorIssueSummary() {
+          return state.editorIssueSummary;
+        },
+        get editorDirty() {
+          return state.editorDirty;
+        },
+        get editorImportFileName() {
+          return state.editorImportFileName;
+        },
+        get editorImportError() {
+          return state.editorImportError;
+        },
+        get editorImportInput() {
+          return state.editorImportInput;
+        },
+        get editorLoadError() {
+          return state.editorLoadError;
+        },
+        get editorJsonDraft() {
+          return state.editorJsonDraft;
+        },
+        get editorJsonErrors() {
+          return state.editorJsonErrors;
+        },
+        get editorPotentialsDraft() {
+          return state.editorPotentialsDraft;
+        },
+        get editorMaterialsDraft() {
+          return state.editorMaterialsDraft;
+        },
+        get editorIdentityDraft() {
+          return state.editorIdentityDraft;
+        },
+        get commitEditorCharacterIdentity() {
+          return state.commitEditorCharacterIdentity;
+        },
+        get editorMaterialLevels() {
+          return state.editorMaterialLevels;
+        },
+        get editorStrategyCategory() {
+          return state.editorStrategyCategory;
+        },
+        get editorStrategyTab() {
+          return state.editorStrategyTab;
+        },
+        get editorCurrentCharacter() {
+          return state.editorCurrentCharacter;
+        },
+        get editorCurrentGuide() {
+          return state.editorCurrentGuide;
+        },
+        get editorGuideRows() {
+          return state.editorGuideRows;
+        },
+        get editorTeamSlots() {
+          return state.editorTeamSlots;
+        },
+        get editorSkillLevelLabels() {
+          return state.editorSkillLevelLabels;
+        },
+        get editorGetSkillTables() {
+          return state.editorGetSkillTables;
+        },
+        get getEditorSkillValue() {
+          return state.getEditorSkillValue;
+        },
+        get updateEditorSkillValue() {
+          return state.updateEditorSkillValue;
+        },
+        get setEditorStrategyCategory() {
+          return state.setEditorStrategyCategory;
+        },
+        get setEditorStrategyTab() {
+          return state.setEditorStrategyTab;
+        },
+        get triggerEditorImport() {
+          return state.triggerEditorImport;
+        },
+        get handleEditorImportFile() {
+          return state.handleEditorImportFile;
+        },
+        get exportEditorData() {
+          return state.exportEditorData;
+        },
+        get runEditorValidation() {
+          return state.runEditorValidation;
+        },
+        get applyEditorAutoFix() {
+          return state.applyEditorAutoFix;
+        },
+        get resetEditorChanges() {
+          return state.resetEditorChanges;
+        },
+        get selectEditorCharacter() {
+          return state.selectEditorCharacter;
+        },
+        get addEditorCharacter() {
+          return state.addEditorCharacter;
+        },
+        get removeEditorCharacter() {
+          return state.removeEditorCharacter;
+        },
+        get addEditorSkill() {
+          return state.addEditorSkill;
+        },
+        get removeEditorSkill() {
+          return state.removeEditorSkill;
+        },
+        get addEditorSkillTable() {
+          return state.addEditorSkillTable;
+        },
+        get removeEditorSkillTable() {
+          return state.removeEditorSkillTable;
+        },
+        get addEditorSkillRow() {
+          return state.addEditorSkillRow;
+        },
+        get removeEditorSkillRow() {
+          return state.removeEditorSkillRow;
+        },
+        get addEditorTalent() {
+          return state.addEditorTalent;
+        },
+        get removeEditorTalent() {
+          return state.removeEditorTalent;
+        },
+        get addEditorBaseSkill() {
+          return state.addEditorBaseSkill;
+        },
+        get removeEditorBaseSkill() {
+          return state.removeEditorBaseSkill;
+        },
+        get addEditorEquipRow() {
+          return state.addEditorEquipRow;
+        },
+        get removeEditorEquipRow() {
+          return state.removeEditorEquipRow;
+        },
+        get addEditorEquipWeapon() {
+          return state.addEditorEquipWeapon;
+        },
+        get removeEditorEquipWeapon() {
+          return state.removeEditorEquipWeapon;
+        },
+        get getEditorEquipSlotValue() {
+          return state.getEditorEquipSlotValue;
+        },
+        get updateEditorEquipSlotField() {
+          return state.updateEditorEquipSlotField;
+        },
+        get clearEditorEquipSlot() {
+          return state.clearEditorEquipSlot;
+        },
+        get addEditorTeamSlot() {
+          return state.addEditorTeamSlot;
+        },
+        get removeEditorTeamSlot() {
+          return state.removeEditorTeamSlot;
+        },
+        get addEditorTeamOption() {
+          return state.addEditorTeamOption;
+        },
+        get removeEditorTeamOption() {
+          return state.removeEditorTeamOption;
+        },
+        get addEditorTeamWeapon() {
+          return state.addEditorTeamWeapon;
+        },
+        get removeEditorTeamWeapon() {
+          return state.removeEditorTeamWeapon;
+        },
+        get addEditorTeamEquip() {
+          return state.addEditorTeamEquip;
+        },
+        get removeEditorTeamEquip() {
+          return state.removeEditorTeamEquip;
+        },
+        get syncEditorJsonField() {
+          return state.syncEditorJsonField;
+        },
+        get applyEditorJsonField() {
+          return state.applyEditorJsonField;
+        },
+        get formatEditorJsonField() {
+          return state.formatEditorJsonField;
+        },
+        get updateEditorPotentials() {
+          return state.updateEditorPotentials;
+        },
+        get addEditorPotential() {
+          return state.addEditorPotential;
+        },
+        get removeEditorPotential() {
+          return state.removeEditorPotential;
+        },
+        get moveEditorPotential() {
+          return state.moveEditorPotential;
+        },
+        get updateEditorPotentialField() {
+          return state.updateEditorPotentialField;
+        },
+        get updateEditorMaterialLevel() {
+          return state.updateEditorMaterialLevel;
+        },
       };
     },
   });
 
   app.component("PlanConfigControl", planConfigControl);
   app.component("MatchStatusLine", matchStatusLine);
+  app.component("MarkdownText", markdownText);
   app.component("EquipRefiningList", equipRefiningList);
   app.component("EquipRefiningDetail", equipRefiningDetail);
   app.component("EquipRefiningRecommendation", equipRefiningRecommendation);
+  app.component("StrategyGuideDetail", strategyGuideDetail);
   app.directive("lazy-src", lazyImageDirective);
   app.mount("#app");
 })();

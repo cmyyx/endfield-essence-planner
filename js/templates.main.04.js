@@ -506,7 +506,12 @@
           'has-toast': toastNotices && toastNotices.length > 0,
         }"
       >
-        <transition-group name="fade-scale" tag="div" class="toast-stack">
+        <transition-group
+          name="fade-scale"
+          tag="div"
+          class="toast-stack"
+          @before-leave="prepareToastLeave"
+        >
           <div
             v-for="(notice, index) in toastNotices"
             :key="notice.id || ['toast', index].join('|')"
@@ -515,16 +520,20 @@
             role="status"
             aria-live="polite"
           >
-            <div
-              class="update-toast-card toast-card"
-              :class="{ 'is-clickable': notice && notice.clickable }"
-              :role="notice && notice.clickable ? 'button' : 'status'"
-              :tabindex="notice && notice.clickable ? 0 : -1"
-              :aria-label="notice && notice.clickable && notice.ariaLabel ? notice.ariaLabel : null"
-              @click="activateToastNotice((notice && notice.id) || '')"
-              @keydown.enter.prevent="activateToastNotice((notice && notice.id) || '')"
-              @keydown.space.prevent="activateToastNotice((notice && notice.id) || '')"
-            >
+              <div
+                class="update-toast-card toast-card"
+                :class="{ 'is-clickable': notice && notice.clickable }"
+                :role="notice && notice.clickable ? 'button' : 'status'"
+                :tabindex="notice && notice.clickable ? 0 : -1"
+                :aria-label="notice && notice.clickable && notice.ariaLabel ? notice.ariaLabel : null"
+                :data-toast-id="(notice && notice.id) || ''"
+                @mouseenter="pauseToastNotice((notice && notice.id) || '')"
+                @focusin="pauseToastNotice((notice && notice.id) || '')"
+                @focusout="resumeToastNotice((notice && notice.id) || '')"
+                @click="activateToastNotice((notice && notice.id) || '')"
+                @keydown.enter.prevent="activateToastNotice((notice && notice.id) || '')"
+                @keydown.space.prevent="activateToastNotice((notice && notice.id) || '')"
+              >
               <div class="toast-main">
                 <span class="toast-icon" aria-hidden="true">{{ notice && notice.icon ? notice.icon : "!" }}</span>
                 <div class="toast-text">

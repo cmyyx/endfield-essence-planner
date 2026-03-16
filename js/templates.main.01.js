@@ -212,6 +212,14 @@
           >
             {{ t("nav.background_view") }}
           </button>
+          <button
+            v-if="showEditorEntry"
+            class="nav-item"
+            :class="{ active: currentView === 'editor' }"
+            @click="setView('editor')"
+          >
+            编辑器
+          </button>
           </nav>
         </div>
       </header>

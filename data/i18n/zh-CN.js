@@ -488,7 +488,7 @@ Object.assign(window.I18N["zh-CN"].strings, {
   "plan.item_11": "智识",
   "plan.item_12": "意志",
   "plan.item_13": "攻击力",
-  "plan.item_14": "血量",
+  "plan.item_14": "生命值",
   "plan.item_15": "技能",
   "plan.item_16": "技能数据",
   "plan.item_17": "数据项",

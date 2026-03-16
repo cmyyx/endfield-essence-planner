@@ -1751,7 +1751,7 @@
       .equip-table {
         display: grid;
         border-radius: 12px;
-        overflow-x: hidden;
+        overflow-x: auto;
         overflow-y: hidden;
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(8, 12, 18, 0.65);
@@ -1778,6 +1778,7 @@
         display: grid;
         grid-template-columns: minmax(180px, 1.1fr) repeat(4, minmax(120px, 1fr));
         border-left: 1px solid rgba(255, 255, 255, 0.06);
+        min-width: 560px;
       }
 
       .equip-row-head .equip-row-main {
@@ -2172,21 +2173,23 @@
 
       .detail-tabs-main {
         margin-top: 6px;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
         gap: 12px;
       }
 
       .detail-tabs-sub {
         margin-top: 0;
-        margin-bottom: 18px;
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
-        display: grid;
-        grid-template-columns: 1fr;
-        align-items: center;
-        gap: 12px;
+        margin-bottom: 20px;
+        margin-left: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        display: block;
+        position: static;
+      }
+
+      .detail-tabs-sub::before {
+        content: none;
       }
 
       .detail-tabs-main .detail-tab {
@@ -2235,12 +2238,14 @@
         border-radius: 999px;
         font-weight: 600;
         transition: 0.2s ease;
+        cursor: pointer;
       }
 
       .detail-tab:hover {
         color: var(--text);
         border-color: rgba(255, 255, 255, 0.25);
         transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
       }
 
       .detail-tab.active {
@@ -2296,11 +2301,19 @@
         margin: 8px 0 12px;
         padding: 8px 12px;
         border-radius: 10px;
-        border: 1px solid rgba(255, 199, 92, 0.35);
-        background: rgba(255, 199, 92, 0.12);
-        color: #f7d39a;
+        border: 1px solid var(--stroke);
+        background: var(--panel);
+        color: var(--text);
         font-size: 12px;
         line-height: 1.5;
+      }
+
+      .strategy-notice a {
+        color: var(--accent);
+      }
+
+      .strategy-notice a:hover {
+        color: var(--text);
       }
 
       .talent-header {
@@ -2379,6 +2392,8 @@
         .detail-tabs-sub {
           grid-template-columns: 1fr;
           gap: 8px;
+          margin-left: 0;
+          padding-left: 14px;
         }
 
         .detail-sub-header {
@@ -2631,7 +2646,8 @@
         }
 
         .detail-tabs-sub {
-          padding: 8px 10px;
+          margin-left: 0;
+          padding: 0;
         }
 
         .detail-sub-title {
@@ -2856,6 +2872,12 @@
         color: var(--text);
       }
 
+      .skill-desc {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
       .skill-multipliers {
         margin-top: 8px;
         font-size: 13px;
@@ -3067,9 +3089,50 @@
         color: var(--muted);
       }
 
+      .potential-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
       .potential-desc {
         font-size: 14px;
         color: var(--text);
+      }
+
+      .markdown-text {
+        white-space: normal;
+      }
+
+      .markdown-paragraph {
+        margin: 0 0 8px;
+      }
+
+      .markdown-text .markdown-paragraph:last-child {
+        margin-bottom: 0;
+      }
+
+      .markdown-list {
+        margin: 0 0 8px 18px;
+        padding: 0;
+      }
+
+      .markdown-list li {
+        margin: 4px 0;
+      }
+
+      .markdown-text code {
+        padding: 1px 4px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-family: "Cascadia Mono", "Menlo", "Consolas", monospace;
+        font-size: 0.92em;
+      }
+
+      .markdown-text a {
+        color: var(--accent-2);
+        text-decoration: underline;
       }
 
       @keyframes fade-in {
@@ -3105,7 +3168,7 @@
         margin-bottom: 6px;
       }
 
-      .talent-item p {
+      .talent-desc {
         margin: 0;
         font-size: 14px;
         color: var(--muted);
@@ -3220,9 +3283,21 @@
       /* Skill Header Icon */
       .skill-header {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 10px;
         margin-bottom: 8px;
+      }
+
+      .skill-title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .skill-type {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
       }
 
       .skill-icon {

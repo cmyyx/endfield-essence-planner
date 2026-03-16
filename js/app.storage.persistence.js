@@ -32,6 +32,7 @@
         state.uiStateStorageKey,
         state.attrHintStorageKey,
         state.customWeaponsStorageKey,
+        state.editorCharactersStorageKey,
         state.noticeSkipKey,
         state.perfModeStorageKey,
         state.themeModeStorageKey,

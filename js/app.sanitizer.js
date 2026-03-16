@@ -93,9 +93,115 @@
     return tokens.length ? tokens : [{ type: "text", text: source }];
   };
 
+  var tokenizeInlineMarkdown = function (value) {
+    var source = String(value || "");
+    if (!source) return [];
+    var tokens = [];
+    var pattern = /(\*\*[^*\n]+?\*\*|`[^`\n]+`|\*[^*\n]+?\*|\[[^\]\n]+]\([^) \n]+?\))/g;
+    var lastIndex = 0;
+    var match = null;
+    while ((match = pattern.exec(source))) {
+      if (match.index > lastIndex) {
+        tokens.push({ type: "text", text: source.slice(lastIndex, match.index) });
+      }
+      var chunk = match[0];
+      if (chunk.slice(0, 2) === "**" && chunk.slice(-2) === "**") {
+        tokens.push({ type: "strong", text: chunk.slice(2, -2) });
+      } else if (chunk.slice(0, 1) === "*" && chunk.slice(-1) === "*") {
+        tokens.push({ type: "em", text: chunk.slice(1, -1) });
+      } else if (chunk.slice(0, 1) === "`" && chunk.slice(-1) === "`") {
+        tokens.push({ type: "code", text: chunk.slice(1, -1) });
+      } else if (chunk.slice(0, 1) === "[") {
+        var parts = chunk.match(/^\[([^\]\n]+)\]\(([^)\s\n]+)\)$/);
+        if (parts) {
+          var safeHref = toSafeHttpUrl(parts[2]);
+          if (safeHref) {
+            tokens.push({ type: "link", href: safeHref, text: String(parts[1] || "") });
+          } else {
+            tokens.push({ type: "text", text: String(parts[1] || "") });
+          }
+        } else {
+          tokens.push({ type: "text", text: chunk });
+        }
+      } else {
+        tokens.push({ type: "text", text: chunk });
+      }
+      lastIndex = match.index + chunk.length;
+    }
+    if (lastIndex < source.length) {
+      tokens.push({ type: "text", text: source.slice(lastIndex) });
+    }
+    return tokens;
+  };
+
+  var tokenizeParagraphLines = function (lines) {
+    var tokens = [];
+    lines.forEach(function (line, index) {
+      if (index > 0) {
+        tokens.push({ type: "break" });
+      }
+      tokenizeInlineMarkdown(line).forEach(function (token) {
+        tokens.push(token);
+      });
+    });
+    return tokens;
+  };
+
+  var tokenizeMarkdownBlocks = function (value) {
+    var source = String(value || "");
+    if (!source.trim()) return [];
+    var lines = source.split(/\r?\n/);
+    var blocks = [];
+    var paragraphLines = [];
+    var flushParagraph = function () {
+      if (!paragraphLines.length) return;
+      blocks.push({ type: "paragraph", tokens: tokenizeParagraphLines(paragraphLines) });
+      paragraphLines = [];
+    };
+    var index = 0;
+    while (index < lines.length) {
+      var line = lines[index];
+      if (!line.trim()) {
+        flushParagraph();
+        index += 1;
+        continue;
+      }
+      var unorderedMatch = line.match(/^\s*[-*+]\s+(.+)$/);
+      var orderedMatch = line.match(/^\s*\d+\.\s+(.+)$/);
+      if (unorderedMatch || orderedMatch) {
+        flushParagraph();
+        var ordered = Boolean(orderedMatch);
+        var items = [];
+        while (index < lines.length) {
+          var current = lines[index];
+          var nextUnordered = current.match(/^\s*[-*+]\s+(.+)$/);
+          var nextOrdered = current.match(/^\s*\d+\.\s+(.+)$/);
+          if (ordered && nextOrdered) {
+            items.push({ tokens: tokenizeInlineMarkdown(nextOrdered[1]) });
+            index += 1;
+            continue;
+          }
+          if (!ordered && nextUnordered) {
+            items.push({ tokens: tokenizeInlineMarkdown(nextUnordered[1]) });
+            index += 1;
+            continue;
+          }
+          break;
+        }
+        blocks.push({ type: "list", ordered: ordered, items: items });
+        continue;
+      }
+      paragraphLines.push(line);
+      index += 1;
+    }
+    flushParagraph();
+    return blocks;
+  };
+
   var api = {
     toSafeHttpUrl: toSafeHttpUrl,
     tokenizeNoticeItem: tokenizeNoticeItem,
+    tokenizeMarkdownBlocks: tokenizeMarkdownBlocks,
   };
 
   if (typeof window !== "undefined") {

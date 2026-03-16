@@ -55,6 +55,7 @@
     state.attrHintStorageKey = "planner-attr-hint:v1";
     state.weaponAttrOverridesStorageKey = "weapon-attr-overrides:v1";
     state.customWeaponsStorageKey = "planner-custom-weapons:v1";
+    state.editorCharactersStorageKey = "planner-editor-characters:v1";
     state.noticeSkipKey = "announcement:skip";
     state.legacyNoticePrefix = "announcement:skip:";
     state.perfModeStorageKey = "planner-perf-mode:v1";
@@ -90,6 +91,12 @@
     state.skipNotice = ref(false);
     state.toastNotices = ref([]);
     state.toastNotice = ref(null);
+    state.pauseToastNotice = () => {};
+    state.resumeToastNotice = () => {};
+    state.pauseAllToastNotices = () => {};
+    state.resumeAllToastNotices = () => {};
+    state.editorIdentityDraft = ref({ id: "", name: "" });
+    state.commitEditorCharacterIdentity = () => {};
 
     state.appReady = ref(false);
     state.currentView = ref("planner");
