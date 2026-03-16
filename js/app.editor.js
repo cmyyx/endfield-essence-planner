@@ -1749,9 +1749,15 @@
       }
     };
 
-    const characterScripts = Array.isArray(window.__APP_CHARACTER_SCRIPTS__)
-      ? window.__APP_CHARACTER_SCRIPTS__
-      : ["./data/characters.js", "./data/characters/ember.js", "./data/characters/perlica.js"];
+    const resolveCharacterScripts = () => {
+      if (typeof window === "undefined") return [];
+      const raw = Array.isArray(window.__APP_CHARACTER_SCRIPTS__)
+        ? window.__APP_CHARACTER_SCRIPTS__
+        : [];
+      const normalized = raw.map((src) => String(src || "").trim()).filter(Boolean);
+      const unique = Array.from(new Set(normalized));
+      return unique.filter((src) => src !== "./data/characters.js");
+    };
 
     const resolveStorageLists = (payload, baseList) => {
       const overrides = Array.isArray(payload && payload.overrides) ? safeClone(payload.overrides) : [];
@@ -1851,14 +1857,27 @@
         return false;
       }
       pendingLoad = (async () => {
+        let warningText = "";
         try {
+          let hadFailure = false;
+          await state.loadScriptOnce("./data/characters.js");
+          const characterScripts = resolveCharacterScripts();
           for (let index = 0; index < characterScripts.length; index += 1) {
-            await state.loadScriptOnce(characterScripts[index]);
+            const script = characterScripts[index];
+            try {
+              await state.loadScriptOnce(script);
+            } catch (error) {
+              hadFailure = true;
+              if (typeof console !== "undefined" && typeof console.warn === "function") {
+                console.warn("[editor] Failed to load character script:", script, error);
+              }
+            }
           }
+          warningText = hadFailure ? "部分角色脚本加载失败，已忽略缺失文件。" : "";
           if (Array.isArray(window.characters)) {
             const baseList = setEditorBaseCharacters(window.characters);
             if (storedPayload && applyEditorStoragePayload(storedPayload, baseList)) {
-              editorLoadError.value = "";
+              editorLoadError.value = warningText;
               return true;
             }
             editorCharacters.value = baseList;
@@ -1868,21 +1887,21 @@
               editorSelectedId.value = characterKey(baseList[0], 0);
               syncDraftsFromCharacter(baseList[0]);
             }
-            editorLoadError.value = "";
+            editorLoadError.value = warningText;
             return true;
           }
           if (storedPayload && applyEditorStoragePayload(storedPayload, [])) {
-            editorLoadError.value = "未能加载最新角色数据，已使用本地草稿。";
+            editorLoadError.value = warningText || "未能加载最新角色数据，已使用本地草稿。";
             return true;
           }
-          editorLoadError.value = "角色脚本已加载，但未找到角色数据。";
+          editorLoadError.value = warningText || "角色数据未能加载，请稍后重试。";
           return false;
         } catch (error) {
           if (storedPayload && applyEditorStoragePayload(storedPayload, [])) {
-            editorLoadError.value = "自动加载角色数据失败，已使用本地草稿。";
+            editorLoadError.value = warningText || "未能加载最新角色数据，已使用本地草稿。";
             return true;
           }
-          editorLoadError.value = "自动加载角色数据失败，请使用导入功能。";
+          editorLoadError.value = warningText || "角色数据加载失败，请稍后重试。";
           return false;
         } finally {
           pendingLoad = null;

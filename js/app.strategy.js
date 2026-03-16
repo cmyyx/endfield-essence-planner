@@ -272,11 +272,15 @@
       return trimmed;
     });
 
-    const characterScripts = [
-      "./data/characters.js",
-      "./data/characters/ember.js",
-      "./data/characters/perlica.js",
-    ];
+    const resolveCharacterScripts = () => {
+      if (typeof window === "undefined") return [];
+      const raw = Array.isArray(window.__APP_CHARACTER_SCRIPTS__)
+        ? window.__APP_CHARACTER_SCRIPTS__
+        : [];
+      const normalized = raw.map((src) => String(src || "").trim()).filter(Boolean);
+      const unique = Array.from(new Set(normalized));
+      return unique.filter((src) => src !== "./data/characters.js");
+    };
 
     const syncCharactersFromWindow = () => {
       state.characters.value = Array.isArray(window.characters) ? window.characters : [];
@@ -302,10 +306,25 @@
       state.charactersLoading.value = true;
       pendingCharacterLoad = (async () => {
         try {
+          let hadFailure = false;
+          await state.loadScriptOnce("./data/characters.js");
+          const characterScripts = resolveCharacterScripts();
           for (let index = 0; index < characterScripts.length; index += 1) {
-            await state.loadScriptOnce(characterScripts[index]);
+            const script = characterScripts[index];
+            try {
+              await state.loadScriptOnce(script);
+            } catch (error) {
+              hadFailure = true;
+              if (typeof console !== "undefined" && typeof console.warn === "function") {
+                console.warn("[strategy] Failed to load character script:", script, error);
+              }
+            }
           }
           syncCharactersFromWindow();
+          if (!state.charactersLoaded.value && hadFailure) {
+            lastCharacterLoadFailureAt = Date.now();
+            return false;
+          }
           lastCharacterLoadFailureAt = 0;
           return state.charactersLoaded.value;
         } catch (error) {

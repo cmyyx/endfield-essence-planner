@@ -1535,19 +1535,7 @@
       }
 
       .character-hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          90deg,
-          rgba(8, 12, 18, 0.96) 0%,
-          rgba(8, 12, 18, 0.86) 30%,
-          rgba(8, 12, 18, 0.5) 55%,
-          rgba(8, 12, 18, 0.2) 72%,
-          rgba(8, 12, 18, 0) 88%
-        );
-        z-index: 1;
-        pointer-events: none;
+        content: none;
       }
 
       .hero-left {
@@ -1562,22 +1550,12 @@
         position: relative;
         border-radius: 14px;
         overflow: hidden;
-        background: rgba(8, 12, 18, 0.68);
-        box-shadow: 0 16px 30px rgba(var(--color-black-rgb), 0.35);
+        background: transparent;
+        box-shadow: none;
       }
 
       .hero-left::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          135deg,
-          rgba(8, 12, 18, 0.35) 0%,
-          rgba(8, 12, 18, 0.2) 45%,
-          rgba(8, 12, 18, 0) 100%
-        );
-        pointer-events: none;
-        z-index: 0;
+        content: none;
       }
 
       .hero-left > * {
