@@ -532,6 +532,10 @@
                 :aria-label="notice && notice.clickable && notice.ariaLabel ? notice.ariaLabel : null"
                 :data-toast-id="(notice && notice.id) || ''"
                 @mouseenter="pauseToastNotice((notice && notice.id) || '')"
+                @mouseleave="resumeToastNotice((notice && notice.id) || '')"
+                @touchstart.passive="pauseToastNotice((notice && notice.id) || '')"
+                @touchend.passive="resumeToastNotice((notice && notice.id) || '')"
+                @touchcancel.passive="resumeToastNotice((notice && notice.id) || '')"
                 @focusin="pauseToastNotice((notice && notice.id) || '')"
                 @focusout="resumeToastNotice((notice && notice.id) || '')"
                 @click="activateToastNotice((notice && notice.id) || '')"
@@ -567,7 +571,10 @@
               <div
                 v-if="notice && notice.durationMs && notice.durationMs > 0"
                 class="toast-progress"
-                :style="{ '--toast-duration': (notice.durationMs || toastDefaultDurationMs) + 'ms' }"
+                :style="{
+                  '--toast-duration': (notice.durationMs || toastDefaultDurationMs) + 'ms',
+                  '--toast-animation-state': isToastNoticePaused((notice && notice.id) || '') ? 'paused' : 'running'
+                }"
               ></div>
             </div>
           </div>

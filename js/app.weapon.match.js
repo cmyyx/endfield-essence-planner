@@ -7,14 +7,20 @@
     const matchQuery = ref("");
     const matchSourceName = ref("");
 
-    const allWeapons = weapons
-      .slice()
-      .sort((a, b) => {
+    const allWeapons = computed(() => {
+      const base = Array.isArray(weapons) ? weapons.slice() : [];
+      const custom = Array.isArray(state.customWeapons && state.customWeapons.value)
+        ? state.customWeapons.value
+        : [];
+      return custom.concat(base).sort((a, b) => {
         if (b.rarity !== a.rarity) return b.rarity - a.rarity;
         return compareText(a.name, b.name);
       });
-    const sourceWeapons = allWeapons;
-    const sourceWeaponMap = new Map(sourceWeapons.map((weapon) => [weapon.name, weapon]));
+    });
+    const sourceWeapons = computed(() => allWeapons.value);
+    const sourceWeaponMap = computed(
+      () => new Map(sourceWeapons.value.map((weapon) => [weapon.name, weapon]))
+    );
 
     const getSearchEntry = (weapon) => {
       const index = state.weaponSearchIndex && state.weaponSearchIndex.value;
@@ -39,9 +45,9 @@
 
     const matchSourceList = computed(() => {
       const queryMeta = createSearchQueryMeta(matchQuery.value);
-      if (!queryMeta.active) return sourceWeapons;
+      if (!queryMeta.active) return sourceWeapons.value;
       const matched = [];
-      sourceWeapons.forEach((weapon, index) => {
+      sourceWeapons.value.forEach((weapon, index) => {
         const score = scoreSearchEntry(getSearchEntry(weapon), queryMeta);
         if (score <= 0) return;
         matched.push({ weapon, score, index });
@@ -53,12 +59,14 @@
       return matched.map((item) => item.weapon);
     });
 
-    const matchSourceWeapon = computed(() => sourceWeaponMap.get(matchSourceName.value) || null);
+    const matchSourceWeapon = computed(
+      () => sourceWeaponMap.value.get(matchSourceName.value) || null
+    );
 
     const matchResults = computed(() => {
       const source = matchSourceWeapon.value;
       if (!source) return [];
-      return allWeapons.filter(
+      return allWeapons.value.filter(
         (weapon) =>
           weapon.name !== source.name &&
           weapon.s1 === source.s1 &&
@@ -72,8 +80,8 @@
       matchSourceName.value = weapon.name;
     };
 
-    if (!matchSourceName.value && sourceWeapons.length) {
-      matchSourceName.value = sourceWeapons[0].name;
+    if (!matchSourceName.value && sourceWeapons.value.length) {
+      matchSourceName.value = sourceWeapons.value[0].name;
     }
 
     state.matchQuery = matchQuery;

@@ -230,15 +230,15 @@
         }
 
         .weapon-ownership-badge.is-owned {
-          border: 1px solid rgba(var(--color-accent-rgb), 0.5);
-          background: rgba(var(--color-ok-rgb), 0.88);
-          color: rgba(var(--color-accent-rgb), 0.9);
+          border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-50));
+          background: rgba(var(--color-ok-rgb), var(--alpha-88));
+          color: rgba(var(--color-black-rgb), var(--alpha-96));
         }
 
         .weapon-ownership-badge.is-unowned {
-          border: 1px solid rgba(var(--color-rarity-5-rgb), 0.5);
-          background: rgba(45, 35, 18, 0.78);
-          color: rgba(var(--color-rarity-5-rgb), 0.9);
+          border: 1px solid rgba(var(--color-rarity-5-rgb), var(--alpha-50));
+          background: rgba(45, 35, 18, var(--alpha-78));
+          color: rgba(var(--color-rarity-5-rgb), var(--alpha-90));
           max-width: min(52%, 56px);
         }
 
@@ -449,8 +449,8 @@
         justify-content: flex-start;
         padding: 6px;
         border-radius: 10px;
-        border: 1px dashed rgba(var(--color-white-rgb), 0.12);
-        background: rgba(8, 12, 18, 0.45);
+        border: 1px dashed rgba(var(--color-white-rgb), var(--alpha-12));
+        background: rgba(8, 12, 18, var(--alpha-45));
       }
 
       .custom-weapon-preview img {
@@ -472,8 +472,8 @@
         gap: 10px;
         padding: 8px;
         border-radius: 10px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.08);
-        background: rgba(12, 18, 28, 0.75);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-08));
+        background: rgba(12, 18, 28, var(--alpha-75));
       }
 
       .custom-weapon-thumb {
@@ -482,8 +482,8 @@
         border-radius: 8px;
         overflow: hidden;
         flex: 0 0 auto;
-        border: 1px solid rgba(var(--color-white-rgb), 0.16);
-        background: rgba(var(--color-black-rgb), 0.6);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-16));
+        background: rgba(var(--color-black-rgb), var(--alpha-60));
         position: relative;
       }
 
@@ -493,8 +493,8 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: rgba(var(--color-accent-rgb), 0.9);
-        color: rgba(var(--color-black-rgb), 1);
+        background: rgba(var(--color-accent-rgb), var(--alpha-90));
+        color: rgba(var(--color-black-rgb), var(--alpha-100));
         font-size: 8px;
         font-weight: 900;
         text-align: center;
@@ -504,7 +504,7 @@
       }
 
       [data-theme="light"] .custom-weapon-thumb::after {
-        background: rgba(var(--color-accent-rgb), 1);
+        background: rgba(var(--color-accent-rgb), var(--alpha-100));
         color: #ffffff;
       }
 
@@ -547,10 +547,10 @@
       }
 
       .badge.custom-weapon-badge {
-        border: 1px solid rgba(var(--color-accent-rgb), 0.6) !important;
-        background: rgba(var(--color-accent-rgb), 0.9) !important;
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-60)) !important;
+        background: rgba(var(--color-accent-rgb), var(--alpha-90)) !important;
         color: #ffffff !important;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, var(--alpha-25)) !important;
         font-weight: 800 !important;
       }
 
@@ -559,15 +559,16 @@
         align-self: flex-end;
         padding: 2px 6px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-accent-rgb), 0.6);
-        background: rgba(var(--color-accent-rgb), 0.9);
-        color: #ffffff;
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-50));
+        background: rgba(var(--color-ok-rgb), var(--alpha-88));
+        color: rgba(var(--color-black-rgb), var(--alpha-96));
         font-size: 10px;
-        font-weight: 800;
+        font-weight: 600;
         line-height: 1.1;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      }
+
+      [data-theme="light"] .weapon-custom-chip {
+        color: rgba(var(--color-white-rgb), var(--alpha-96));
       }
 
       .weapon-name .weapon-title {
@@ -658,7 +659,7 @@
         aspect-ratio: 1 / 1;
         border-radius: 8px;
         border: 1px solid var(--stroke);
-        background: rgba(var(--color-black-rgb), 0.92);
+        background: rgba(var(--color-black-rgb), var(--alpha-92));
         cursor: pointer;
         transition: 0.2s ease;
         overflow: hidden;
@@ -667,24 +668,24 @@
       }
 
       .weapon-item:hover {
-        border-color: rgba(var(--color-white-rgb), 0.35);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-35));
         transform: none;
       }
 
       .weapon-item.is-selected {
-        border-color: rgba(var(--color-accent-rgb), 0.95);
-        box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.5), 0 0 0 6px rgba(var(--color-accent-rgb), 0.22),
-          0 20px 34px rgba(var(--color-black-rgb), 0.5);
-        background: radial-gradient(120% 120% at 50% 0%, rgba(var(--color-accent-rgb), 0.28), rgba(var(--color-black-rgb), 0.92) 60%);
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-95));
+        box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), var(--alpha-50)), 0 0 0 6px rgba(var(--color-accent-rgb), var(--alpha-22)),
+          0 20px 34px rgba(var(--color-black-rgb), var(--alpha-50));
+        background: radial-gradient(120% 120% at 50% 0%, rgba(var(--color-accent-rgb), var(--alpha-28)), rgba(var(--color-black-rgb), var(--alpha-92)) 60%);
       }
 
       .weapon-item.is-selected .weapon-name {
-        color: rgba(var(--color-accent-rgb), 1);
-        text-shadow: 0 2px 10px rgba(var(--color-accent-rgb), 0.35);
+        color: rgba(var(--color-accent-rgb), var(--alpha-100));
+        text-shadow: 0 2px 10px rgba(var(--color-accent-rgb), var(--alpha-35));
       }
 
       .weapon-item.is-essence-owned {
-        opacity: 0.55;
+        opacity: var(--alpha-55);
       }
 
       .weapon-item.is-essence-owned .weapon-name {
@@ -699,9 +700,9 @@
         z-index: 5;
         padding: 4px 8px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-info-rgb), 0.46);
-        background: rgba(var(--color-info-rgb), 0.14);
-        color: rgba(var(--color-info-rgb), 1);
+        border: 1px solid rgba(var(--color-info-rgb), var(--alpha-46));
+        background: rgba(var(--color-info-rgb), var(--alpha-14));
+        color: rgba(var(--color-info-rgb), var(--alpha-100));
         font-size: 11px;
         font-weight: 600;
         cursor: pointer;
@@ -728,9 +729,9 @@
         min-width: 220px;
         padding: 10px 12px;
         border-radius: 12px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.12);
-        background: rgba(12, 18, 28, 0.98);
-        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), 0.45);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-12));
+        background: rgba(12, 18, 28, var(--alpha-98));
+        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), var(--alpha-45));
         z-index: 20;
       }
 
@@ -771,7 +772,7 @@
       .secondary-upload input[type="file"] {
         position: absolute;
         inset: 0;
-        opacity: 0;
+        opacity: var(--alpha-00);
         cursor: pointer;
       }
 
@@ -779,7 +780,7 @@
         position: absolute;
         width: 1px;
         height: 1px;
-        opacity: 0;
+        opacity: var(--alpha-00);
         pointer-events: none;
       }
 
@@ -795,7 +796,7 @@
         padding: 6px 8px;
         border-radius: 8px;
         border: 1px solid var(--stroke);
-        background: rgba(8, 12, 18, 0.7);
+        background: rgba(8, 12, 18, var(--alpha-70));
         color: var(--text);
         font-size: 12px;
       }
@@ -805,7 +806,7 @@
         padding: 6px 8px;
         border-radius: 8px;
         border: 1px solid var(--stroke);
-        background: rgba(8, 12, 18, 0.7);
+        background: rgba(8, 12, 18, var(--alpha-70));
         color: var(--text);
         font-size: 12px;
       }
@@ -828,35 +829,35 @@
       }
 
       .secondary-warning {
-        color: rgba(var(--color-danger-rgb), 1);
+        color: rgba(var(--color-danger-rgb), var(--alpha-100));
       }
 
       .secondary-warning-action {
-        border-color: rgba(var(--color-danger-rgb), 0.55);
-        background: rgba(var(--color-danger-rgb), 0.18);
-        color: rgba(var(--color-danger-rgb), 0.85);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-55));
+        background: rgba(var(--color-danger-rgb), var(--alpha-18));
+        color: rgba(var(--color-danger-rgb), var(--alpha-85));
       }
 
       .secondary-warning-action:hover {
-        border-color: rgba(var(--color-danger-rgb), 0.78);
-        background: rgba(var(--color-danger-rgb), 0.28);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-78));
+        background: rgba(var(--color-danger-rgb), var(--alpha-28));
       }
 
       [data-theme="light"] .secondary-warning-action {
-        border-color: rgba(var(--color-danger-rgb), 0.45);
-        background: rgba(var(--color-danger-rgb), 0.12);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-45));
+        background: rgba(var(--color-danger-rgb), var(--alpha-12));
         color: #8b3636;
         font-weight: 700;
       }
 
       [data-theme="light"] .secondary-warning-action:hover {
-        border-color: rgba(var(--color-danger-rgb), 0.6);
-        background: rgba(var(--color-danger-rgb), 0.18);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-60));
+        background: rgba(var(--color-danger-rgb), var(--alpha-18));
         color: #7a2d2d;
       }
 
       .secondary-desc {
-        border-top: 1px dashed rgba(var(--color-white-rgb), 0.12);
+        border-top: 1px dashed rgba(var(--color-white-rgb), var(--alpha-12));
         padding-top: 8px;
         font-size: 11px;
         color: var(--muted);
@@ -880,8 +881,8 @@
         height: 16px;
         padding: 0 6px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-danger-rgb), 0.72);
-        background: linear-gradient(135deg, rgba(var(--color-danger-rgb), 0.8), rgba(var(--color-danger-rgb), 1));
+        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-72));
+        background: linear-gradient(135deg, rgba(var(--color-danger-rgb), var(--alpha-80)), rgba(var(--color-danger-rgb), var(--alpha-100)));
         color: #fff8f8;
         font-size: 9px;
         font-weight: 800;
@@ -889,7 +890,7 @@
         letter-spacing: 0.08em;
         text-align: center;
         white-space: nowrap;
-        box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.3), 0 0 12px rgba(255, 107, 107, 0.45);
+        box-shadow: 0 0 0 1px rgba(255, 107, 107, var(--alpha-30)), 0 0 12px rgba(255, 107, 107, var(--alpha-45));
         animation: plan-config-hint-dot-pulse 1.6s ease-in-out infinite;
       }
 
@@ -897,12 +898,12 @@
         0%,
         100% {
           transform: translateY(0);
-          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.3), 0 0 12px rgba(255, 107, 107, 0.45);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, var(--alpha-30)), 0 0 12px rgba(255, 107, 107, var(--alpha-45));
         }
 
         50% {
           transform: translateY(-1px);
-          box-shadow: 0 0 0 1px rgba(255, 107, 107, 0.48), 0 0 16px rgba(255, 107, 107, 0.62);
+          box-shadow: 0 0 0 1px rgba(255, 107, 107, var(--alpha-48)), 0 0 16px rgba(255, 107, 107, var(--alpha-62));
         }
       }
 
@@ -915,9 +916,9 @@
         overflow: auto;
         padding: 12px;
         border-radius: 12px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.14);
-        background: rgba(12, 18, 28, 0.98);
-        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), 0.45);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-14));
+        background: rgba(12, 18, 28, var(--alpha-98));
+        box-shadow: 0 18px 40px rgba(var(--color-black-rgb), var(--alpha-45));
         z-index: 28;
         display: grid;
         gap: 10px;
@@ -933,7 +934,7 @@
         align-items: center;
         gap: 8px;
         justify-content: flex-end;
-        background: linear-gradient(0deg, rgba(12, 18, 28, 0.98), rgba(12, 18, 28, 0.88) 70%, rgba(12, 18, 28, 0));
+        background: linear-gradient(0deg, rgba(12, 18, 28, var(--alpha-98)), rgba(12, 18, 28, var(--alpha-88)) 70%, rgba(12, 18, 28, var(--alpha-00)));
       }
 
       .plan-config-close-hint {
@@ -953,8 +954,8 @@
       .plan-config-section {
         display: grid;
         border-radius: 10px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.08);
-        background: rgba(var(--color-white-rgb), 0.03);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-08));
+        background: rgba(var(--color-white-rgb), var(--alpha-03));
         overflow: hidden;
       }
 
@@ -973,7 +974,7 @@
       }
 
       .plan-config-section-header:hover {
-        background: rgba(var(--color-white-rgb), 0.04);
+        background: rgba(var(--color-white-rgb), var(--alpha-04));
       }
 
       .plan-config-section-title {
@@ -987,20 +988,20 @@
         align-items: center;
         justify-content: center;
         font-size: 12px;
-        opacity: 0.7;
+        opacity: var(--alpha-70);
         transition: transform 0.2s ease, opacity 0.2s ease;
       }
 
       .plan-config-section-chevron.is-open {
         transform: rotate(90deg);
-        opacity: 1;
+        opacity: var(--alpha-100);
       }
 
       .plan-config-section-body {
         display: grid;
         gap: 8px;
         padding: 8px;
-        border-top: 1px solid rgba(var(--color-white-rgb), 0.06);
+        border-top: 1px solid rgba(var(--color-white-rgb), var(--alpha-06));
       }
 
       .plan-config-collapse-enter-active,
@@ -1012,14 +1013,14 @@
       .plan-config-collapse-enter-from,
       .plan-config-collapse-leave-to {
         max-height: 0;
-        opacity: 0;
+        opacity: var(--alpha-00);
         transform: translateY(-2px);
       }
 
       .plan-config-collapse-enter-to,
       .plan-config-collapse-leave-from {
         max-height: 1200px;
-        opacity: 1;
+        opacity: var(--alpha-100);
         transform: translateY(0);
       }
 
@@ -1037,7 +1038,7 @@
 
       .plan-config-rule-head {
         padding-bottom: 2px;
-        border-bottom: 1px dashed rgba(var(--color-white-rgb), 0.08);
+        border-bottom: 1px dashed rgba(var(--color-white-rgb), var(--alpha-08));
       }
 
       .plan-config-rule-head-cell {
@@ -1063,7 +1064,7 @@
 
       .plan-config-rule-sub .plan-config-rule-label {
         font-size: 11px;
-        opacity: 0.8;
+        opacity: var(--alpha-80);
       }
 
       .switch-compact {
@@ -1118,8 +1119,8 @@
         gap: 6px;
         padding: 8px;
         border-radius: 10px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.08);
-        background: rgba(var(--color-white-rgb), 0.03);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-08));
+        background: rgba(var(--color-white-rgb), var(--alpha-03));
       }
 
       .plan-config-rule {
@@ -1130,7 +1131,7 @@
       .plan-config-rule + .plan-config-rule {
         margin-top: 4px;
         padding-top: 8px;
-        border-top: 1px solid rgba(var(--color-white-rgb), 0.06);
+        border-top: 1px solid rgba(var(--color-white-rgb), var(--alpha-06));
       }
 
       .plan-config-rule-title {
@@ -1143,12 +1144,12 @@
       }
 
       .priority-mode-desc {
-        opacity: 0.72;
+        opacity: var(--alpha-72);
         transition: opacity 0.15s ease, color 0.15s ease;
       }
 
       .priority-mode-desc.is-active {
-        opacity: 1;
+        opacity: var(--alpha-100);
       }
 
       .priority-mode-name {
@@ -1200,8 +1201,8 @@
         margin: 0 0 16px;
         padding: 12px 14px;
         border-radius: 14px;
-        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.35);
-        background: rgba(var(--color-rarity-5-rgb), 0.08);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), var(--alpha-35));
+        background: rgba(var(--color-rarity-5-rgb), var(--alpha-08));
         color: #ffd9b6;
         display: flex;
         flex-wrap: wrap;
@@ -1213,8 +1214,8 @@
         margin: 0 0 12px;
         padding: 10px 14px;
         border-radius: 12px;
-        border: 1px dashed rgba(var(--color-accent-rgb), 0.3);
-        background: rgba(12, 18, 28, 0.7);
+        border: 1px dashed rgba(var(--color-accent-rgb), var(--alpha-30));
+        background: rgba(12, 18, 28, var(--alpha-70));
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -1247,14 +1248,14 @@
       }
 
       .exclude-toggle.active {
-        border-color: rgba(95, 132, 176, 0.62);
-        background: rgba(95, 132, 176, 0.24);
+        border-color: rgba(95, 132, 176, var(--alpha-62));
+        background: rgba(95, 132, 176, var(--alpha-24));
         color: #e8f3ff;
       }
 
       .exclude-toggle.intent-alert {
-        border-color: rgba(var(--color-danger-rgb), 0.8);
-        background: rgba(var(--color-danger-rgb), 0.22);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-80));
+        background: rgba(var(--color-danger-rgb), var(--alpha-22));
         color: #ffe6e6;
       }
 
@@ -1273,8 +1274,8 @@
         z-index: 5;
         padding: 2px 6px;
         border-radius: 999px;
-        border: 1px solid rgba(154, 165, 177, 0.45);
-        background: rgba(154, 165, 177, 0.12);
+        border: 1px solid rgba(154, 165, 177, var(--alpha-45));
+        background: rgba(154, 165, 177, var(--alpha-12));
         color: var(--muted);
         font-size: 10px;
       }
@@ -1284,27 +1285,27 @@
         position: absolute;
         inset: 0;
         border-radius: 8px;
-        border: 2px solid rgba(var(--color-white-rgb), 0);
-        background: rgba(var(--color-white-rgb), 0);
-        box-shadow: 0 0 0 0 rgba(var(--color-white-rgb), 0);
-        opacity: 0;
+        border: 2px solid rgba(var(--color-white-rgb), var(--alpha-00));
+        background: rgba(var(--color-white-rgb), var(--alpha-00));
+        box-shadow: 0 0 0 0 rgba(var(--color-white-rgb), var(--alpha-00));
+        opacity: var(--alpha-00);
         transition: 0.2s ease;
         z-index: 4;
         pointer-events: none;
       }
 
       .weapon-item.is-selected::after {
-        opacity: 1;
-        border-color: rgba(var(--color-accent-rgb), 0.85);
-        background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.28), rgba(var(--color-black-rgb), 0));
-        box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.45), inset 0 0 24px rgba(var(--color-accent-rgb), 0.28);
+        opacity: var(--alpha-100);
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-85));
+        background: linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-28)), rgba(var(--color-black-rgb), var(--alpha-00)));
+        box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), var(--alpha-45)), inset 0 0 24px rgba(var(--color-accent-rgb), var(--alpha-28));
       }
 
       .weapon-item:hover::after {
-        opacity: 1;
-        border-color: rgba(var(--color-white-rgb), 0.75);
-        background: rgba(var(--color-white-rgb), 0.03);
-        box-shadow: 0 0 0 2px rgba(var(--color-white-rgb), 0.4);
+        opacity: var(--alpha-100);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-75));
+        background: rgba(var(--color-white-rgb), var(--alpha-03));
+        box-shadow: 0 0 0 2px rgba(var(--color-white-rgb), var(--alpha-40));
       }
 
       .weapon-item::before {
@@ -1315,7 +1316,7 @@
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
-        opacity: 0.9;
+        opacity: var(--alpha-90);
         z-index: 0;
         pointer-events: none;
       }
@@ -1360,7 +1361,7 @@
         right: -1px;
         bottom: 0;
         height: 42.5px;
-        background-image: linear-gradient(90deg, rgba(122, 118, 148, 0.7), rgba(84, 82, 110, 0.9));
+        background-image: linear-gradient(90deg, rgba(122, 118, 148, var(--alpha-70)), rgba(84, 82, 110, var(--alpha-90)));
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center bottom;
@@ -1403,8 +1404,8 @@
         display: none;
         padding: 2px 7px;
         border-radius: 999px;
-        border: 1px solid rgba(95, 201, 228, 0.5);
-        background: rgba(13, 43, 58, 0.88);
+        border: 1px solid rgba(95, 201, 228, var(--alpha-50));
+        background: rgba(13, 43, 58, var(--alpha-88));
         color: #dff8ff;
         font-size: 11px;
         font-weight: 700;
@@ -1423,9 +1424,9 @@
         max-width: 100%;
         padding: 2px 6px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.65);
-        background: rgba(45, 35, 18, 0.78);
-        color: rgba(var(--color-rarity-5-rgb), 0.9);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), var(--alpha-65));
+        background: rgba(45, 35, 18, var(--alpha-78));
+        color: rgba(var(--color-rarity-5-rgb), var(--alpha-90));
         font-size: 11px;
         line-height: 1.15;
         white-space: nowrap;
@@ -1452,15 +1453,19 @@
       }
 
       .weapon-ownership-badge.is-owned {
-        border: 1px solid rgba(var(--color-accent-rgb), 0.5);
-        background: rgba(var(--color-ok-rgb), 0.88);
-        color: rgba(var(--color-accent-rgb), 0.9);
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-50));
+        background: rgba(var(--color-ok-rgb), var(--alpha-88));
+        color: rgba(var(--color-black-rgb), var(--alpha-96));
+      }
+
+      [data-theme="light"] .weapon-ownership-badge.is-owned {
+        color: rgba(var(--color-white-rgb), var(--alpha-96));
       }
 
       .weapon-ownership-badge.is-unowned {
-        border: 1px solid rgba(var(--color-rarity-5-rgb), 0.5);
-        background: rgba(45, 35, 18, 0.78);
-        color: rgba(var(--color-rarity-5-rgb), 0.9);
+        border: 1px solid rgba(var(--color-rarity-5-rgb), var(--alpha-50));
+        background: rgba(45, 35, 18, var(--alpha-78));
+        color: rgba(var(--color-rarity-5-rgb), var(--alpha-90));
         max-width: min(54%, 68px);
       }
 
@@ -1521,7 +1526,7 @@
         color: #f5f2ee;
         overflow: hidden;
         text-overflow: ellipsis;
-        text-shadow: 0 1px 6px rgba(var(--color-black-rgb), 0.65);
+        text-shadow: 0 1px 6px rgba(var(--color-black-rgb), var(--alpha-65));
         z-index: 3;
       }
 
@@ -1543,7 +1548,7 @@
         font-size: 11px;
         line-height: 1.1;
         font-weight: 500;
-        color: rgba(245, 242, 238, 0.8);
+        color: rgba(245, 242, 238, var(--alpha-80));
         overflow: hidden;
         text-overflow: ellipsis;
       }
@@ -1564,9 +1569,9 @@
         height: 24px;
         border-radius: 50%;
         object-fit: cover;
-        background: rgba(10, 14, 22, 0.6);
-        border: 1px solid rgba(var(--color-white-rgb), 0.35);
-        box-shadow: 0 2px 6px rgba(var(--color-black-rgb), 0.35);
+        background: rgba(10, 14, 22, var(--alpha-60));
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-35));
+        box-shadow: 0 2px 6px rgba(var(--color-black-rgb), var(--alpha-35));
       }
 
       .weapon-item .weapon-avatars {
@@ -1625,13 +1630,13 @@
       }
 
       .weapon-attr-item:hover {
-        border-color: rgba(var(--color-white-rgb), 0.35);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-35));
       }
 
       .weapon-attr-item.is-selected {
-        border-color: rgba(var(--color-accent-rgb), 0.7);
-        background: rgba(18, 34, 40, 0.88);
-        box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.4), 0 10px 18px rgba(var(--color-black-rgb), 0.35);
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-70));
+        background: rgba(18, 34, 40, var(--alpha-88));
+        box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-40)), 0 10px 18px rgba(var(--color-black-rgb), var(--alpha-35));
       }
 
       .weapon-attr-item.is-selected::before {
@@ -1642,17 +1647,17 @@
         bottom: 0;
         width: 4px;
         border-radius: var(--radius-md) 0 0 var(--radius-md);
-        background: rgba(var(--color-accent-rgb), 0.9);
-        box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.45);
+        background: rgba(var(--color-accent-rgb), var(--alpha-90));
+        box-shadow: 0 0 10px rgba(var(--color-accent-rgb), var(--alpha-45));
         pointer-events: none;
       }
 
       .weapon-attr-item.is-selected .scheme-weapon-title {
-        color: rgba(var(--color-accent-rgb), 1);
+        color: rgba(var(--color-accent-rgb), var(--alpha-100));
       }
 
       .weapon-attr-item.is-essence-owned {
-        opacity: 0.55;
+        opacity: var(--alpha-55);
       }
 
       .weapon-attr-item.is-essence-owned .weapon-main-name {
@@ -1677,8 +1682,8 @@
         padding: 3px 7px;
         box-sizing: border-box;
         border-radius: 6px;
-        border: 1px solid rgba(var(--color-white-rgb), 0.12);
-        background: rgba(10, 14, 20, 0.45);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-12));
+        background: rgba(10, 14, 20, var(--alpha-45));
         color: var(--text);
         font-size: 12px;
         line-height: normal;
@@ -1695,7 +1700,7 @@
       }
 
       .exclude-note-input:focus {
-        border-color: rgba(var(--color-white-rgb), 0.35);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-35));
       }
 
       @media (max-width: 640px), (orientation: portrait) and (max-width: 1024px) {
@@ -1807,8 +1812,8 @@
       .missing-tag {
         padding: 2px 8px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-danger-rgb), 0.45);
-        background: rgba(var(--color-danger-rgb), 0.12);
+        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-45));
+        background: rgba(var(--color-danger-rgb), var(--alpha-12));
         color: #ffd1d1;
         font-size: 11px;
       }
@@ -1831,7 +1836,7 @@
 
       .fade-scale-enter-from,
       .fade-scale-leave-to {
-        opacity: 0;
+        opacity: var(--alpha-00);
       }
 
       .fade-scale-leave-active {
@@ -1850,7 +1855,7 @@
       .fade-scale-enter-from .faq-card,
       .fade-scale-leave-to .faq-card {
         transform: translateY(10px) scale(0.975);
-        opacity: 0;
+        opacity: var(--alpha-00);
       }
 
 
@@ -1863,13 +1868,13 @@
       .collapse-enter-from,
       .collapse-leave-to {
         max-height: 0;
-        opacity: 0;
+        opacity: var(--alpha-00);
       }
 
       .collapse-enter-to,
       .collapse-leave-from {
         max-height: 1200px;
-        opacity: 1;
+        opacity: var(--alpha-100);
       }
 
       .weapon-mini {
@@ -1879,7 +1884,7 @@
         height: 80px;
         border-radius: 10px;
         border: 1px solid var(--stroke);
-        background: rgba(var(--color-white-rgb), 0.04);
+        background: rgba(var(--color-white-rgb), var(--alpha-04));
         overflow: hidden;
       }
 

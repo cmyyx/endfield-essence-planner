@@ -78,6 +78,7 @@
     const runtimeWarningDedupWindowMs = 4000;
     const toastVisibleLimit = 5;
     const toastDefaultDurationMs = 6500;
+    const toastDismissBufferMs = 120;
     const toastLastSeenAt = new Map();
     const toastTimers = new Map();
     const toastTimerMeta = new Map();
@@ -275,17 +276,18 @@
         ? Number(options.remainingMs)
         : baseDuration;
       if (!Number.isFinite(duration) || duration <= 0) return;
+      const timeoutDuration = duration + toastDismissBufferMs;
       clearToastTimer(notice.id);
       const startedAt = Date.now();
       toastTimerMeta.set(key, {
-        remainingMs: duration,
+        remainingMs: timeoutDuration,
         startedAt,
       });
       const timer = setTimeout(() => {
         toastTimers.delete(notice.id);
         toastTimerMeta.delete(key);
         removeVisibleToastNotice(notice.id);
-      }, duration);
+      }, timeoutDuration);
       toastTimers.set(notice.id, timer);
     };
 
@@ -369,7 +371,7 @@
             ? Number(notice.durationMs)
             : toastDefaultDurationMs;
         if (notice && Number.isFinite(baseDuration) && baseDuration > 0 && !toastTimerMeta.has(key)) {
-          toastTimerMeta.set(key, { remainingMs: baseDuration, startedAt: 0 });
+          toastTimerMeta.set(key, { remainingMs: baseDuration + toastDismissBufferMs, startedAt: 0 });
         }
         return;
       }
@@ -1294,6 +1296,7 @@
     state.dismissToastNotice = dismissToastNotice;
     state.pauseToastNotice = pauseToastNotice;
     state.resumeToastNotice = resumeToastNotice;
+    state.isToastNoticePaused = isToastNoticePaused;
     state.resumeToastNoticeIfNotHovered = resumeToastNoticeIfNotHovered;
     state.pauseAllToastNotices = pauseAllToastNotices;
     state.resumeAllToastNotices = resumeAllToastNotices;

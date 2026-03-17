@@ -6,7 +6,7 @@
       .card {
         background: var(--panel-strong);
         border-radius: var(--radius-lg);
-        border: 1px solid rgba(var(--color-white-rgb), 0.1);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-10));
         padding: 20px;
         box-shadow: var(--shadow);
       }
@@ -38,9 +38,9 @@
         gap: 6px;
         padding: 5px 11px;
         border-radius: 999px;
-        background: rgba(var(--color-accent-rgb), 0.12);
-        border: 1px solid rgba(var(--color-accent-rgb), 0.4);
-        color: rgba(var(--color-accent-rgb), 0.95);
+        background: rgba(var(--color-accent-rgb), var(--alpha-12));
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-40));
+        color: rgba(var(--color-accent-rgb), var(--alpha-95));
         font-size: 11px;
         font-weight: 600;
         line-height: 1.2;
@@ -53,9 +53,9 @@
       }
 
       .pill.warn {
-        background: rgba(242, 182, 50, 0.12);
-        border-color: rgba(242, 182, 50, 0.4);
-        color: rgba(var(--color-rarity-5-rgb), 0.95);
+        background: rgba(242, 182, 50, var(--alpha-12));
+        border-color: rgba(242, 182, 50, var(--alpha-40));
+        color: rgba(var(--color-rarity-5-rgb), var(--alpha-95));
       }
 
       .s1-block {
@@ -63,7 +63,7 @@
         padding: 12px;
         border-radius: var(--radius-md);
         border: 1px solid var(--stroke);
-        background: rgba(10, 14, 22, 0.6);
+        background: rgba(10, 14, 22, var(--alpha-60));
       }
 
       .s1-header {
@@ -102,14 +102,14 @@
         font-weight: 600;
         line-height: 1.2;
         letter-spacing: 0.01em;
-        border: 1px solid rgba(var(--color-ok-rgb), 0.4);
-        background: rgba(var(--color-ok-rgb), 0.12);
-        color: rgba(var(--color-ok-rgb), 1);
+        border: 1px solid rgba(var(--color-ok-rgb), var(--alpha-40));
+        background: rgba(var(--color-ok-rgb), var(--alpha-12));
+        color: rgba(var(--color-ok-rgb), var(--alpha-100));
       }
 
       .chip.warn {
-        border-color: rgba(var(--color-rarity-5-rgb), 0.45);
-        background: rgba(var(--color-rarity-5-rgb), 0.1);
+        border-color: rgba(var(--color-rarity-5-rgb), var(--alpha-45));
+        background: rgba(var(--color-rarity-5-rgb), var(--alpha-10));
         color: #ffe8c3;
       }
 
@@ -145,8 +145,8 @@
         margin-left: 4px;
         padding: 2px 7px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-accent-rgb), 0.35);
-        background: rgba(var(--color-accent-rgb), 0.12);
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-35));
+        background: rgba(var(--color-accent-rgb), var(--alpha-12));
         color: var(--accent-2);
         font-size: 11px;
         font-weight: 600;
@@ -175,7 +175,7 @@
         content: "";
         flex: 1;
         height: 1px;
-        background: rgba(var(--color-white-rgb), 0.08);
+        background: rgba(var(--color-white-rgb), var(--alpha-08));
       }
 
       .scheme-divider span {
@@ -186,8 +186,8 @@
         margin: 12px 0 16px;
         padding: 14px;
         border-radius: var(--radius-md);
-        border: 1px solid rgba(var(--color-white-rgb), 0.1);
-        background: rgba(10, 14, 22, 0.78);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-10));
+        background: rgba(10, 14, 22, var(--alpha-78));
         display: grid;
         gap: 10px;
       }
@@ -211,9 +211,9 @@
         gap: 6px;
         padding: 6px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(var(--color-ok-rgb), 0.35);
-        background: rgba(var(--color-ok-rgb), 0.12);
-        color: rgba(var(--color-ok-rgb), 1);
+        border: 1px solid rgba(var(--color-ok-rgb), var(--alpha-35));
+        background: rgba(var(--color-ok-rgb), var(--alpha-12));
+        color: rgba(var(--color-ok-rgb), var(--alpha-100));
         font-size: 11px;
         font-weight: 600;
         line-height: 1.2;
@@ -221,14 +221,14 @@
       }
 
       .lock-chip.attr {
-        border-color: rgba(var(--color-rarity-6-rgb), 0.55);
-        background: rgba(var(--color-rarity-6-rgb), 0.12);
+        border-color: rgba(var(--color-rarity-6-rgb), var(--alpha-55));
+        background: rgba(var(--color-rarity-6-rgb), var(--alpha-12));
         color: #ffd2ad;
       }
 
       .lock-chip.warn {
-        border-color: rgba(var(--color-danger-rgb), 0.55);
-        background: rgba(var(--color-danger-rgb), 0.14);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-55));
+        background: rgba(var(--color-danger-rgb), var(--alpha-14));
         color: #ffd1d1;
       }
 
@@ -236,7 +236,7 @@
         padding: 12px 14px;
         border-radius: var(--radius-md);
         border: 1px solid var(--stroke);
-        background: rgba(10, 14, 22, 0.72);
+        background: rgba(10, 14, 22, var(--alpha-72));
         display: grid;
         gap: 6px;
         min-width: 0;
@@ -250,11 +250,11 @@
       }
 
       .scheme-weapon-item.base-selectable:hover {
-        border-color: rgba(var(--color-white-rgb), 0.2);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
       }
 
       .scheme-weapon-item.is-dim {
-        opacity: 0.45;
+        opacity: var(--alpha-45);
       }
 
       .scheme-weapon-item.is-dim .weapon-main-name {
@@ -263,28 +263,28 @@
       }
 
       .scheme-weapon-item.is-selected {
-        border-color: rgba(var(--color-accent-rgb), 0.5);
-        background: rgba(18, 34, 40, 0.88);
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-50));
+        background: rgba(18, 34, 40, var(--alpha-88));
       }
 
       .scheme-weapon-item.base-choice {
-        border-color: rgba(var(--color-rarity-5-rgb), 0.6);
-        background: rgba(30, 26, 18, 0.88);
+        border-color: rgba(var(--color-rarity-5-rgb), var(--alpha-60));
+        background: rgba(30, 26, 18, var(--alpha-88));
         box-shadow:
-          0 0 0 1px rgba(var(--color-rarity-5-rgb), 0.3),
-          0 10px 20px rgba(var(--color-rarity-5-rgb), 0.16);
+          0 0 0 1px rgba(var(--color-rarity-5-rgb), var(--alpha-30)),
+          0 10px 20px rgba(var(--color-rarity-5-rgb), var(--alpha-16));
       }
 
       .scheme-weapon-item.base-choice.is-dim {
-        opacity: 0.72;
+        opacity: var(--alpha-72);
       }
 
       .scheme-weapon-item.is-disabled {
         cursor: not-allowed;
         border-style: dashed;
-        border-color: rgba(var(--color-danger-rgb), 0.45);
-        background: rgba(28, 16, 18, 0.7);
-        opacity: 0.8;
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-45));
+        background: rgba(28, 16, 18, var(--alpha-70));
+        opacity: var(--alpha-80);
       }
 
       .scheme-weapon-list.conflict-list {
@@ -305,7 +305,7 @@
       .exclude-note-text {
         font-size: 12px;
         color: var(--muted);
-        opacity: 0.85;
+        opacity: var(--alpha-85);
       }
 
       .scheme-weapon-title {
@@ -359,21 +359,21 @@
         font-weight: 600;
         line-height: 1.2;
         letter-spacing: 0.02em;
-        background: rgba(var(--color-accent-rgb), 0.15);
+        background: rgba(var(--color-accent-rgb), var(--alpha-15));
         color: #c9fff7;
-        border: 1px solid rgba(var(--color-accent-rgb), 0.4);
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-40));
       }
 
       .scheme-weapon-title .badge.warn {
-        background: rgba(var(--color-danger-rgb), 0.2);
-        border-color: rgba(var(--color-danger-rgb), 0.5);
+        background: rgba(var(--color-danger-rgb), var(--alpha-20));
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-50));
         color: #ffd1d1;
       }
 
       .scheme-weapon-title .badge.muted {
-        background: rgba(154, 165, 177, 0.16);
-        border-color: rgba(154, 165, 177, 0.5);
-        color: rgba(var(--color-info-rgb), 0.9);
+        background: rgba(154, 165, 177, var(--alpha-16));
+        border-color: rgba(154, 165, 177, var(--alpha-50));
+        color: rgba(var(--color-info-rgb), var(--alpha-90));
       }
 
       .scheme-weapon-title .rarity {
@@ -419,8 +419,8 @@
         min-height: 20px;
         padding: 2px 9px;
         border-radius: 7px;
-        border: 1px solid rgba(180, 202, 228, 0.28);
-        background: rgba(var(--color-surface-rgb), 0.46);
+        border: 1px solid rgba(180, 202, 228, var(--alpha-28));
+        background: rgba(var(--color-surface-rgb), var(--alpha-46));
         line-height: 1.2;
         color: inherit;
       }
@@ -448,20 +448,20 @@
       }
 
       .attr-value.locked {
-        border-color: rgba(242, 182, 50, 0.5);
-        background: rgba(242, 182, 50, 0.12);
-        color: rgba(var(--color-rarity-5-rgb), 0.95);
+        border-color: rgba(242, 182, 50, var(--alpha-50));
+        background: rgba(242, 182, 50, var(--alpha-12));
+        color: rgba(var(--color-rarity-5-rgb), var(--alpha-95));
       }
 
       .attr-value.base-lock {
-        border-color: rgba(var(--color-ok-rgb), 0.5);
-        background: rgba(var(--color-ok-rgb), 0.12);
-        color: rgba(var(--color-ok-rgb), 1);
+        border-color: rgba(var(--color-ok-rgb), var(--alpha-50));
+        background: rgba(var(--color-ok-rgb), var(--alpha-12));
+        color: rgba(var(--color-ok-rgb), var(--alpha-100));
       }
 
       .attr-value.conflict {
-        border-color: rgba(var(--color-danger-rgb), 0.55);
-        background: rgba(var(--color-danger-rgb), 0.14);
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-55));
+        background: rgba(var(--color-danger-rgb), var(--alpha-14));
         color: #ffd1d1;
       }
 
@@ -489,7 +489,7 @@
       .empty {
         padding: 24px;
         border-radius: var(--radius-lg);
-        border: 1px dashed rgba(var(--color-white-rgb), 0.12);
+        border: 1px dashed rgba(var(--color-white-rgb), var(--alpha-12));
         color: var(--muted);
       }
 
@@ -497,8 +497,8 @@
         margin-top: 14px;
         padding: 12px;
         border-radius: var(--radius-md);
-        border: 1px solid rgba(var(--color-white-rgb), 0.08);
-        background: rgba(8, 12, 18, 0.7);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-08));
+        background: rgba(8, 12, 18, var(--alpha-70));
       }
 
       .byproducts h4 {
@@ -611,7 +611,7 @@
       }
 
       html.low-gpu .weapon-item.is-selected {
-        background: rgba(var(--color-black-rgb), 0.92) !important;
+        background: rgba(var(--color-black-rgb), var(--alpha-92)) !important;
       }
 
 

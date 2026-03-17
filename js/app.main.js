@@ -398,14 +398,14 @@
     template: `
 <div class="match-status-line">
   <span
-    class="match-status-chip"
+    class="weapon-ownership-badge match-status-badge"
     :class="{ 'is-owned': isWeaponOwned(weaponName), 'is-unowned': !isWeaponOwned(weaponName) }"
   >
     {{ isWeaponOwned(weaponName) ? t("badge.owned") : t("nav.not_owned") }}
   </span>
   <span
-    class="match-status-chip"
-    :class="{ 'is-essence-owned': isEssenceOwned(weaponName) }"
+    class="weapon-ownership-badge match-status-badge"
+    :class="{ 'is-owned': isEssenceOwned(weaponName), 'is-unowned': !isEssenceOwned(weaponName) }"
   >
     {{ isEssenceOwned(weaponName) ? t("nav.essence_owned") : t("badge.essence_not_owned") }}
   </span>
@@ -1896,6 +1896,7 @@
         dismissToastNotice: state.dismissToastNotice,
         pauseToastNotice: state.pauseToastNotice,
         resumeToastNotice: state.resumeToastNotice,
+        isToastNoticePaused: state.isToastNoticePaused,
         resumeToastNoticeIfNotHovered: state.resumeToastNoticeIfNotHovered,
         pauseAllToastNotices: state.pauseAllToastNotices,
         resumeAllToastNotices: state.resumeAllToastNotices,
