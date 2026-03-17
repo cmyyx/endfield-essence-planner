@@ -66,6 +66,7 @@ html[data-theme="light"] #app-preload {
   --preload-track: rgba(51, 79, 107, var(--alpha-18));
   --preload-fill: #1fc8b7;
   --preload-current: #2f4358;
+
   color: #1c2b3f;
 }
 

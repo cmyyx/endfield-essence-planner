@@ -272,11 +272,10 @@
       const baseDuration = Number.isFinite(notice.durationMs)
         ? Number(notice.durationMs)
         : toastDefaultDurationMs;
-      const duration = Number.isFinite(options.remainingMs)
-        ? Number(options.remainingMs)
-        : baseDuration;
+      const hasRemaining = Number.isFinite(options.remainingMs);
+      const duration = hasRemaining ? Number(options.remainingMs) : baseDuration;
       if (!Number.isFinite(duration) || duration <= 0) return;
-      const timeoutDuration = duration + toastDismissBufferMs;
+      const timeoutDuration = hasRemaining ? duration : duration + toastDismissBufferMs;
       clearToastTimer(notice.id);
       const startedAt = Date.now();
       toastTimerMeta.set(key, {
