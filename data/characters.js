@@ -1,4 +1,9 @@
 (function () {
   window.characters = window.characters || [];
-  window.__APP_CHARACTER_SCRIPTS__ = ["./data/characters/tangtang.js"];
+  const scripts = window.__APP_CHARACTER_SCRIPTS__ || [];
+  const newScript = "./data/characters/tangtang.js";
+  if (!scripts.includes(newScript)) {
+    scripts.push(newScript);
+  }
+  window.__APP_CHARACTER_SCRIPTS__ = scripts;
 })();

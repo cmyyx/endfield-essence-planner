@@ -291,7 +291,7 @@
 
       if (typeof raw.equipRefiningSelectedName === "string") {
         const name = String(raw.equipRefiningSelectedName).trim();
-        if (name && (!equipNameSet.size || equipNameSet.has(name))) {
+        if (name && equipNameSet.has(name)) {
           next.equipRefiningSelectedName = name;
         }
       }

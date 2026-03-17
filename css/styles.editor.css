@@ -330,7 +330,7 @@
   color: var(--text);
   font-size: 12px;
   line-height: 1.5;
-  font-family: "Cascadia Mono", "Menlo", "Consolas", monospace;
+  font-family: "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
 .editor-materials {

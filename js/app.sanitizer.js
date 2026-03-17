@@ -167,17 +167,18 @@
         continue;
       }
       var unorderedMatch = line.match(/^\s*[-*+]\s+(.+)$/);
-      var orderedMatch = line.match(/^\s*\d+\.\s+(.+)$/);
+      var orderedMatch = line.match(/^\s*(\d+)\.\s+(.+)$/);
       if (unorderedMatch || orderedMatch) {
         flushParagraph();
         var ordered = Boolean(orderedMatch);
+        var start = ordered ? parseInt(orderedMatch[1], 10) : undefined;
         var items = [];
         while (index < lines.length) {
           var current = lines[index];
           var nextUnordered = current.match(/^\s*[-*+]\s+(.+)$/);
-          var nextOrdered = current.match(/^\s*\d+\.\s+(.+)$/);
+          var nextOrdered = current.match(/^\s*(\d+)\.\s+(.+)$/);
           if (ordered && nextOrdered) {
-            items.push({ tokens: tokenizeInlineMarkdown(nextOrdered[1]) });
+            items.push({ tokens: tokenizeInlineMarkdown(nextOrdered[2]) });
             index += 1;
             continue;
           }
@@ -188,7 +189,7 @@
           }
           break;
         }
-        blocks.push({ type: "list", ordered: ordered, items: items });
+        blocks.push({ type: "list", ordered: ordered, start: start, items: items });
         continue;
       }
       paragraphLines.push(line);

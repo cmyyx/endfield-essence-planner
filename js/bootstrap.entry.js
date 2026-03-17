@@ -1304,7 +1304,7 @@
         refreshButton.type = "button";
         refreshButton.textContent = bt("action_refresh");
         refreshButton.style.cssText =
-          "cursor:pointer;border:1px solid rgba(var(--color-white-rgb), 0.35);border-radius:999px;padding:4px 10px;background:rgba(12,18,28,0.9);color:#fff;font-size:12px;";
+          "cursor:pointer;border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:4px 10px;background:rgba(12,18,28,0.9);color:#fff;font-size:12px;";
         refreshButton.addEventListener("click", function () {
           window.location.reload();
         });
@@ -1623,7 +1623,7 @@
           exportButton.type = "button";
           exportButton.textContent = bt("action_export_diag");
           exportButton.style.cssText =
-            "margin-top:10px;cursor:pointer;border:1px solid rgba(var(--color-white-rgb), 0.4);border-radius:999px;padding:4px 10px;background:rgba(12,18,28,0.9);color:#fff;font-size:12px;";
+            "margin-top:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.4);border-radius:999px;padding:4px 10px;background:rgba(12,18,28,0.9);color:#fff;font-size:12px;";
           exportButton.addEventListener("click", function () {
             exportBootDiagnosticBundle({
               title: bt("error_title_resource"),

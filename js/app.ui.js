@@ -83,9 +83,11 @@
     const toastTimerMeta = new Map();
     const toastManualPause = new Set();
     const toastManualPauseMeta = new Map();
+    const toastHoverPause = new Set();
     const toastLeaveRects = new Map();
     let toastPointerTrackerReady = false;
     let toastPointerPosition = null;
+    let toastPointerMoveHandler = null;
     let toastPointerSyncHandle = 0;
     const optionalFailureNotificationDedupWindowMs = 10000;
     const optionalFailureQueueKey = "__bootOptionalLoadFailures";
@@ -221,7 +223,9 @@
       if (!pulled.length) return;
       const next = current.concat(pulled);
       setVisibleToastNotices(next);
-      pulled.forEach((item) => scheduleToastAutoDismiss(item));
+      pulled.forEach((item) => {
+        scheduleToastAutoDismiss(item);
+      });
     };
     const clearToastTimer = (noticeId, options = {}) => {
       const key = String(noticeId || "");
@@ -299,12 +303,20 @@
           insideIds.add(String(id));
         }
       });
-      const toPause = Array.from(insideIds).filter((id) => !toastManualPause.has(id));
+      const toPause = Array.from(insideIds).filter(
+        (id) => !toastManualPause.has(id) && !toastHoverPause.has(id)
+      );
       const toResume = fromPointerMove
-        ? Array.from(toastManualPause).filter((id) => !insideIds.has(id))
+        ? Array.from(toastHoverPause).filter((id) => !insideIds.has(id))
         : [];
-      toPause.forEach((id) => pauseToastNotice(id));
-      toResume.forEach((id) => resumeToastNotice(id));
+      toPause.forEach((id) => {
+        toastHoverPause.add(id);
+        pauseToastNotice(id);
+      });
+      toResume.forEach((id) => {
+        toastHoverPause.delete(id);
+        resumeToastNotice(id);
+      });
     };
 
     const requestToastPointerSync = () => {
@@ -334,14 +346,11 @@
       if (toastPointerTrackerReady) return;
       if (typeof window === "undefined" || typeof document === "undefined") return;
       toastPointerTrackerReady = true;
-      document.addEventListener(
-        "pointermove",
-        (event) => {
-          toastPointerPosition = { x: event.clientX, y: event.clientY };
-          syncPausedToastsWithPointer({ fromPointerMove: true });
-        },
-        { passive: true }
-      );
+      toastPointerMoveHandler = (event) => {
+        toastPointerPosition = { x: event.clientX, y: event.clientY };
+        syncPausedToastsWithPointer({ fromPointerMove: true });
+      };
+      document.addEventListener("pointermove", toastPointerMoveHandler, { passive: true });
     };
 
     const pauseToastNotice = (noticeId) => {
@@ -1239,6 +1248,16 @@
         optionalFailurePollTimer = null;
       }
       clearAllToastTimers();
+      if (toastPointerMoveHandler && typeof document !== "undefined") {
+        document.removeEventListener("pointermove", toastPointerMoveHandler);
+        toastPointerMoveHandler = null;
+      }
+      if (toastPointerSyncHandle) {
+        cancelAnimationFrame(toastPointerSyncHandle);
+        toastPointerSyncHandle = 0;
+      }
+      toastPointerTrackerReady = false;
+      toastPointerPosition = null;
       document.removeEventListener("click", handleDocClick);
       document.removeEventListener("keydown", handleDocKeydown);
       if (preloadBackgroundFadeTimer) {

@@ -2434,8 +2434,7 @@
         .tutorial-float {
           right: 12px;
           left: 12px;
-          bottom:
-            calc(
+          bottom: calc(
               clamp(16px, 4vh, 32px) +
               var(--app-safe-bottom-inset, 0px) +
               var(--viewport-safe-bottom, 0px)

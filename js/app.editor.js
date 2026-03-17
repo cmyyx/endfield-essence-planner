@@ -593,8 +593,8 @@
       return String(value)
         .trim()
         .replace(/\s+/g, "")
-        .replace(/[£¨(][^()£¨£©]*[)£©]/g, "")
-        .replace(/[\/|£ü¡¢£¬¡£¡¤??_\-]/g, "");
+        .replace(/[（(][^()（）]*[)）]/g, "")
+        .replace(/[\/|、，。·？_\-]/g, "");
     };
 
     const normalizeNameForAvatar = (value) => {
@@ -1641,16 +1641,28 @@
     };
 
     const parseCharactersFromScript = (source) => {
-      const sandbox = { characters: [] };
-      const sandboxWindow = { characters: sandbox.characters };
-      const fn = new Function(
-        "window",
-        "self",
-        "globalThis",
-        `"use strict";\n${source}\n;return window.characters;`
-      );
-      const result = fn(sandboxWindow, sandboxWindow, sandboxWindow);
-      return Array.isArray(result) ? result : sandbox.characters;
+      try {
+        const parsed = JSON.parse(source);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+        throw new Error("Invalid format: expected JSON array");
+      } catch (jsonError) {
+        const scriptPattern = /^\s*\(function\s*\(\)\s*\{[\s\S]*window\.characters[\s\S]*\}\)\(\);?\s*$/;
+        if (!scriptPattern.test(source)) {
+          throw new Error("Invalid script format: only JSON or safe character export scripts are allowed");
+        }
+        const sandbox = { characters: [] };
+        const sandboxWindow = { characters: sandbox.characters };
+        const fn = new Function(
+          "window",
+          "self",
+          "globalThis",
+          `"use strict";\n${source}\n;return window.characters;`
+        );
+        const result = fn(sandboxWindow, sandboxWindow, sandboxWindow);
+        return Array.isArray(result) ? result : sandbox.characters;
+      }
     };
 
     state.handleEditorImportFile = async (event) => {

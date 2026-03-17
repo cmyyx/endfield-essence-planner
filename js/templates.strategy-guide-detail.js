@@ -238,7 +238,6 @@
                                       >
                                         <td class="skill-data-name">
                                           <span class="skill-data-label">{{ row.name }}</span>
-                                          <span v-if="row.uniformValue !== null" class="skill-data-uniform">{{ row.uniformValue }}</span>
                                         </td>
                                         <td
                                           v-for="(seg, sIdx) in row.segments"

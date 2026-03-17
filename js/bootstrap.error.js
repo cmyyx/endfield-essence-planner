@@ -189,7 +189,7 @@
       if (details.length) {
         var detailWrap = document.createElement("div");
         detailWrap.style.cssText =
-          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(var(--color-white-rgb), 0.04);border:1px solid rgba(var(--color-white-rgb), 0.09);";
+          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);";
         var detailTitle = document.createElement("div");
         detailTitle.style.cssText = "font-weight:600;color:#ffd1d1;";
         detailTitle.textContent = bt("error_details_title");
@@ -208,7 +208,7 @@
       if (suggestions.length) {
         var suggestWrap = document.createElement("div");
         suggestWrap.style.cssText =
-          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(var(--color-white-rgb), 0.03);border:1px solid rgba(var(--color-white-rgb), 0.08);";
+          "margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);";
         var suggestTitle = document.createElement("div");
         suggestTitle.style.cssText = "font-weight:600;color:#f2e5c9;";
         suggestTitle.textContent = bt("error_suggestions_title");
@@ -248,7 +248,7 @@
       var refreshButton = document.createElement("button");
       refreshButton.type = "button";
       refreshButton.style.cssText =
-        "cursor:pointer;border:1px solid rgba(var(--color-white-rgb), 0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#fff;";
+        "cursor:pointer;border:1px solid rgba(255,255,255,0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#fff;";
       refreshButton.textContent = bt("action_refresh");
       refreshButton.addEventListener("click", function () {
         window.location.reload();
@@ -258,7 +258,7 @@
       var exportButton = document.createElement("button");
       exportButton.type = "button";
       exportButton.style.cssText =
-        "cursor:pointer;border:1px solid rgba(var(--color-white-rgb), 0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#fff;";
+        "cursor:pointer;border:1px solid rgba(255,255,255,0.45);border-radius:999px;padding:6px 14px;background:rgba(12,18,28,0.9);color:#fff;";
       exportButton.textContent = bt("action_export_diag");
       exportButton.addEventListener("click", function () {
         exportBootDiagnostics({

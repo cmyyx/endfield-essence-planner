@@ -138,6 +138,13 @@
       ) && !imageErrorNameSet.value.has(equip && equip.name);
     const equipRefiningEquipImageSrc = (equip) => {
       if (!equip) return "";
+      if (equip.name && imageErrorNameSet.value.has(equip.name)) {
+        const internalName = equipImageMap[equip.name];
+        if (internalName) {
+          return encodeURI(`./image/equip/${internalName}.avif`);
+        }
+        return "";
+      }
       const override = resolveEquipImageOverride(equip);
       if (override) return override;
       if (!equip.name) return "";
