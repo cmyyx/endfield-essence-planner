@@ -578,7 +578,7 @@
       if (!Array.isArray(rows)) return [];
       return rows.map((row) => {
         const weapons = Array.isArray(row.weapons) ? row.weapons.filter(Boolean) : [];
-        const equipment = Array.isArray(row.equipment) ? row.equipment.filter(Boolean) : [];
+        const equipment = Array.isArray(row.equipment) ? row.equipment : [];
         const normalizedEquipment = equipment.slice(0, 4);
         while (normalizedEquipment.length < 4) normalizedEquipment.push(null);
         return {

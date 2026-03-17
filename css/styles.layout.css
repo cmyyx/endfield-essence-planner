@@ -1242,12 +1242,17 @@
       }
 
       [data-theme="light"] .match-status-chip {
+        border-color: rgba(var(--color-info-rgb), 0.4);
+        background: rgba(var(--color-info-rgb), 0.15);
+        color: #2a5a7a;
         box-shadow: none;
       }
 
       [data-theme="light"] .match-status-chip.is-owned,
       [data-theme="light"] .match-status-chip.is-essence-owned {
-        color: #0e5d5a;
+        border-color: rgba(var(--color-accent-rgb), 0.45);
+        background: rgba(var(--color-accent-rgb), 0.18);
+        color: #1a6b65;
       }
 
       [data-theme="light"] .match-selection-attrs .attr-value:not(.base-lock, .locked, .conflict) {
@@ -1539,7 +1544,6 @@
       }
 
       .hero-left {
-        background: transparent;
         border: none;
         padding: 18px 16px;
         display: flex;

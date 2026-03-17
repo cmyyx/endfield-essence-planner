@@ -205,7 +205,7 @@
                   <div class="detail-section">
                     <h3>{{ t("plan.item_15") }}</h3>
                     <div class="skills-list">
-                      <div v-for="skill in currentCharacter.skills" :key="skill.name" class="skill-item">
+                      <div v-for="(skill, skillIdx) in currentCharacter.skills" :key="'skill-' + skillIdx + '-' + skill.name" class="skill-item">
                         <div class="skill-header">
                           <img v-if="skill.icon" v-lazy-src="skill.icon" class="skill-icon" alt="" />
                           <div class="skill-title">
@@ -264,7 +264,7 @@
                   <div class="detail-section" v-if="currentCharacter.baseSkills">
                     <h3>{{ t("guide.item_14") }}</h3>
                     <div class="base-skills-grid">
-                      <div v-for="bs in currentCharacter.baseSkills" :key="bs.name" class="base-skill-card">
+                      <div v-for="(bs, bsIdx) in currentCharacter.baseSkills" :key="'bs-' + bsIdx + '-' + bs.name" class="base-skill-card">
                         <div class="base-skill-name">{{ bs.name }}</div>
                         <markdown-text :content="bs.description" class-name="base-skill-desc"></markdown-text>
                       </div>
@@ -273,7 +273,7 @@
                   <div class="detail-section">
                     <h3>{{ t("guide.item_15") }}</h3>
                     <div class="talents-list">
-                      <div v-for="talent in currentCharacter.talents" :key="talent.name" class="talent-item">
+                      <div v-for="(talent, talentIdx) in currentCharacter.talents" :key="'talent-' + talentIdx + '-' + talent.name" class="talent-item">
                         <div class="talent-header">
                           <img v-if="talent.icon" v-lazy-src="talent.icon" class="talent-icon" alt="" />
                           <div class="talent-name">{{ talent.name }}</div>

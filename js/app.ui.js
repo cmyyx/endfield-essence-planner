@@ -231,11 +231,13 @@
       const key = String(noticeId || "");
       if (!key) return;
       const timer = toastTimers.get(key);
-      if (!timer) return;
-      clearTimeout(timer);
-      toastTimers.delete(key);
+      if (timer) {
+        clearTimeout(timer);
+        toastTimers.delete(key);
+      }
       if (!options.keepMeta) {
         toastTimerMeta.delete(key);
+        toastHoverPause.delete(key);
       }
     };
     const clearAllToastTimers = () => {
