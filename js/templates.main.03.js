@@ -525,13 +525,25 @@
                     {{ syncAuthMode === 'login' ? t("sync.account_label") : t("sync.email_label") }}
                   </label>
                   <input
+                    v-if="syncAuthMode === 'login'"
                     id="sync-account"
-                    v-model.trim="syncAuthMode === 'login' ? syncAccountInput : syncEmailInput"
+                    v-model.trim="syncAccountInput"
                     class="sync-input"
-                    :type="syncAuthMode === 'login' ? 'text' : 'email'"
-                    :autocomplete="syncAuthMode === 'login' ? 'username' : 'email'"
+                    type="text"
+                    autocomplete="username"
                     maxlength="191"
-                    :placeholder="syncAuthMode === 'login' ? t('sync.account_hint') : t('sync.email_hint')"
+                    :placeholder="t('sync.account_hint')"
+                    :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked"
+                  />
+                  <input
+                    v-else
+                    id="sync-email"
+                    v-model.trim="syncEmailInput"
+                    class="sync-input"
+                    type="email"
+                    autocomplete="email"
+                    maxlength="191"
+                    :placeholder="t('sync.email_hint')"
                     :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked"
                   />
                 </div>
@@ -558,7 +570,6 @@
                     minlength="6"
                     :placeholder="t('sync.password_hint')"
                     :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked"
-                    @keydown.enter="submitSyncAuth"
                   />
                 </div>
 
@@ -574,7 +585,6 @@
                     minlength="6"
                     :placeholder="t('sync.password_confirm_hint')"
                     :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked"
-                    @keydown.enter="submitSyncAuth"
                   />
                 </div>
 

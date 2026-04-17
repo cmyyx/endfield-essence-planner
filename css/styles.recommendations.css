@@ -62,6 +62,8 @@
       }
 
       .coverage-badge {
+        display: inline-flex;
+        align-items: center;
         font-size: 11px;
         font-weight: 600;
         padding: 2px 7px;
@@ -265,7 +267,8 @@
         gap: 4px;
       }
 
-      .lock-tag {
+      .lock-tag,
+      .lock-chip {
         display: inline-block;
         padding: 1px 7px;
         border-radius: 3px;
@@ -276,7 +279,8 @@
         line-height: 1.4;
       }
 
-      .lock-tag.is-warn {
+      .lock-tag.is-warn,
+      .lock-chip.warn {
         color: var(--warn);
       }
 

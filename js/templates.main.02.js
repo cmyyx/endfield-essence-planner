@@ -103,7 +103,7 @@
                         :key="'base-' + idx"
                         class="lock-tag"
                         :class="{ 'is-warn': card.manualPickNeeded || card.manualPickOverflow }"
-                      >{{ label === "请手动选择" ? t(label) : label === "任意属性" ? tTerm("misc", label) : formatS1(label) }}</span>
+                      >{{ label.type === "manual_pick" ? t("请手动选择") : label.type === "any_attribute" ? tTerm("misc", "任意属性") : formatS1(label.value) }}</span>
                     </span>
                   </span>
                   <span class="lock-kv">

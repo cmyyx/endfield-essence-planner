@@ -456,10 +456,11 @@
         overflow-x: hidden;
         border: 1px solid var(--stroke);
         border-radius: 6px;
-        background: rgba(16, 22, 32, var(--alpha-98));
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow);
         opacity: 0;
         visibility: hidden;
+        pointer-events: none;
         transform: translateY(-4px);
         transition: all 0.15s ease;
       }
@@ -467,6 +468,7 @@
       .filter-dropdown-menu.is-open {
         opacity: 1;
         visibility: visible;
+        pointer-events: auto;
         transform: translateY(0);
       }
 

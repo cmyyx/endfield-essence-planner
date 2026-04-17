@@ -3278,6 +3278,10 @@
         color: var(--text);
         font-size: 14px;
         line-height: 1.45;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
       }
 
       .expand-row {

@@ -139,8 +139,8 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .hero-ad-badge {
-  background: rgba(var(--color-warning-rgb), 0.16);
-  color: #8a5200;
+      background: rgba(var(--color-warning-rgb), var(--alpha-16));
+      color: #8a5200;
 }
 
 [data-theme="light"] .hero-ad-link {
@@ -210,17 +210,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .lock-summary {
-  background: rgba(var(--color-black-rgb), var(--alpha-03));
-  border-color: rgba(var(--color-black-rgb), var(--alpha-08));
-}
-
-[data-theme="light"] .lock-tag {
-  background: rgba(var(--color-black-rgb), var(--alpha-05));
-}
-
-[data-theme="light"] .lock-summary {
   background: rgba(var(--color-white-rgb), var(--alpha-90));
   border-color: rgba(var(--color-black-rgb), var(--alpha-14));
+}
+
+[data-theme="light"] .lock-tag,
+[data-theme="light"] .lock-chip {
+  background: rgba(var(--color-black-rgb), var(--alpha-05));
 }
 
 [data-theme="light"] .lock-title {
@@ -259,9 +255,6 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   border-color: rgba(var(--color-accent-rgb), var(--alpha-50));
   background: rgba(var(--color-accent-rgb), var(--alpha-10));
   box-shadow: none;
-}
-    0 0 0 2px rgba(230, 124, 0, var(--alpha-45)),
-    inset 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-35));
 }
 
 [data-theme="light"] .scheme-weapon-item.base-selectable {
@@ -359,7 +352,6 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .scheme-weapon-item.is-selected .badge.muted,
 [data-theme="light"] .weapon-attr-item.is-selected .badge.muted {
   background: rgba(var(--color-black-rgb), var(--alpha-06));
-  color: var(--muted);
   color: #42566d;
 }
 

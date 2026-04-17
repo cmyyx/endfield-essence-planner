@@ -1243,10 +1243,10 @@
         padding: 12px 0 8px 0;
         display: grid;
         gap: 12px;
-        animation: syncSlideDown 0.2s ease-out;
+        animation: sync-slide-down 0.2s ease-out;
       }
 
-      @keyframes syncSlideDown {
+      @keyframes sync-slide-down {
         from {
           opacity: 0;
           transform: translateY(-8px);

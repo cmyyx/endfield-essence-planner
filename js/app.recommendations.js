@@ -35,6 +35,8 @@
         ? state.getSelectedWeaponAttrIssues()
         : [];
 
+    const createBasePickLabel = (type, value = "") => ({ type, value });
+
     const getEffectiveSelectedRegions = () =>
       state.effectiveSelectedRegions && Array.isArray(state.effectiveSelectedRegions.value)
         ? state.effectiveSelectedRegions.value
@@ -450,10 +452,12 @@
             (weapon) => activeBaseSet.has(weapon.s1) && !state.isEssenceOwned(weapon.name)
           ).length;
 
-          const basePickLabels = baseOverflow ? [...displayBaseKeys] : baseAutoPick.slice();
+          const basePickLabels = (baseOverflow ? [...displayBaseKeys] : baseAutoPick.slice()).map((key) =>
+            createBasePickLabel("s1", key)
+          );
           if (baseOverflow) {
             while (basePickLabels.length < baseLimit) {
-              basePickLabels.push("请手动选择");
+              basePickLabels.push(createBasePickLabel("manual_pick"));
             }
           }
 
@@ -513,7 +517,7 @@
             displaySelectedMatchNames: coveredSelected.map((weapon) => weapon.name),
             displaySelectedMissingNames: missingSelected.map((weapon) => weapon.name),
             basePickLabels,
-            baseAllLabels,
+            baseAllLabels: baseAllLabels.map((key) => createBasePickLabel("s1", key)),
             baseAutoPickKeys: baseAutoPick.slice(),
             baseOverflow,
             manualPickNeeded,

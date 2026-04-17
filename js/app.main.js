@@ -1229,6 +1229,15 @@ return { view: "planner" };
         syncLegacyScrollbarMode();
       };
 
+      const handleDocumentClick = (event) => {
+        const target = event && event.target;
+        if (!target || !target.closest) return;
+        const isDropdownClick = target.closest(".filter-dropdown-wrapper");
+        if (!isDropdownClick && state.closeAllDropdowns) {
+          state.closeAllDropdowns();
+        }
+      };
+
       onMounted(() => {
         const route = parseRoute();
         applyRoute(route);
@@ -1238,20 +1247,16 @@ return { view: "planner" };
           window.addEventListener("popstate", onPopState);
         }
         if (typeof document !== "undefined") {
-          document.addEventListener("click", (event) => {
-            const target = event.target;
-            if (!target || !target.closest) return;
-            const isDropdownClick = target.closest(".filter-dropdown-wrapper");
-            if (!isDropdownClick && state.closeAllDropdowns) {
-              state.closeAllDropdowns();
-            }
-          });
+          document.addEventListener("click", handleDocumentClick);
         }
       });
 
       onBeforeUnmount(() => {
         if (typeof window !== "undefined") {
           window.removeEventListener("popstate", onPopState);
+        }
+        if (typeof document !== "undefined") {
+          document.removeEventListener("click", handleDocumentClick);
         }
         if (typeof document === "undefined" || !document.documentElement) return;
         document.documentElement.classList.remove("legacy-scrollbar-hidden");
@@ -1272,11 +1277,19 @@ return { view: "planner" };
         syncQuery(false);
       });
 
-      watch(() => state.selectedNames.value.length, (len) => {
-        if (len <= 5 && state.showSelectedWeaponsPopup.value) {
-          state.showSelectedWeaponsPopup.value = false;
+      watch(
+        () => {
+          const selectedNames = state.selectedNames;
+          return selectedNames && Array.isArray(selectedNames.value) ? selectedNames.value.length : 0;
+        },
+        (len) => {
+          const showSelectedWeaponsPopup = state.showSelectedWeaponsPopup;
+          if (!showSelectedWeaponsPopup) return;
+          if (len <= 5 && showSelectedWeaponsPopup.value) {
+            showSelectedWeaponsPopup.value = false;
+          }
         }
-      });
+      );
 
       const parseExceptionTime = (value) => {
         const time = Date.parse(String(value || ""));

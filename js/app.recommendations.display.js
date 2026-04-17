@@ -25,6 +25,8 @@
     const hasVisibleRows = (scheme) =>
       Boolean(scheme && Array.isArray(scheme.weaponRows) && scheme.weaponRows.length);
 
+    const createBasePickLabel = (type, value = "") => ({ type, value });
+
     const filterByRegion = (scheme) => {
       const selected = getEffectiveSelectedRegions();
       if (!selected || !selected.length) return true;
@@ -298,9 +300,11 @@
       });
       const basePick = baseSorted.slice(0, 3);
       const baseOverflow = baseKeys.length > 3;
-      const basePickLabels = basePick.slice();
-      while (basePickLabels.length < 3) basePickLabels.push("任意属性");
-      const baseAllLabels = baseSorted.slice();
+      const basePickLabels = basePick.map((key) => createBasePickLabel("s1", key));
+      while (basePickLabels.length < 3) {
+        basePickLabels.push(createBasePickLabel("any_attribute"));
+      }
+      const baseAllLabels = baseSorted.map((key) => createBasePickLabel("s1", key));
 
       const baseChips = baseSorted.map((key) => ({
         key,

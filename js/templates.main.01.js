@@ -407,25 +407,41 @@
                   type="button"
                   class="filter-dropdown-trigger"
                   :class="{ 'is-active': filterS1.length > 0, 'is-open': dropdownOpenS1 }"
+                  aria-haspopup="listbox"
+                  :aria-expanded="dropdownOpenS1 ? 'true' : 'false'"
+                  aria-controls="filter-dropdown-s1"
                   @click="toggleDropdown('s1')"
                 >
                   <span class="filter-dropdown-value" :class="{ 'has-selection': filterS1.length > 0 }">
-                    {{ filterS1.length > 0 ? filterS1.map(v => formatS1(v)).join(', ') : t('nav.all') }}
+                    {{ filterS1.length > 0 ? filterS1.map(v => formatS1(v)).join(t('nav.separator_enum')) : t('nav.all') }}
                   </span>
                   <span v-if="filterS1.length > 0" class="filter-dropdown-badge">{{ filterS1.length }}</span>
                   <span class="filter-dropdown-chevron"></span>
                 </button>
-                <div class="filter-dropdown-menu" :class="{ 'is-open': dropdownOpenS1 }">
+                <div
+                  id="filter-dropdown-s1"
+                  class="filter-dropdown-menu"
+                  :class="{ 'is-open': dropdownOpenS1 }"
+                  role="listbox"
+                  aria-multiselectable="true"
+                  :aria-hidden="dropdownOpenS1 ? 'false' : 'true'"
+                >
                   <div
                     v-for="option in s1Options"
                     :key="option.value"
                     class="filter-dropdown-option"
+                    role="option"
                     :class="{
                       'is-selected': filterS1.includes(option.value),
                       'is-disabled': option.isDisabled && !filterS1.includes(option.value),
                     }"
+                    :tabindex="dropdownOpenS1 && !(option.isDisabled && !filterS1.includes(option.value)) ? 0 : -1"
+                    :aria-selected="filterS1.includes(option.value) ? 'true' : 'false'"
+                    :aria-disabled="option.isDisabled && !filterS1.includes(option.value) ? 'true' : 'false'"
                     :title="option.isDisabled && !filterS1.includes(option.value) ? option.disabledHintTitle : ''"
                     @click.stop="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
+                    @keydown.enter.stop.prevent="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
+                    @keydown.space.stop.prevent="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
                   >
                     <span class="filter-dropdown-checkbox"></span>
                     <span class="filter-dropdown-option-text">{{ formatS1(option.value) }}</span>
@@ -440,25 +456,41 @@
                   type="button"
                   class="filter-dropdown-trigger"
                   :class="{ 'is-active': filterS2.length > 0, 'is-open': dropdownOpenS2 }"
+                  aria-haspopup="listbox"
+                  :aria-expanded="dropdownOpenS2 ? 'true' : 'false'"
+                  aria-controls="filter-dropdown-s2"
                   @click="toggleDropdown('s2')"
                 >
                   <span class="filter-dropdown-value" :class="{ 'has-selection': filterS2.length > 0 }">
-                    {{ filterS2.length > 0 ? filterS2.map(v => tTerm('s2', v)).join(', ') : t('nav.all') }}
+                    {{ filterS2.length > 0 ? filterS2.map(v => tTerm('s2', v)).join(t('nav.separator_enum')) : t('nav.all') }}
                   </span>
                   <span v-if="filterS2.length > 0" class="filter-dropdown-badge">{{ filterS2.length }}</span>
                   <span class="filter-dropdown-chevron"></span>
                 </button>
-                <div class="filter-dropdown-menu" :class="{ 'is-open': dropdownOpenS2 }">
+                <div
+                  id="filter-dropdown-s2"
+                  class="filter-dropdown-menu"
+                  :class="{ 'is-open': dropdownOpenS2 }"
+                  role="listbox"
+                  aria-multiselectable="true"
+                  :aria-hidden="dropdownOpenS2 ? 'false' : 'true'"
+                >
                   <div
                     v-for="option in s2Options"
                     :key="option.value"
                     class="filter-dropdown-option"
+                    role="option"
                     :class="{
                       'is-selected': filterS2.includes(option.value),
                       'is-disabled': option.isDisabled && !filterS2.includes(option.value),
                     }"
+                    :tabindex="dropdownOpenS2 && !(option.isDisabled && !filterS2.includes(option.value)) ? 0 : -1"
+                    :aria-selected="filterS2.includes(option.value) ? 'true' : 'false'"
+                    :aria-disabled="option.isDisabled && !filterS2.includes(option.value) ? 'true' : 'false'"
                     :title="option.isDisabled && !filterS2.includes(option.value) ? option.disabledHintTitle : ''"
                     @click.stop="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
+                    @keydown.enter.stop.prevent="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
+                    @keydown.space.stop.prevent="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
                   >
                     <span class="filter-dropdown-checkbox"></span>
                     <span class="filter-dropdown-option-text">{{ tTerm("s2", option.value) }}</span>
@@ -473,25 +505,41 @@
                   type="button"
                   class="filter-dropdown-trigger"
                   :class="{ 'is-active': filterS3.length > 0, 'is-open': dropdownOpenS3 }"
+                  aria-haspopup="listbox"
+                  :aria-expanded="dropdownOpenS3 ? 'true' : 'false'"
+                  aria-controls="filter-dropdown-s3"
                   @click="toggleDropdown('s3')"
                 >
                   <span class="filter-dropdown-value" :class="{ 'has-selection': filterS3.length > 0 }">
-                    {{ filterS3.length > 0 ? filterS3.map(v => tTerm('s3', v)).join(', ') : t('nav.all') }}
+                    {{ filterS3.length > 0 ? filterS3.map(v => tTerm('s3', v)).join(t('nav.separator_enum')) : t('nav.all') }}
                   </span>
                   <span v-if="filterS3.length > 0" class="filter-dropdown-badge">{{ filterS3.length }}</span>
                   <span class="filter-dropdown-chevron"></span>
                 </button>
-                <div class="filter-dropdown-menu" :class="{ 'is-open': dropdownOpenS3 }">
+                <div
+                  id="filter-dropdown-s3"
+                  class="filter-dropdown-menu"
+                  :class="{ 'is-open': dropdownOpenS3 }"
+                  role="listbox"
+                  aria-multiselectable="true"
+                  :aria-hidden="dropdownOpenS3 ? 'false' : 'true'"
+                >
                   <div
                     v-for="option in s3OptionEntries"
                     :key="option.value"
                     class="filter-dropdown-option"
+                    role="option"
                     :class="{
                       'is-selected': filterS3.includes(option.value),
                       'is-disabled': option.isDisabled && !filterS3.includes(option.value),
                     }"
+                    :tabindex="dropdownOpenS3 && !(option.isDisabled && !filterS3.includes(option.value)) ? 0 : -1"
+                    :aria-selected="filterS3.includes(option.value) ? 'true' : 'false'"
+                    :aria-disabled="option.isDisabled && !filterS3.includes(option.value) ? 'true' : 'false'"
                     :title="option.isDisabled && !filterS3.includes(option.value) ? option.disabledHintTitle : ''"
                     @click.stop="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
+                    @keydown.enter.stop.prevent="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
+                    @keydown.space.stop.prevent="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
                   >
                     <span class="filter-dropdown-checkbox"></span>
                     <span class="filter-dropdown-option-text">{{ tTerm("s3", option.value) }}</span>
@@ -973,9 +1021,13 @@
                   <span class="lock-chip" :class="{ warn: fallbackPlan.baseOverflow }">
                     {{ fallbackPlan.baseOverflow ? t("nav.base_attribute_conflict") : t("nav.base_attributes") }}：
                     {{
-                      (fallbackPlan.baseOverflow ? fallbackPlan.baseAllLabels : fallbackPlan.basePickLabels).join(
-                        " / "
-                      )
+                      (fallbackPlan.baseOverflow ? fallbackPlan.baseAllLabels : fallbackPlan.basePickLabels)
+                        .map(label => label.type === 'manual_pick'
+                          ? t('请手动选择')
+                          : label.type === 'any_attribute'
+                            ? tTerm('misc', '任意属性')
+                            : formatS1(label.value))
+                        .join(" / ")
                     }}
                   </span>
                   <span class="lock-chip warn" v-if="fallbackPlan.s2Conflict">
