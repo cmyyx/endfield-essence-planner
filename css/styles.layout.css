@@ -801,6 +801,8 @@
       .about-card.sync-card {
         padding: 0;
         width: min(420px, 92vw);
+        max-height: min(88vh, 720px);
+        overflow: auto;
       }
 
       /* 内容卡片 */
@@ -2335,6 +2337,7 @@
         /* 移动端极简登录框适配 */
         .about-card.sync-card {
           width: min(420px, 94vw);
+          max-height: min(92vh, 720px);
         }
 
         .sync-login-card {

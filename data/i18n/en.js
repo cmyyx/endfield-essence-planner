@@ -610,7 +610,7 @@ Object.assign(window.I18N["en"].strings, {
   "plan_config.marks_import_confirm_warning": "This action cannot be undone.",
   "plan_config.marks_import_confirm_action": "Import and overwrite",
   "plan_config.show_weapon_ownership_tags": "Show weapon ownership tags",
-  "plan_config.quick_edit_ownership_state": "Quick edit ownership state",
+  "plan_config.quick_edit_ownership_state": "Enable editing ownership state/notes",
   "plan_config.priority_and_strategies": "Priority & strategies",
   "plan_config.export_weapon_marks": "Export weapon mark data",
   "plan_config.import_weapon_marks": "Import weapon mark data",

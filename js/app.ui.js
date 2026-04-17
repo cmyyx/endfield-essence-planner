@@ -1181,13 +1181,14 @@
       }
     };
 
+    const flushPlanConfigHintsOnClose = () => {
+      if (!planConfigOwnershipHintViewed.value) return;
+      markPlanConfigOwnershipHintSeen();
+      planConfigOwnershipHintViewed.value = false;
+    };
+
     const togglePlanConfig = () => {
       const nextOpen = !showPlanConfig.value;
-      const flushPlanConfigHintsOnClose = () => {
-        if (!planConfigOwnershipHintViewed.value) return;
-        markPlanConfigOwnershipHintSeen();
-        planConfigOwnershipHintViewed.value = false;
-      };
       if (!nextOpen) flushPlanConfigHintsOnClose();
       showPlanConfig.value = nextOpen;
       if (nextOpen) {

@@ -579,7 +579,7 @@ Object.assign(window.I18N["zh-CN"].strings, {
   "plan_config.marks_import_confirm_warning": "该操作不可撤销。",
   "plan_config.marks_import_confirm_action": "确认导入",
   "plan_config.show_weapon_ownership_tags": "显示武器拥有标签",
-  "plan_config.quick_edit_ownership_state": "快捷编辑拥有状态",
+  "plan_config.quick_edit_ownership_state": "开启编辑拥有状态/备注功能",
   "plan_config.priority_and_strategies": "优先级与优先策略",
   "plan_config.export_weapon_marks": "导出武器标记数据",
   "plan_config.import_weapon_marks": "导入武器标记数据",

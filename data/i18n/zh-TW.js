@@ -610,7 +610,7 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "plan_config.marks_import_confirm_warning": "此操作無法復原。",
   "plan_config.marks_import_confirm_action": "確認匯入",
   "plan_config.show_weapon_ownership_tags": "顯示武器擁有標籤",
-  "plan_config.quick_edit_ownership_state": "快捷編輯擁有狀態",
+  "plan_config.quick_edit_ownership_state": "開啟編輯擁有狀態/備註功能",
   "plan_config.priority_and_strategies": "優先級與優先策略",
   "plan_config.export_weapon_marks": "匯出武器標記資料",
   "plan_config.import_weapon_marks": "匯入武器標記資料",

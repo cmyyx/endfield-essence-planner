@@ -610,7 +610,7 @@ Object.assign(window.I18N["ja"].strings, {
   "plan_config.marks_import_confirm_warning": "この操作は元に戻せません。",
   "plan_config.marks_import_confirm_action": "インポートを実行",
   "plan_config.show_weapon_ownership_tags": "武器の所持タグを表示",
-  "plan_config.quick_edit_ownership_state": "所持状態をクイック編集",
+  "plan_config.quick_edit_ownership_state": "所持状態/メモの編集機能を有効にする",
   "plan_config.priority_and_strategies": "優先度と優先戦略",
   "plan_config.export_weapon_marks": "武器マークデータをエクスポート",
   "plan_config.import_weapon_marks": "武器マークデータをインポート",

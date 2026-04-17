@@ -864,7 +864,7 @@
           @toggle="togglePlanConfig"
         ></plan-config-panel>
 
-        <section class="panel" :class="{ 'panel-hidden': mobilePanel !== 'plans' }">
+        <section class="panel" :class="{ 'panel-hidden': mobilePanel !== 'plans' || showPlanConfig }" v-show="!showPlanConfig">
           <div class="panel-title">
             <h2>{{ t("nav.plan_recommendations") }}</h2>
             <div class="panel-actions">
