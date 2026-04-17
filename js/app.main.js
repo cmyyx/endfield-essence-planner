@@ -315,6 +315,10 @@
     typeof appTemplates.planConfigControl === "string" && appTemplates.planConfigControl.trim()
       ? appTemplates.planConfigControl.trim()
       : "<div></div>";
+  const planConfigPanelTemplate =
+    typeof appTemplates.planConfigPanel === "string" && appTemplates.planConfigPanel.trim()
+      ? appTemplates.planConfigPanel.trim()
+      : "<div></div>";
   const equipRefiningListTemplate =
     typeof appTemplates.equipRefiningList === "string" && appTemplates.equipRefiningList.trim()
       ? appTemplates.equipRefiningList.trim()
@@ -354,6 +358,16 @@
   })();
 
   const planConfigControl = {
+    props: {
+      t: { type: Function, required: true },
+      showPlanConfig: { type: Boolean, required: true },
+      showPlanConfigHintDot: { type: Boolean, required: true },
+    },
+    emits: ["toggle"],
+    template: planConfigTemplate,
+  };
+
+  const planConfigPanel = {
     props: {
       t: { type: Function, required: true },
       recommendationConfig: { type: Object, required: true },
@@ -424,7 +438,7 @@
         return error.fallback || String(key || "");
       },
     },
-    template: planConfigTemplate,
+    template: planConfigPanelTemplate,
   };
 
   const matchStatusLine = {
@@ -1187,6 +1201,14 @@ return { view: "planner" };
         target.style.overflowY = contentHeight > maxHeight ? "auto" : "hidden";
       };
 
+      const notePopoverKey = ref(null);
+      const toggleNotePopover = (weaponName) => {
+        notePopoverKey.value = notePopoverKey.value === weaponName ? null : weaponName;
+      };
+      const closeNotePopover = () => {
+        notePopoverKey.value = null;
+      };
+
       const syncQuery = (replace = false) => {
         if (typeof window === "undefined") return;
         if (applyingRoute) return;
@@ -1215,6 +1237,16 @@ return { view: "planner" };
         if (typeof window !== "undefined") {
           window.addEventListener("popstate", onPopState);
         }
+        if (typeof document !== "undefined") {
+          document.addEventListener("click", (event) => {
+            const target = event.target;
+            if (!target || !target.closest) return;
+            const isDropdownClick = target.closest(".filter-dropdown-wrapper");
+            if (!isDropdownClick && state.closeAllDropdowns) {
+              state.closeAllDropdowns();
+            }
+          });
+        }
       });
 
       onBeforeUnmount(() => {
@@ -1238,6 +1270,12 @@ return { view: "planner" };
       watch([state.currentView, () => (state.selectedCharacterId ? state.selectedCharacterId.value : null)], () => {
         syncLegacyScrollbarMode();
         syncQuery(false);
+      });
+
+      watch(() => state.selectedNames.value.length, (len) => {
+        if (len <= 5 && state.showSelectedWeaponsPopup.value) {
+          state.showSelectedWeaponsPopup.value = false;
+        }
       });
 
       const parseExceptionTime = (value) => {
@@ -1626,6 +1664,8 @@ return { view: "planner" };
         confirmMarksImport: state.confirmMarksImport,
         formatSourceInfo,
         showEquipRefiningNavHintDot: state.showEquipRefiningNavHintDot,
+
+
         showRerunRankingNavHintDot: state.showRerunRankingNavHintDot,
         showEditorEntry: state.showEditorEntry,
         togglePlanConfig: state.togglePlanConfig,
@@ -1700,6 +1740,9 @@ return { view: "planner" };
         filterS1: state.filterS1,
         filterS2: state.filterS2,
         filterS3: state.filterS3,
+        dropdownOpenS1: state.dropdownOpenS1,
+        dropdownOpenS2: state.dropdownOpenS2,
+        dropdownOpenS3: state.dropdownOpenS3,
         s1Options: state.s1Options,
         s2Options: state.s2Options,
         s3OptionEntries: state.s3OptionEntries,
@@ -1710,6 +1753,8 @@ return { view: "planner" };
         hasRerunRankingRows: state.hasRerunRankingRows,
         rerunRankingGeneratedAt: state.rerunRankingGeneratedAt,
         toggleFilterValue: state.toggleFilterValue,
+        toggleDropdown: state.toggleDropdown,
+        closeAllDropdowns: state.closeAllDropdowns,
         clearAttributeFilters: state.clearAttributeFilters,
         hasAttributeFilters: state.hasAttributeFilters,
         isRegionSelected: state.isRegionSelected,
@@ -1721,6 +1766,7 @@ return { view: "planner" };
         weaponGridTopSpacer: state.weaponGridTopSpacer,
         weaponGridBottomSpacer: state.weaponGridBottomSpacer,
         allFilteredSelected: state.allFilteredSelected,
+        allWeaponsSelected: state.allWeaponsSelected,
         recommendations: state.recommendations,
         recommendationDataIssue: state.recommendationDataIssue,
         recommendationEmptyReason: state.recommendationEmptyReason,
@@ -2398,6 +2444,7 @@ return { view: "planner" };
   });
 
   app.component("PlanConfigControl", planConfigControl);
+  app.component("PlanConfigPanel", planConfigPanel);
   app.component("MatchStatusLine", matchStatusLine);
   app.component("MarkdownText", markdownText);
   app.component("EquipRefiningList", equipRefiningList);

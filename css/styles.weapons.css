@@ -164,8 +164,13 @@
           margin-bottom: 10px;
         }
 
-        .tag-list {
-          gap: 6px;
+        .selected-weapons-summary {
+          padding: 8px 10px;
+        }
+
+        .selected-weapons-summary-empty,
+        .selected-weapons-summary-text {
+          font-size: 12px;
         }
 
         .tag-actions {
@@ -311,8 +316,25 @@
           gap: 4px 6px;
         }
 
+        .card-header-left {
+          gap: 6px;
+        }
+
         .card-title {
           font-size: 11px;
+        }
+
+        .coverage-badge {
+          font-size: 9px;
+          padding: 1px 5px;
+        }
+
+        .card-stats {
+          gap: 8px;
+        }
+
+        .stat-item {
+          font-size: 10px;
         }
 
         .pill {
@@ -348,12 +370,17 @@
         }
 
         .lock-items {
+          gap: 4px 8px;
+        }
+
+        .lock-kv {
+          font-size: 10px;
           gap: 4px;
         }
 
-        .lock-chip {
-          padding: 3px 6px;
-          font-size: 8px;
+        .lock-tag {
+          padding: 1px 4px;
+          font-size: 10px;
         }
 
         .scheme-weapon-list {
@@ -534,12 +561,12 @@
       }
 
       .custom-weapon-rarity {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--muted);
       }
 
       .custom-weapon-meta {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--muted);
         display: flex;
         flex-wrap: wrap;
@@ -791,7 +818,7 @@
       }
 
       .secondary-label {
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--text);
@@ -799,22 +826,22 @@
 
       .secondary-select {
         width: 100%;
-        padding: 6px 8px;
+        padding: 8px 10px;
         border-radius: 8px;
         border: 1px solid var(--stroke);
         background: rgba(8, 12, 18, var(--alpha-70));
         color: var(--text);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .secondary-input {
         width: 100%;
-        padding: 6px 8px;
+        padding: 8px 10px;
         border-radius: 8px;
         border: 1px solid var(--stroke);
         background: rgba(8, 12, 18, var(--alpha-70));
         color: var(--text);
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .secondary-range {
@@ -823,7 +850,7 @@
       }
 
       .secondary-hint {
-        font-size: 11px;
+        font-size: 12px;
         color: var(--muted);
       }
 
@@ -871,12 +898,93 @@
 
       .plan-config {
         position: relative;
-        display: inline-flex;
-        align-items: center;
+        display: flex;
+        margin-bottom: 12px;
       }
 
-      .plan-config .toggle-button {
+      .panel-actions .plan-config {
+        width: auto;
+        margin-bottom: 0;
+      }
+
+      .plan-config-entry-button {
         position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 14px 20px;
+        border-radius: var(--radius-lg);
+        border: 1px solid transparent;
+        background:
+          linear-gradient(rgba(10, 14, 22, var(--alpha-60)), rgba(10, 14, 22, var(--alpha-60))) padding-box,
+          linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-55)), rgba(var(--color-rarity-5-rgb), var(--alpha-35)), rgba(var(--color-accent-rgb), var(--alpha-55))) border-box;
+        color: var(--text);
+        cursor: pointer;
+        transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        text-align: center;
+      }
+
+      .plan-config-entry-button:hover {
+        background:
+          linear-gradient(rgba(var(--color-accent-rgb), var(--alpha-08)), rgba(var(--color-accent-rgb), var(--alpha-08))) padding-box,
+          linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-70)), rgba(var(--color-rarity-5-rgb), var(--alpha-50)), rgba(var(--color-accent-rgb), var(--alpha-70))) border-box;
+        box-shadow: 0 0 18px rgba(var(--color-accent-rgb), var(--alpha-12));
+      }
+
+      .plan-config-entry-button:active {
+        transform: scale(0.97);
+      }
+
+      .plan-config-entry-button.is-active {
+        background:
+          linear-gradient(rgba(var(--color-accent-rgb), var(--alpha-10)), rgba(var(--color-accent-rgb), var(--alpha-10))) padding-box,
+          linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-75)), rgba(var(--color-rarity-5-rgb), var(--alpha-55)), rgba(var(--color-accent-rgb), var(--alpha-75))) border-box;
+        box-shadow: 0 0 24px rgba(var(--color-accent-rgb), var(--alpha-16));
+      }
+
+      .plan-config-entry-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      .plan-config-entry-title {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .plan-config-entry-sub {
+        font-size: 11px;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        color: var(--muted);
+      }
+
+      .plan-config-entry-button:hover .plan-config-entry-sub,
+      .plan-config-entry-button.is-active .plan-config-entry-sub {
+        color: rgba(var(--color-accent-rgb), var(--alpha-80));
+      }
+
+      .panel-actions .plan-config-entry-button {
+        width: auto;
+        padding: 6px 12px;
+      }
+
+      .panel-actions .plan-config-entry-content {
+        flex-direction: row;
+        gap: 6px;
+      }
+
+      .panel-actions .plan-config-entry-sub {
+        display: none;
+      }
+
+      .panel-actions .plan-config-entry-title {
+        font-size: 11px;
       }
 
       .plan-config-hint-dot {
@@ -928,6 +1036,74 @@
         z-index: 28;
         display: grid;
         gap: 10px;
+        transform-origin: top right;
+      }
+
+      .plan-config-panel-standalone {
+        position: relative;
+        width: auto;
+        max-height: none;
+        overflow: visible;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--stroke);
+        background: var(--panel-strong);
+        box-shadow: var(--shadow);
+        z-index: auto;
+      }
+
+      .plan-config-panel-enter-active,
+      .plan-config-panel-leave-active {
+        transition: opacity 0.24s ease, transform 0.24s ease;
+      }
+
+      .plan-config-panel-enter-from {
+        opacity: var(--alpha-00);
+        transform: translateX(18px);
+      }
+
+      .plan-config-panel-leave-to {
+        opacity: var(--alpha-00);
+        transform: translateX(-18px);
+      }
+
+      .plan-config-standalone-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 0 20px 20px;
+      }
+
+      .plan-config-block {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(var(--color-white-rgb), var(--alpha-06));
+      }
+
+      .plan-config-block:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .plan-config-block-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .plan-config-panel-standalone > .panel-title {
+        margin-bottom: 0;
+      }
+
+      [data-theme="light"] .plan-config-panel-standalone {
+        background: var(--panel-strong);
+        border-color: var(--stroke);
+        box-shadow: none;
+      }
+
+      [data-theme="light"] .plan-config-block {
+        border-bottom-color: rgba(var(--color-black-rgb), var(--alpha-06));
       }
 
       .plan-config-panel-foot {
@@ -945,7 +1121,7 @@
 
       .plan-config-close-hint {
         margin-right: auto;
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.02em;
         color: var(--muted);
         white-space: nowrap;
@@ -953,7 +1129,7 @@
 
       .plan-config-close {
         padding: 4px 10px;
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.04em;
       }
 
@@ -1048,14 +1224,14 @@
       }
 
       .plan-config-rule-head-cell {
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.04em;
         color: var(--muted);
         text-align: center;
       }
 
       .plan-config-rule-label {
-        font-size: 12px;
+        font-size: 13px;
       }
 
       .plan-config-rule-col {
@@ -1069,7 +1245,7 @@
       }
 
       .plan-config-rule-sub .plan-config-rule-label {
-        font-size: 11px;
+        font-size: 12px;
         opacity: var(--alpha-80);
       }
 
@@ -1126,7 +1302,7 @@
       }
 
       .plan-config-rule-empty {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--muted);
       }
 
@@ -1903,8 +2079,8 @@
 
       .missing-details summary {
         cursor: pointer;
-        color: #ffb7b7;
-        font-weight: 600;
+        color: var(--danger);
+        font-weight: 500;
       }
 
       .missing-tags {
@@ -1915,11 +2091,11 @@
       }
 
       .missing-tag {
-        padding: 2px 8px;
-        border-radius: 999px;
-        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-45));
-        background: rgba(var(--color-danger-rgb), var(--alpha-12));
-        color: #ffd1d1;
+        padding: 1px 7px;
+        border-radius: 3px;
+        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-25));
+        background: rgba(var(--color-danger-rgb), var(--alpha-06));
+        color: var(--danger);
         font-size: 11px;
       }
 

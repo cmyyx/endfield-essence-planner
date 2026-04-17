@@ -147,6 +147,8 @@
     state.marksImportConfirmCountdown = ref(0);
     state.showMarksImportConfirmModal = ref(false);
     state.showEquipRefiningNavHintDot = ref(false);
+
+
     state.showRerunRankingNavHintDot = ref(false);
     state.recommendationConfig = ref({
       hideEssenceOwnedWeaponsInPlans: false,
@@ -271,6 +273,10 @@
     state.filterS2 = ref([]);
     state.filterS3 = ref([]);
     state.selectedRegions = ref([]);
+
+    state.dropdownOpenS1 = ref(false);
+    state.dropdownOpenS2 = ref(false);
+    state.dropdownOpenS3 = ref(false);
 
     state.tutorialWeaponTarget = ref(null);
     state.tutorialSchemeTarget = ref(null);

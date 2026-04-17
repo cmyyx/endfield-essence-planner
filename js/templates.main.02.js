@@ -68,115 +68,81 @@
                 "
               >
               <div class="card-header">
-                <div>
+                <div class="card-header-left">
                   <div class="card-title">{{ tTerm("dungeon", card.dungeon.name) }}</div>
-                  <div class="hint" v-if="card.displaySelectedMatchCount === card.targetCount">
-                    {{ t("guide.extra_skill_pools_already_satisfy_selected_weapons") }}
-                  </div>
-                  <div class="hint" v-else>
-                    {{
-                      t("guide.covers_match_total_selected_weapons_the_rest_need_separa", {
-                        match: card.displaySelectedMatchCount,
-                        total: card.targetCount,
-                      })
-                    }}
-                  </div>
-                  <details
-                    v-if="card.displaySelectedMissingNames.length && !card.baseOverflow"
-                    class="missing-details"
-                    :open="card.targetCount > 1"
-                  >
-                    <summary>
-                      {{ t("plan.item") }} {{ card.displaySelectedMissingNames.length }} {{ t("nav.weapons_2") }}（{{
-                        t("nav.base_attributes")
-                      }}）
-                      </summary>
-                      <div class="missing-tags">
-                        <span
-                          v-for="name in card.displaySelectedMissingNames"
-                        :key="name"
-                        class="missing-tag"
-                      >
-                        {{ tTerm("weapon", name) }}
-                      </span>
-                    </div>
-                  </details>
+                  <span class="coverage-badge" :class="{ 'is-full': card.displaySelectedMatchCount === card.targetCount }">
+                    {{ card.displaySelectedMatchCount }}/{{ card.targetCount }}
+                  </span>
                 </div>
-                <div class="strategy-row">
-                  <span class="pill wide">
-                    {{
-                      t("guide.can_farm_together_count_weapons_covers_match_selected", {
-                        count: card.displayWeaponCount,
-                        match: card.displaySelectedMatchCount,
-                      })
-                    }}
+                <div class="card-stats">
+                  <span class="stat-item">
+                    <span class="stat-label">{{ t("plan.farmable") }}</span>
+                    <span class="stat-value">{{ card.displayWeaponCount }}</span>
                   </span>
-                  <span class="pill" v-if="card.maxWeaponCount !== card.displayWeaponCount">
-                    {{ t("label.max_farmable_count", { count: card.maxWeaponCount }) }}
+                  <span class="stat-item" v-if="card.maxWeaponCount !== card.displayWeaponCount">
+                    <span class="stat-label">{{ t("plan.max_farmable") }}</span>
+                    <span class="stat-value">{{ card.maxWeaponCount }}</span>
                   </span>
-                  <span class="pill warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
-                    {{
-                      t("plan.uncovered_count", { count: card.displaySelectedMissingNames.length })
-                    }}
+                  <span class="stat-item stat-warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
+                    <span class="stat-label">{{ t("plan.uncovered") }}</span>
+                    <span class="stat-value">{{ card.displaySelectedMissingNames.length }}</span>
                   </span>
-                  <span
-                    class="pill warn"
-                    v-if="card.conflictSelected && card.conflictSelected.length"
-                  >
-                    {{ t("plan.conflicts_count", { count: card.conflictSelected.length }) }}
+                  <span class="stat-item stat-danger" v-if="card.conflictSelected && card.conflictSelected.length">
+                    <span class="stat-label">{{ t("plan.conflicts") }}</span>
+                    <span class="stat-value">{{ card.conflictSelected.length }}</span>
                   </span>
                 </div>
               </div>
               <div class="lock-summary">
-                <div class="lock-title">{{ t("plan.locked_plan") }}</div>
                 <div class="lock-items">
-                  <span
-                    class="lock-chip"
-                    :class="{ warn: card.manualPickNeeded || card.manualPickOverflow }"
-                  >
-                    {{ t("nav.base_attributes") }}：{{
-                      card.basePickLabels
-                        .map((label) =>
-                          label === "请手动选择" ? t(label) : label === "任意属性" ? tTerm("misc", label) : formatS1(label)
-                        )
-                        .join(" / ")
-                    }}
-                  </span>
-                  <span class="lock-chip attr">{{
-                    t("plan.lock_label_value", {
-                      label: t(card.lockLabel),
-                      value: tTerm(card.lockType, card.lockValue),
-                    })
-                  }}</span>
-                </div>
-                <div
-                  class="hint"
-                  v-if="card.baseOverflow"
-                  :class="{ 'status-warn': card.manualPickOverflow }"
-                >
-                  <template v-if="card.manualPickOverflow">
-                    <span class="hint-line hint-accent">
-                      {{
-                        t("guide.click_a_yellow_highlighted_weapon_below_to_drop_the_base", {
-                          count: card.manualPickOverflowCount,
-                        })
-                      }}
+                  <span class="lock-kv">
+                    <span class="lock-kv-label">{{ t("nav.base_attributes") }}</span>
+                    <span class="lock-kv-values">
+                      <span
+                        v-for="(label, idx) in card.basePickLabels"
+                        :key="'base-' + idx"
+                        class="lock-tag"
+                        :class="{ 'is-warn': card.manualPickNeeded || card.manualPickOverflow }"
+                      >{{ label === "请手动选择" ? t(label) : label === "任意属性" ? tTerm("misc", label) : formatS1(label) }}</span>
                     </span>
+                  </span>
+                  <span class="lock-kv">
+                    <span class="lock-kv-label">{{ t(card.lockLabel) }}</span>
+                    <span class="lock-kv-values">
+                      <span class="lock-tag">{{ tTerm(card.lockType, card.lockValue) }}</span>
+                    </span>
+                  </span>
+                </div>
+                <div class="lock-hint" v-if="card.baseOverflow">
+                  <template v-if="card.manualPickOverflow">
+                    {{ t("guide.click_a_yellow_highlighted_weapon_below_to_drop_the_base", { count: card.manualPickOverflowCount }) }}
                   </template>
                   <template v-else-if="card.manualPickNeeded">
-                    <span class="hint-line hint-accent">
-                      {{
-                        t("guide.item", {
-                          count: card.manualPickNeeded,
-                        })
-                      }}
-                    </span>
+                    {{ t("guide.item", { count: card.manualPickNeeded }) }}
                   </template>
                   <template v-else>
-                    <span class="hint-line hint-accent">{{ t("guide.click_weapons_to_select_deselect_base_attributes") }}</span>
+                    {{ t("guide.click_weapons_to_select_deselect_base_attributes") }}
                   </template>
                 </div>
               </div>
+              <details
+                v-if="card.displaySelectedMissingNames.length && !card.baseOverflow"
+                class="missing-details"
+                :open="card.targetCount > 1"
+              >
+                <summary>
+                  {{ t("plan.item") }} {{ card.displaySelectedMissingNames.length }} {{ t("nav.weapons_2") }}（{{ t("nav.base_attributes") }}）
+                </summary>
+                <div class="missing-tags">
+                  <span
+                    v-for="name in card.displaySelectedMissingNames"
+                    :key="name"
+                    class="missing-tag"
+                  >
+                    {{ tTerm("weapon", name) }}
+                  </span>
+                </div>
+              </details>
 
               <div v-if="card.conflictSelected && card.conflictSelected.length" class="conflict-section">
                 <button class="ghost-button" @click="toggleConflictOpen(card.schemeKey)">

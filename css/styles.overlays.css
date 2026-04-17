@@ -2564,9 +2564,9 @@
       }
 
       .notice-card .notice-list li {
-        margin: 6px 0;
-        line-height: 1.6;
-        color: var(--muted);
+        margin: 8px 0;
+        line-height: 1.65;
+        color: var(--text);
       }
 
       .notice-card .notice-link {
@@ -2589,13 +2589,12 @@
       }
 
       .notice-card .notice-qq {
-        margin-top: 10px;
-        padding: 8px 10px;
-        border-radius: 10px;
-        border: 1px dashed rgba(255, 186, 85, var(--alpha-35));
-        background: rgba(255, 186, 85, var(--alpha-08));
-        color: #ffd9b6;
-        font-size: 12px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--stroke);
+        background: rgba(var(--color-black-rgb), var(--alpha-18));
+        color: var(--muted);
+        font-size: 13px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -2612,7 +2611,8 @@
 
       .notice-card .notice-join {
         font-size: 12px;
-        padding: 4px 10px;
+        padding: 5px 12px;
+        font-weight: 600;
         order: 0;
       }
 
@@ -2620,15 +2620,62 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        margin-top: 12px;
         color: var(--muted);
         font-size: 12px;
+        line-height: 1.5;
       }
 
       .notice-card {
         display: flex;
         flex-direction: column;
-        max-height: min(72vh, 620px);
+        width: min(420px, 94vw);
+        max-height: min(
+          calc(100vh - (2 * clamp(20px, 4vh, 32px)) - var(--app-safe-top-inset, 0px) - var(--app-safe-bottom-inset, 0px) - var(--viewport-safe-bottom, 0px)),
+          620px
+        );
+        padding: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: var(--panel-strong);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--stroke);
+        box-shadow: var(--shadow);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(var(--color-white-rgb), var(--alpha-12)) transparent;
+        scrollbar-gutter: stable;
+      }
+
+      .notice-card::-webkit-scrollbar {
+        width: 5px;
+      }
+      .notice-card::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 6px 0;
+      }
+      .notice-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--color-white-rgb), var(--alpha-12));
+        border-radius: 3px;
+      }
+      .notice-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--color-white-rgb), var(--alpha-22));
+      }
+
+      [data-theme="light"] .notice-card {
+        scrollbar-color: rgba(var(--color-black-rgb), var(--alpha-10)) transparent;
+      }
+      [data-theme="light"] .notice-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--color-black-rgb), var(--alpha-10));
+      }
+      [data-theme="light"] .notice-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--color-black-rgb), var(--alpha-18));
+      }
+
+      .notice-card > h3 {
+        margin: 0 0 4px;
+        padding: 22px 24px 0;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+        color: var(--text);
       }
 
       .adblock-notice-card {
@@ -2695,22 +2742,97 @@
       }
 
       .notice-body {
-        overflow: auto;
-        padding-right: 4px;
+        overflow: visible;
+        padding: 0 24px;
       }
 
       .notice-footer {
-        margin-top: 12px;
-        padding-top: 10px;
-        padding-bottom: 4px;
-        border-top: 1px dashed rgba(var(--color-white-rgb), var(--alpha-12));
+        margin-top: 16px;
+        padding: 16px 24px 20px;
+        border-top: 1px solid var(--stroke);
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
       }
 
       .notice-card .notice-skip input {
         accent-color: var(--accent-2);
+      }
+
+      @media (max-width: 560px) {
+        .notice-card {
+          width: min(420px, 94vw);
+          max-height: calc(100vh - 16px);
+        }
+
+        .notice-body {
+          padding: 0 20px;
+        }
+
+        .notice-card > h3 {
+          font-size: 17px;
+          padding: 20px 20px 0;
+        }
+
+        .notice-card .notice-meta {
+          font-size: 11px;
+        }
+
+        .notice-card .notice-list {
+          padding-left: 16px;
+        }
+
+        .notice-card .notice-list li {
+          font-size: 13px;
+          line-height: 1.6;
+          margin: 6px 0;
+        }
+
+        .notice-card .notice-qq {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 8px;
+          padding: 10px;
+        }
+
+        .notice-card .notice-join {
+          align-self: flex-start;
+          order: 0;
+        }
+
+        .notice-card .notice-qq-info {
+          order: 1;
+          font-size: 12px;
+        }
+
+        .notice-footer {
+          margin-top: 12px;
+          padding: 14px 20px 16px;
+          gap: 10px;
+        }
+
+        .notice-card .notice-skip {
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .notice-body {
+          padding: 0 18px;
+        }
+
+        .notice-card > h3 {
+          font-size: 16px;
+          padding: 18px 18px 0;
+        }
+
+        .notice-card .notice-list li {
+          font-size: 12px;
+        }
+
+        .notice-footer {
+          padding: 12px 18px 14px;
+        }
       }
 
       .changelog-card {
@@ -3046,6 +3168,7 @@
         flex-direction: column;
         gap: 10px;
         margin-bottom: 16px;
+        position: relative;
       }
 
       .tag-list {
@@ -3129,6 +3252,32 @@
       .tag-clear {
         justify-self: end;
         white-space: nowrap;
+      }
+
+      .selected-weapons-summary {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+        background: rgba(8, 12, 18, var(--alpha-70));
+        border: 1px solid var(--stroke);
+        min-width: 0;
+        order: 2;
+      }
+
+      .selected-weapons-summary-empty {
+        color: var(--muted);
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .selected-weapons-summary-text {
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.45;
       }
 
       .expand-row {

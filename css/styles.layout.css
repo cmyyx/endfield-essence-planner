@@ -414,6 +414,10 @@
         cursor: not-allowed;
       }
 
+      .ghost-button:active:not(:disabled) {
+        transform: scale(0.96);
+      }
+
       .ghost-button.toggle-button {
         display: inline-flex;
         align-items: center;
@@ -503,6 +507,10 @@
         font-size: 12px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+      }
+
+      .about-button:active:not(:disabled) {
+        transform: scale(0.96);
       }
 
       .hero-actions {
@@ -718,24 +726,598 @@
         text-transform: none;
       }
 
+      /* ===== 极简登录卡片样式 (主题变量适配) ===== */
+      
+      /* 主容器 - 使用 panel 变量确保暗色/亮色模式都正确 */
       .sync-card {
-        width: min(700px, 92vw);
+        width: min(420px, 92vw);
         max-height: min(
           calc(100vh - (2 * clamp(20px, 4vh, 32px)) - var(--app-safe-top-inset, 0px) - var(--app-safe-bottom-inset, 0px) - var(--viewport-safe-bottom, 0px)),
-          760px
+          680px
         );
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: var(--panel-strong);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--stroke);
+        box-shadow: var(--shadow);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(var(--color-white-rgb), var(--alpha-12)) transparent;
+        scrollbar-gutter: stable;
+      }
+
+      /* 沉浸式滚动条 - Webkit */
+      .sync-card::-webkit-scrollbar {
+        width: 5px;
+      }
+      .sync-card::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 6px 0;
+      }
+      .sync-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--color-white-rgb), var(--alpha-12));
+        border-radius: 3px;
+      }
+      .sync-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--color-white-rgb), var(--alpha-22));
+      }
+
+      /* 亮色模式滚动条 */
+      [data-theme="light"] .sync-card {
+        scrollbar-color: rgba(var(--color-black-rgb), var(--alpha-10)) transparent;
+      }
+      [data-theme="light"] .sync-card::-webkit-scrollbar-thumb {
+        background: rgba(var(--color-black-rgb), var(--alpha-10));
+      }
+      [data-theme="light"] .sync-card::-webkit-scrollbar-thumb:hover {
+        background: rgba(var(--color-black-rgb), var(--alpha-18));
       }
 
       .sync-body {
+        display: block;
+        gap: 0;
+        min-height: 0;
+        overflow: visible;
+        padding: 28px 24px 24px;
+      }
+
+      /* 未登录状态卡片 */
+      .sync-login-card {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* 标题区域 */
+      .sync-login-header {
+        text-align: left;
+        margin-bottom: 4px;
+      }
+
+      .sync-login-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 6px 0;
+        line-height: 1.3;
+        letter-spacing: -0.01em;
+      }
+
+      .sync-login-subtitle {
+        font-size: 14px;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.5;
+        font-weight: 400;
+      }
+
+      /* 登录/注册切换标签（极简版） */
+      .sync-auth-tabs-minimal {
+        display: flex;
+        gap: 0;
+        border-bottom: 1px solid var(--stroke);
+        margin: 4px 0 20px 0;
+      }
+
+      .sync-tab-button {
+        flex: 1;
+        padding: 10px 16px;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease;
+        position: relative;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        font-family: var(--font-body);
+        line-height: 1.4;
+      }
+
+      .sync-tab-button:hover:not(:disabled) {
+        color: var(--text);
+      }
+
+      .sync-tab-button.is-active {
+        color: var(--text);
+        border-bottom-color: var(--accent-2);
+        font-weight: 600;
+      }
+
+      .sync-tab-button:focus-visible {
+        outline: 2px solid var(--accent-2);
+        outline-offset: -2px;
+        border-radius: 2px;
+      }
+
+      .sync-tab-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* 表单容器 */
+      .sync-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      /* 字段组 */
+      .sync-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      /* 标签 */
+      .sync-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        letter-spacing: 0;
+      }
+
+      /* 输入框 - 使用主题变量 */
+      .sync-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        color: var(--text);
+        background: rgba(var(--color-black-rgb), var(--alpha-18));
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        outline: none;
+        font-family: var(--font-body);
+        box-sizing: border-box;
+        line-height: 1.4;
+      }
+
+      .sync-input:hover:not(:focus):not(:disabled) {
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
+      }
+
+      .sync-input:focus {
+        border-color: var(--accent-2);
+        box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), var(--alpha-18));
+        background: rgba(var(--color-black-rgb), var(--alpha-24));
+      }
+
+      .sync-input::placeholder {
+        color: var(--muted);
+        opacity: 0.7;
+      }
+
+      .sync-input:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: rgba(var(--color-black-rgb), var(--alpha-10));
+        border-color: var(--stroke);
+      }
+
+      /* 密码字段头部（包含忘记密码链接） */
+      .sync-password-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* 忘记密码链接（微小） */
+      .sync-forgot-link {
+        font-size: 12px;
+        color: var(--muted);
+        text-decoration: none;
+        font-weight: 400;
+        transition: color 0.15s ease;
+      }
+
+      .sync-forgot-link:hover {
+        color: var(--accent-2);
+        text-decoration: underline;
+      }
+
+      /* 人机验证容器 */
+      .sync-turnstile-container {
+        width: 100%;
+        min-height: 68px;
+        padding: 12px;
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius-sm);
+        background: rgba(var(--color-white-rgb), var(--alpha-04));
+        overflow-x: auto;
+        overflow-y: hidden;
+        position: relative;
+        transition: border-color 0.15s ease;
+      }
+
+      .sync-turnstile-container:hover:not(.is-loading) {
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
+      }
+
+      .sync-turnstile-container.is-loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .sync-turnstile-container.is-unavailable,
+      .sync-turnstile-container.is-warning,
+      .sync-turnstile-container.is-error {
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-34));
+        background: rgba(var(--color-danger-rgb), var(--alpha-10));
+      }
+
+      .sync-turnstile-widget {
+        min-height: 44px;
+        width: 100%;
+      }
+
+      .sync-turnstile-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        font-size: 13px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      /* 提示文字 */
+      .sync-hint-text {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .sync-hint-text.is-warning {
+        color: rgba(var(--color-warning-rgb), var(--alpha-100));
+      }
+
+      .sync-hint-text.is-error {
+        color: rgba(var(--color-danger-rgb), var(--alpha-100));
+      }
+
+      /* 错误提示横幅 - 复用已有 feedback 逻辑 */
+      .sync-error-banner {
+        padding: 10px 12px;
+        background: rgba(var(--color-danger-rgb), var(--alpha-10));
+        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-34));
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: rgba(var(--color-danger-rgb), var(--alpha-100));
+        line-height: 1.5;
+      }
+
+      /* 表单反馈区域 */
+      .sync-form-feedback {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .sync-error-message {
+        padding: 10px 12px;
+        background: rgba(var(--color-danger-rgb), var(--alpha-10));
+        border: 1px solid rgba(var(--color-danger-rgb), var(--alpha-34));
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: rgba(var(--color-danger-rgb), var(--alpha-100));
+        line-height: 1.5;
+      }
+
+      .sync-notice-message {
+        padding: 10px 12px;
+        background: rgba(var(--color-info-rgb), var(--alpha-10));
+        border: 1px solid rgba(var(--color-info-rgb), var(--alpha-34));
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        color: rgba(var(--color-info-rgb), var(--alpha-100));
+        line-height: 1.5;
+      }
+
+      /* 提交按钮 - 使用 accent-2 主题色 */
+      .sync-submit-btn {
+        width: 100%;
+        height: 44px;
+        padding: 0 20px;
+        background: rgba(var(--color-accent-rgb), var(--alpha-90));
+        color: rgba(var(--color-black-rgb), var(--alpha-96));
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+        margin-top: 6px;
+        font-family: var(--font-body);
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      .sync-submit-btn:hover:not(:disabled) {
+        background: rgba(var(--color-accent-rgb), var(--alpha-100));
+      }
+
+      .sync-submit-btn:active:not(:disabled) {
+        background: rgba(var(--color-accent-rgb), var(--alpha-80));
+        transform: scale(0.99);
+      }
+
+      .sync-submit-btn:focus-visible {
+        outline: 2px solid var(--accent-2);
+        outline-offset: 2px;
+      }
+
+      .sync-submit-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: rgba(var(--color-white-rgb), var(--alpha-18));
+        color: var(--muted);
+      }
+
+      /* 底部辅助提示 */
+      .sync-footer-hint {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+        margin: 8px 0 0 0;
+        line-height: 1.5;
+        opacity: 0.7;
+      }
+
+      /* 已登录状态卡片 */
+      .sync-logged-in-card {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px 0;
+      }
+
+      .sync-user-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--stroke);
+      }
+
+      .sync-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-sm);
+        background: rgba(var(--color-accent-rgb), var(--alpha-26));
+        border: 1px solid rgba(var(--color-accent-rgb), var(--alpha-34));
+        color: var(--accent-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .sync-user-details {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .sync-username {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 2px 0;
+        line-height: 1.3;
+      }
+
+      .sync-account-id {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 0;
+        line-height: 1.4;
+      }
+
+      /* 操作按钮网格 */
+      .sync-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .sync-action-btn {
+        height: 40px;
+        padding: 10px 16px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        border: 1px solid var(--stroke);
+        background: rgba(var(--color-white-rgb), var(--alpha-04));
+        color: var(--text);
+        font-family: var(--font-body);
+      }
+
+      .sync-action-btn.primary {
+        background: rgba(var(--color-accent-rgb), var(--alpha-90));
+        color: rgba(var(--color-black-rgb), var(--alpha-96));
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-55));
+        font-weight: 600;
+      }
+
+      .sync-action-btn.primary:hover:not(:disabled) {
+        background: rgba(var(--color-accent-rgb), var(--alpha-100));
+      }
+
+      .sync-action-btn.ghost:hover:not(:disabled) {
+        background: rgba(var(--color-white-rgb), var(--alpha-08));
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
+      }
+
+      .sync-action-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* 设备信息提示（极小文字） */
+      .sync-device-hint {
+        font-size: 11px;
+        color: var(--muted);
+        opacity: 0.5;
+        text-align: center;
+        padding-top: 12px;
+        border-top: 1px solid var(--stroke);
+        line-height: 1.5;
+      }
+
+      /* 本地开发折叠面板 */
+      .sync-dev-accordion {
+        border-top: 1px solid var(--stroke);
+        margin-top: 16px;
+        padding-top: 16px;
+      }
+
+      .sync-dev-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 0;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: color 0.15s ease;
+        justify-content: space-between;
+        font-family: var(--font-body);
+      }
+
+      .sync-dev-toggle:hover {
+        color: var(--text);
+      }
+
+      .sync-dev-icon {
+        width: 16px;
+        height: 16px;
+        opacity: 0.6;
+      }
+
+      .sync-chevron {
+        width: 16px;
+        height: 16px;
+        transition: transform 0.2s ease;
+        opacity: 0.6;
+      }
+
+      .sync-chevron.is-expanded {
+        transform: rotate(180deg);
+      }
+
+      .sync-dev-content {
+        padding: 12px 0 8px 0;
         display: grid;
         gap: 12px;
-        min-height: 0;
-        overflow: auto;
-        overscroll-behavior: contain;
-        scrollbar-gutter: stable;
-        padding-left: 2px;
-        padding-right: 6px;
+        animation: syncSlideDown 0.2s ease-out;
+      }
+
+      @keyframes syncSlideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 亮色模式下的输入框覆盖 */
+      [data-theme="light"] .sync-input {
+        background: rgba(var(--color-white-rgb), var(--alpha-70));
+      }
+
+      [data-theme="light"] .sync-input:hover:not(:focus):not(:disabled) {
+        border-color: rgba(var(--color-black-rgb), var(--alpha-20));
+      }
+
+      [data-theme="light"] .sync-input:focus {
+        border-color: var(--accent-2);
+        background: rgba(var(--color-white-rgb), var(--alpha-95));
+      }
+
+      [data-theme="light"] .sync-input:disabled {
+        background: rgba(var(--color-white-rgb), var(--alpha-50));
+      }
+
+      [data-theme="light"] .sync-turnstile-container {
+        background: rgba(var(--color-white-rgb), var(--alpha-72));
+      }
+
+      [data-theme="light"] .sync-turnstile-container.is-unavailable,
+      [data-theme="light"] .sync-turnstile-container.is-warning,
+      [data-theme="light"] .sync-turnstile-container.is-error {
+        border-color: rgba(var(--color-danger-rgb), var(--alpha-28));
+        background: rgba(var(--color-danger-rgb), var(--alpha-08));
+      }
+
+      [data-theme="light"] .sync-submit-btn {
+        color: #ffffff;
+      }
+
+      [data-theme="light"] .sync-submit-btn:disabled {
+        background: rgba(var(--color-black-rgb), var(--alpha-14));
+        color: var(--muted);
+      }
+
+      [data-theme="light"] .sync-error-banner,
+      [data-theme="light"] .sync-error-message {
+        color: #8b3535;
+      }
+
+      [data-theme="light"] .sync-notice-message {
+        color: #2b5a7a;
+      }
+
+      [data-theme="light"] .sync-action-btn {
+        background: rgba(var(--color-white-rgb), var(--alpha-56));
+      }
+
+      [data-theme="light"] .sync-action-btn.primary {
+        color: #ffffff;
+      }
+
+      [data-theme="light"] .sync-avatar {
+        color: #16463f;
+      }
+
+      [data-theme="light"] .sync-device-hint {
+        opacity: 0.6;
       }
 
       .sync-auth-tabs {
@@ -1435,31 +2017,57 @@
           max-width: min(188px, 58vw);
         }
 
+        /* 移动端极简登录框适配 */
         .sync-card {
-          width: min(700px, 96vw);
-          max-height: calc(100vh - 12px - var(--app-safe-top-inset, 0px) - var(--app-safe-bottom-inset, 0px) - var(--viewport-safe-bottom, 0px));
-          border-radius: 14px;
+          width: min(420px, 94vw);
+          max-height: calc(100vh - 16px);
+          border-radius: var(--radius-md);
         }
 
         .sync-body {
-          gap: 8px;
-          padding-right: 2px;
+          padding: 22px 20px 20px;
         }
 
-        .sync-card h3 {
-          margin-bottom: 8px;
+        .sync-login-title {
           font-size: 18px;
         }
 
-        .sync-auth-tabs .ghost-button {
-          padding-inline: 8px;
-          font-size: 12px;
+        .sync-login-subtitle {
+          font-size: 13px;
         }
 
-        .sync-turnstile-shell {
-          min-height: 66px;
+        .sync-input {
+          height: 40px;
+          padding: 0 11px;
+          font-size: 15px; /* 防止iOS缩放 */
+        }
+
+        .sync-submit-btn {
+          height: 42px;
+        }
+
+        /* 移动端隐藏开发面板 */
+        .sync-dev-accordion {
+          display: none;
+        }
+
+        .sync-turnstile-container {
+          min-height: 60px;
           padding: 8px 10px;
-          overflow-x: auto;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .sync-body {
+          padding: 18px 18px 18px;
+        }
+
+        .sync-login-title {
+          font-size: 17px;
+        }
+
+        .sync-actions-grid {
+          grid-template-columns: 1fr;
         }
 
         .sync-card .secondary-hint {

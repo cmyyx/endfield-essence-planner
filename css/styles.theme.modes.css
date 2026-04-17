@@ -199,34 +199,23 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #1f5d8d;
 }
 
-[data-theme="light"] .pill {
-  background: rgba(var(--color-accent-rgb), var(--alpha-14));
-  border-color: rgba(var(--color-accent-rgb), var(--alpha-35));
-  color: #0f625f;
+[data-theme="light"] .coverage-badge {
+  background: rgba(var(--color-accent-rgb), var(--alpha-12));
+  color: rgba(var(--color-accent-rgb), var(--alpha-90));
 }
 
-[data-theme="light"] .pill.warn {
-  background: rgba(255, 159, 26, var(--alpha-15));
-  border-color: rgba(255, 159, 26, var(--alpha-42));
-  color: #7d5317;
-}
-
-[data-theme="light"] .lock-chip {
-  border-color: rgba(var(--color-ok-rgb), var(--alpha-35));
+[data-theme="light"] .coverage-badge.is-full {
   background: rgba(var(--color-ok-rgb), var(--alpha-12));
-  color: #14684c;
+  color: rgba(var(--color-ok-rgb), var(--alpha-90));
 }
 
-[data-theme="light"] .lock-chip.attr {
-  border-color: rgba(255, 128, 0, var(--alpha-44));
-  background: rgba(255, 128, 0, var(--alpha-12));
-  color: #8f4f12;
+[data-theme="light"] .lock-summary {
+  background: rgba(var(--color-black-rgb), var(--alpha-03));
+  border-color: rgba(var(--color-black-rgb), var(--alpha-08));
 }
 
-[data-theme="light"] .lock-chip.warn {
-  border-color: rgba(var(--color-danger-rgb), var(--alpha-42));
-  background: rgba(var(--color-danger-rgb), var(--alpha-12));
-  color: #8d3434;
+[data-theme="light"] .lock-tag {
+  background: rgba(var(--color-black-rgb), var(--alpha-05));
 }
 
 [data-theme="light"] .lock-summary {
@@ -255,21 +244,22 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .scheme-weapon-item.is-selected.base-selectable,
 [data-theme="light"] .scheme-weapon-item.is-selected {
-  background: rgba(223, 243, 255, var(--alpha-98));
-  border-color: rgba(var(--color-accent-rgb), var(--alpha-60));
-  box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-30));
+  background: rgba(var(--color-accent-rgb), var(--alpha-06));
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-30));
+  box-shadow: none;
 }
 
 [data-theme="light"] .scheme-weapon-item.base-choice {
-  background: rgba(255, 240, 214, var(--alpha-98));
-  border-color: rgba(230, 124, 0, var(--alpha-85));
-  box-shadow: 0 0 0 2px rgba(230, 124, 0, var(--alpha-35));
+  background: rgba(var(--color-accent-rgb), var(--alpha-08));
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-40));
+  box-shadow: none;
 }
 
 [data-theme="light"] .scheme-weapon-item.is-selected.base-choice {
-  border-color: rgba(230, 124, 0, var(--alpha-95));
-  background: rgba(255, 235, 208, var(--alpha-98));
-  box-shadow:
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-50));
+  background: rgba(var(--color-accent-rgb), var(--alpha-10));
+  box-shadow: none;
+}
     0 0 0 2px rgba(230, 124, 0, var(--alpha-45)),
     inset 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-35));
 }
@@ -356,22 +346,20 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 
 [data-theme="light"] .scheme-weapon-item.is-selected .badge,
 [data-theme="light"] .weapon-attr-item.is-selected .badge {
-  background: rgba(var(--color-accent-rgb), var(--alpha-24));
-  border-color: rgba(var(--color-accent-rgb), var(--alpha-48));
-  color: #0f4a48;
+  background: rgba(var(--color-accent-rgb), var(--alpha-12));
+  color: rgba(var(--color-accent-rgb), var(--alpha-90));
 }
 
 [data-theme="light"] .scheme-weapon-item.is-selected .badge.warn,
 [data-theme="light"] .weapon-attr-item.is-selected .badge.warn {
-  background: rgba(var(--color-danger-rgb), var(--alpha-14));
-  border-color: rgba(var(--color-danger-rgb), var(--alpha-35));
-  color: #8c3a3a;
+  background: rgba(var(--color-danger-rgb), var(--alpha-10));
+  color: var(--danger);
 }
 
 [data-theme="light"] .scheme-weapon-item.is-selected .badge.muted,
 [data-theme="light"] .weapon-attr-item.is-selected .badge.muted {
-  background: rgba(154, 165, 177, var(--alpha-20));
-  border-color: rgba(154, 165, 177, var(--alpha-50));
+  background: rgba(var(--color-black-rgb), var(--alpha-06));
+  color: var(--muted);
   color: #42566d;
 }
 
@@ -627,6 +615,25 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #57708c;
 }
 
+[data-theme="light"] .selected-weapons-summary {
+  background: rgba(var(--color-white-rgb), var(--alpha-65));
+  border-color: rgba(var(--color-black-rgb), var(--alpha-14));
+}
+
+[data-theme="light"] .selected-weapon-name {
+  color: #1a2a3d;
+}
+
+[data-theme="light"] .selected-weapon-thumb {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+}
+
+[data-theme="light"] .selected-weapon-thumb-fallback {
+  background: rgba(var(--color-black-rgb), var(--alpha-06));
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+  color: #6b8199;
+}
+
 [data-theme="light"] .lang-option {
   color: #1a2a3d;
 }
@@ -765,27 +772,61 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #0a5c58;
 }
 
+[data-theme="light"] .plan-config-entry-button {
+  background:
+    linear-gradient(rgba(var(--color-white-rgb), var(--alpha-72)), rgba(var(--color-white-rgb), var(--alpha-72))) padding-box,
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-35)), rgba(200, 140, 60, var(--alpha-25)), rgba(var(--color-accent-rgb), var(--alpha-35))) border-box;
+  color: #1a2a3d;
+}
+
+[data-theme="light"] .plan-config-entry-button:hover {
+  background:
+    linear-gradient(rgba(var(--color-accent-rgb), var(--alpha-06)), rgba(var(--color-accent-rgb), var(--alpha-06))) padding-box,
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-50)), rgba(200, 140, 60, var(--alpha-35)), rgba(var(--color-accent-rgb), var(--alpha-50))) border-box;
+  box-shadow: 0 0 18px rgba(var(--color-accent-rgb), var(--alpha-08));
+}
+
+[data-theme="light"] .plan-config-entry-button.is-active {
+  background:
+    linear-gradient(rgba(var(--color-accent-rgb), var(--alpha-10)), rgba(var(--color-accent-rgb), var(--alpha-10))) padding-box,
+    linear-gradient(135deg, rgba(var(--color-accent-rgb), var(--alpha-55)), rgba(200, 140, 60, var(--alpha-40)), rgba(var(--color-accent-rgb), var(--alpha-55))) border-box;
+  box-shadow: 0 0 24px rgba(var(--color-accent-rgb), var(--alpha-10));
+}
+
+[data-theme="light"] .plan-config-entry-sub {
+  color: #6b8199;
+}
+
+[data-theme="light"] .plan-config-entry-button:hover .plan-config-entry-sub,
+[data-theme="light"] .plan-config-entry-button.is-active .plan-config-entry-sub {
+  color: rgba(var(--color-accent-rgb), 0.7);
+}
+
 [data-theme="light"] .region-filter-chips .filter-chip.is-disabled {
   opacity: 0.35;
 }
 
 [data-theme="light"] .missing-tag {
-  border-color: rgba(var(--color-danger-rgb), var(--alpha-28));
-  background: rgba(var(--color-danger-rgb), var(--alpha-10));
-  color: #8b3f47;
+  border-color: rgba(var(--color-danger-rgb), var(--alpha-20));
+  background: rgba(var(--color-danger-rgb), var(--alpha-06));
+  color: var(--danger);
 }
 
 [data-theme="light"] .about-card,
 [data-theme="light"] .tutorial-card,
-[data-theme="light"] .notice-card,
 [data-theme="light"] .changelog-card {
   background: rgba(var(--color-white-rgb), var(--alpha-65));
   border-color: rgba(var(--color-black-rgb), var(--alpha-16));
   color: #1a2a3d;
 }
 
-[data-theme="light"] .changelog-section,
-[data-theme="light"] .notice-footer {
+[data-theme="light"] .notice-card {
+  background: var(--panel-strong);
+  border-color: var(--stroke);
+  color: #1a2a3d;
+}
+
+[data-theme="light"] .changelog-section {
   border-top-color: rgba(var(--color-black-rgb), var(--alpha-16));
 }
 
@@ -1177,14 +1218,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .scheme-weapon-item .attr-value.base-lock {
-  background: rgba(var(--color-ok-rgb), var(--alpha-20));
-  border-color: rgba(var(--color-ok-rgb), var(--alpha-50));
-  box-shadow: 0 0 0 1px rgba(var(--color-ok-rgb), var(--alpha-18)) inset;
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-25));
+  color: rgba(var(--color-accent-rgb), var(--alpha-85));
 }
 
 [data-theme="light"] .scheme-weapon-item .attr-value.locked {
-  background: rgba(var(--color-warning-rgb), var(--alpha-22));
-  border-color: rgba(var(--color-warning-rgb), var(--alpha-48));
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-30));
+  color: rgba(var(--color-accent-rgb), var(--alpha-90));
 }
 
 [data-theme="light"] .scheme-weapon-item .attr-value:not(.base-lock, .locked, .conflict),
@@ -1195,15 +1235,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 }
 
 [data-theme="light"] .attr-value.base-lock {
-  border-color: rgba(var(--color-ok-rgb), var(--alpha-45));
-  background: rgba(var(--color-ok-rgb), var(--alpha-14));
-  color: #1d6d4d;
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-25));
+  color: rgba(var(--color-accent-rgb), var(--alpha-90));
 }
 
 [data-theme="light"] .attr-value.locked {
-  border-color: rgba(var(--color-warning-rgb), var(--alpha-45));
-  background: rgba(var(--color-warning-rgb), var(--alpha-16));
-  color: #7a4f19;
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-30));
+  color: rgba(var(--color-accent-rgb), var(--alpha-90));
 }
 
 [data-theme="light"] .attr-value.conflict {
