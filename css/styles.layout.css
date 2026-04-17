@@ -60,14 +60,15 @@
       body::before {
         content: "";
         position: fixed;
-        inset: 0;
+        inset: -20px;
         z-index: -2;
         background-image: var(--bg-image);
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        filter: blur(8px) saturate(0.7);
         opacity: var(--alpha-100);
-        transition: opacity 0.75s ease;
+        transition: opacity 0.75s ease, filter 0.75s ease;
         pointer-events: none;
       }
 
@@ -92,12 +93,11 @@
         inset: 0;
         z-index: -1;
         pointer-events: none;
-        background: var(--bg-overlay-solid);
-        opacity: var(--alpha-40);
+        background: linear-gradient(135deg, rgba(8, 12, 18, 0.5) 0%, rgba(8, 12, 18, 0.75) 100%);
       }
 
       html[data-bg-display="off"] body::after {
-        opacity: var(--alpha-100);
+        background: var(--bg-overlay-solid);
       }
 
       [v-cloak] {
@@ -496,21 +496,36 @@
       .about-button {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
-        padding: 8px 14px;
-        border-radius: 999px;
+        height: 36px;
+        padding: 0 20px;
+        border-radius: var(--radius-sm);
         border: 1px solid rgba(var(--color-white-rgb), var(--alpha-18));
         background: rgba(12, 16, 24, var(--alpha-60));
         color: var(--text);
         cursor: pointer;
         transition: 0.2s ease;
-        font-size: 12px;
+        font-size: 13px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
       .about-button:active:not(:disabled) {
         transform: scale(0.96);
+      }
+
+      .about-button .profile-entry-icon {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .about-button .profile-entry-icon svg {
+        width: 18px;
+        height: 18px;
       }
 
       .hero-actions {
@@ -528,33 +543,8 @@
         align-items: center;
       }
 
-      .theme-switch {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-14));
-        background: rgba(10, 14, 22, var(--alpha-60));
-      }
-
-      .theme-label {
-        font-size: 11px;
-        color: var(--muted);
-        letter-spacing: 0.04em;
-      }
-
-      .theme-select {
-        border: 1px solid var(--stroke);
-        background: rgba(8, 12, 18, var(--alpha-70));
-        color: var(--text);
-        border-radius: 999px;
-        padding: 4px 8px;
-        font-size: 11px;
-      }
-
-      .lang-button {
-        width: auto;
+      .theme-toggle {
+        width: 36px;
         height: 36px;
         border-radius: 999px;
         border: 1px solid rgba(var(--color-white-rgb), var(--alpha-16));
@@ -563,8 +553,32 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .theme-toggle:hover {
+        border-color: rgba(var(--color-white-rgb), var(--alpha-32));
+        background: rgba(20, 24, 32, var(--alpha-80));
+      }
+
+      .theme-toggle svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .lang-button {
+        width: auto;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-16));
+        background: rgba(10, 14, 22, var(--alpha-70));
+        color: var(--text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         gap: 6px;
-        padding: 0 12px;
+        padding: 0 14px;
         cursor: pointer;
         transition: border-color 0.2s ease, transform 0.2s ease;
       }
@@ -719,86 +733,94 @@
         padding: 3px 8px;
       }
 
-      .secondary-panel .about-button.secondary-shortcut {
-        padding: 6px 10px;
-        font-size: 11px;
-        letter-spacing: 0.04em;
+      .secondary-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .secondary-action-btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-10));
+        background: rgba(12, 16, 24, var(--alpha-35));
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+      }
+
+      .secondary-action-btn svg {
+        width: 18px;
+        height: 18px;
+        opacity: 0.75;
+        flex-shrink: 0;
+      }
+
+      .secondary-action-btn .secondary-action-label {
+        font-size: 13px;
+        letter-spacing: 0.01em;
         text-transform: none;
+        opacity: 0.95;
+      }
+
+      .secondary-action-btn:hover {
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
+        background: rgba(20, 24, 32, var(--alpha-55));
+      }
+
+      .secondary-action-btn:hover svg {
+        opacity: 0.9;
+      }
+
+      .secondary-action-btn:hover .secondary-action-label {
+        opacity: 1;
+      }
+
+      .secondary-action-btn:active {
+        background: rgba(24, 28, 36, var(--alpha-65));
       }
 
       /* ===== 极简登录卡片样式 (主题变量适配) ===== */
       
-      /* 主容器 - 使用 panel 变量确保暗色/亮色模式都正确 */
-      .sync-card {
+      /* ============================================================
+       * sync-card 自然高度布局
+       * 结构：.sync-card(flex外壳) > .sync-login-card(自然流)
+       *       ├── header/tabs
+       *       ├── .sync-form   (自然流，无滚动)
+       *       ├── .sync-login-actions + .sync-submit-btn
+       *       └── .sync-footer-hint
+       * ============================================================ */
+
+      /* 外壳 — 自然高度，居中 */
+      .about-card.sync-card {
+        padding: 0;
         width: min(420px, 92vw);
-        max-height: min(
-          calc(100vh - (2 * clamp(20px, 4vh, 32px)) - var(--app-safe-top-inset, 0px) - var(--app-safe-bottom-inset, 0px) - var(--viewport-safe-bottom, 0px)),
-          680px
-        );
-        overflow-y: auto;
-        overflow-x: hidden;
-        background: var(--panel-strong);
-        border-radius: var(--radius-md);
-        border: 1px solid var(--stroke);
-        box-shadow: var(--shadow);
-        scrollbar-width: thin;
-        scrollbar-color: rgba(var(--color-white-rgb), var(--alpha-12)) transparent;
-        scrollbar-gutter: stable;
       }
 
-      /* 沉浸式滚动条 - Webkit */
-      .sync-card::-webkit-scrollbar {
-        width: 5px;
-      }
-      .sync-card::-webkit-scrollbar-track {
-        background: transparent;
-        margin: 6px 0;
-      }
-      .sync-card::-webkit-scrollbar-thumb {
-        background: rgba(var(--color-white-rgb), var(--alpha-12));
-        border-radius: 3px;
-      }
-      .sync-card::-webkit-scrollbar-thumb:hover {
-        background: rgba(var(--color-white-rgb), var(--alpha-22));
-      }
-
-      /* 亮色模式滚动条 */
-      [data-theme="light"] .sync-card {
-        scrollbar-color: rgba(var(--color-black-rgb), var(--alpha-10)) transparent;
-      }
-      [data-theme="light"] .sync-card::-webkit-scrollbar-thumb {
-        background: rgba(var(--color-black-rgb), var(--alpha-10));
-      }
-      [data-theme="light"] .sync-card::-webkit-scrollbar-thumb:hover {
-        background: rgba(var(--color-black-rgb), var(--alpha-18));
-      }
-
-      .sync-body {
-        display: block;
-        gap: 0;
-        min-height: 0;
-        overflow: visible;
-        padding: 28px 24px 24px;
-      }
-
-      /* 未登录状态卡片 */
+      /* 内容卡片 */
       .sync-login-card {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        padding: 24px 24px 0;
       }
 
-      /* 标题区域 */
+      /* 标题 */
       .sync-login-header {
         text-align: left;
-        margin-bottom: 4px;
+        padding-bottom: 14px;
       }
 
       .sync-login-title {
         font-size: 20px;
         font-weight: 600;
         color: var(--text);
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
         line-height: 1.3;
         letter-spacing: -0.01em;
       }
@@ -811,12 +833,11 @@
         font-weight: 400;
       }
 
-      /* 登录/注册切换标签（极简版） */
+      /* 标签栏 */
       .sync-auth-tabs-minimal {
         display: flex;
         gap: 0;
         border-bottom: 1px solid var(--stroke);
-        margin: 4px 0 20px 0;
       }
 
       .sync-tab-button {
@@ -857,11 +878,17 @@
         cursor: not-allowed;
       }
 
-      /* 表单容器 */
+      /* 错误横幅 */
+      .sync-error-banner {
+        flex-shrink: 0;
+      }
+
+      /* 表单 — 自然流，无滚动 */
       .sync-form {
         display: flex;
         flex-direction: column;
-        gap: 18px;
+        gap: 14px;
+        padding: 16px 0 4px;
       }
 
       /* 字段组 */
@@ -869,6 +896,7 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        flex-shrink: 0;
       }
 
       /* 标签 */
@@ -939,16 +967,20 @@
         text-decoration: underline;
       }
 
-      /* 人机验证容器 */
+      /* 人机验证容器 - 隔离异常高度，限制 max-height */
+      .sync-turnstile-field {
+        flex-shrink: 0;
+      }
+
       .sync-turnstile-container {
         width: 100%;
-        min-height: 68px;
-        padding: 12px;
+        max-height: 120px;
+        min-height: 0;
+        padding: 10px 12px;
         border: 1px solid var(--stroke);
         border-radius: var(--radius-sm);
         background: rgba(var(--color-white-rgb), var(--alpha-04));
-        overflow-x: auto;
-        overflow-y: hidden;
+        overflow: hidden;
         position: relative;
         transition: border-color 0.15s ease;
       }
@@ -1037,7 +1069,12 @@
         line-height: 1.5;
       }
 
-      /* 提交按钮 - 使用 accent-2 主题色 */
+      /* 提交按钮容器 — 固定在卡片底部，不随内容滚动 */
+      .sync-login-actions {
+        flex-shrink: 0;
+        padding: 12px 24px 0;
+      }
+
       .sync-submit-btn {
         width: 100%;
         height: 44px;
@@ -1050,7 +1087,6 @@
         font-weight: 600;
         cursor: pointer;
         transition: background-color 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
-        margin-top: 6px;
         font-family: var(--font-body);
         line-height: 1;
         display: inline-flex;
@@ -1085,9 +1121,46 @@
         font-size: 12px;
         color: var(--muted);
         text-align: center;
-        margin: 8px 0 0 0;
+        margin: 0;
+        padding: 10px 24px 14px;
         line-height: 1.5;
         opacity: 0.7;
+        border-top: 1px solid var(--stroke);
+        margin-top: auto;
+      }
+
+      /* 登录卡片内数据摘要 — 紧凑单栏 */
+      .sync-login-summary {
+        padding: 10px 24px 18px;
+        border-top: 1px solid var(--stroke);
+        background: rgba(var(--color-black-rgb), var(--alpha-06));
+        border-radius: 0;
+      }
+
+      .sync-login-summary-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .sync-login-summary-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 16px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .sync-login-summary-item::after {
+        content: "";
+      }
+
+      .sync-login-summary-meta {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-top: 2px;
       }
 
       /* 已登录状态卡片 */
@@ -1095,7 +1168,12 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
-        padding: 20px 0;
+        padding: 20px 24px;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(var(--color-white-rgb), var(--alpha-12)) transparent;
       }
 
       .sync-user-info {
@@ -1354,16 +1432,16 @@
 
       .sync-turnstile-shell {
         position: relative;
-        min-height: 74px;
         width: 100%;
+        max-height: 120px;
+        min-height: 0;
         max-width: 100%;
         min-width: 0;
         padding: 10px 12px;
         border-radius: 12px;
         border: 1px solid rgba(var(--color-white-rgb), var(--alpha-12));
         background: rgba(var(--color-white-rgb), var(--alpha-04));
-        overflow-x: auto;
-        overflow-y: hidden;
+        overflow: hidden;
       }
 
       .sync-turnstile-shell.is-loading {
@@ -1902,38 +1980,78 @@
       }
 
       .site-feedback-banner {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        position: relative;
+        display: inline-flex;
         align-items: center;
-        gap: 8px;
-        margin: 8px auto 12px;
-        padding: 6px 10px;
-        width: fit-content;
-        max-width: min(1180px, calc(100% - 24px));
-        border-radius: 12px;
-        border: 1px solid rgba(var(--color-white-rgb), var(--alpha-16));
-        background: rgba(8, 12, 20, 0.78);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+        gap: 6px;
+        padding: 0 12px;
+        height: 36px;
+        width: auto;
+        max-width: calc(100vw - 20px);
+        border-radius: 999px;
+        background: rgba(10, 14, 22, var(--alpha-70));
+        box-sizing: border-box;
+        flex-shrink: 0;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .site-feedback-banner::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        background: linear-gradient(
+          135deg,
+          #ff3b5c 0%,
+          #ffb83b 25%,
+          #3bff6e 50%,
+          #3b9eff 75%,
+          #b83bff 100%
+        );
+        background-size: 300% 300%;
+        animation: rgb-border-shift 4s ease infinite;
+        mask:
+          linear-gradient(#fff 0 0) padding-box,
+          linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        -webkit-mask:
+          linear-gradient(#fff 0 0) padding-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        z-index: -1;
+      }
+
+      @keyframes rgb-border-shift {
+        0%, 100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
       }
 
       .site-feedback-label {
         min-width: 0;
-        color: rgba(232, 246, 255, var(--alpha-94));
-        font-size: 13px;
-        line-height: 1.5;
-      }
-
-      .site-feedback-link {
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
         white-space: nowrap;
-        padding: 6px 12px;
-        border-color: rgba(var(--color-accent-rgb), var(--alpha-44));
-        background: rgba(var(--color-accent-rgb), var(--alpha-16));
-        color: #dcfffb;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: none;
+        text-decoration: underline;
+        text-decoration-color: var(--color-accent);
+        text-underline-offset: 3px;
       }
 
-      .site-feedback-link:hover {
-        border-color: rgba(var(--color-accent-rgb), var(--alpha-70));
-        background: rgba(var(--color-accent-rgb), var(--alpha-24));
+      .site-feedback-banner:hover {
+        background: rgba(10, 14, 22, var(--alpha-88));
+      }
+
+      .site-feedback-banner:active {
+        transform: scale(0.98);
       }
 
       .hero-ad-banner {
@@ -1972,14 +2090,14 @@
       }
 
       @media (max-width: 720px) {
-        .site-feedback-banner {
-          gap: 6px;
-          padding: 6px 8px;
-          max-width: calc(100% - 20px);
+        .site-feedback-label {
+          font-size: 11px;
+          max-width: 120px;
         }
 
         .site-feedback-link {
-          padding-inline: 10px;
+          padding: 3px 8px;
+          font-size: 11px;
         }
 
         .sync-summary-grid {
@@ -2003,7 +2121,7 @@
           max-width: 100%;
         }
 
-        .sync-card {
+        .about-card.sync-card {
           width: min(700px, 92vw);
         }
 
@@ -2018,14 +2136,12 @@
         }
 
         /* 移动端极简登录框适配 */
-        .sync-card {
+        .about-card.sync-card {
           width: min(420px, 94vw);
-          max-height: calc(100vh - 16px);
-          border-radius: var(--radius-md);
         }
 
-        .sync-body {
-          padding: 22px 20px 20px;
+        .sync-login-card {
+          padding: 20px 20px 0;
         }
 
         .sync-login-title {
@@ -2052,14 +2168,18 @@
         }
 
         .sync-turnstile-container {
-          min-height: 60px;
+          max-height: 100px;
           padding: 8px 10px;
         }
       }
 
       @media (max-width: 380px) {
-        .sync-body {
-          padding: 18px 18px 18px;
+        .sync-login-card {
+          padding: 18px 18px 0;
+        }
+
+        .sync-footer-hint {
+          padding: 8px 18px 14px;
         }
 
         .sync-login-title {
@@ -2313,7 +2433,8 @@
         }
 
         .about-button {
-          padding: 6px 10px;
+          height: 32px;
+          padding: 0 10px;
           font-size: 11px;
           letter-spacing: 0.04em;
           text-transform: none;
@@ -2336,18 +2457,14 @@
           letter-spacing: 0.04em;
         }
 
-        .theme-switch {
-          gap: 6px;
-          padding: 3px 8px;
+        .theme-toggle {
+          width: 32px;
+          height: 32px;
         }
 
-        .theme-label {
-          font-size: 10px;
-        }
-
-        .theme-select {
-          font-size: 10px;
-          padding: 3px 6px;
+        .theme-toggle svg {
+          width: 16px;
+          height: 16px;
         }
       }
 
@@ -2357,7 +2474,8 @@
         }
 
         .about-button {
-          padding: 5px 8px;
+          height: 30px;
+          padding: 0 8px;
           font-size: 10px;
         }
 
@@ -2366,18 +2484,14 @@
           padding: 0 8px;
         }
 
-        .theme-switch {
-          padding: 2px 6px;
+        .theme-toggle {
+          width: 28px;
+          height: 28px;
         }
 
-        .theme-label {
-          font-size: 9px;
-          letter-spacing: 0.02em;
-        }
-
-        .theme-select {
-          max-width: 96px;
-          padding: 2px 5px;
+        .theme-toggle svg {
+          width: 14px;
+          height: 14px;
         }
       }
 

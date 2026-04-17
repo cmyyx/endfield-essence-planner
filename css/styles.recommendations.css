@@ -80,32 +80,46 @@
 
       .card-stats {
         display: flex;
-        gap: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
         align-items: center;
       }
 
-      .stat-item {
-        display: flex;
-        align-items: baseline;
-        gap: 4px;
-        font-size: 12px;
+      .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        background: rgba(var(--color-white-rgb), var(--alpha-06));
+        font-size: 13px;
       }
 
-      .stat-label {
+      .stat-chip-label {
         color: var(--muted);
         font-weight: 400;
       }
 
-      .stat-value {
+      .stat-chip-value {
         font-weight: 600;
         color: var(--text);
       }
 
-      .stat-item.stat-warn .stat-value {
+      .stat-chip.stat-warn {
+        background: rgba(var(--color-warn-rgb), var(--alpha-14));
         color: var(--warn);
       }
 
-      .stat-item.stat-danger .stat-value {
+      .stat-chip.stat-warn .stat-chip-value {
+        color: var(--warn);
+      }
+
+      .stat-chip.stat-danger {
+        background: rgba(var(--color-danger-rgb), var(--alpha-14));
+        color: var(--danger);
+      }
+
+      .stat-chip.stat-danger .stat-chip-value {
         color: var(--danger);
       }
 

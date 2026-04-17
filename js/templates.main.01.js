@@ -6,52 +6,36 @@
           <h1>{{ t("nav.endfield_essence_planner") }}</h1>
         </div>
         <div class="hero-actions">
-          <div class="lang-switch" ref="langSwitchRef" @click.stop>
-            <button
-              class="lang-button"
-              type="button"
-              aria-label="Language"
-              aria-haspopup="listbox"
-              :aria-expanded="showLangMenu ? 'true' : 'false'"
-              @click="toggleLangMenu"
-            >
-              <span class="lang-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                  <circle cx="12" cy="12" r="9"></circle>
-                  <path d="M3 12h18"></path>
-                  <path d="M12 3a13 13 0 0 1 0 18"></path>
-                  <path d="M12 3a13 13 0 0 0 0 18"></path>
-                </svg>
-              </span>
-              <span class="lang-label">Language</span>
-            </button>
-            <div v-if="showLangMenu" class="lang-menu" :class="'align-' + langMenuPlacement" role="listbox">
-              <button
-                v-for="option in languageOptions"
-                :key="option.value"
-                class="lang-option"
-                :class="{ active: option.value === locale }"
-                role="option"
-                :aria-selected="option.value === locale"
-                @click="setLocale(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            </div>
-          </div>
-          <div class="theme-switch" @click.stop>
-            <label class="theme-label" for="theme-mode-select">{{ t("nav.theme") }}</label>
-            <select
-              id="theme-mode-select"
-              class="theme-select"
-              :value="themePreference"
-              @change="setThemeMode($event.target.value)"
-            >
-              <option value="auto">{{ t("nav.auto") }}</option>
-              <option value="light">{{ t("nav.light") }}</option>
-              <option value="dark">{{ t("nav.dark") }}</option>
-            </select>
-          </div>
+          <a
+            class="site-feedback-banner"
+            href="https://wj.qq.com/s2/26332435/z16l/"
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="问卷入口"
+          >
+            <span class="site-feedback-label">填写网站调研问卷</span>
+          </a>
+          <button
+            class="theme-toggle"
+            type="button"
+            :aria-label="themePreference === 'auto' ? t('nav.auto') : (themePreference === 'light' ? t('nav.light') : t('nav.dark'))"
+            @click="setThemeMode(themePreference === 'auto' ? 'light' : themePreference === 'light' ? 'dark' : 'auto')"
+          >
+            <svg v-if="resolvedTheme === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2"></path>
+              <path d="M12 20v2"></path>
+              <path d="m4.93 4.93 1.41 1.41"></path>
+              <path d="m17.66 17.66 1.41 1.41"></path>
+              <path d="M2 12h2"></path>
+              <path d="M20 12h2"></path>
+              <path d="m6.34 17.66-1.41 1.41"></path>
+              <path d="m19.07 4.93-1.41 1.41"></path>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
           <button
             v-if="syncRegionAccessMode !== 'hidden' && syncRegionAccessMode !== 'cn-blocked'"
             class="about-button login-button profile-entry-button"
@@ -92,18 +76,67 @@
             </span>
             <span class="profile-entry-label">{{ t("sync.cn_region_unavailable_action") }}</span>
           </button>
+          <button
+            class="lang-button"
+            type="button"
+            aria-label="Language"
+            @click="cycleLocale"
+          >
+            <span class="lang-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M3 12h18"></path>
+                <path d="M12 3a13 13 0 0 1 0 18"></path>
+                <path d="M12 3a13 13 0 0 0 0 18"></path>
+              </svg>
+            </span>
+            <span class="lang-label">{{ languageOptions.find(o => o.value === locale)?.label || locale.toUpperCase() }}</span>
+          </button>
           <div class="secondary-menu">
             <button class="about-button menu-toggle" @click="showSecondaryMenu = !showSecondaryMenu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="16" height="16">
+                <line x1="4" x2="20" y1="6" y2="6"></line>
+                <line x1="4" x2="20" y1="12" y2="12"></line>
+                <line x1="4" x2="20" y1="18" y2="18"></line>
+              </svg>
               {{ t("nav.more_tools") }}
             </button>
             <div v-if="showSecondaryMenu" class="secondary-panel">
               <div class="secondary-item">
                 <div class="secondary-label">{{ t("nav.quick_links") }}</div>
-                <div class="secondary-actions">
-                  <button class="about-button secondary-shortcut" @click="openNotice(); showSecondaryMenu = false">{{ t("nav.announcement") }}</button>
-                  <button class="about-button secondary-shortcut" @click="openChangelog(); showSecondaryMenu = false">{{ t("nav.changelog") }}</button>
-                  <button class="about-button secondary-shortcut" @click="openFaq(); showSecondaryMenu = false">FAQ</button>
-                  <button class="about-button secondary-shortcut" @click="openAbout(); showSecondaryMenu = false">{{ t("nav.about") }}</button>
+                <div class="secondary-actions secondary-grid">
+                  <button class="secondary-action-btn" @click="openNotice(); showSecondaryMenu = false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                      <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <span class="secondary-action-label">{{ t("nav.announcement") }}</span>
+                  </button>
+                  <button class="secondary-action-btn" @click="openChangelog(); showSecondaryMenu = false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span class="secondary-action-label">{{ t("nav.changelog") }}</span>
+                  </button>
+                  <button class="secondary-action-btn" @click="openFaq(); showSecondaryMenu = false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span class="secondary-action-label">FAQ</span>
+                  </button>
+                  <button class="secondary-action-btn" @click="openAbout(); showSecondaryMenu = false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span class="secondary-action-label">{{ t("nav.about") }}</span>
+                  </button>
                 </div>
               </div>
               <div class="secondary-item">
@@ -268,17 +301,6 @@
           </nav>
         </div>
       </header>
-      <section class="site-feedback-banner" aria-label="问卷入口">
-        <span class="site-feedback-label">我们诚邀您填写网站调研问卷，感谢您抽出宝贵时间作答：</span>
-        <a
-          class="about-button site-feedback-link"
-          href="https://wj.qq.com/s2/26332435/z16l/"
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          问卷跳转
-        </a>
-      </section>
       <section
         v-if="heroAdBannerEnabled && (!syncAuthenticated || (syncUser && !syncUser.ad_free))"
         class="hero-ad-banner"
@@ -934,6 +956,13 @@
             </div>
           </div>
 
+          <plan-config-control
+            :t="t"
+            :show-plan-config="showPlanConfig"
+            :show-plan-config-hint-dot="showPlanConfigHintDot"
+            @toggle="togglePlanConfig"
+          ></plan-config-control>
+
           <div v-if="selectedCount && regionOptions.length > 1" class="region-filter-bar">
             <span class="region-filter-label">{{ t("filter.region_filter") }}</span>
             <div class="region-filter-chips">
@@ -952,13 +981,6 @@
               </button>
             </div>
           </div>
-
-          <plan-config-control
-            :t="t"
-            :show-plan-config="showPlanConfig"
-            :show-plan-config-hint-dot="showPlanConfigHintDot"
-            @toggle="togglePlanConfig"
-          ></plan-config-control>
 
           <div v-if="!selectedCount" class="empty">
             {{ t("nav.select_at_least_one_weapon_and_the_system_will_recommend") }}

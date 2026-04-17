@@ -75,21 +75,21 @@
                   </span>
                 </div>
                 <div class="card-stats">
-                  <span class="stat-item">
-                    <span class="stat-label">{{ t("plan.farmable") }}</span>
-                    <span class="stat-value">{{ card.displayWeaponCount }}</span>
+                  <span class="stat-chip">
+                    <span class="stat-chip-label">{{ t("plan.farmable") }}</span>
+                    <span class="stat-chip-value">{{ card.displayWeaponCount }}</span>
                   </span>
-                  <span class="stat-item" v-if="card.maxWeaponCount !== card.displayWeaponCount">
-                    <span class="stat-label">{{ t("plan.max_farmable") }}</span>
-                    <span class="stat-value">{{ card.maxWeaponCount }}</span>
+                  <span class="stat-chip" v-if="card.maxWeaponCount !== card.displayWeaponCount">
+                    <span class="stat-chip-label">{{ t("plan.max_farmable") }}</span>
+                    <span class="stat-chip-value">{{ card.maxWeaponCount }}</span>
                   </span>
-                  <span class="stat-item stat-warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
-                    <span class="stat-label">{{ t("plan.uncovered") }}</span>
-                    <span class="stat-value">{{ card.displaySelectedMissingNames.length }}</span>
+                  <span class="stat-chip stat-warn" v-if="card.displaySelectedMissingNames.length && !card.baseOverflow">
+                    <span class="stat-chip-label">{{ t("plan.uncovered") }}</span>
+                    <span class="stat-chip-value">{{ card.displaySelectedMissingNames.length }}</span>
                   </span>
-                  <span class="stat-item stat-danger" v-if="card.conflictSelected && card.conflictSelected.length">
-                    <span class="stat-label">{{ t("plan.conflicts") }}</span>
-                    <span class="stat-value">{{ card.conflictSelected.length }}</span>
+                  <span class="stat-chip stat-danger" v-if="card.conflictSelected && card.conflictSelected.length">
+                    <span class="stat-chip-label">{{ t("plan.conflicts") }}</span>
+                    <span class="stat-chip-value">{{ card.conflictSelected.length }}</span>
                   </span>
                 </div>
               </div>

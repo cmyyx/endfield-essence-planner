@@ -468,7 +468,7 @@
           @pointerup.self="finishOverlayPointerClose('sync-modal', closeSyncModal, $event)"
           @pointercancel.self="cancelOverlayPointerClose('sync-modal')"
         >
-          <div class="about-card notice-card sync-card">
+          <div class="about-card sync-card">
             <!-- 极简登录卡片 -->
             <div v-if="!syncAuthenticated" class="sync-login-card">
               <!-- 标题区域 -->
@@ -632,19 +632,35 @@
                   </div>
                   <div v-else-if="syncNotice" class="sync-notice-message">{{ syncNotice }}</div>
                 </div>
+              </form>
 
-                <!-- 登录/注册提交按钮 -->
+              <!-- 登录/注册提交按钮 — 固定在卡片底部 -->
+              <div class="sync-login-actions">
                 <button
                   type="submit"
                   class="sync-submit-btn"
                   :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked || syncTurnstileLoading || !syncTurnstileReadyToSubmit"
+                  @click="submitSyncAuth"
                 >
                   {{ syncBusy ? (syncAuthMode === 'register' ? t("sync.registering_action") : t("sync.logging_in_action")) : (syncAuthMode === 'register' ? t("sync.register_action") : t("sync.login_action")) }}
                 </button>
-              </form>
+              </div>
 
               <!-- 底部辅助提示 -->
               <p class="sync-footer-hint">{{ t("sync.credentials_hint") }}</p>
+
+              <!-- 数据摘要面板（当前设备同步状态） -->
+              <div class="sync-summary-card sync-login-summary">
+                <div class="sync-login-summary-title">{{ t("sync.local_summary") }}</div>
+                <div class="sync-login-summary-row">
+                  <span class="sync-login-summary-item">{{ t("sync.summary_marks", { count: syncLocalSummary.marksCount }) }}</span>
+                  <span class="sync-login-summary-item">{{ t("sync.summary_custom_weapons", { count: syncLocalSummary.customWeaponsCount }) }}</span>
+                  <span class="sync-login-summary-item">{{ t("sync.summary_selected", { count: syncLocalSummary.selectedCount }) }}</span>
+                </div>
+                <div class="sync-login-summary-row sync-login-summary-meta">
+                  {{ t("sync.last_synced_at", { time: syncLastSyncedDisplay || t("sync.never_synced") }) }}
+                </div>
+              </div>
             </div>
 
             <!-- 已登录状态卡片 -->
@@ -921,26 +937,6 @@
               </div>
             </div>
 
-            <!-- 数据摘要面板（简化版） -->
-            <div class="secondary-item">
-              <div class="sync-summary-grid" :class="{ 'is-single': !syncAuthenticated }">
-                <div class="sync-summary-card">
-                  <div class="secondary-label">{{ t("sync.local_summary") }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_marks", { count: syncLocalSummary.marksCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_custom_weapons", { count: syncLocalSummary.customWeaponsCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_selected", { count: syncLocalSummary.selectedCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.last_synced_at", { time: syncLastSyncedDisplay || t("sync.never_synced") }) }}</div>
-                </div>
-                <div v-if="syncAuthenticated" class="sync-summary-card">
-                  <div class="secondary-label">{{ t("sync.remote_summary") }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_marks", { count: syncRemoteSummary.marksCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_custom_weapons", { count: syncRemoteSummary.customWeaponsCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_selected", { count: syncRemoteSummary.selectedCount }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_version", { version: syncRemoteSummary.version }) }}</div>
-                  <div class="secondary-hint">{{ t("sync.summary_updated_at", { time: syncRemoteUpdatedDisplay || "-" }) }}</div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </transition>

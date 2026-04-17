@@ -749,9 +749,9 @@
       }
 
       .menu-toggle {
-        padding: 6px 12px;
-        border-radius: 999px;
-        font-size: 12px;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
         letter-spacing: 0.04em;
       }
 

@@ -147,6 +147,12 @@
       showLangMenu.value = false;
     };
 
+    const cycleLocale = async () => {
+      const currentIndex = allLocales.indexOf(locale.value);
+      const nextIndex = (currentIndex + 1) % allLocales.length;
+      await setLocale(allLocales[nextIndex]);
+    };
+
     const getStrings = (targetLocale) =>
       (i18n[targetLocale] && i18n[targetLocale].strings) || {};
     const getTerms = (targetLocale) =>
@@ -325,6 +331,7 @@
     state.langMenuPlacement = langMenuPlacement;
     state.toggleLangMenu = toggleLangMenu;
     state.setLocale = setLocale;
+    state.cycleLocale = cycleLocale;
     state.t = t;
     state.tTerm = tTerm;
     state.showAiNotice = showAiNotice;

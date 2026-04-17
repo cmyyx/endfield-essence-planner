@@ -1625,6 +1625,7 @@ return { view: "planner" };
         langMenuPlacement: state.langMenuPlacement,
         toggleLangMenu: state.toggleLangMenu,
         setLocale: state.setLocale,
+        cycleLocale: state.cycleLocale,
         t: state.t,
         tTerm: state.tTerm,
         localeRenderVersion: state.localeRenderVersion,
