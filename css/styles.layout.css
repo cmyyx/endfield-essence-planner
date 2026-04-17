@@ -1116,6 +1116,57 @@
         color: var(--muted);
       }
 
+      .sync-submit-btn.ghost {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--muted);
+      }
+      .sync-submit-btn.ghost:hover:not(:disabled) {
+        background: rgba(var(--color-black-rgb), var(--alpha-06));
+        color: var(--text);
+      }
+      .sync-submit-btn.ghost:disabled {
+        border-color: var(--stroke);
+      }
+
+      /* 文字操作按钮（发送验证码、关闭等） */
+      .sync-text-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid var(--stroke);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        font-family: var(--font-body);
+        line-height: 1.4;
+      }
+
+      .sync-text-action-btn:hover:not(:disabled) {
+        color: var(--text);
+        border-color: rgba(var(--color-white-rgb), var(--alpha-20));
+        background: rgba(var(--color-black-rgb), var(--alpha-06));
+      }
+
+      .sync-text-action-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .sync-text-action-btn.sync-text-action-primary {
+        color: var(--accent-2);
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-34));
+      }
+
+      .sync-text-action-btn.sync-text-action-primary:hover:not(:disabled) {
+        background: rgba(var(--color-accent-rgb), var(--alpha-10));
+      }
+
       /* 底部辅助提示 */
       .sync-footer-hint {
         font-size: 12px;
@@ -1161,6 +1212,152 @@
         font-size: 11px;
         opacity: 0.7;
         margin-top: 2px;
+      }
+
+      /* 冲突摘要警告 */
+      .sync-login-summary-warning {
+        background: rgba(var(--color-warning-rgb), var(--alpha-10));
+        border-color: rgba(var(--color-warning-rgb), var(--alpha-34));
+      }
+
+      /* 权益管理区块 */
+      .sync-rights-section {
+        padding: 12px 24px 14px;
+        border-top: 1px solid var(--stroke);
+      }
+
+      .sync-rights-plans {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 8px;
+        margin-bottom: 10px;
+      }
+
+      .sync-rights-plan-card {
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        background: rgba(var(--color-black-rgb), var(--alpha-06));
+        border: 1px solid var(--stroke);
+      }
+
+      .sync-rights-plan-card.sync-rights-plan-member {
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-34));
+        background: rgba(var(--color-accent-rgb), var(--alpha-06));
+      }
+
+      .sync-rights-plan-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+
+      /* 权益详情展开区 */
+      .sync-rights-detail {
+        padding: 12px 24px 18px;
+        border-top: 1px solid var(--stroke);
+        background: rgba(var(--color-black-rgb), var(--alpha-03));
+      }
+
+      .sync-rights-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+
+      .sync-rights-table th,
+      .sync-rights-table td {
+        padding: 6px 8px;
+        text-align: left;
+        border-bottom: 1px solid var(--stroke);
+        color: var(--muted);
+      }
+
+      .sync-rights-table th {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 11px;
+      }
+
+      .sync-rights-value-positive {
+        color: rgba(var(--color-success-rgb), var(--alpha-100));
+      }
+
+      .sync-rights-value-negative {
+        color: rgba(var(--color-danger-rgb), var(--alpha-100));
+      }
+
+      .sync-rights-payment-copy {
+        font-size: 11px;
+        color: var(--muted);
+        margin-bottom: 10px;
+        line-height: 1.5;
+      }
+
+      .sync-rights-pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .sync-rights-price-card {
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--stroke);
+        text-align: center;
+      }
+
+      .sync-rights-price-card.sync-rights-plan-card-member {
+        border-color: rgba(var(--color-accent-rgb), var(--alpha-34));
+      }
+
+      .sync-rights-price {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text);
+        margin: 4px 0 2px;
+      }
+
+      .sync-rights-price-discount {
+        font-size: 11px;
+        color: var(--accent-2);
+      }
+
+      .sync-rights-qr-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .sync-rights-qr-card {
+        padding: 8px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--stroke);
+        text-align: center;
+      }
+
+      .sync-payment-qr {
+        width: 100%;
+        max-width: 120px;
+        border-radius: 4px;
+        margin-top: 4px;
+      }
+
+      .sync-claim-history-item {
+        padding: 8px 10px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--stroke);
+        margin-bottom: 6px;
+      }
+
+      /* 开发面板 */
+      .sync-dev-section {
+        padding: 0 24px;
+        border-top: 1px solid var(--stroke);
       }
 
       /* 已登录状态卡片 */
