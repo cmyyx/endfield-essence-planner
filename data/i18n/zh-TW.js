@@ -81,7 +81,10 @@ window.I18N["zh-TW"] = {
     "完成": "完成",
     "button.view_details": "查看詳情",
     "请手动选择": "請手動選擇",
+    "manual_pick": "請手動選擇",
     "排除武器": "排除武器",
+    "siteFeedback.label": "填寫網站調研問卷",
+    "siteFeedback.ariaLabel": "問卷入口",
     "少女祈祷中": "少女祈禱中",
     "首次打开或强制刷新可能稍慢": "首次開啟或強制重新整理可能稍慢",
     "资源已就绪，正在准备背景…": "資源已就緒，正在準備背景…",
@@ -261,7 +264,8 @@ window.I18N["zh-TW"] = {
     },
     "misc": {
       "任意": "任意",
-      "任意属性": "任意屬性"
+      "任意属性": "任意屬性",
+      "any_attribute": "任意屬性"
     }
   }
 };
@@ -576,7 +580,7 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "plan_config.hide_unowned_weapons": "隱藏未擁有武器",
   "plan_config.not_set": "不設定",
   "plan_config.plan_recommendation_settings": "基質規劃設定",
-  "plan_config.entry_hint": "調整基質規劃的優先級與篩選策略",
+  "plan_config.entry_hint": "點擊展開更多選項：自訂顯示欄位、篩選條件、優先級策略與推薦演算法設定",
   "plan_config.marks_import_export": "標記資料管理",
   "plan_config.marks_export": "匯出",
   "plan_config.marks_import": "匯入",

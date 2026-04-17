@@ -397,6 +397,38 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   text-decoration-color: rgba(var(--color-black-rgb), var(--alpha-28));
 }
 
+[data-theme="light"] .equip-refining-filter-grid .filter-grid-item {
+  background: rgba(244, 248, 255, var(--alpha-95));
+  border-color: rgba(var(--color-black-rgb), var(--alpha-14));
+  color: #1a2a3d;
+}
+
+[data-theme="light"] .equip-refining-filter-grid .filter-grid-item:hover {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-28));
+  background: rgba(240, 248, 255, var(--alpha-98));
+  color: #10263f;
+}
+
+[data-theme="light"] .equip-refining-filter-grid .filter-grid-item.is-active {
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-55));
+  background: rgba(var(--color-accent-rgb), var(--alpha-10));
+  color: #0f5c59;
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-20));
+}
+
+[data-theme="light"] .equip-refining-filter-grid .filter-grid-item.is-disabled {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+  background: rgba(238, 242, 247, var(--alpha-90));
+  color: #8191a5;
+  text-decoration-color: rgba(var(--color-black-rgb), var(--alpha-28));
+}
+
+[data-theme="light"] .equip-refining-filter-grid .filter-grid-item.is-disabled:hover {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+  background: rgba(238, 242, 247, var(--alpha-90));
+  color: #8191a5;
+}
+
 [data-theme="light"] .plan-config-hint-dot {
   border-color: rgba(225, 78, 78, var(--alpha-68));
   background: linear-gradient(135deg, #ff866d, #e14e4e);
@@ -735,6 +767,51 @@ html[data-bg-display="off"][data-theme="light"] body::after {
 [data-theme="light"] .filter-panel-compact {
   background: rgba(var(--color-white-rgb), var(--alpha-65));
   border-color: rgba(var(--color-black-rgb), var(--alpha-14));
+}
+
+[data-theme="light"] .filter-grid-label {
+  color: #5a6d82;
+}
+
+[data-theme="light"] .filter-grid-badge {
+  background: rgba(var(--color-accent-rgb), var(--alpha-12));
+  color: rgba(var(--color-accent-rgb), var(--alpha-88));
+}
+
+[data-theme="light"] .filter-grid-item {
+  background: rgba(244, 248, 255, var(--alpha-95));
+  border-color: rgba(var(--color-black-rgb), var(--alpha-14));
+  color: #1a2a3d;
+}
+
+[data-theme="light"] .filter-grid-item:hover {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-28));
+  background: rgba(240, 248, 255, var(--alpha-98));
+  color: #10263f;
+}
+
+[data-theme="light"] .filter-grid-item.is-active {
+  border-color: rgba(var(--color-accent-rgb), var(--alpha-55));
+  background: rgba(var(--color-accent-rgb), var(--alpha-10));
+  color: #0f5c59;
+  box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-20));
+}
+
+[data-theme="light"] .filter-grid-item.is-disabled {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+  background: rgba(238, 242, 247, var(--alpha-90));
+  color: #8191a5;
+  text-decoration-color: rgba(var(--color-black-rgb), var(--alpha-28));
+}
+
+[data-theme="light"] .filter-grid-item.is-disabled:hover {
+  border-color: rgba(var(--color-black-rgb), var(--alpha-10));
+  background: rgba(238, 242, 247, var(--alpha-90));
+  color: #8191a5;
+}
+
+[data-theme="light"] .filter-grid-hint {
+  color: #6b8199;
 }
 
 [data-theme="light"] .filter-dropdown-trigger {
@@ -1106,24 +1183,29 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   border-color: rgba(var(--color-black-rgb), var(--alpha-14));
 }
 
-[data-theme="light"] .stat-chip {
+[data-theme="light"] .stat-chip,
+[data-theme="light"] .stat-item {
   background: rgba(var(--color-white-rgb), var(--alpha-80));
   color: #1a2a3d;
 }
 
-[data-theme="light"] .stat-chip .stat-chip-label {
+[data-theme="light"] .stat-chip .stat-chip-label,
+[data-theme="light"] .stat-item .stat-label {
   color: #6b8199;
 }
 
-[data-theme="light"] .stat-chip .stat-chip-value {
+[data-theme="light"] .stat-chip .stat-chip-value,
+[data-theme="light"] .stat-item .stat-value {
   color: #1a2a3d;
 }
 
-[data-theme="light"] .stat-chip.stat-warn {
+[data-theme="light"] .stat-chip.stat-warn,
+[data-theme="light"] .stat-item.stat-warn {
   background: rgba(255, 159, 26, var(--alpha-12));
 }
 
-[data-theme="light"] .stat-chip.stat-danger {
+[data-theme="light"] .stat-chip.stat-danger,
+[data-theme="light"] .stat-item.stat-danger {
   background: rgba(220, 38, 38, var(--alpha-12));
 }
 

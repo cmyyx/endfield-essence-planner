@@ -81,7 +81,10 @@ window.I18N["ja"] = {
     "完成": "完了",
     "button.view_details": "詳細を見る",
     "请手动选择": "手動で選択",
+    "manual_pick": "手動で選択",
     "排除武器": "武器を除外",
+    "siteFeedback.label": "サイト調査アンケート",
+    "siteFeedback.ariaLabel": "アンケート入口",
     "少女祈祷中": "少女祈祷中 / 少女、祈りの最中…",
     "首次打开或强制刷新可能稍慢": "初回起動や強制リロードは少し時間がかかる場合があります",
     "资源已就绪，正在准备背景…": "リソースの準備が完了しました。背景を準備しています…",
@@ -261,7 +264,8 @@ window.I18N["ja"] = {
     },
     "misc": {
       "任意": "任意",
-      "任意属性": "任意属性"
+      "任意属性": "任意属性",
+      "any_attribute": "任意属性"
     }
   }
 };
@@ -576,7 +580,7 @@ Object.assign(window.I18N["ja"].strings, {
   "plan_config.hide_unowned_weapons": "未所持武器を非表示",
   "plan_config.not_set": "未設定",
   "plan_config.plan_recommendation_settings": "基質プラン設定",
-  "plan_config.entry_hint": "基質プランの優先度とフィルター戦略を調整",
+  "plan_config.entry_hint": "クリックして詳細オプションを展開：表示フィールド、フィルター条件、優先度戦略、推奨アルゴリズム設定をカスタマイズ",
   "plan_config.marks_import_export": "マークデータ管理",
   "plan_config.marks_export": "エクスポート",
   "plan_config.marks_import": "インポート",

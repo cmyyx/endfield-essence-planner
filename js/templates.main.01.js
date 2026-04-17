@@ -11,9 +11,9 @@
             href="https://wj.qq.com/s2/26332435/z16l/"
             target="_blank"
             rel="noreferrer noopener"
-            aria-label="问卷入口"
+            :aria-label="t('siteFeedback.ariaLabel')"
           >
-            <span class="site-feedback-label">填写网站调研问卷</span>
+            <span class="site-feedback-label">{{ t("siteFeedback.label") }}</span>
           </a>
           <button
             class="theme-toggle"
@@ -21,7 +21,7 @@
             :aria-label="themePreference === 'auto' ? t('nav.auto') : (themePreference === 'light' ? t('nav.light') : t('nav.dark'))"
             @click="setThemeMode(themePreference === 'auto' ? 'light' : themePreference === 'light' ? 'dark' : 'auto')"
           >
-            <svg v-if="resolvedTheme === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <svg v-if="themePreference === 'light'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
               <circle cx="12" cy="12" r="4"></circle>
               <path d="M12 2v2"></path>
               <path d="M12 20v2"></path>
@@ -32,8 +32,13 @@
               <path d="m6.34 17.66-1.41 1.41"></path>
               <path d="m19.07 4.93-1.41 1.41"></path>
             </svg>
-            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <svg v-else-if="themePreference === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
           </button>
           <button
@@ -422,153 +427,72 @@
             </button>
           </div>
           <div class="filter-panel-compact" :class="{ 'is-collapsed': !showFilterPanel }">
-            <div class="filter-dropdown-row">
-              <div class="filter-dropdown-label">{{ t("nav.base_attributes") }}</div>
-              <div class="filter-dropdown-wrapper">
+            <div class="filter-grid-group">
+              <div class="filter-grid-header">
+                <span class="filter-grid-label">{{ t("nav.base_attributes") }}</span>
+                <span v-if="filterS1.length > 0" class="filter-grid-badge">{{ filterS1.length }}</span>
+              </div>
+              <div class="filter-grid-options">
                 <button
+                  v-for="option in s1Options"
+                  :key="option.value"
                   type="button"
-                  class="filter-dropdown-trigger"
-                  :class="{ 'is-active': filterS1.length > 0, 'is-open': dropdownOpenS1 }"
-                  aria-haspopup="listbox"
-                  :aria-expanded="dropdownOpenS1 ? 'true' : 'false'"
-                  aria-controls="filter-dropdown-s1"
-                  @click="toggleDropdown('s1')"
+                  class="filter-grid-item"
+                  :class="{
+                    'is-active': filterS1.includes(option.value),
+                    'is-disabled': option.isDisabled && !filterS1.includes(option.value),
+                  }"
+                  :title="option.isDisabled && !filterS1.includes(option.value) ? option.disabledHintTitle : ''"
+                  @click="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
                 >
-                  <span class="filter-dropdown-value" :class="{ 'has-selection': filterS1.length > 0 }">
-                    {{ filterS1.length > 0 ? filterS1.map(v => formatS1(v)).join(t('nav.separator_enum')) : t('nav.all') }}
-                  </span>
-                  <span v-if="filterS1.length > 0" class="filter-dropdown-badge">{{ filterS1.length }}</span>
-                  <span class="filter-dropdown-chevron"></span>
+                  {{ formatS1(option.value) }}
                 </button>
-                <div
-                  id="filter-dropdown-s1"
-                  class="filter-dropdown-menu"
-                  :class="{ 'is-open': dropdownOpenS1 }"
-                  role="listbox"
-                  aria-multiselectable="true"
-                  :aria-hidden="dropdownOpenS1 ? 'false' : 'true'"
-                >
-                  <div
-                    v-for="option in s1Options"
-                    :key="option.value"
-                    class="filter-dropdown-option"
-                    role="option"
-                    :class="{
-                      'is-selected': filterS1.includes(option.value),
-                      'is-disabled': option.isDisabled && !filterS1.includes(option.value),
-                    }"
-                    :tabindex="dropdownOpenS1 && !(option.isDisabled && !filterS1.includes(option.value)) ? 0 : -1"
-                    :aria-selected="filterS1.includes(option.value) ? 'true' : 'false'"
-                    :aria-disabled="option.isDisabled && !filterS1.includes(option.value) ? 'true' : 'false'"
-                    :title="option.isDisabled && !filterS1.includes(option.value) ? option.disabledHintTitle : ''"
-                    @click.stop="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
-                    @keydown.enter.stop.prevent="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
-                    @keydown.space.stop.prevent="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
-                  >
-                    <span class="filter-dropdown-checkbox"></span>
-                    <span class="filter-dropdown-option-text">{{ formatS1(option.value) }}</span>
-                  </div>
-                </div>
               </div>
             </div>
-            <div class="filter-dropdown-row">
-              <div class="filter-dropdown-label">{{ t("nav.extra_attributes") }}</div>
-              <div class="filter-dropdown-wrapper">
+            <div class="filter-grid-group">
+              <div class="filter-grid-header">
+                <span class="filter-grid-label">{{ t("nav.extra_attributes") }}</span>
+                <span v-if="filterS2.length > 0" class="filter-grid-badge">{{ filterS2.length }}</span>
+              </div>
+              <div class="filter-grid-options">
                 <button
+                  v-for="option in s2Options"
+                  :key="option.value"
                   type="button"
-                  class="filter-dropdown-trigger"
-                  :class="{ 'is-active': filterS2.length > 0, 'is-open': dropdownOpenS2 }"
-                  aria-haspopup="listbox"
-                  :aria-expanded="dropdownOpenS2 ? 'true' : 'false'"
-                  aria-controls="filter-dropdown-s2"
-                  @click="toggleDropdown('s2')"
+                  class="filter-grid-item"
+                  :class="{
+                    'is-active': filterS2.includes(option.value),
+                    'is-disabled': option.isDisabled && !filterS2.includes(option.value),
+                  }"
+                  :title="option.isDisabled && !filterS2.includes(option.value) ? option.disabledHintTitle : ''"
+                  @click="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
                 >
-                  <span class="filter-dropdown-value" :class="{ 'has-selection': filterS2.length > 0 }">
-                    {{ filterS2.length > 0 ? filterS2.map(v => tTerm('s2', v)).join(t('nav.separator_enum')) : t('nav.all') }}
-                  </span>
-                  <span v-if="filterS2.length > 0" class="filter-dropdown-badge">{{ filterS2.length }}</span>
-                  <span class="filter-dropdown-chevron"></span>
+                  {{ tTerm("s2", option.value) }}
                 </button>
-                <div
-                  id="filter-dropdown-s2"
-                  class="filter-dropdown-menu"
-                  :class="{ 'is-open': dropdownOpenS2 }"
-                  role="listbox"
-                  aria-multiselectable="true"
-                  :aria-hidden="dropdownOpenS2 ? 'false' : 'true'"
-                >
-                  <div
-                    v-for="option in s2Options"
-                    :key="option.value"
-                    class="filter-dropdown-option"
-                    role="option"
-                    :class="{
-                      'is-selected': filterS2.includes(option.value),
-                      'is-disabled': option.isDisabled && !filterS2.includes(option.value),
-                    }"
-                    :tabindex="dropdownOpenS2 && !(option.isDisabled && !filterS2.includes(option.value)) ? 0 : -1"
-                    :aria-selected="filterS2.includes(option.value) ? 'true' : 'false'"
-                    :aria-disabled="option.isDisabled && !filterS2.includes(option.value) ? 'true' : 'false'"
-                    :title="option.isDisabled && !filterS2.includes(option.value) ? option.disabledHintTitle : ''"
-                    @click.stop="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
-                    @keydown.enter.stop.prevent="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
-                    @keydown.space.stop.prevent="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
-                  >
-                    <span class="filter-dropdown-checkbox"></span>
-                    <span class="filter-dropdown-option-text">{{ tTerm("s2", option.value) }}</span>
-                  </div>
-                </div>
               </div>
             </div>
-            <div class="filter-dropdown-row">
-              <div class="filter-dropdown-label">{{ t("nav.skill_attributes") }}</div>
-              <div class="filter-dropdown-wrapper">
-                <button
-                  type="button"
-                  class="filter-dropdown-trigger"
-                  :class="{ 'is-active': filterS3.length > 0, 'is-open': dropdownOpenS3 }"
-                  aria-haspopup="listbox"
-                  :aria-expanded="dropdownOpenS3 ? 'true' : 'false'"
-                  aria-controls="filter-dropdown-s3"
-                  @click="toggleDropdown('s3')"
-                >
-                  <span class="filter-dropdown-value" :class="{ 'has-selection': filterS3.length > 0 }">
-                    {{ filterS3.length > 0 ? filterS3.map(v => tTerm('s3', v)).join(t('nav.separator_enum')) : t('nav.all') }}
-                  </span>
-                  <span v-if="filterS3.length > 0" class="filter-dropdown-badge">{{ filterS3.length }}</span>
-                  <span class="filter-dropdown-chevron"></span>
-                </button>
-                <div
-                  id="filter-dropdown-s3"
-                  class="filter-dropdown-menu"
-                  :class="{ 'is-open': dropdownOpenS3 }"
-                  role="listbox"
-                  aria-multiselectable="true"
-                  :aria-hidden="dropdownOpenS3 ? 'false' : 'true'"
-                >
-                  <div
-                    v-for="option in s3OptionEntries"
-                    :key="option.value"
-                    class="filter-dropdown-option"
-                    role="option"
-                    :class="{
-                      'is-selected': filterS3.includes(option.value),
-                      'is-disabled': option.isDisabled && !filterS3.includes(option.value),
-                    }"
-                    :tabindex="dropdownOpenS3 && !(option.isDisabled && !filterS3.includes(option.value)) ? 0 : -1"
-                    :aria-selected="filterS3.includes(option.value) ? 'true' : 'false'"
-                    :aria-disabled="option.isDisabled && !filterS3.includes(option.value) ? 'true' : 'false'"
-                    :title="option.isDisabled && !filterS3.includes(option.value) ? option.disabledHintTitle : ''"
-                    @click.stop="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
-                    @keydown.enter.stop.prevent="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
-                    @keydown.space.stop.prevent="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
-                  >
-                    <span class="filter-dropdown-checkbox"></span>
-                    <span class="filter-dropdown-option-text">{{ tTerm("s3", option.value) }}</span>
-                  </div>
-                  <div class="filter-dropdown-hint">{{ t("error.gray_attributes_mean_no_weapons_under_current_filters") }}</div>
-                </div>
+            <div class="filter-grid-group">
+              <div class="filter-grid-header">
+                <span class="filter-grid-label">{{ t("nav.skill_attributes") }}</span>
+                <span v-if="filterS3.length > 0" class="filter-grid-badge">{{ filterS3.length }}</span>
               </div>
+              <div class="filter-grid-options">
+                <button
+                  v-for="option in s3OptionEntries"
+                  :key="option.value"
+                  type="button"
+                  class="filter-grid-item"
+                  :class="{
+                    'is-active': filterS3.includes(option.value),
+                    'is-disabled': option.isDisabled && !filterS3.includes(option.value),
+                  }"
+                  :title="option.isDisabled && !filterS3.includes(option.value) ? option.disabledHintTitle : ''"
+                  @click="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
+                >
+                  {{ tTerm("s3", option.value) }}
+                </button>
+              </div>
+              <div class="filter-grid-hint">{{ t("error.gray_attributes_mean_no_weapons_under_current_filters") }}</div>
             </div>
           </div>
 
@@ -1045,9 +969,9 @@
                     {{
                       (fallbackPlan.baseOverflow ? fallbackPlan.baseAllLabels : fallbackPlan.basePickLabels)
                         .map(label => label.type === 'manual_pick'
-                          ? t('请手动选择')
+                          ? t('manual_pick')
                           : label.type === 'any_attribute'
-                            ? tTerm('misc', '任意属性')
+                            ? tTerm('misc', 'any_attribute')
                             : formatS1(label.value))
                         .join(" / ")
                     }}

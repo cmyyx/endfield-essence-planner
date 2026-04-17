@@ -1089,7 +1089,32 @@
       .plan-config-block-title {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        padding: 8px 0 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(var(--color-white-rgb), var(--alpha-10));
+      }
+
+      .plan-config-block-title .secondary-label {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text);
+        position: relative;
+        padding-left: 10px;
+      }
+
+      .plan-config-block-title .secondary-label::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 14px;
+        background: linear-gradient(180deg, var(--accent), rgba(var(--color-accent-rgb), 0.6));
+        border-radius: 2px;
       }
 
       .plan-config-panel-standalone > .panel-title {

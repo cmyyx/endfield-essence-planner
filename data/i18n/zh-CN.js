@@ -74,7 +74,10 @@ window.I18N["zh-CN"] = {
     "反馈问题": "反馈问题",
     "button.view_details": "查看详情",
     "刷新页面": "刷新页面",
-    "请手动选择": "请手动选择"
+    "请手动选择": "请手动选择",
+    "manual_pick": "请手动选择",
+    "siteFeedback.label": "填写网站调研问卷",
+    "siteFeedback.ariaLabel": "问卷入口"
   },
   "terms": {
     "s1": {
@@ -230,7 +233,8 @@ window.I18N["zh-CN"] = {
     },
     "misc": {
       "任意": "任意",
-      "任意属性": "任意属性"
+      "任意属性": "任意属性",
+      "any_attribute": "任意属性"
     }
   }
 };
@@ -545,7 +549,7 @@ Object.assign(window.I18N["zh-CN"].strings, {
   "plan_config.hide_unowned_weapons": "隐藏未拥有武器",
   "plan_config.not_set": "不设置",
   "plan_config.plan_recommendation_settings": "基质规划设置",
-  "plan_config.entry_hint": "调整基质规划的优先级与筛选策略",
+  "plan_config.entry_hint": "点击展开更多选项：自定义显示字段、筛选条件、优先级策略与推荐算法设置",
   "plan_config.marks_import_export": "标记数据管理",
   "plan_config.marks_export": "导出",
   "plan_config.marks_import": "导入",

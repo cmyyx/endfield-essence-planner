@@ -503,7 +503,7 @@
               </div>
 
               <!-- 登录表单 -->
-              <form class="sync-form" @submit.prevent="submitSyncAuth">
+              <form id="sync-form" class="sync-form" @submit.prevent="submitSyncAuth">
                 <!-- 用户名（仅注册模式） -->
                 <div v-if="syncAuthMode === 'register'" class="sync-field-group">
                   <label class="sync-label" for="sync-username">{{ t("sync.username_label") }}</label>
@@ -521,7 +521,7 @@
 
                 <!-- 账号/邮箱输入 -->
                 <div class="sync-field-group">
-                  <label class="sync-label" for="sync-account">
+                  <label class="sync-label" :for="syncAuthMode === 'login' ? 'sync-account' : 'sync-email'">
                     {{ syncAuthMode === 'login' ? t("sync.account_label") : t("sync.email_label") }}
                   </label>
                   <input
@@ -638,9 +638,9 @@
               <div class="sync-login-actions">
                 <button
                   type="submit"
+                  form="sync-form"
                   class="sync-submit-btn"
                   :disabled="syncBusy || syncSessionChecking || syncFrontendBlocked || syncTurnstileLoading || !syncTurnstileReadyToSubmit"
-                  @click="submitSyncAuth"
                 >
                   {{ syncBusy ? (syncAuthMode === 'register' ? t("sync.registering_action") : t("sync.logging_in_action")) : (syncAuthMode === 'register' ? t("sync.register_action") : t("sync.login_action")) }}
                 </button>

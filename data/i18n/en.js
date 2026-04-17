@@ -81,7 +81,10 @@ window.I18N["en"] = {
     "完成": "Finish",
     "button.view_details": "View Details",
     "请手动选择": "Select manually",
+    "manual_pick": "Select manually",
     "排除武器": "Exclude a weapon",
+    "siteFeedback.label": "Fill out site survey",
+    "siteFeedback.ariaLabel": "Survey entry",
     "少女祈祷中": "少女祈祷中 / A Maiden at Prayer...",
     "首次打开或强制刷新可能稍慢": "First load or hard refresh may be a bit slow",
     "资源已就绪，正在准备背景…": "Resources ready, preparing background...",
@@ -261,7 +264,8 @@ window.I18N["en"] = {
     },
     "misc": {
       "任意": "Any",
-      "任意属性": "Any Attribute"
+      "任意属性": "Any Attribute",
+      "any_attribute": "Any Attribute"
     }
   }
 };
@@ -576,7 +580,7 @@ Object.assign(window.I18N["en"].strings, {
   "plan_config.hide_unowned_weapons": "Hide unowned weapons",
   "plan_config.not_set": "Not set",
   "plan_config.plan_recommendation_settings": "Essence Planning Settings",
-  "plan_config.entry_hint": "Adjust essence planning priorities and filter strategies",
+  "plan_config.entry_hint": "Click to expand more options: customize display fields, filter conditions, priority strategies and recommendation algorithm settings",
   "plan_config.marks_import_export": "Mark data management",
   "plan_config.marks_export": "Export",
   "plan_config.marks_import": "Import",

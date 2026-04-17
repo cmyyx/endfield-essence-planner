@@ -43,49 +43,49 @@
     </div>
     <div class="equip-refining-filter-group">
       <div class="equip-refining-filter-label">{{ t("equip_refining.sub_attr_1") }}</div>
-      <div class="equip-refining-filter-chips">
+      <div class="equip-refining-filter-grid">
         <button
           v-for="option in filterOptionEntries.sub1"
           :key="'equip-filter-sub1-' + option.value"
           type="button"
-          class="filter-chip"
+          class="filter-grid-item"
           :class="{ 'is-active': filterSub1.includes(option.value), 'is-disabled': option.isDisabled && !filterSub1.includes(option.value) }"
           :disabled="option.isDisabled && !filterSub1.includes(option.value)"
           @click="option.isDisabled && !filterSub1.includes(option.value) ? null : toggleFilterValue('sub1', option.value)"
         >
-          <span>{{ option.value }}</span>
+          {{ option.value }}
         </button>
       </div>
     </div>
     <div class="equip-refining-filter-group">
       <div class="equip-refining-filter-label">{{ t("equip_refining.sub_attr_2") }}</div>
-      <div class="equip-refining-filter-chips">
+      <div class="equip-refining-filter-grid">
         <button
           v-for="option in filterOptionEntries.sub2"
           :key="'equip-filter-sub2-' + option.value"
           type="button"
-          class="filter-chip"
+          class="filter-grid-item"
           :class="{ 'is-active': filterSub2.includes(option.value), 'is-disabled': option.isDisabled && !filterSub2.includes(option.value) }"
           :disabled="option.isDisabled && !filterSub2.includes(option.value)"
           @click="option.isDisabled && !filterSub2.includes(option.value) ? null : toggleFilterValue('sub2', option.value)"
         >
-          <span>{{ option.value }}</span>
+          {{ option.value }}
         </button>
       </div>
     </div>
     <div class="equip-refining-filter-group">
       <div class="equip-refining-filter-label">{{ t("equip_refining.special_effect") }}</div>
-      <div class="equip-refining-filter-chips">
+      <div class="equip-refining-filter-grid">
         <button
           v-for="option in filterOptionEntries.special"
           :key="'equip-filter-special-' + option.value"
           type="button"
-          class="filter-chip"
+          class="filter-grid-item"
           :class="{ 'is-active': filterSpecial.includes(option.value), 'is-disabled': option.isDisabled && !filterSpecial.includes(option.value) }"
           :disabled="option.isDisabled && !filterSpecial.includes(option.value)"
           @click="option.isDisabled && !filterSpecial.includes(option.value) ? null : toggleFilterValue('special', option.value)"
         >
-          <span>{{ option.value }}</span>
+          {{ option.value }}
         </button>
       </div>
     </div>
