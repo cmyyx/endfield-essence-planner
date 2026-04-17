@@ -419,14 +419,16 @@
         box-shadow: inset 0 0 0 1px rgba(var(--color-accent-rgb), var(--alpha-20));
       }
 
-      .filter-grid-item.is-disabled {
+      .filter-grid-item.is-disabled,
+      .filter-grid-item:disabled {
         opacity: 0.4;
         cursor: not-allowed;
         text-decoration: line-through;
         text-decoration-thickness: 1px;
       }
 
-      .filter-grid-item.is-disabled:hover {
+      .filter-grid-item.is-disabled:hover,
+      .filter-grid-item:disabled:hover {
         border-color: var(--stroke);
         background: rgba(20, 26, 36, var(--alpha-85));
         color: var(--text);

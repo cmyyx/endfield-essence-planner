@@ -442,8 +442,9 @@
                     'is-active': filterS1.includes(option.value),
                     'is-disabled': option.isDisabled && !filterS1.includes(option.value),
                   }"
+                  :disabled="option.isDisabled && !filterS1.includes(option.value)"
                   :title="option.isDisabled && !filterS1.includes(option.value) ? option.disabledHintTitle : ''"
-                  @click="option.isDisabled && !filterS1.includes(option.value) ? null : toggleFilterValue('s1', option.value)"
+                  @click="toggleFilterValue('s1', option.value)"
                 >
                   {{ formatS1(option.value) }}
                 </button>
@@ -464,8 +465,9 @@
                     'is-active': filterS2.includes(option.value),
                     'is-disabled': option.isDisabled && !filterS2.includes(option.value),
                   }"
+                  :disabled="option.isDisabled && !filterS2.includes(option.value)"
                   :title="option.isDisabled && !filterS2.includes(option.value) ? option.disabledHintTitle : ''"
-                  @click="option.isDisabled && !filterS2.includes(option.value) ? null : toggleFilterValue('s2', option.value)"
+                  @click="toggleFilterValue('s2', option.value)"
                 >
                   {{ tTerm("s2", option.value) }}
                 </button>
@@ -486,8 +488,9 @@
                     'is-active': filterS3.includes(option.value),
                     'is-disabled': option.isDisabled && !filterS3.includes(option.value),
                   }"
+                  :disabled="option.isDisabled && !filterS3.includes(option.value)"
                   :title="option.isDisabled && !filterS3.includes(option.value) ? option.disabledHintTitle : ''"
-                  @click="option.isDisabled && !filterS3.includes(option.value) ? null : toggleFilterValue('s3', option.value)"
+                  @click="toggleFilterValue('s3', option.value)"
                 >
                   {{ tTerm("s3", option.value) }}
                 </button>
