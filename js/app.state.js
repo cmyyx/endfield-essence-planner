@@ -85,10 +85,8 @@
     state.planConfigHintStorageKey = "planner-plan-config-hint:v1";
     // 更新基质规划设置时递增该版本号，可让红点对所有用户重新显示一次。
     state.planConfigHintVersion = "7";
-    state.planConfigDisplayRulesHintStorageKey = "planner-plan-config-display-rules-hint:v1";
-    state.planConfigDisplayRulesHintVersion = "1";
     state.planConfigOwnershipHintStorageKey = "planner-plan-config-ownership-hint:v1";
-    state.planConfigOwnershipHintVersion = "1";
+    state.planConfigOwnershipHintVersion = "2";
     state.equipRefiningNavHintStorageKey = "planner-equip-refining-nav-hint:v1";
     // 更新装备精锻导航提示时递增该版本号，可让红点对所有用户重新显示一次。
     state.equipRefiningNavHintVersion = "1";
@@ -139,7 +137,6 @@
     state.planConfigSectionManuallySet = ref(false);
     state.showWeaponAttrDataModal = ref(false);
     state.showPlanConfigHintDot = ref(false);
-    state.showPlanConfigDisplayRulesHintDot = ref(false);
     state.showPlanConfigOwnershipHintDot = ref(false);
     state.marksImportError = ref("");
     state.marksImportFileName = ref("");

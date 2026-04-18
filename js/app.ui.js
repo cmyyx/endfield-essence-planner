@@ -1135,23 +1135,6 @@
       }
     };
 
-    const markPlanConfigDisplayRulesHintSeen = () => {
-      if (!state.showPlanConfigDisplayRulesHintDot || !state.showPlanConfigDisplayRulesHintDot.value) return;
-      state.showPlanConfigDisplayRulesHintDot.value = false;
-      try {
-        localStorage.setItem(
-          state.planConfigDisplayRulesHintStorageKey,
-          state.planConfigDisplayRulesHintVersion
-        );
-      } catch (error) {
-        reportStorageIssue("storage.write", state.planConfigDisplayRulesHintStorageKey, error, {
-          scope: "ui.plan-config-display-rules-hint-write",
-        });
-      }
-    };
-
-    const planConfigOwnershipHintViewed = ref(false);
-
     const markEquipRefiningNavHintSeen = () => {
       if (!showEquipRefiningNavHintDot.value) return;
       showEquipRefiningNavHintDot.value = false;
@@ -1181,15 +1164,8 @@
       }
     };
 
-    const flushPlanConfigHintsOnClose = () => {
-      if (!planConfigOwnershipHintViewed.value) return;
-      markPlanConfigOwnershipHintSeen();
-      planConfigOwnershipHintViewed.value = false;
-    };
-
     const togglePlanConfig = () => {
       const nextOpen = !showPlanConfig.value;
-      if (!nextOpen) flushPlanConfigHintsOnClose();
       showPlanConfig.value = nextOpen;
       if (nextOpen) {
         markPlanConfigHintSeen();
@@ -1215,12 +1191,6 @@
       next[name] = !current;
       planConfigSectionCollapsed.value = next;
       const nextCollapsed = Boolean(next[name]);
-      if (name === "displayRules" && !nextCollapsed) {
-        markPlanConfigDisplayRulesHintSeen();
-        if (state.showPlanConfigOwnershipHintDot && state.showPlanConfigOwnershipHintDot.value) {
-          planConfigOwnershipHintViewed.value = true;
-        }
-      }
       if (!planConfigSectionManuallySet.value) {
         planConfigSectionManuallySet.value = true;
       }
@@ -1237,7 +1207,6 @@
         showSecondaryMenu.value = false;
       }
       if (showPlanConfig.value && !event.target.closest(".plan-config")) {
-        flushPlanConfigHintsOnClose();
         showPlanConfig.value = false;
       }
       if (showLangMenu.value && !event.target.closest(".lang-switch")) {
@@ -1248,7 +1217,6 @@
     const handleDocKeydown = (event) => {
       if (!event) return;
       if (event.key === "Escape") {
-        if (showPlanConfig.value) flushPlanConfigHintsOnClose();
         showSecondaryMenu.value = false;
         showPlanConfig.value = false;
         showLangMenu.value = false;
@@ -1458,7 +1426,6 @@
     state.scrollToTop = scrollToTop;
     state.setThemeMode = setThemeMode;
     state.togglePlanConfig = togglePlanConfig;
-    state.markPlanConfigDisplayRulesHintSeen = markPlanConfigDisplayRulesHintSeen;
     state.markPlanConfigOwnershipHintSeen = markPlanConfigOwnershipHintSeen;
     state.isPlanConfigSectionCollapsed = isPlanConfigSectionCollapsed;
     state.togglePlanConfigSectionCollapsed = togglePlanConfigSectionCollapsed;

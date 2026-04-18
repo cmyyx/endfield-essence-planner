@@ -527,21 +527,6 @@
       });
     }
     try {
-      const storedPlanConfigDisplayRulesHintVersion = localStorage.getItem(
-        state.planConfigDisplayRulesHintStorageKey
-      );
-      state.showPlanConfigDisplayRulesHintDot.value =
-        storedPlanConfigDisplayRulesHintVersion !== state.planConfigDisplayRulesHintVersion;
-    } catch (error) {
-      state.showPlanConfigDisplayRulesHintDot.value = true;
-      recoveryApi.reportStorageIssue(
-        "storage.read",
-        state.planConfigDisplayRulesHintStorageKey,
-        error,
-        { scope: "restore-plan-config-display-rules-hint" }
-      );
-    }
-    try {
       const storedPlanConfigOwnershipHintVersion = localStorage.getItem(
         state.planConfigOwnershipHintStorageKey
       );

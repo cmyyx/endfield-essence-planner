@@ -884,10 +884,16 @@
 
     const toggleShowWeaponOwnershipInList = () => {
       state.showWeaponOwnershipInList.value = !state.showWeaponOwnershipInList.value;
+      if (typeof state.markPlanConfigOwnershipHintSeen === "function") {
+        state.markPlanConfigOwnershipHintSeen();
+      }
     };
 
     const toggleShowWeaponOwnershipInPlans = () => {
       state.showWeaponOwnershipInPlans.value = !state.showWeaponOwnershipInPlans.value;
+      if (typeof state.markPlanConfigOwnershipHintSeen === "function") {
+        state.markPlanConfigOwnershipHintSeen();
+      }
     };
 
     const toggleFilterPanel = () => {
