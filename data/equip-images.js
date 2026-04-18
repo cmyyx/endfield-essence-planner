@@ -102,5 +102,22 @@ window.EQUIP_IMAGES = {
   "生物辅助接驳器·贰型": "item_equip_t4_suit_heal01_edc_02",
   "点剑定位信标": "item_equip_t4_suit_phy01_edc_01",
   "点剑微型滤芯": "item_equip_t4_suit_phy01_edc_02",
-  "点剑轻装甲": "item_equip_t4_suit_phy01_body_01"
+  "点剑轻装甲": "item_equip_t4_suit_phy01_body_01",
+  "清波重甲": "item_equip_t4_suit_combo_cd01_body_01",
+  "清波轻甲": "item_equip_t4_suit_combo_cd01_body_02",
+  "清波手甲": "item_equip_t4_suit_combo_cd01_hand_01",
+  "清波护手": "item_equip_t4_suit_combo_cd01_hand_02",
+  "清波定位仪": "item_equip_t4_suit_combo_cd01_edc_01",
+  "清波竹刃": "item_equip_t4_suit_combo_cd01_edc_02",
+  "清波水罐": "item_equip_t4_suit_combo_cd01_edc_03",
+  "壤流轻甲": "item_equip_t4_suit_expend_spell01_body_02",
+  "壤流护手": "item_equip_t4_suit_expend_spell01_hand_02",
+  "壤流短棍": "item_equip_t4_suit_expend_spell01_edc_02",
+  "拓荒纤维手套·壹型": "item_equip_t4_suit_atb01_hand_03",
+  "拓荒增量供氧栓·壹型": "item_equip_t4_suit_atb01_edc_06",
+  "碾骨手套": "item_equip_t4_suit_attri01_hand_03",
+  "碾骨小雕像·贰型": "item_equip_t4_suit_attri01_edc_02",
+  "点剑重装甲·壹型": "item_equip_t4_suit_phy01_body_03",
+  "点剑战术手甲·壹型": "item_equip_t4_suit_phy01_hand_03",
+  "点剑短刃": "item_equip_t4_suit_phy01_edc_04"
 };

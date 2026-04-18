@@ -1,18 +1,19 @@
 window.CONTENT = {
   gameCompat: {
-    supportedVersion: "1.1",
-    nextVersion: "1.2",
-    nextVersionAt: "2026-04-17T00:00:00Z",
+    supportedVersion: "1.2",
+    nextVersion: "1.3",
+    nextVersionAt: "2026-05-22T00:00:00Z",
   },
   announcement: {
-    version: "1.1.8",
+    version: "1.1.9",
     title: "nav.announcement",
-    date: "2026-04-15",
+    date: "2026-04-16",
     //用完记得改回去
-    forceModal: false,
+    forceModal: true,
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
     items: [
+      "==关于标记功能不显示==,请跟随基质规划设置的new指引在基质规划设置-显示与渲染,开启==快捷编辑拥有状态==",
       "因==不可抗力因素==(被告警整改,做不了用户交互),end.canmoe.com 的在线同步/登录功能无法向中国大陆提供服务,如需使用请使用非中国大陆IP访问或访问[国际站](https://end.07070721.xyz)(国际站可向任意地区用户提供云服务,但访问速度可能略慢);要是说我跑路那我也没话说,您说的都对",
       "对网站有新功能建议?遇到使用问题需要反馈?欢迎填写问卷,感谢您抽出宝贵时间作答 https://wj.qq.com/s2/26315367/7916/",
       "如果你对本站使用的背景感兴趣,[点此通过网盘下载随机图中的背景](https://pan.quark.cn/s/27540d6f3706),感谢你的喜欢!",
@@ -21,6 +22,12 @@ window.CONTENT = {
   changelog: {
     title: "nav.changelog",
     entries: [
+      {
+        date: "2026-04-17",
+        items: [
+          "增加1.2新装备",
+        ],
+      },
       {
         date: "2026-04-16",
         items: [

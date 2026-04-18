@@ -65,5 +65,6 @@ window.WEAPON_IMAGES = {
   "吉米尼12": "wpn_funnel_0002",
   "奥佩罗77": "wpn_lance_0009",
   "佩科5": "wpn_pistol_0001",
-  "塔尔11": "wpn_sword_0003"
+  "塔尔11": "wpn_sword_0003",
+  "雾中微光": "wpn_funnel_0017"
 };
