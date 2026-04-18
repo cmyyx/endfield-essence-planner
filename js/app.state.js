@@ -78,6 +78,7 @@
     state.backgroundStorageKey = "planner-bg-image:v1";
     state.backgroundApiStorageKey = "planner-bg-api:v1";
     state.backgroundDisplayStorageKey = "planner-bg-display:v1";
+    state.backgroundBlurStorageKey = "planner-bg-blur:v1";
     state.syncMetaStorageKey = "planner-sync-meta:v1";
     state.syncPrefsStorageKey = "planner-sync-prefs:v1";
     state.syncDevStorageKey = "planner-sync-dev:v1";
@@ -106,6 +107,7 @@
     state.customBackgroundError = ref("");
     state.customBackgroundApi = ref("");
     state.backgroundDisplayEnabled = ref(true);
+    state.backgroundBlurEnabled = ref(true);
 
     state.showNotice = ref(false);
     state.showChangelog = ref(false);

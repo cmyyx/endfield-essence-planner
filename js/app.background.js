@@ -70,6 +70,11 @@
       }
     };
 
+    const applyBackgroundBlur = (enabled) => {
+      if (!root) return;
+      root.setAttribute("data-bg-blur", enabled ? "on" : "off");
+    };
+
     const isLowGpuMode = () => Boolean(state.lowGpuEnabled && state.lowGpuEnabled.value);
 
     const isStandardBackgroundEnabled = () => {
@@ -267,6 +272,23 @@
       setBackgroundDisplayEnabled(!current);
     };
 
+    const setBackgroundBlurEnabled = (enabled) => {
+      const next = Boolean(enabled);
+      if (state.backgroundBlurEnabled && state.backgroundBlurEnabled.value === next) {
+        applyBackgroundBlur(next);
+        return;
+      }
+      if (state.backgroundBlurEnabled) {
+        state.backgroundBlurEnabled.value = next;
+      }
+      applyBackgroundBlur(next);
+    };
+
+    const toggleBackgroundBlurEnabled = () => {
+      const current = Boolean(state.backgroundBlurEnabled && state.backgroundBlurEnabled.value);
+      setBackgroundBlurEnabled(!current);
+    };
+
     const handleBackgroundFile = (event) => {
       const input = event && event.target;
       const file = input && input.files && input.files[0];
@@ -303,6 +325,14 @@
     readStoredApi();
     applyBackground();
 
+    try {
+      const storedBlur = localStorage.getItem(state.backgroundBlurStorageKey);
+      if (storedBlur === "0") {
+        state.backgroundBlurEnabled.value = false;
+      }
+    } catch (_e) {}
+    applyBackgroundBlur(state.backgroundBlurEnabled.value);
+
     watch(
       () => [
         state.customBackground.value,
@@ -318,6 +348,16 @@
       () => {
         saveApi();
         applyBackground();
+      }
+    );
+
+    watch(
+      () => state.backgroundBlurEnabled.value,
+      (value) => {
+        try {
+          localStorage.setItem(state.backgroundBlurStorageKey, value ? "1" : "0");
+        } catch (_e) {}
+        applyBackgroundBlur(value);
       }
     );
 
@@ -339,6 +379,8 @@
     state.clearCustomBackground = clearCustomBackground;
     state.setBackgroundDisplayEnabled = setBackgroundDisplayEnabled;
     state.toggleBackgroundDisplayEnabled = toggleBackgroundDisplayEnabled;
+    state.setBackgroundBlurEnabled = setBackgroundBlurEnabled;
+    state.toggleBackgroundBlurEnabled = toggleBackgroundBlurEnabled;
     state.reapplyBackground = applyBackground;
   };
 })();

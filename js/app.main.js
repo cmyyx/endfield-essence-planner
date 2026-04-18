@@ -2081,6 +2081,7 @@ return { view: "planner" };
         syncAutoSyncEnabled: state.syncAutoSyncEnabled,
         syncIsLocalhostMode: state.syncIsLocalhostMode,
         syncShowDevPanel: state.syncShowDevPanel,
+        syncDevExpanded: state.syncDevExpanded,
         syncApiBaseInput: state.syncApiBaseInput,
         syncDevHeaderNameInput: state.syncDevHeaderNameInput,
         syncDevHeaderValueInput: state.syncDevHeaderValueInput,
@@ -2122,7 +2123,9 @@ return { view: "planner" };
         customBackgroundError: state.customBackgroundError,
         customBackgroundApi: state.customBackgroundApi,
         backgroundDisplayEnabled: state.backgroundDisplayEnabled,
+        backgroundBlurEnabled: state.backgroundBlurEnabled,
         toggleBackgroundDisplayEnabled: state.toggleBackgroundDisplayEnabled,
+        toggleBackgroundBlurEnabled: state.toggleBackgroundBlurEnabled,
         handleBackgroundFile: state.handleBackgroundFile,
         clearCustomBackground: state.clearCustomBackground,
         // Strategy Module

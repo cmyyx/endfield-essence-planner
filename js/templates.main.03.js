@@ -679,6 +679,11 @@
                 </button>
               </div>
 
+              <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; padding:0 0 12px;">
+                <button type="button" class="sync-text-action-btn" :disabled="syncBusy || syncFrontendBlocked" @click="openSyncPasswordModal()">{{ t("sync.change_password_entry") }}</button>
+                <button type="button" class="sync-text-action-btn" :disabled="syncBusy || syncFrontendBlocked" @click="openSyncEmailModal()">{{ t("sync.email_verify_or_change_entry") }}</button>
+              </div>
+
               <!-- 数据摘要（已登录：本地+远程） -->
               <div class="sync-login-summary">
                 <div class="sync-login-summary-title">{{ t("sync.local_summary") }}</div>
@@ -689,6 +694,17 @@
                 </div>
                 <div class="sync-login-summary-row sync-login-summary-meta">
                   {{ t("sync.last_synced_at", { time: syncLastSyncedDisplay || t("sync.never_synced") }) }}
+                </div>
+              </div>
+              <div v-if="syncRemoteSummary && (syncRemoteSummary.marksCount > 0 || syncRemoteSummary.customWeaponsCount > 0 || syncRemoteSummary.selectedCount > 0 || syncRemoteSummary.version > 0)" class="sync-login-summary">
+                <div class="sync-login-summary-title">{{ t("sync.remote_summary") }}</div>
+                <div class="sync-login-summary-row">
+                  <span class="sync-login-summary-item">{{ t("sync.summary_marks", { count: syncRemoteSummary.marksCount }) }}</span>
+                  <span class="sync-login-summary-item">{{ t("sync.summary_custom_weapons", { count: syncRemoteSummary.customWeaponsCount }) }}</span>
+                  <span class="sync-login-summary-item">{{ t("sync.summary_selected", { count: syncRemoteSummary.selectedCount }) }}</span>
+                </div>
+                <div class="sync-login-summary-row sync-login-summary-meta">
+                  {{ t("sync.summary_version", { version: syncRemoteSummary.version }) }}
                 </div>
               </div>
 
@@ -929,8 +945,6 @@
               <!-- 底部操作 -->
               <div class="sync-footer-hint" style="border-top:1px solid var(--stroke); margin-top:14px;">
                 <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-                  <button type="button" class="sync-text-action-btn" :disabled="syncBusy || syncFrontendBlocked" @click="openSyncPasswordModal()">{{ t("sync.change_password_mode_current") }}</button>
-                  <button type="button" class="sync-text-action-btn" :disabled="syncBusy || syncFrontendBlocked" @click="openSyncEmailModal()">{{ t("sync.email_action_title") }}</button>
                   <button type="button" class="sync-text-action-btn" :disabled="syncBusy || syncFrontendBlocked" @click="closeSyncModal">{{ t("plan_config.close") }}</button>
                 </div>
               </div>

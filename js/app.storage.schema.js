@@ -294,6 +294,9 @@
       if (typeof raw.backgroundDisplayEnabled === "boolean") {
         next.backgroundDisplayEnabled = raw.backgroundDisplayEnabled;
       }
+      if (typeof raw.backgroundBlurEnabled === "boolean") {
+        next.backgroundBlurEnabled = raw.backgroundBlurEnabled;
+      }
 
       if (typeof raw.equipRefiningSelectedName === "string") {
         const name = String(raw.equipRefiningSelectedName).trim();

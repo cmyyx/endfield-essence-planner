@@ -79,6 +79,10 @@
         background-image: none !important;
       }
 
+      html[data-bg-blur="off"] body::before {
+        filter: none;
+      }
+
       html.bg-image-fading-in body::before {
         opacity: var(--alpha-30);
       }
@@ -1163,10 +1167,22 @@
       .sync-text-action-btn.sync-text-action-primary {
         color: var(--accent-2);
         border-color: rgba(var(--color-accent-rgb), var(--alpha-34));
+        background: rgba(var(--color-accent-rgb), var(--alpha-10));
       }
 
       .sync-text-action-btn.sync-text-action-primary:hover:not(:disabled) {
-        background: rgba(var(--color-accent-rgb), var(--alpha-10));
+        background: rgba(var(--color-accent-rgb), var(--alpha-18));
+      }
+
+      [data-theme="light"] .sync-text-action-btn.sync-text-action-primary {
+        color: #fff;
+        border-color: var(--accent-2);
+        background: var(--accent-2);
+      }
+
+      [data-theme="light"] .sync-text-action-btn.sync-text-action-primary:hover:not(:disabled) {
+        background: #1ab5a5;
+        border-color: #1ab5a5;
       }
 
       /* 底部辅助提示 */

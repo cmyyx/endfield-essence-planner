@@ -170,6 +170,7 @@
                         weapon.isUnowned,
                         weapon.isEssenceOwnedReal,
                         weapon.note,
+                        showWeaponOwnershipInPlans,
                       ]"
                     >
                       <div class="scheme-weapon-title">
@@ -285,6 +286,7 @@
                     tutorialTargetSchemeKey,
                     card.schemeKey,
                     isTutorialGuideWeapon(weapon.name),
+                    showWeaponOwnershipInPlans,
                   ]"
                   :class="{
                     'is-selected': weapon.isSelected,

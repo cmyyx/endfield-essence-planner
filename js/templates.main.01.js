@@ -35,10 +35,9 @@
             <svg v-else-if="themePreference === 'dark'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
             </svg>
-            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21a9 9 0 1 0 0-18v18z" fill="currentColor" />
+              <circle cx="12" cy="12" r="9" />
             </svg>
           </button>
           <button
@@ -180,6 +179,23 @@
                       : t("button.when_disabled_only_a_plain_color_background_is_shown")
                   }}
                 </div>
+              </div>
+              <div class="secondary-item">
+                <div class="secondary-label">{{ t("nav.background_blur") }}</div>
+                <button
+                  class="ghost-button toggle-button switch-toggle"
+                  :class="{ 'is-active': backgroundBlurEnabled }"
+                  role="switch"
+                  :aria-checked="backgroundBlurEnabled ? 'true' : 'false'"
+                  :disabled="!backgroundDisplayEnabled || lowGpuEnabled"
+                  @click="toggleBackgroundBlurEnabled"
+                >
+                  <span class="switch-label">{{ backgroundBlurEnabled ? t("nav.enabled") : t("button.disabled") }}</span>
+                  <span class="switch-track" :class="{ on: backgroundBlurEnabled }">
+                    <span class="switch-thumb"></span>
+                  </span>
+                </button>
+                <div class="secondary-hint">{{ t("button.when_disabled_background_image_will_not_be_blurred") }}</div>
               </div>
               <div class="secondary-item">
                 <div class="secondary-label">{{ t("nav.background_image") }}</div>
@@ -710,6 +726,7 @@
                 filterS3.includes(weapon.s3),
                 getWeaponNote(weapon.name),
                 selectorHiddenMemoKey,
+                showWeaponOwnershipInList,
               ]"
               :class="{
                 'is-selected': selectedNameSet.has(weapon.name),
@@ -1005,6 +1022,7 @@
                     isUnowned(weapon.name),
                     isEssenceOwned(weapon.name),
                     getWeaponNote(weapon.name),
+                    showWeaponOwnershipInPlans,
                   ]"
                 >
                   <div class="scheme-weapon-title">

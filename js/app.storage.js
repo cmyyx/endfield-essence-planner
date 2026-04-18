@@ -471,6 +471,9 @@
           if (typeof restored.backgroundDisplayEnabled === "boolean") {
             state.backgroundDisplayEnabled.value = restored.backgroundDisplayEnabled;
           }
+          if (typeof restored.backgroundBlurEnabled === "boolean") {
+            state.backgroundBlurEnabled.value = restored.backgroundBlurEnabled;
+          }
           if (restored.recommendationConfig) {
             state.recommendationConfig.value = restored.recommendationConfig;
           }
@@ -689,6 +692,7 @@
         showWeaponOwnershipInPlans: state.showWeaponOwnershipInPlans.value,
         showAllSchemes: state.showAllSchemes.value,
         backgroundDisplayEnabled: state.backgroundDisplayEnabled.value,
+        backgroundBlurEnabled: state.backgroundBlurEnabled.value,
         recommendationConfig: state.recommendationConfig.value,
         filterS1: state.filterS1.value,
         filterS2: state.filterS2.value,
