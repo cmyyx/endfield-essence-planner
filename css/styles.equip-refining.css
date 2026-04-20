@@ -439,6 +439,26 @@
   color: var(--muted);
 }
 
+.equip-refining-recommend-warning {
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 124, 124, 0.62);
+  border-radius: 9px;
+  background: rgba(255, 96, 96, 0.16);
+  color: #ffdede;
+  font-size: 12px;
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  box-shadow: inset 0 0 0 1px rgba(255, 120, 120, 0.14);
+}
+
+.equip-refining-recommend-warning-icon {
+  flex: 0 0 auto;
+  transform: translateY(1px);
+}
+
 .equip-refining-tip-value {
   color: var(--accent-2);
   font-weight: 700;

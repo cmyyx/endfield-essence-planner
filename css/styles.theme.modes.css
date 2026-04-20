@@ -431,6 +431,13 @@ html[data-bg-display="off"][data-theme="light"] body::after {
   color: #8191a5;
 }
 
+[data-theme="light"] .equip-refining-recommend-warning {
+  border-color: rgba(214, 88, 88, var(--alpha-58));
+  background: rgba(255, 112, 112, var(--alpha-16));
+  color: #8b2b2b;
+  box-shadow: inset 0 0 0 1px rgba(214, 88, 88, var(--alpha-18));
+}
+
 [data-theme="light"] .plan-config-hint-dot {
   border-color: rgba(225, 78, 78, var(--alpha-68));
   background: linear-gradient(135deg, #ff866d, #e14e4e);

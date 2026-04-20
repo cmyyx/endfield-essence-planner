@@ -172,6 +172,10 @@
     <p class="equip-refining-recommend-tip" v-else>
       {{ t("equip_refining.recommend_other_equip") }}
     </p>
+    <p v-if="recommendation.materialFilterNoticeKey" class="equip-refining-recommend-warning">
+      <span class="equip-refining-recommend-warning-icon" aria-hidden="true">⚠️</span>
+      <span>{{ t(recommendation.materialFilterNoticeKey) }}</span>
+    </p>
     <div class="weapon-list equip-refining-candidate-list">
       <div
         v-for="candidate in visibleCandidates"
@@ -224,21 +228,9 @@
     <h2>{{ t("equip_refining.recommendation_title") }}</h2>
   </div>
   <div class="equip-refining-filter-panel">
-    <button
-      type="button"
-      class="equip-refining-filter-header"
-      :aria-expanded="!materialFilterPanelCollapsed"
-      @click="toggleMaterialFilterPanelCollapsed"
-    >
-      <div class="equip-refining-filter-head">
-        <span class="secondary-label">{{ t("equip_refining.material_filters") }}</span>
-        <span class="equip-refining-filter-actions">
-          <span class="equip-refining-filter-chevron" :class="{ 'is-open': !materialFilterPanelCollapsed }" aria-hidden="true"></span>
-        </span>
-      </div>
-    </button>
-    <div v-show="!materialFilterPanelCollapsed" class="equip-refining-filter-body">
-      <div class="equip-refining-filter-toolbar">
+    <div class="equip-refining-filter-head">
+      <span class="secondary-label">{{ t("equip_refining.material_filters") }}</span>
+      <span class="equip-refining-filter-actions">
         <button
           type="button"
           class="ghost-button equip-refining-filter-clear"
@@ -246,7 +238,9 @@
         >
           {{ t("equip_refining.clear_filters") }}
         </button>
-      </div>
+      </span>
+    </div>
+    <div class="equip-refining-filter-body">
       <div class="equip-refining-filter-group">
         <div class="equip-refining-filter-grid">
           <button

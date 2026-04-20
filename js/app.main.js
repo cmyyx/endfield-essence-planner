@@ -512,10 +512,8 @@
       recommendations: { type: Array, required: true },
       filterMaterial: { type: Array, required: true },
       filterOptionEntries: { type: Object, required: true },
-      materialFilterPanelCollapsed: { type: Boolean, required: true },
       toggleFilterValue: { type: Function, required: true },
       clearMaterialFilters: { type: Function, required: true },
-      toggleMaterialFilterPanelCollapsed: { type: Function, required: true },
       visibleRecommendationCandidates: { type: Function, required: true },
       hasMoreRecommendationCandidates: { type: Function, required: true },
       isRecommendationExpanded: { type: Function, required: true },
@@ -1845,9 +1843,6 @@ return { view: "planner" };
         get equipRefiningFilterPanelCollapsed() {
           return state.equipRefiningFilterPanelCollapsed;
         },
-        get equipRefiningMaterialFilterPanelCollapsed() {
-          return state.equipRefiningMaterialFilterPanelCollapsed;
-        },
         get toggleEquipRefiningFilterValue() {
           return state.toggleEquipRefiningFilterValue;
         },
@@ -1859,9 +1854,6 @@ return { view: "planner" };
         },
         get toggleEquipRefiningFilterPanelCollapsed() {
           return state.toggleEquipRefiningFilterPanelCollapsed;
-        },
-        get toggleEquipRefiningMaterialFilterPanelCollapsed() {
-          return state.toggleEquipRefiningMaterialFilterPanelCollapsed;
         },
         get equipRefiningEquipCount() {
           return state.equipRefiningEquipCount;
