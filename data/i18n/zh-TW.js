@@ -400,6 +400,7 @@ Object.assign(window.I18N["zh-TW"].strings, {
   "equip_refining.i_understand": "我已知曉",
   "equip_refining.i_understand_count_s": "我已知曉（{count}s）",
   "equip_refining.attribute_filters": "屬性篩選",
+  "equip_refining.material_filters": "裝備材料篩選",
   "equip_refining.clear_filters": "清空篩選",
   "equip_refining.missing_target_attr": "該裝備沒有這一條屬性",
   "equip_refining.no_matching_equip": "未找到匹配裝備",

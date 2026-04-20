@@ -400,6 +400,7 @@ Object.assign(window.I18N["en"].strings, {
   "equip_refining.i_understand": "I understand",
   "equip_refining.i_understand_count_s": "I understand ({count}s)",
   "equip_refining.attribute_filters": "Attribute Filters",
+  "equip_refining.material_filters": "Equip Material Filters",
   "equip_refining.clear_filters": "Clear Filters",
   "equip_refining.missing_target_attr": "This equip does not have this attribute",
   "equip_refining.no_matching_equip": "No matching equip found",

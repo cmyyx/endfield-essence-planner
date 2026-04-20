@@ -400,6 +400,7 @@ Object.assign(window.I18N["ja"].strings, {
   "equip_refining.i_understand": "理解しました",
   "equip_refining.i_understand_count_s": "理解しました（{count}s）",
   "equip_refining.attribute_filters": "属性フィルター",
+  "equip_refining.material_filters": "装備素材フィルター",
   "equip_refining.clear_filters": "フィルターをクリア",
   "equip_refining.missing_target_attr": "この装備にはこの属性がありません",
   "equip_refining.no_matching_equip": "一致する装備が見つかりません",

@@ -369,6 +369,7 @@ Object.assign(window.I18N["zh-CN"].strings, {
   "equip_refining.i_understand": "我已知晓",
   "equip_refining.i_understand_count_s": "我已知晓（{count}s）",
   "equip_refining.attribute_filters": "属性筛选",
+  "equip_refining.material_filters": "装备材料筛选",
   "equip_refining.clear_filters": "清空筛选",
   "equip_refining.missing_target_attr": "该装备没有这一条属性",
   "equip_refining.no_matching_equip": "未找到匹配装备",
