@@ -247,12 +247,8 @@
     const equipRefiningSpecialOptions = uniqueSortedAttrKeys(
       equipList.map((equip) => equip && equip.special && equip.special.key)
     );
-    const equipRefiningMaterialOptions = Array.from(
-      new Set(
-        equipList
-          .map((equip) => String((equip && equip.metarial) || "").trim())
-          .filter(Boolean)
-      )
+    const equipRefiningMaterialOptions = uniqueSortedAttrKeys(
+      equipList.map((equip) => String((equip && equip.material) || "").trim())
     );
 
     const matchesEquipRefiningAttrFilters = (equip, filters) => {
@@ -498,9 +494,9 @@
       const selectedMaterials = Array.isArray(equipRefiningFilterMaterial.value)
         ? equipRefiningFilterMaterial.value
         : [];
-      const selfMaterial = String((equip && equip.metarial) || "").trim();
+      const selfMaterial = String((equip && equip.material) || "").trim();
       const shouldIncludeSelf =
-        selectedMaterials.length === 0 || selectedMaterials.includes(selfMaterial);
+        selectedMaterials.length === 0 || !selfMaterial || selectedMaterials.includes(selfMaterial);
       const selfCandidate = {
         equip,
         matchAttr: targetAttr,
@@ -510,8 +506,8 @@
       for (let i = 0; i < equipList.length; i += 1) {
         const candidateEquip = equipList[i];
         if (selectedMaterials.length) {
-          const material = String((candidateEquip && candidateEquip.metarial) || "").trim();
-          if (!selectedMaterials.includes(material)) continue;
+          const material = String((candidateEquip && candidateEquip.material) || "").trim();
+          if (material && !selectedMaterials.includes(material)) continue;
         }
         if (candidateEquip.name === equip.name) continue;
         if (candidateEquip.part !== equip.part) continue;
