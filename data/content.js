@@ -5,21 +5,29 @@ window.CONTENT = {
     nextVersionAt: "2026-06-05T00:00:00Z",
   },
   announcement: {
-    version: "1.2.2",
+    version: "1.2.3",
     title: "nav.announcement",
-    date: "2026-05-09",
+    date: "2026-05-26",
     //用完记得改回去
     forceModal: true,
     qqGroup: "1045523485",
     qqNote: "反馈与建议交流",
     items: [
-      "重构后的新版本基质规划区域基本完成,就修改的部分内容,公开了新的问卷(因为我估计可能不是最后一个,所以是末尾带了1):",
-      "新版本功能修改意见收集1 https://wj.qq.com/s2/26636579/d3e8/",
+      "重构后的新版本基本全部完成,页面调整较大,且数据不兼容(部分数据会提供迁移选项);现开始公开测试,如想查看详细更新内容或参与测试并反馈问题,请访问:",
+      "[enddev.canmoe.com](https://enddev.canmoe.com)",
+      "预计在 2026/05/30 前正式上线(如在此时间后,您仍在访问当前版本,则意味着您可能正在使用过时的版本)",
+      "旧版本的相关问卷均已停止收集,如果您有对于新版本的任何反馈或建议,请访问上述测试站点进行反馈",
     ],
   },
   changelog: {
     title: "nav.changelog",
     entries: [
+      {
+        date: "2026-05-26",
+        items: [
+          "此版本(旧版本)停止维护,请关注新项目 https://github.com/cmyyx/cep",
+        ],
+      },
       {
         date: "2026-04-30",
         items: [
