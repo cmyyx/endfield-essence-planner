@@ -9,7 +9,8 @@
     "lifeng",
     "zhuangfangyi",
     "gilberta",
-    "laevatain"
+    "laevatain",
+    "snowshine",
   ];
 
   characterIds.forEach(function (id) {
